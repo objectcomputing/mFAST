@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.fixprotocol.org/ns/templates/test2" ns="http://www.fixprotocol.org/ns/fix">
+    <template name="MDRefreshSample">
+        <templateRef name="SampleInfo" ns="http://www.fixprotocol.org/ns/templates/test1"/>
+        <sequence name="MDEntries">
+            <length name="NoMDEntries" id="268"/>
+            <uInt32 name="MDUpdateAction" id="279">
+                <copy/>
+            </uInt32>
+            <string name="MDEntryType" id="269">
+                <copy/>
+            </string>
+            <string name="Symbol" id="55">
+                <copy/>
+            </string>
+            <string name="SecurityType" id="167">
+                <copy/>
+            </string>
+            <decimal name="MDEntryPx" id="270">
+                <delta/>
+            </decimal>
+            <decimal name="MDEntrySize" id="271">
+                <exponent> <delta/> </exponent>
+                <mantissa> <delta/> </mantissa>
+            </decimal>
+            <uInt32 name="NumberOfOrders" id="346">
+                <delta/>
+            </uInt32>
+            <string name="QuoteCondition" id="276">
+                <copy/>
+            </string>
+            <string name="TradeCondition" id="277">
+                <copy/>
+            </string>
+        </sequence>
+    </template>
+</templates>

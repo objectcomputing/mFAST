@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.fixprotocol.org/ns/templates/test1" ns="http://www.fixprotocol.org/ns/fix">
+    <template name="SampleInfo">
+        <string name="BeginString" id="8">
+            <constant value="FIX4.4"/>
+        </string>
+        <string name="MessageType" id="35">
+            <constant value="X"/>
+        </string>
+        <string name="SenderCompID" id="49">
+            <copy/>
+        </string>
+        <uInt32 name="MsgSeqNum" id="34">
+            <increment/>
+        </uInt32>
+    </template>
+</templates>

@@ -1,0 +1,125 @@
+// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// All rights reserved.
+//
+// This file is part of mFAST.
+//
+//     mFAST is free software: you can redistribute it and/or modify
+//     it under the terms of the GNU Lesser General Public License as published by
+//     the Free Software Foundation, either version 3 of the License, or
+//     (at your option) any later version.
+//
+//     mFAST is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+//
+//     You should have received a copy of the GNU Lesser General Public License
+//     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
+//
+#ifndef FAST_ISTREAM_EXTRACTOR_H_AMFDBCO
+#define FAST_ISTREAM_EXTRACTOR_H_AMFDBCO
+
+#include "mfast/fast_istream.h"
+#include "mfast/int_ref.h"
+#include "mfast/string_ref.h"
+#include "mfast/decimal_ref.h"
+
+namespace mfast
+{
+
+inline fast_istream& operator >> (fast_istream& strm, const int32_mref& mref)
+{
+  if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
+    mref.as_absent();
+  return strm;
+}
+
+inline fast_istream& operator >> (fast_istream& strm, const uint32_mref& mref)
+{
+  if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
+    mref.as_absent();
+  return strm;
+
+}
+
+inline fast_istream& operator >> (fast_istream& strm, const int64_mref& mref)
+{
+  if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
+    mref.as_absent();
+  return strm;
+}
+
+inline fast_istream& operator >> (fast_istream& strm, const uint64_mref& mref)
+{
+  if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
+    mref.as_absent();
+  return strm;
+}
+
+inline fast_istream& operator >> (fast_istream& strm, const exponent_mref& mref)
+{
+  if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
+    mref.as_absent();
+  return strm;
+}
+
+inline fast_istream& operator >> (fast_istream& strm, const ascii_string_mref& mref)
+{
+  const char* buf;
+  uint32_t len;
+  if (strm.decode(buf, len, mref.instruction()->is_nullable(), mref.instruction())) {
+    mref.assign(buf, buf+len);
+    mref[len-1] &= '\x7F';
+  }
+  else {
+    mref.as_absent();
+  }
+  return strm;
+}
+
+inline fast_istream& operator >> (fast_istream& strm, const unicode_string_mref& mref)
+{
+  const char* buf;
+  uint32_t len;
+  if (strm.decode(buf, len, mref.instruction()->is_nullable(), mref.instruction()))
+  {
+    mref.assign(buf, buf+len);
+  }
+  else {
+    mref.as_absent();
+  }
+  return strm;
+}
+
+inline fast_istream& operator >> (fast_istream& strm, const byte_vector_mref& mref)
+{
+  const unsigned char* buf;
+  uint32_t len;
+  if (strm.decode(buf, len, mref.instruction()->is_nullable(), 0))
+  {
+    mref.assign(buf, buf+len);
+  }
+  else {
+    mref.as_absent();
+  }
+  return strm;
+}
+
+inline fast_istream& operator >> (fast_istream& strm, const decimal_mref& mref)
+{
+  value_storage_t* storage = mref.storage();
+  if (strm.decode(storage->decimal_storage.exponent_,
+                  mref.instruction()->is_nullable()))
+  {
+    storage->present(true);
+    strm.decode(storage->decimal_storage.mantissa_, false);
+  }
+  else {
+    mref.as_absent();
+  }
+  return strm;
+}
+
+}
+
+#endif /* end of include guard: FAST_ISTREAM_EXTRACTOR_H_AMFDBCO */
