@@ -206,7 +206,7 @@ class constant_operator
       // An optional field with the constant operator will occupy a single bit. If the bit is set, the value
       // is the initial value in the instruction context. If the bit is not set, the value is considered absent.
 
-      if (!mref.is_optional()) {
+      if (!mref.optional()) {
         mref.as_initial_value();
       }
       else {
@@ -306,7 +306,7 @@ class copy_or_increment_operator_impl
             mref.as_initial_value();
             save_previous_value(mref);
           }
-          else if (!mref.is_optional()) {
+          else if (!mref.optional()) {
             // Unless the field has optional presence, it is a dynamic error [ERR D5]
             // if the instruction context has no initial value.
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D5"));
@@ -323,7 +323,7 @@ class copy_or_increment_operator_impl
           // If the field is optional the value is considered absent.
           mref.as_absent();
           // It is a dynamic error [ERR D6] if the field is mandatory.
-          if (!mref.is_optional()) {
+          if (!mref.optional()) {
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
           }
         }
@@ -735,7 +735,7 @@ class tail_operator
           if (mref.instruction()->has_initial_value()) {
             mref.as_initial_value();
           }
-          else if (mref.is_optional()) {
+          else if (mref.optional()) {
             // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
             mref.as_absent();
           }
@@ -747,7 +747,7 @@ class tail_operator
         else if (prev.is_empty()) {
           //  * empty – the value of the field is empty. If the field is optional the value is considered absent.
           //            It is a dynamic error [ERR D7] if the field is mandatory.
-          if (mref.is_optional())
+          if (mref.optional())
             mref.as_absent();
           else
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));

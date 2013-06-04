@@ -77,7 +77,7 @@ class group_cref
     const value_storage_t* field_storage(size_t index) const;
     void as_present() const
     {
-      if (instruction()->is_optional())
+      if (instruction()->optional())
         const_cast<value_storage_t*>(storage_)->present(true);
     }
   private:

@@ -66,7 +66,7 @@ class field_cref
 
     bool absent () const
     {
-      return instruction_== 0 ||  (is_optional() && storage_->is_empty());
+      return instruction_== 0 ||  (optional() && storage_->is_empty());
     }
 
     bool present() const
@@ -74,9 +74,9 @@ class field_cref
       return !absent ();
     }
 
-    bool is_optional() const
+    bool optional() const
     {
-      return instruction_->is_optional();
+      return instruction_->optional();
     }
 
     bool has_initial_value() const
@@ -158,7 +158,7 @@ class make_field_mref_base<T, boost::true_type>
     void as_absent() const
     {
       const T* ptr = static_cast<const T*>(this);
-      if (ptr->instruction()->is_optional()) {
+      if (ptr->instruction()->optional()) {
         ptr->storage()->present(0);
       }
     }

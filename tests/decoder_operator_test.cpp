@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
 
     uint64_mref ref(&allocator, &storage, &inst);
 
-    BOOST_CHECK(!ref.is_optional());
+    BOOST_CHECK(!ref.optional());
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);

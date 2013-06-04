@@ -73,7 +73,7 @@ inline std::ostream& operator << (std::ostream& os, const byte_vector_cref& cref
   return os;
 }
 
-inline std::ostream& operator << (std::ostream& os, const decimal_mref& cref)
+inline std::ostream& operator << (std::ostream& os, const decimal_cref& cref)
 {
   if (cref.exponent() >=0 ){
     os << cref.mantissa();

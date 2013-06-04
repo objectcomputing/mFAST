@@ -253,7 +253,7 @@ class field_instruction
       return nullable_flag_;
     }
 
-    bool is_optional() const
+    bool optional() const
     {
       return optional_flag_;
     }

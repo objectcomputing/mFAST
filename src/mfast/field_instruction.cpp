@@ -44,7 +44,7 @@ void integer_field_instruction_base::construct_value(value_storage_t& storage,
 {
   storage.uint_storage.content_ = default_value_.uint_storage.content_;
   storage.uint_storage.defined_bit_ = 1;
-  storage.uint_storage.present_ = !is_optional();
+  storage.uint_storage.present_ = !optional();
 }
 
 /////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ void decimal_field_instruction::construct_value(value_storage_t& storage,
                                                 allocator*       alloc) const
 {
   storage = default_value_;
-  storage.decimal_storage.present_ = !is_optional();
+  storage.decimal_storage.present_ = !optional();
 }
 
 void decimal_field_instruction::accept(field_instruction_visitor& visitor,
@@ -68,7 +68,7 @@ void string_field_instruction::construct_value(value_storage_t& storage,
                                                allocator*       alloc) const
 {
   storage = default_value_;
-  if (is_optional())
+  if (optional())
     storage.array_storage.len_ = 0;
 }
 
@@ -167,7 +167,7 @@ void group_content_helper::copy_group_subfields(const value_storage_t* src_subfi
 void group_field_instruction::construct_value(value_storage_t& storage,
                                               allocator*       alloc ) const
 {
-  storage.group_storage.present_ = !is_optional();
+  storage.group_storage.present_ = !optional();
   // group field is never used for a dictionary key; so, we won't use this
   // function for reseting a key and thus no memory deallocation is required.
   storage.group_storage.content_ =
@@ -242,7 +242,7 @@ void sequence_field_instruction::construct_value(value_storage_t& storage,
                                                  allocator*       alloc ) const
 {
   // len_ == 0 is reserve for null/absent
-  storage.array_storage.len_ = is_optional() ? 0 : sequence_length_instruction_->initial_value()+1;
+  storage.array_storage.len_ = optional() ? 0 : sequence_length_instruction_->initial_value()+1;
   if (sequence_length_instruction_ && sequence_length_instruction_->initial_value() > 0) {
     std::size_t element_size = this->group_content_byte_count();
     std::size_t reserve_size = (sequence_length_instruction_->initial_value())*element_size;

@@ -122,7 +122,7 @@ decoder_impl::pre_visit(const group_mref& mref)
   // If a group field is optional, it will occupy a single bit in the presence map.
   // The contents of the group may appear in the stream iff the bit is set.
 
-  if (mref.is_optional())
+  if (mref.optional())
   {
     debug_ << " : current pmap = " << current_pmap() << "\n";
     if (!current_pmap().is_next_bit_set()) {
