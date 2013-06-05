@@ -31,7 +31,8 @@ const char usage[] =
   "  -head n     : process only the first 'n' messages\n"
   "  -c count    : repeat the test 'count' times\n"
   "  -r          : Toggle 'reset decoder on every message' (default false).\n"
-  "  -hfix n     : Skip n byte header before each message\n\n";
+  "  -hfix n     : Skip n byte header before each message\n"
+  "  -arena      : Use arena_allocator\n\n";
 
 
 int read_file(const char* filename, std::vector<char>& contents)
@@ -58,6 +59,7 @@ int main(int argc, const char** argv)
   std::size_t repeat_count = 1;
   bool force_reset = false;
   std::size_t skip_header_bytes = 0;
+  bool use_arena = false;
 
   int i = 1;
   int parse_status = 0;
@@ -90,6 +92,9 @@ int main(int argc, const char** argv)
     else if (std::strcmp(arg, "-hfix") == 0) {
       skip_header_bytes = atoi(argv[i++]);
     }
+    else if (std::strcmp(arg, "-arena") == 0) {
+      use_arena = true;
+    }
   }
 
   if (parse_status != 0 || template_contents.size() == 0 || message_contents.size() == 0) {
@@ -100,8 +105,12 @@ int main(int argc, const char** argv)
   try {
     mfast::dynamic_templates_description description(&template_contents[0]);
 
-    mfast::arena_allocator alloc;
-    mfast::decoder coder(alloc);
+    mfast::arena_allocator arena_alloc;
+    mfast::malloc_allocator malloc_allc;
+    mfast::allocator* alloc = &malloc_allc;
+    if (use_arena)
+      alloc = &arena_alloc;
+    mfast::decoder coder(*alloc);
 
     const mfast::templates_description* descriptions[] = { &description };
     coder.include(descriptions);
@@ -114,7 +123,6 @@ int main(int argc, const char** argv)
         mfast::fast_istream strm(&message_contents[0], message_contents.size());
         for (int i = 0; i < head_n && !strm.eof(); ++i) {
           strm.gbump(skip_header_bytes);
-          std::cout << "message " << i << "\n";
           if (!strm.eof()) {
             mfast::message_cref ref = coder.decode(strm, force_reset || (i == 0) );
           }

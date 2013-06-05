@@ -23,6 +23,7 @@
 #include <limits>
 #include <vector>
 #include "example.h"
+// #include <boost/chrono/chrono.hpp>
 
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -32,8 +33,8 @@ const char usage[] =
   "  -head n     : process only the first 'n' messages\n"
   "  -c count    : repeat the test 'count' times\n"
   "  -r          : Toggle 'reset decoder on every message' (default false).\n"
-  "  -hfix n     : Skip n byte header before each message\n\n";
-
+  "  -hfix n     : Skip n byte header before each message\n"
+  "  -arena      : Use arena_allocator\n\n";
 
 int read_file(const char* filename, std::vector<char>& contents)
 {
@@ -58,6 +59,7 @@ int main(int argc, const char** argv)
   std::size_t repeat_count = 1;
   bool force_reset = false;
   std::size_t skip_header_bytes = 0;
+  bool use_arena = false;
 
   int i = 1;
   int parse_status = 0;
@@ -87,6 +89,9 @@ int main(int argc, const char** argv)
     else if (std::strcmp(arg, "-hfix") == 0) {
       skip_header_bytes = atoi(argv[i++]);
     }
+    else if (std::strcmp(arg, "-arena") == 0) {
+      use_arena = true;
+    }
   }
 
   if (parse_status != 0 || message_contents.size() == 0) {
@@ -96,12 +101,19 @@ int main(int argc, const char** argv)
 
   try {
 
-    mfast::arena_allocator alloc;
-    mfast::decoder coder(alloc);
+    mfast::arena_allocator arena_alloc;
+    mfast::malloc_allocator malloc_allc;
+    mfast::allocator* alloc = &malloc_allc;
+    if (use_arena)
+      alloc = &arena_alloc;
+    mfast::decoder coder(*alloc);
     const mfast::templates_description* descriptions[] = { &example::the_description };
 
     coder.include(descriptions);
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
+
+    // typedef boost::chrono::high_resolution_clock clock;
+    // clock::time_point start=clock::now();
     {
 
       for (int j = 0; j < repeat_count; ++j) {
@@ -117,6 +129,9 @@ int main(int argc, const char** argv)
     }
     boost::posix_time::ptime stop = boost::posix_time::microsec_clock::universal_time();
     std::cout << "time spent " <<  static_cast<unsigned long>((stop - start).total_milliseconds()) << " msec\n";
+
+    // typedef boost::chrono::milliseconds ms;
+    // std::cout << "time spent " << boost::chrono::duration_cast<ms>(clock::now() - start).count() << " ms\n";
   }
   catch (boost::exception& e) {
     std::cerr << boost::diagnostic_information(e);

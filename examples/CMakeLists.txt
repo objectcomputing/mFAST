@@ -1,2 +1,2 @@
 add_subdirectory (performance_test)
-add_subdirectory (simple)
+add_subdirectory (message_printer)
