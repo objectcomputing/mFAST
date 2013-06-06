@@ -38,9 +38,11 @@ struct decoder_impl
   std::deque<presence_map> pmap_stack_;
   fast_istream* strm_;
   allocator* alloc_;
-  message_map_t template_messages_;
   dictionary_resetter resetter_;
-  arena_allocator template_alloc_;
+
+  arena_allocator template_alloc_;  // template_alloc MUST be constructed before template_messages,
+  message_map_t template_messages_; // Do not chnage the order of the two
+
   allocator* message_alloc_;
   message_base* active_message_;
   bool force_reset_;

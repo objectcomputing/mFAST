@@ -17,6 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "arena_allocator.h"
+#include <cstring>
 #include <algorithm>
 
 namespace mfast {

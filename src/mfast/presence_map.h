@@ -18,7 +18,7 @@
 //
 #ifndef PRESENCE_MAP_H_MWSEB461
 #define PRESENCE_MAP_H_MWSEB461
-
+#include <stdint.h>
 #include <iostream>
 
 namespace mfast {

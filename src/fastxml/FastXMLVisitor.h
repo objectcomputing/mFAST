@@ -18,7 +18,7 @@
 //
 #ifndef FASTXMLVISITOR_H_ZMKQ7SDU
 #define FASTXMLVISITOR_H_ZMKQ7SDU
-
+#include <stdint.h>
 #include <vector>
 #include <exception>
 #include <fstream>

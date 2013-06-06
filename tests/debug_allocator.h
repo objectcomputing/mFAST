@@ -56,5 +56,16 @@ public:
   std::set<void*> leased_addresses_;
 };
 
+#ifndef UINT64_MAX
+#define UINT64_MAX (18446744073709551615ULL)
+#endif
+
+#ifndef INT64_MAX
+#define INT64_MAX (9223372036854775807LL)
+#endif
+
+#ifndef INT32_MIN
+#define INT32_MIN (-2147483647L-1)
+#endif
 
 #endif /* end of include guard: DEBUG_ALLOCATOR_H_PPV2L7KE */

@@ -169,7 +169,8 @@ class int_mref
       this->storage()->present(present);
     }
 
-    friend fast_istream& operator >> (fast_istream& strm, const int_mref<T>& mref);
+    template <typename U>
+    friend fast_istream& operator >> (fast_istream& strm, const int_mref<U>& mref);
 
     int_mref& operator = (const int_mref&);
 

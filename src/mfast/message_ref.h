@@ -122,8 +122,28 @@ class message_base
     message_base(const message_cref& other,
                  allocator*          alloc);
 
-    message_base(BOOST_RV_REF(message_base)other);
-    message_base& operator = (BOOST_RV_REF(message_base)other);
+    message_base(BOOST_RV_REF(message_base)other)
+      : alloc_(other.alloc_)
+      , instruction_ (other.instruction_)
+    {
+      // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
+      my_storage_ = other.my_storage_;
+      other.instruction_ = 0;
+    }
+
+    message_base& operator = (BOOST_RV_REF(message_base)other)
+    {
+      // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
+      if (this->instruction())
+        this->instruction()->destruct_value(my_storage_, alloc_);
+
+      alloc_ = other.alloc_;
+      instruction_ = other.instruction_;
+      my_storage_ = other.my_storage_;
+
+      other.instruction_ = 0;
+      return *this;
+    }
 
     message_mref ref();
     message_cref ref() const;
@@ -232,18 +252,13 @@ message_cref::subinstruction(size_t index) const
   return instruction()->subinstruction(index);
 }
 
-// inline const value_storage_t*
-// message_cref::storage_for(const message_cref& other) const
-// {
-//   return other.storage_;
-// }
 
 ///////////////////////////////////////////////////////
 
 template <typename ConstMessageRef>
 inline
-make_message_mref<ConstMessageRef>::make_message_mref(allocator*                  alloc,
-                                                      value_storage_t*            storage,
+make_message_mref<ConstMessageRef>::make_message_mref(allocator*                                           alloc,
+                                                      value_storage_t*                                     storage,
                                                       make_message_mref<ConstMessageRef>::instruction_cptr instruction)
   : base_type(alloc, storage, instruction)
 {
@@ -290,28 +305,6 @@ message_base::message_base(const message_cref& other,
   this->instruction()->copy_construct_value(my_storage_, 0, alloc, other.storage_);
 }
 
-inline
-message_base::message_base(BOOST_RV_REF(message_base)other)
-  : alloc_(other.alloc_)
-  , instruction_ (other.instruction_)
-{
-  my_storage_ = other.my_storage_;
-  other.instruction_ = 0;
-}
-
-inline
-message_base& message_base::operator = (BOOST_RV_REF(message_base)other)
-{
-  if (this->instruction())
-    this->instruction()->destruct_value(my_storage_, alloc_);
-
-  alloc_ = other.alloc_;
-  instruction_ = other.instruction_;
-  my_storage_ = other.my_storage_;
-
-  other.instruction_ = 0;
-  return *this;
-}
 
 inline message_mref
 message_base::ref()

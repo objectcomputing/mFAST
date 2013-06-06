@@ -16,6 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
+#include <cstring>
 #include "mfast/field_instruction.h"
 #include "mfast/allocator.h"
 

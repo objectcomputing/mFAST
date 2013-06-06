@@ -16,14 +16,6 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-//
-//  field_ref_test.cpp
-//  mfast
-//
-//  Created by Huang-Ming Huang on 3/29/13.
-//  Copyright (c) 2013 Huang-Ming Huang. All rights reserved.
-//
-
 
 #include <mfast/malloc_allocator.h>
 #include <mfast/int_ref.h>

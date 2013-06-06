@@ -27,34 +27,14 @@
 namespace mfast
 {
 
-inline fast_istream& operator >> (fast_istream& strm, const int32_mref& mref)
+template <typename U>
+inline fast_istream& operator >> (fast_istream& strm, const int_mref<U>& mref)
 {
   if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
     mref.as_absent();
   return strm;
 }
 
-inline fast_istream& operator >> (fast_istream& strm, const uint32_mref& mref)
-{
-  if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
-    mref.as_absent();
-  return strm;
-
-}
-
-inline fast_istream& operator >> (fast_istream& strm, const int64_mref& mref)
-{
-  if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
-    mref.as_absent();
-  return strm;
-}
-
-inline fast_istream& operator >> (fast_istream& strm, const uint64_mref& mref)
-{
-  if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
-    mref.as_absent();
-  return strm;
-}
 
 inline fast_istream& operator >> (fast_istream& strm, const exponent_mref& mref)
 {
