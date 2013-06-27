@@ -11,3 +11,6 @@ tests/test1.cpp
 tests/test2.h
 tests/test2.inl
 tests/test2.cpp
+examples/message_printer/MDRefreshSample.cpp
+examples/message_printer/MDRefreshSample.h
+examples/message_printer/MDRefreshSample.inl
