@@ -22,27 +22,23 @@
 #include "../fastxml/FastXMLVisitor.h"
 #include <map>
 #include <string>
+#include <boost/exception/all.hpp>
 
 class file_open_error
-  : public std::exception
+  : public virtual boost::exception, public virtual std::exception
 {
-  char filename_[128];
-
   public:
-    file_open_error(const std::string& filename)
+    file_open_error()
     {
-      std::strncpy(filename_, filename.c_str(), 127);
-      filename_[127] = 0;
     }
 
-    const char* what() const throw()
+    file_open_error(const std::string& filename)
     {
-      static char buffer[256];
-      std::snprintf(buffer, 256, "Cannot open file: %s\n", filename_);
-      return buffer;
+      *this << boost::errinfo_file_name(filename) << boost::errinfo_errno(errno);
     }
 
 };
+
 
 
 

@@ -39,7 +39,7 @@ class presence_map
       if (mask_ == 0 && continue_) {
         load(continue_);
       }
-      bool result = cur_bitmap_ & mask_;
+      bool result = (cur_bitmap_ & mask_) != 0;
       return result;
     }
 

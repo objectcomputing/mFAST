@@ -154,10 +154,8 @@ class message_base
 
   protected:
     const value_storage_t* storage_for(const message_cref& other) const;
-    message_base(const message_base& other);
-    message_base& operator = (const message_base&);
 
-    friend class decoder_impl;
+    friend struct decoder_impl;
 
     // Used by decoder to indicate this object uses arena allocator,
     // and the allocator has been resetted. All previously allocated memory
@@ -259,7 +257,7 @@ template <typename ConstMessageRef>
 inline
 make_message_mref<ConstMessageRef>::make_message_mref(allocator*                                           alloc,
                                                       value_storage_t*                                     storage,
-                                                      make_message_mref<ConstMessageRef>::instruction_cptr instruction)
+                                                      typename make_message_mref<ConstMessageRef>::instruction_cptr instruction)
   : base_type(alloc, storage, instruction)
 {
 }

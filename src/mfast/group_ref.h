@@ -142,7 +142,7 @@ class make_group_mref
   private:
     make_group_mref& operator= (const make_group_mref&);
     friend class field_mutator_adaptor_base;
-    friend class decoder_impl;
+    friend struct decoder_impl;
     void ensure_valid() const;
 };
 

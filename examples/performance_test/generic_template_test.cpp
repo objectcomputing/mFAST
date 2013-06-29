@@ -118,10 +118,10 @@ int main(int argc, const char** argv)
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
     {
 
-      for (int j = 0; j < repeat_count; ++j) {
+      for (std::size_t j = 0; j < repeat_count; ++j) {
 
         mfast::fast_istream strm(&message_contents[0], message_contents.size());
-        for (int i = 0; i < head_n && !strm.eof(); ++i) {
+        for (std::size_t i = 0; i < head_n && !strm.eof(); ++i) {
           strm.gbump(skip_header_bytes);
           if (!strm.eof()) {
             mfast::message_cref ref = coder.decode(strm, force_reset || (i == 0) );

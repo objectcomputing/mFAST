@@ -47,7 +47,7 @@ public:
 
   void reset()
   {
-    for (int i = 0; i < impl_.size(); ++i) {
+    for (std::size_t i = 0; i < impl_.size(); ++i) {
       impl_[i]->defined(false);
     }
   }

@@ -53,8 +53,13 @@ int main(int argc, const char** argv)
       doc.Accept(&source_producer);
     }
   }
-  catch (std::exception& ex) {
-    std::cerr << ex.what() << "\n";
+  catch( boost::exception & e ) {
+    std::cerr << diagnostic_information(e);
+    return -1;
+  }
+  catch (std::exception& e)
+  {
+    std::cerr << e.what() << "\n";
     return -1;
   }
 

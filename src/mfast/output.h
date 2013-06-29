@@ -67,7 +67,7 @@ inline std::ostream& operator << (std::ostream& os, const unicode_string_cref& c
 inline std::ostream& operator << (std::ostream& os, const byte_vector_cref& cref)
 {
   boost::io::ios_flags_saver  ifs( os );
-  for (int i = 0 ; i < cref.size(); ++i){
+  for (std::size_t i = 0 ; i < cref.size(); ++i){
     os << (int) cref[i];
   }
   return os;

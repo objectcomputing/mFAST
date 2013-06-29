@@ -87,7 +87,7 @@ void dictionary_builder::build(const templates_description* def)
   const char* ns = current_ns_;
   const char* dictionary = current_dictionary_;
 
-  for (int i  = 0; i < def->instructions_count(); ++i ) {
+  for (uint32_t i  = 0; i < def->instructions_count(); ++i ) {
     template_instruction* inst = new (*alloc_)template_instruction(*def->instruction(i));
     build_template(inst, inst);
 
@@ -129,7 +129,7 @@ void dictionary_builder::build_group(const field_instruction*    fi,
   field_instruction** subinstructions =
     static_cast<field_instruction**>( alloc_->allocate( instructions_count *
                                                         sizeof(field_instruction*) ) );
-  for (int i = 0; i < instructions_count; ++i) {
+  for (size_t i = 0; i < instructions_count; ++i) {
     src->subinstructions_[i]->accept(*this, &subinstructions[i]);
   }
 

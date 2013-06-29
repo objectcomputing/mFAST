@@ -24,9 +24,6 @@
 
 namespace mfast
 {
-class decoder;
-
-
 
 struct decoder_impl;
 

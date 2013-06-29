@@ -80,7 +80,7 @@ std::size_t
 arena_allocator::reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)
 {
   // make the new_size at least 64 bytes
-  new_size = std::max(2*new_size, 64UL) & (~63);
+  new_size = std::max(2UL*new_size, 64UL) & (~63);
   void* old_pointer = pointer;
   pointer = this->allocate(new_size);
   std::memcpy(pointer, old_pointer, old_size);

@@ -303,7 +303,7 @@ bool FastXML2Header::VisitInteger (const XMLElement & element,
                                    std::size_t        index)
 {
   char buf[10];
-  snprintf(buf, 10, "uint%d",bits);
+  TIXML_SNPRINTF(buf, 10, "uint%d",bits);
   const char* cpp_type = (element.Name()[0] == 'u') ? buf : buf+1;
   VisitEnterSimpleValue(element,
                         cpp_type,

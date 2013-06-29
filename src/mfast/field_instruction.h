@@ -836,7 +836,7 @@ struct group_content_helper
 
   bool subinstruction_has_pmap_bit() const
   {
-    for (int i = 0; i < subinstructions_count_; ++i) {
+    for (uint32_t i = 0; i < subinstructions_count_; ++i) {
       if (subinstruction(i)->has_pmap_bit())
         return true;
     }

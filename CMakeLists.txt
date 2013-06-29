@@ -1,8 +1,8 @@
-# The name of our project is "TinyFAST". CMakeLists files in this project can
+# The name of our project is "mFAST". CMakeLists files in this project can
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
 cmake_minimum_required (VERSION 2.8)
-project (TinyFAST)
+project (mFAST)
 
 
 set(MFAST_MAJOR_VERSION 0)
@@ -45,10 +45,11 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 # Select flags.
 # Initialize CXXFLAGS.
-set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
-set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-
+# if (CMAKE_COMPILER_IS_GNUCXX)
+# 	set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
+# 	set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
+# 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+# endif ()
 
 include_directories ("${PROJECT_BINARY_DIR}"
                      "${PROJECT_SOURCE_DIR}/src")

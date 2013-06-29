@@ -449,7 +449,7 @@ bool FastXML2Source::VisitInteger (const XMLElement & element,
   bool is_unsigned = element.Name()[0] == 'u';
 
   char buf[10];
-  snprintf(buf, 10, "uint%d",bits);
+  TIXML_SNPRINTF(buf, 10, "uint%d",bits);
   const char* cpp_type = is_unsigned ? buf : buf+1;
 
   if (initialValue.size()) {
