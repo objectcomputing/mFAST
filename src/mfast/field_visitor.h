@@ -34,7 +34,7 @@ template <class FieldAccessor>
 class field_accessor_adaptor
   : public field_instruction_visitor
 {
-  FieldAccessor accssor_;
+  FieldAccessor& accssor_;
 
   value_storage_t& storage_of(const field_cref& ref)
   {
@@ -42,11 +42,8 @@ class field_accessor_adaptor
   }
 
   public:
-    field_accessor_adaptor()
-    {
-    }
 
-    field_accessor_adaptor(FieldAccessor accssor)
+    field_accessor_adaptor(FieldAccessor& accssor)
       : accssor_(accssor)
     {
     }
@@ -200,22 +197,20 @@ class field_mutator_adaptor_base
 
 };
 
+
+
 template <class FieldMutator>
 class field_mutator_adaptor
   : public field_mutator_adaptor_base
   , private detail::field_storage_helper
 {
   allocator* alloc_;
-  FieldMutator mutator_;
+  FieldMutator& mutator_;
 
   public:
+    typedef typename FieldMutator::struct_context context_t;
 
-    field_mutator_adaptor()
-      : alloc_(0)
-    {
-    }
-
-    field_mutator_adaptor(FieldMutator mutator)
+    field_mutator_adaptor(FieldMutator& mutator)
       : alloc_(0)
       , mutator_(mutator)
     {
@@ -223,11 +218,12 @@ class field_mutator_adaptor
 
     void visit(const group_mref& ref)
     {
-      if (mutator_.pre_visit(ref)) {
+      context_t context;
+      if (mutator_.pre_visit(ref, context)) {
         for (int i = 0; i < ref.fields_count(); ++i) {
           ref.subinstruction(i)->accept(*this, field_storage(ref, i));
         }
-        mutator_.post_visit(ref);
+        mutator_.post_visit(ref,context);
       }
     }
 
@@ -235,13 +231,14 @@ class field_mutator_adaptor
     {
       if (mutator_.pre_visit(ref)) {
         for (int j = 0; j < ref.size(); ++j) {
+          context_t context;
           sequence_element_mref element(ref[j]);
-          if (mutator_.pre_visit(j, element)) {
+          if (mutator_.pre_visit(j, element, context)) {
             for (int i = 0; i < ref.fields_count(); ++i) {
               field_mref r(element.mutable_field(i));
               r.instruction()->accept(*this, field_storage(r));
             }
-            mutator_.post_visit(j, element);
+            mutator_.post_visit(j, element, context);
           }
         }
         mutator_.post_visit(ref);
@@ -251,11 +248,12 @@ class field_mutator_adaptor
     void visit(const message_mref& ref)
     {
       alloc_ = field_allocator(ref);
-      if (mutator_.pre_visit(ref)) {
+      context_t context;
+      if (mutator_.pre_visit(ref, context)) {
         for (int i = 0; i < ref.fields_count(); ++i) {
           ref.subinstruction(i)->accept(*this, field_storage(ref, i));
         }
-        mutator_.post_visit(ref);
+        mutator_.post_visit(ref,context);
       }
     }
 
@@ -328,13 +326,14 @@ class field_mutator_adaptor
     virtual void visit(const templateref_instruction* inst, void* storage)
     {
       value_storage_t* v = static_cast<value_storage_t*>(storage);
+      context_t context;
       dynamic_mref dyn_mref(alloc_, v, inst);
-      if (mutator_.pre_visit(dyn_mref)) {
+      if (mutator_.pre_visit(dyn_mref, context)) {
         message_mref mref(alloc_, v, v->templateref_storage.instruction_storage.instruction_);
         for (int i = 0; i < mref.fields_count(); ++i) {
           mref.subinstruction(i)->accept(*this, field_storage(mref, i));
         }
-        mutator_.post_visit(dyn_mref);
+        mutator_.post_visit(dyn_mref,context);
       }
     }
 
@@ -345,7 +344,7 @@ template <typename FieldAccessor>
 inline void
 group_cref::accept_accessor(FieldAccessor& accessor) const
 {
-  field_accessor_adaptor<FieldAccessor&> adaptor(accessor);
+  field_accessor_adaptor<FieldAccessor> adaptor(accessor);
   adaptor.visit(*this);
 }
 
@@ -354,7 +353,7 @@ template <typename FieldMutator>
 inline void
 make_group_mref<ConstFieldRef>::accept_mutator(FieldMutator& mutator) const
 {
-  field_mutator_adaptor<FieldMutator&> adaptor(mutator);
+  field_mutator_adaptor<FieldMutator> adaptor(mutator);
   adaptor.visit(*reinterpret_cast<group_mref*>(this));
 }
 
@@ -363,7 +362,7 @@ template <typename FieldAccessor>
 inline void
 make_sequence_cref<ElementType>::accept_accessor(FieldAccessor& accessor) const
 {
-  field_accessor_adaptor<FieldAccessor&> adaptor(accessor);
+  field_accessor_adaptor<FieldAccessor> adaptor(accessor);
   adaptor.visit(*reinterpret_cast<sequence_cref*>(this));
 }
 
@@ -372,7 +371,7 @@ template <typename FieldMutator>
 inline void
 make_sequence_mref<ElementType>::accept_mutator(FieldMutator& mutator) const
 {
-  field_mutator_adaptor<FieldMutator&> adaptor(mutator);
+  field_mutator_adaptor<FieldMutator> adaptor(mutator);
   adaptor.visit(*reinterpret_cast<sequence_mref*>(this));
 }
 
@@ -380,7 +379,7 @@ template <typename FieldAccessor>
 inline void
 message_cref::accept_accessor(FieldAccessor& accessor) const
 {
-  field_accessor_adaptor<FieldAccessor&> adaptor(accessor);
+  field_accessor_adaptor<FieldAccessor> adaptor(accessor);
   adaptor.visit(*this);
 }
 
@@ -389,7 +388,7 @@ template <typename FieldMutator>
 inline void
 make_message_mref<ConstFieldRef>::accept_mutator(FieldMutator& mutator) const
 {
-  field_mutator_adaptor<FieldMutator&> adaptor(mutator);
+  field_mutator_adaptor<FieldMutator> adaptor(mutator);
   adaptor.visit(*this);
 }
 

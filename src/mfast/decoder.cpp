@@ -16,7 +16,6 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <deque>
 #include "decoder.h"
 #include "decoder_field_operator.h"
 #include "field_visitor.h"
@@ -35,36 +34,52 @@ typedef boost::container::map<uint32_t, message_base> message_map_t;
 
 struct decoder_impl
 {
-  std::deque<presence_map> pmap_stack_;
+
+  struct struct_context
+  {
+    presence_map pmap_;
+    presence_map* prev_pmap_;
+
+    struct_context()
+      : prev_pmap_(0)
+    {
+    }
+
+  };
+
   fast_istream* strm_;
   allocator* alloc_;
   dictionary_resetter resetter_;
 
   arena_allocator template_alloc_;  // template_alloc MUST be constructed before template_messages,
-  message_map_t template_messages_; // Do not chnage the order of the two
+  message_map_t template_messages_; // Do not change the order of the two
 
   allocator* message_alloc_;
   message_base* active_message_;
   bool force_reset_;
   debug_stream debug_;
+  presence_map* current_;
 
   decoder_impl();
   ~decoder_impl();
   void reset_messages();
   presence_map& current_pmap();
+  void decode_pmap(struct_context& context);
+  void restore_pmap(struct_context& context);
 
   template <typename SimpleMRef>
   void visit(const SimpleMRef &mref);
-  bool pre_visit(const group_mref& mref);
-  void post_visit(const group_mref& mref);
+
+  bool pre_visit(const group_mref& mref, struct_context& context);
+  void post_visit(const group_mref& mref, struct_context& context);
   bool pre_visit(const sequence_mref& mref);
   void post_visit(const sequence_mref&);
-  bool pre_visit(std::size_t /* index */, const sequence_element_mref& mref);
-  void post_visit(std::size_t /* index */, const sequence_element_mref& mref);
-  bool pre_visit(const message_mref&);
-  void post_visit(const message_mref&);
-  bool pre_visit(dynamic_mref&);
-  void post_visit(const dynamic_mref&);
+  bool pre_visit(std::size_t /* index */, const sequence_element_mref& mref, struct_context& context);
+  void post_visit(std::size_t /* index */, const sequence_element_mref& mref, struct_context& context);
+  bool pre_visit(const message_mref&, struct_context& context);
+  void post_visit(const message_mref&, struct_context& context);
+  bool pre_visit(dynamic_mref&, struct_context& context);
+  void post_visit(const dynamic_mref&, struct_context& context);
 
   message_base*  decode_segment(fast_istream* strm);
 };
@@ -94,7 +109,22 @@ decoder_impl::~decoder_impl()
 inline presence_map&
 decoder_impl::current_pmap()
 {
-  return pmap_stack_.back();
+  return *current_;
+}
+
+inline void
+decoder_impl::decode_pmap(struct_context& context)
+{
+  context.prev_pmap_ = current_;
+  current_ = &context.pmap_;
+  strm_->decode(current_pmap());
+}
+
+inline void
+decoder_impl::restore_pmap(struct_context& context)
+{
+  if (context.prev_pmap_)
+    current_ = context.prev_pmap_;
 }
 
 template <typename SimpleMRef>
@@ -117,9 +147,9 @@ decoder_impl::visit(const SimpleMRef& mref)
 }
 
 inline bool
-decoder_impl::pre_visit(const group_mref& mref)
+decoder_impl::pre_visit(const group_mref& mref, struct_context& context)
 {
-  debug_ << "decoding group " << mref.name() ;
+  debug_ << "decoding group " << mref.name();
 
   // If a group field is optional, it will occupy a single bit in the presence map.
   // The contents of the group may appear in the stream iff the bit is set.
@@ -138,8 +168,7 @@ decoder_impl::pre_visit(const group_mref& mref)
   }
 
   if (mref.instruction()->has_pmap_bit()) {
-    pmap_stack_.resize(pmap_stack_.size()+1);
-    strm_->decode(current_pmap());
+    decode_pmap(context);
     debug_ << "        " << mref.name() << " has group pmap -> " << current_pmap() << "\n";
   }
   mref.ensure_valid();
@@ -147,10 +176,9 @@ decoder_impl::pre_visit(const group_mref& mref)
 }
 
 inline void
-decoder_impl::post_visit(const group_mref& mref)
+decoder_impl::post_visit(const group_mref& mref, struct_context& context)
 {
-  if (mref.instruction()->has_pmap_bit())
-    pmap_stack_.pop_back();
+  restore_pmap(context);
 }
 
 inline bool
@@ -183,29 +211,26 @@ decoder_impl::post_visit(const sequence_mref&)
 }
 
 inline bool
-decoder_impl::pre_visit(std::size_t index, const sequence_element_mref& mref)
+decoder_impl::pre_visit(std::size_t index, const sequence_element_mref& mref, struct_context& context)
 {
   debug_ << "decoding  element[" << index << "] : has pmap bit = " <<  mref.instruction()->has_pmap_bit() << "\n";
 
   if (mref.instruction()->has_pmap_bit())
   {
-    pmap_stack_.resize(pmap_stack_.size()+1);
-    strm_->decode(current_pmap());
+    decode_pmap(context);
     debug_ << "    decoded pmap -> " <<  current_pmap() << "\n";
   }
   return true;
 }
 
 inline void
-decoder_impl::post_visit(std::size_t /* index */, const sequence_element_mref& mref)
+decoder_impl::post_visit(std::size_t /* index */, const sequence_element_mref& mref, struct_context& context)
 {
-  if (mref.instruction()->has_pmap_bit()) {
-    pmap_stack_.pop_back();
-  }
+  restore_pmap(context);
 }
 
 inline bool
-decoder_impl::pre_visit(const message_mref& mref)
+decoder_impl::pre_visit(const message_mref& mref, struct_context& /*context*/)
 {
   mref.ensure_valid();
   debug_ << "decoding template " << mref.name()  << " ...\n";
@@ -214,16 +239,16 @@ decoder_impl::pre_visit(const message_mref& mref)
 }
 
 inline void
-decoder_impl::post_visit(const message_mref&)
+decoder_impl::post_visit(const message_mref&, struct_context& /*context*/)
 {
 }
 
 inline bool
-decoder_impl::pre_visit(dynamic_mref& mref)
+decoder_impl::pre_visit(dynamic_mref& mref, struct_context& context)
 {
   debug_ << "decoding dynamic templateRef ...\n";
 
-  strm_->decode(current_pmap());
+  decode_pmap(context);
   debug_ << "   decoded pmap -> " << current_pmap() << "\n";
 
   presence_map& pmap = current_pmap();
@@ -250,17 +275,17 @@ decoder_impl::pre_visit(dynamic_mref& mref)
 }
 
 inline void
-decoder_impl::post_visit(const dynamic_mref& mref)
+decoder_impl::post_visit(const dynamic_mref& mref, struct_context& context)
 {
-  pmap_stack_.pop_back();
+  restore_pmap(context);
 }
 
 message_base*
 decoder_impl::decode_segment(fast_istream* strm)
 {
   strm_ = strm;
-  pmap_stack_.resize(1);
-  strm_->decode(current_pmap());
+  struct_context context;
+  decode_pmap(context);
 
   presence_map& pmap = current_pmap();
 
@@ -286,7 +311,7 @@ decoder_impl::decode_segment(fast_istream* strm)
     }
   }
 
-  if (force_reset_ || active_message_->instruction()->has_reset_attribute()){
+  if (force_reset_ || active_message_->instruction()->has_reset_attribute()) {
     resetter_.reset();
     reset_messages();
   }
@@ -359,6 +384,7 @@ decoder::debug_log(std::ostream& log)
 {
   impl_->debug_.set(log);
 }
+
 #endif
 
 }
