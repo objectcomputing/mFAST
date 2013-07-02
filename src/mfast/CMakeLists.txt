@@ -2,6 +2,7 @@ file (GLOB headers "*.h") ## retrieve all header files in cirst directory
 file (GLOB sources "*.cpp")     ## retrieve all source files in current directory
 
 
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 set(mfast_SRCS ../fastxml/tinyxml2.cpp ../fastxml/FastXMLVisitor.cpp ${sources} ${headers})
 

@@ -1,4 +1,5 @@
 
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 add_executable (fast_type_gen
 	            fast_type_gen.cpp

@@ -45,11 +45,14 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
 # Select flags.
 # Initialize CXXFLAGS.
-# if (CMAKE_COMPILER_IS_GNUCXX)
-# 	set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
-# 	set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
-# 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-# endif ()
+if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+	set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
+	# set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
+	# set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
+	# set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+elseif (MSVC)
+	add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
+endif()
 
 include_directories ("${PROJECT_BINARY_DIR}"
                      "${PROJECT_SOURCE_DIR}/src")
@@ -62,7 +65,6 @@ set(MFAST_LIBRARIES mfast)
 # FASTTYPEGEN_TARGET (public macro)
 #============================================================
 #
-set(FASTTYPEGEN_EXECUTABLE ${CMAKE_BINARY_DIR}/src/fast_type_gen/fast_type_gen)
 
 macro(FASTTYPEGEN_TARGET Name)
 set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]")
@@ -73,16 +75,20 @@ foreach (input ${ARGN})
 endforeach(input)
 
 foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
-	set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${var}.cpp)
+	set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
 endforeach(var)
 
-add_custom_command(OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-  COMMAND ${FASTTYPEGEN_EXECUTABLE}
+file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+add_custom_command(
+  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+  COMMAND $<TARGET_FILE:fast_type_gen>
   ARGS ${ARGN}
   DEPENDS ${ARGN} ${FASTTYPEGEN_EXECUTABLE}
   COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  
+include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 set(FASTTYPEGEN_${Name}_DEFINED TRUE)
 set(FASTTYPEGEN_${Name}_INPUTS ${ARGN})
 endmacro()
