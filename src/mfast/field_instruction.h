@@ -561,7 +561,7 @@ class decimal_field_instruction
 
     int8_t exponent_initial_value() const
     {
-      return this->default_value_.decimal_storage.exponent_;
+      return static_cast<int8_t>(this->default_value_.decimal_storage.exponent_);
     }
 
     virtual void construct_value(value_storage_t& storage,

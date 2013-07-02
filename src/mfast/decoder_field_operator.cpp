@@ -600,7 +600,7 @@ class delta_operator
       int32_t sub_len = substraction_length >= 0 ? substraction_length : ~substraction_length;
       const value_storage_t& base_value = delta_base_value_of(mref);
 
-      if ( sub_len > base_value.array_length())
+      if ( sub_len > static_cast<int32_t>(base_value.array_length()))
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
 
       uint32_t delta_len;

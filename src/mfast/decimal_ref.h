@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef DECIMAL_H_V02M5O0J
-#define DECIMAL_H_V02M5O0J
+#ifndef DECIMAL_REF_H_V02M5O0J
+#define DECIMAL_REF_H_V02M5O0J
 
 #include <cmath>
 #include <cfloat>
@@ -273,4 +273,4 @@ class decimal_mref
 
 }
 
-#endif /* end of include guard: DECIMAL_H_V02M5O0J */
+#endif /* end of include guard: DECIMAL_REF_H_V02M5O0J */

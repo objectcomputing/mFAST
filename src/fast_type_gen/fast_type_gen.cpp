@@ -41,7 +41,7 @@ int main(int argc, const char** argv)
       }
 
       path f(path(argv[i]).stem());
-      const char* filebase = f.c_str();
+      const char* filebase = f.string().c_str();
 
       FastXML2Header header_producer(filebase,registry);
       doc.Accept(&header_producer);

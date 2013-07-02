@@ -288,7 +288,7 @@ void sequence_field_instruction::copy_value(const value_storage_t& src,
       *static_cast<const value_storage_t**>(src.array_storage.content_);
     value_storage_t* dest_elements = *static_cast<value_storage_t**>(dest.array_storage.content_);
 
-    for (int i = 0; i < size; ++i ) {
+    for (std::size_t i = 0; i < size; ++i ) {
       copy_group_subfields(&src_elements[i], &dest_elements[i], alloc);
     }
   }

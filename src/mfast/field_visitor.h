@@ -220,7 +220,7 @@ class field_mutator_adaptor
     {
       context_t context;
       if (mutator_.pre_visit(ref, context)) {
-        for (int i = 0; i < ref.fields_count(); ++i) {
+        for (std::size_t i = 0; i < ref.fields_count(); ++i) {
           ref.subinstruction(i)->accept(*this, field_storage(ref, i));
         }
         mutator_.post_visit(ref,context);
@@ -230,11 +230,11 @@ class field_mutator_adaptor
     void visit(const sequence_mref& ref)
     {
       if (mutator_.pre_visit(ref)) {
-        for (int j = 0; j < ref.size(); ++j) {
+        for (std::size_t j = 0; j < ref.size(); ++j) {
           context_t context;
           sequence_element_mref element(ref[j]);
           if (mutator_.pre_visit(j, element, context)) {
-            for (int i = 0; i < ref.fields_count(); ++i) {
+            for (std::size_t i = 0; i < ref.fields_count(); ++i) {
               field_mref r(element.mutable_field(i));
               r.instruction()->accept(*this, field_storage(r));
             }
@@ -250,7 +250,7 @@ class field_mutator_adaptor
       alloc_ = field_allocator(ref);
       context_t context;
       if (mutator_.pre_visit(ref, context)) {
-        for (int i = 0; i < ref.fields_count(); ++i) {
+        for (std::size_t i = 0; i < ref.fields_count(); ++i) {
           ref.subinstruction(i)->accept(*this, field_storage(ref, i));
         }
         mutator_.post_visit(ref,context);
@@ -330,7 +330,7 @@ class field_mutator_adaptor
       dynamic_mref dyn_mref(alloc_, v, inst);
       if (mutator_.pre_visit(dyn_mref, context)) {
         message_mref mref(alloc_, v, v->templateref_storage.instruction_storage.instruction_);
-        for (int i = 0; i < mref.fields_count(); ++i) {
+        for (std::size_t i = 0; i < mref.fields_count(); ++i) {
           mref.subinstruction(i)->accept(*this, field_storage(mref, i));
         }
         mutator_.post_visit(dyn_mref,context);
