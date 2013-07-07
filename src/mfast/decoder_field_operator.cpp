@@ -28,58 +28,58 @@ namespace mfast
 {
 
 void
-decoder_field_operator::decode(const int32_mref& mref,
-                               fast_istream&     stream,
-                               presence_map&     pmap) const
+decoder_field_operator::decode(const int32_mref& /* mref */,
+                               fast_istream&     /* stream */,
+                               presence_map&     /* pmap */) const
 {
 }
 
 void
-decoder_field_operator::decode(const uint32_mref& mref,
-                               fast_istream&      stream,
-                               presence_map&      pmap) const
+decoder_field_operator::decode(const uint32_mref& /* mref */,
+                               fast_istream&      /* stream */,
+                               presence_map&      /* pmap */) const
 {
 }
 
 void
-decoder_field_operator::decode(const int64_mref& mref,
-                               fast_istream&     stream,
-                               presence_map&     pmap) const
+decoder_field_operator::decode(const int64_mref& /* mref */,
+                               fast_istream&     /* stream */,
+                               presence_map&     /* pmap */) const
 {
 }
 
 void
-decoder_field_operator::decode(const uint64_mref& mref,
-                               fast_istream&      stream,
-                               presence_map&      pmap) const
+decoder_field_operator::decode(const uint64_mref& /* mref */,
+                               fast_istream&      /* stream */,
+                               presence_map&      /* pmap */) const
 {
 }
 
 void
-decoder_field_operator::decode(const ascii_string_mref& mref,
-                               fast_istream&            stream,
-                               presence_map&            pmap) const
+decoder_field_operator::decode(const ascii_string_mref& /* mref */,
+                               fast_istream&            /* stream */,
+                               presence_map&            /* pmap */) const
 {
 }
 
 void
-decoder_field_operator::decode(const unicode_string_mref& mref,
-                               fast_istream&              stream,
-                               presence_map&              pmap) const
+decoder_field_operator::decode(const unicode_string_mref& /* mref */,
+                               fast_istream&              /* stream */,
+                               presence_map&              /* pmap */) const
 {
 }
 
 void
-decoder_field_operator::decode(const byte_vector_mref& mref,
-                               fast_istream&           stream,
-                               presence_map&           pmap) const
+decoder_field_operator::decode(const byte_vector_mref& /* mref */,
+                               fast_istream&           /* stream */,
+                               presence_map&           /* pmap */) const
 {
 }
 
 void
-decoder_field_operator::decode(const decimal_mref& mref,
-                               fast_istream&       stream,
-                               presence_map&       pmap) const
+decoder_field_operator::decode(const decimal_mref& /* mref */,
+                               fast_istream&       /* stream */,
+                               presence_map&       /* pmap */) const
 {
 }
 
@@ -198,7 +198,7 @@ class constant_operator
   public:
     template <typename T>
     void decode_impl(const T&      mref,
-                     fast_istream& stream,
+                     fast_istream& /* stream */,
                      presence_map& pmap) const
     {
 
@@ -573,7 +573,7 @@ class delta_operator
       int_type r = static_cast<int_type> (d);
 
       // check overflow
-      if (d != r)
+      if (d != static_cast<int64_t>(r)) // TODO : signed, unsigned
         BOOST_THROW_EXCEPTION(fast_reportable_error("R4"));
 
       mref.as( r );
@@ -588,7 +588,7 @@ class delta_operator
   template <typename T>
   void decode_string(const T&      mref,
                      fast_istream& stream,
-                     presence_map& pmap) const
+                     presence_map& /* pmap */) const
   {
     // The delta value is represented as a Signed Integer subtraction length followed by an ASCII String.
     // If the delta is nullable, the subtraction length is nullable. A NULL delta is represented as a

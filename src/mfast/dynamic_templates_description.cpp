@@ -184,7 +184,7 @@ class templates_loader
     }
 
     bool get_field_attributes(const XMLElement & element,
-                              const std::string& name_attr,
+                              const std::string& /* name_attr */,
                               operator_enum_t&   fieldOp,
                               op_context_t*&     opContext,
                               std::string&       initialValue)
@@ -232,7 +232,7 @@ class templates_loader
       return true;
     }
 
-    virtual bool VisitExitTemplates(const XMLElement & element, std::size_t numFields)
+  virtual bool VisitExitTemplates(const XMLElement & element, std::size_t /* numFields */)
     {
       definition_->ns_ = get_ns(element);
       definition_->template_ns_ = get_templateNs(element);
@@ -277,7 +277,7 @@ class templates_loader
       return true;
     }
 
-    virtual bool VisitTemplateRef(const XMLElement & element, const std::string& name_attr, std::size_t index)
+  virtual bool VisitTemplateRef(const XMLElement & element, const std::string& name_attr, std::size_t /* index */)
     {
       const char* template_name = name_attr.size() ? name_attr.c_str() : 0;
       templateref_instruction* instruction;

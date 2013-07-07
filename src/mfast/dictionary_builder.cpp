@@ -84,9 +84,6 @@ void dictionary_builder::build(const templates_description* def)
   current_ns_ = def->template_ns();
   current_dictionary_ = is_empty_string(def->dictionary()) ?  "global" : def->dictionary();
 
-  const char* ns = current_ns_;
-  const char* dictionary = current_dictionary_;
-
   for (uint32_t i  = 0; i < def->instructions_count(); ++i ) {
     template_instruction* inst = new (*alloc_)template_instruction(*def->instruction(i));
     build_template(inst, inst);

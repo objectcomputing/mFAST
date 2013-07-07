@@ -51,7 +51,7 @@ class field_accessor_adaptor
     void visit(const group_cref& ref)
     {
       if (accssor_.pre_visit(ref)) {
-        for (int i = 0; i < ref.fields_count(); ++i) {
+        for (std::size_t i = 0; i < ref.fields_count(); ++i) {
           field_cref r(ref.const_field(i));
           if (r.present()) {
             r.instruction()->accept(*this, &storage_of(r));
@@ -64,10 +64,10 @@ class field_accessor_adaptor
     void visit(const sequence_cref& ref)
     {
       if (accssor_.pre_visit(ref)) {
-        for (int j = 0; j < ref.size(); ++j) {
+        for (std::size_t j = 0; j < ref.size(); ++j) {
           sequence_element_cref element(ref[j]);
           if (accssor_.pre_visit(j, element)) {
-            for (int i = 0; i < ref.fields_count(); ++i) {
+            for (std::size_t i = 0; i < ref.fields_count(); ++i) {
               field_cref r(element.const_field(i));
               if (r.present()) {
                 r.instruction()->accept(*this, &storage_of(r));
@@ -83,7 +83,7 @@ class field_accessor_adaptor
     void visit(const message_cref& ref)
     {
       if (accssor_.pre_visit(ref)) {
-        for (int i = 0; i < ref.fields_count(); ++i) {
+        for (std::size_t i = 0; i < ref.fields_count(); ++i) {
           field_cref r(ref.const_field(i));
           if (r.present()) {
             r.instruction()->accept(*this, &storage_of(r));
@@ -159,10 +159,10 @@ class field_accessor_adaptor
       this->visit(ref);
     }
 
-    virtual void visit(const templateref_instruction* inst, void* s)
+    virtual void visit(const templateref_instruction* /* inst */, void* storage)
     {
-      value_storage_t* storage = static_cast<value_storage_t*>(storage);
-      message_cref ref(storage, storage->templateref_storage.instruction_storage.instruction_);
+      value_storage_t* s = static_cast<value_storage_t*>(storage);
+      message_cref ref(s, s->templateref_storage.instruction_storage.instruction_);
       this->visit(ref);
     }
 
@@ -215,7 +215,7 @@ class field_mutator_adaptor
       , mutator_(mutator)
     {
     }
-
+    
     void visit(const group_mref& ref)
     {
       context_t context;
@@ -336,7 +336,6 @@ class field_mutator_adaptor
         mutator_.post_visit(dyn_mref,context);
       }
     }
-
 };
 
 ///////////////////////////////////////////////////////////

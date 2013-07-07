@@ -176,7 +176,7 @@ decoder_impl::pre_visit(const group_mref& mref, struct_context& context)
 }
 
 inline void
-decoder_impl::post_visit(const group_mref& mref, struct_context& context)
+decoder_impl::post_visit(const group_mref& /* mref */, struct_context& context)
 {
   restore_pmap(context);
 }
@@ -224,7 +224,7 @@ decoder_impl::pre_visit(std::size_t index, const sequence_element_mref& mref, st
 }
 
 inline void
-decoder_impl::post_visit(std::size_t /* index */, const sequence_element_mref& mref, struct_context& context)
+decoder_impl::post_visit(std::size_t /* index */, const sequence_element_mref& /* mref */, struct_context& context)
 {
   restore_pmap(context);
 }
@@ -275,7 +275,7 @@ decoder_impl::pre_visit(dynamic_mref& mref, struct_context& context)
 }
 
 inline void
-decoder_impl::post_visit(const dynamic_mref& mref, struct_context& context)
+decoder_impl::post_visit(const dynamic_mref& /* mref */, struct_context& context)
 {
   restore_pmap(context);
 }

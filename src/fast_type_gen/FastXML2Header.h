@@ -30,10 +30,20 @@ class FastXML2Header
   public:
     FastXML2Header(const char* filebase, templates_registry_t& registry);
     /// Visit a document.
+    
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
+    
     virtual bool VisitEnter( const XMLDocument& /*doc*/ );
     /// Visit a document.
     virtual bool VisitExit( const XMLDocument& /*doc*/ );
-
+    
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+    
     virtual bool  VisitEnterTemplate (const XMLElement & element, const std::string& name_attr, std::size_t index);
     virtual bool  VisitExitTemplate (const XMLElement & element, const std::string& name_attr, std::size_t numFields, std::size_t index);
     virtual bool  VisitEnterGroup (const XMLElement & element, const std::string& name_attr, std::size_t index);
@@ -56,7 +66,7 @@ class FastXML2Header
                                 const std::string& name_attr,
                                 std::size_t        index);
 
-    typedef indented_ostream<std::stringstream> ind_stream;
+    typedef indented_stringstream ind_stream;
 
     ind_stream header_cref_;
     ind_stream header_mref_;

@@ -17,7 +17,8 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <mfast/malloc_allocator.h>
+
+
 #include <mfast/int_ref.h>
 #include <mfast/string_ref.h>
 #include <mfast/decimal_ref.h>
@@ -25,13 +26,14 @@
 #include <mfast/sequence_ref.h>
 #include <mfast/codec_helper.h>
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include "debug_allocator.h"
 
-
 using namespace mfast;
 
-BOOST_AUTO_TEST_SUITE( field_ref_test_suit )
+BOOST_AUTO_TEST_SUITE( test_field_ref )
 
 BOOST_AUTO_TEST_CASE(integer_field_test)
 {
@@ -618,7 +620,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
   BOOST_CHECK(storage.group_storage.content_ != 0);
   {
     group_cref ref(&storage, &group_inst);
-    BOOST_CHECK_EQUAL(ref.present(),         0);
+    BOOST_CHECK_EQUAL(ref.present(),  false);
     BOOST_CHECK_EQUAL(ref.fields_count(),      2);
 
     BOOST_CHECK_EQUAL(ref.subinstruction(0), &inst0);
@@ -626,8 +628,6 @@ BOOST_AUTO_TEST_CASE(group_field_test)
 
     field_cref f0( ref.const_field(0) );
     BOOST_CHECK(f0.absent());
-
-    int c = byte_vector_cref::is_mutable::value;
 
     field_cref f1( ref.const_field(1) );
     BOOST_CHECK(f1.absent());
@@ -653,7 +653,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
   }
   {
     group_mref ref(&alloc, &storage, &group_inst);
-      BOOST_CHECK_EQUAL(ref.present(),    0);
+      BOOST_CHECK_EQUAL(ref.present(),    false);
       BOOST_CHECK_EQUAL(ref.fields_count(), 2);
 
     field_mref f0(ref.mutable_field(0) );
@@ -745,17 +745,17 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
 
   {
     sequence_mref ref(&alloc, &storage, &sequence_inst);
-    BOOST_CHECK_EQUAL(ref.present(),    0);
+    BOOST_CHECK_EQUAL(ref.present(),    false);
     BOOST_CHECK_EQUAL(ref.fields_count(), 2);
 
     ref.resize(2);
-    BOOST_CHECK_EQUAL(ref.present(),    1);
+    BOOST_CHECK_EQUAL(ref.present(),    true);
 
     ref.as_absent();
-    BOOST_CHECK_EQUAL(ref.present(),    0);
+    BOOST_CHECK_EQUAL(ref.present(),    false);
 
     ref.resize(2);
-    BOOST_CHECK_EQUAL(ref.present(),    1);
+    BOOST_CHECK_EQUAL(ref.present(),    true);
 
     sequence_element_mref e0ref(ref[0]);
     sequence_element_cref e0cref(ref[0]);
@@ -896,7 +896,7 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
 
   {
     sequence_mref ref(&alloc, &storage, &sequence_inst);
-    BOOST_CHECK_EQUAL(ref.present(),                 0);
+    BOOST_CHECK_EQUAL(ref.present(),                 false);
     BOOST_CHECK_EQUAL(ref.fields_count(),              1);
 
     ref.reserve(2);
@@ -906,7 +906,7 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
 
 
     ref.resize(2);
-    BOOST_CHECK_EQUAL(ref.present(),                 1);
+    BOOST_CHECK_EQUAL(ref.present(),                 true);
     BOOST_CHECK_EQUAL(ref.size(),                    2);
 
     BOOST_CHECK_EQUAL(mock0.construct_value_called_, 2);

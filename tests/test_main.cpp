@@ -17,5 +17,5 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE TinyFast Test Suite
+#define BOOST_TEST_MODULE mFast Test Suite
 #include <boost/test/unit_test.hpp>

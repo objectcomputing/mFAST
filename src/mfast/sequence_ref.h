@@ -117,8 +117,8 @@ class make_sequence_cref
     operator [](size_t index) const
     {
       assert(index < size());
-      const value_storage_t* storages =
-        static_cast<const value_storage_t*>(storage_->array_storage.content_);
+      //const value_storage_t* storages =
+      //  static_cast<const value_storage_t*>(storage_->array_storage.content_);
       return reference(element_storage(index), this->instruction());
     }
 

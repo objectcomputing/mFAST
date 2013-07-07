@@ -335,11 +335,11 @@ const
     // Copy the old content to the new buffer.
     // In the case when the this->capacity == 0 && this->size() > 0,
     // reserve() could be invoked with n < this->size(). Thus, we can
-    // only copy max(size(), n) elements to the new buffer.
-    if (this->storage()->array_length() > 0) {
+    // only copy min(size(), n) elements to the new buffer.
+    if (this->storage()->array_length() > 0 && n > 0) {
       memcpy(this->storage()->array_storage.content_,
              old_addr,
-             std::max(this->size(), n) );
+             std::min(this->size(), n) );
     }
   }
 
@@ -353,7 +353,7 @@ make_vector_mref<ConstVectorRef>::shift(
 const
 {
   assert(position >= begin() && position <= end());
-  std::ptrdiff_t offset = position  - begin();
+  std::size_t offset = position  - begin();
 
   if (capacity() < this->size()+n)
     reserve(this->size()+n);

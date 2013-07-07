@@ -31,11 +31,19 @@ class FastXML2Source
   public:
     FastXML2Source(const char* filebase, templates_registry_t& registry);
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Woverloaded-virtual"
+#endif
+    
     /// Visit a document.
     virtual bool VisitEnter( const XMLDocument& /*doc*/ );
     /// Visit a document.
     virtual bool VisitExit( const XMLDocument& /*doc*/ );
-
+    
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
     void add_to_instruction_list(const std::string & name_attr);
 

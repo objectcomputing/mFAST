@@ -23,8 +23,8 @@
 namespace mfast {
 
 void
-field_instruction::destruct_value(value_storage_t& storage,
-                                  allocator*       alloc) const
+field_instruction::destruct_value(value_storage_t&,
+                                  allocator      *       ) const
 {
 }
 
@@ -51,7 +51,7 @@ void integer_field_instruction_base::construct_value(value_storage_t& storage,
 /////////////////////////////////////////////////////////
 
 void decimal_field_instruction::construct_value(value_storage_t& storage,
-                                                allocator*       alloc) const
+                                                allocator        *       ) const
 {
   storage = default_value_;
   storage.decimal_storage.present_ = !optional();
@@ -66,7 +66,7 @@ void decimal_field_instruction::accept(field_instruction_visitor& visitor,
 /////////////////////////////////////////////////////////
 
 void string_field_instruction::construct_value(value_storage_t& storage,
-                                               allocator*       alloc) const
+                                               allocator        *       ) const
 {
   storage = default_value_;
   if (optional())
@@ -306,6 +306,8 @@ void sequence_field_instruction::accept(field_instruction_visitor& visitor,
 
 /////////////////////////////////////////////////////////
 
+
+
 void template_instruction::construct_value(value_storage_t& storage,
                                            value_storage_t* fields_storage,
                                            allocator*       alloc,
@@ -353,11 +355,13 @@ void template_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
+///////////////////////////////////////////////////////////
+
 void templateref_instruction::construct_value(value_storage_t& storage,
-                                              allocator*       alloc) const
+                                              allocator        *       ) const
 {
   storage.templateref_storage.instruction_storage.instruction_ = 0;
-  storage.group_storage.content_ = 0;
+  storage.templateref_storage.content_ = 0;
 }
 
 void templateref_instruction::destruct_value(value_storage_t& storage,
@@ -367,7 +371,7 @@ void templateref_instruction::destruct_value(value_storage_t& storage,
     storage.templateref_storage.instruction_storage.instruction_->destruct_group_subfields(
       static_cast<value_storage_t*>(storage.templateref_storage.content_),
       alloc);
-    alloc->deallocate(storage.group_storage.content_);
+    alloc->deallocate(storage.templateref_storage.content_);
   }
 }
 

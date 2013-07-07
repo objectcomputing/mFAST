@@ -18,8 +18,9 @@
 //
 #include <mfast/fast_istream.h>
 #include <mfast/fast_istream_extractor.h>
-#include <boost/test/test_tools.hpp>
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "debug_allocator.h"
@@ -27,7 +28,7 @@
 
 using namespace mfast;
 
-BOOST_AUTO_TEST_SUITE( fast_istream_test_suit )
+BOOST_AUTO_TEST_SUITE( test_fast_istream )
 
 
 BOOST_AUTO_TEST_CASE(int32_test)
@@ -158,7 +159,7 @@ BOOST_AUTO_TEST_CASE(uint32_test)
 
     uint32_t value;
     BOOST_CHECK(strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, 4294967295);
+    BOOST_CHECK_EQUAL(value, 4294967295U);
   }
 }
 

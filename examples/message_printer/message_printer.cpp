@@ -71,7 +71,7 @@ class message_printer
       return true;
     }
 
-    void post_visit(const group_cref& ref)
+  void post_visit(const group_cref& /* ref */)
     {
       --indent_;
     }
@@ -83,19 +83,19 @@ class message_printer
       return true;
     }
 
-    void post_visit(const sequence_cref& ref)
+  void post_visit(const sequence_cref& /* ref */)
     {
       --indent_;
     }
 
-    bool pre_visit(std::size_t index, const sequence_element_cref& ref)
+  bool pre_visit(std::size_t index, const sequence_element_cref& /* ref */)
     {
       os_ << indent_ <<  "[" << index << "]:\n";
       ++indent_;
       return true;
     }
 
-    void post_visit(std::size_t index, const sequence_element_cref& ref)
+  void post_visit(std::size_t /* index */, const sequence_element_cref& /* ref */)
     {
       --indent_;
     }

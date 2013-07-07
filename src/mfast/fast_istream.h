@@ -243,7 +243,7 @@ struct temp_uint64_t
     return *this;
   }
 
-  temp_uint64_t& operator <<= (int shiftbits)     // shiftbits should always be 7
+  temp_uint64_t& operator <<= (int /* shiftbits */)     // shiftbits should always be 7
   {
     carry =  (value == 0x0200000000000000ULL);
     value <<= 7;

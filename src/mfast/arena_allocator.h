@@ -22,6 +22,7 @@
 #include <new>
 #include <stdint.h>
 #include <cassert>
+#include <cstddef>
 #include "allocator.h"
 
 namespace mfast {
@@ -42,9 +43,6 @@ public:
   virtual bool reset();
   virtual void deallocate(void* pointer);
 
-  enum {
-    default_chunk_size=4096
-  };
 
 
 private:
@@ -78,6 +76,13 @@ private:
   // from if the available size of the head of current_list is not enough.
   memory_chunk* current_list_head_;
   memory_chunk* free_list_head_;
+  
+public:
+  enum {
+    default_chunk_size=4096,
+    chunk_user_size = default_chunk_size - offsetof(struct memory_chunk, user_memory)
+  };
+  
 };
 
 inline
@@ -104,12 +109,12 @@ operator new [] (std::size_t size, mfast::arena_allocator & arena)
 
 
 inline void
-operator delete (void * p, mfast::arena_allocator & arena)
+operator delete (void * /* p */, mfast::arena_allocator & /* arena */)
 {
 }
 
 inline void
-operator delete[] (void * p, mfast::arena_allocator & arena)
+operator delete[] (void * /* p */, mfast::arena_allocator & /* arena */)
 {
 }
 

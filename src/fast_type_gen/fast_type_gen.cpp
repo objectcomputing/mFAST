@@ -29,6 +29,8 @@ using namespace tinyxml2;
 
 int main(int argc, const char** argv)
 {
+  std::cout << "fast_type_gen message\n";
+
   templates_registry_t registry;
 
   try {
@@ -41,15 +43,16 @@ int main(int argc, const char** argv)
       }
 
       path f(path(argv[i]).stem());
-      const char* filebase = f.string().c_str();
+	  std::string filebase = f.string();
+	  std::cout << filebase.c_str() << "\n";
 
-      FastXML2Header header_producer(filebase,registry);
+      FastXML2Header header_producer(filebase.c_str(),registry);
       doc.Accept(&header_producer);
 
-      FastXML2Inline inline_producer(filebase,registry);
+      FastXML2Inline inline_producer(filebase.c_str(),registry);
       doc.Accept(&inline_producer);
 
-      FastXML2Source source_producer(filebase,registry);
+      FastXML2Source source_producer(filebase.c_str(),registry);
       doc.Accept(&source_producer);
     }
   }

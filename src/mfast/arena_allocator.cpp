@@ -21,6 +21,12 @@
 #include <algorithm>
 
 namespace mfast {
+  
+inline std::size_t align(std::size_t n, std::size_t x)
+{
+  const std::size_t y = x-1;
+  return (n + y) & ~y; 
+}
 
 void arena_allocator::free_list(memory_chunk* head)
 {
@@ -40,8 +46,8 @@ arena_allocator::~arena_allocator()
 
 void* arena_allocator::allocate(std::size_t n)
 {
-  // align n to the multiple of 8
-  n = (n + 7) & ~7;
+  // align n to the multiple of pointer
+  n = align(n, sizeof(void*));
 
   if (current_list_head_->size() < n) {
     // current block does not have enough memory
@@ -64,8 +70,8 @@ void* arena_allocator::allocate(std::size_t n)
         current_list_head_ = tmp_current_list_head_head;
       }
       // allocate new memory chunk from the system
-      std::size_t new_chunk_size = n+ sizeof(memory_chunk) - sizeof(uint64_t) // minimum size for the new block
-                                   + (default_chunk_size -1) & ~(default_chunk_size -1); // make the size multiple of default_chunk_size
+      std::size_t new_chunk_size = align(n+ sizeof(memory_chunk) - sizeof(uint64_t), // minimum size for the new block
+                                         default_chunk_size); // make the size multiple of default_chunk_size
 
       void* block = malloc(new_chunk_size);
       current_list_head_ = new (block) memory_chunk(new_chunk_size, current_list_head_);
@@ -80,7 +86,7 @@ std::size_t
 arena_allocator::reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)
 {
   // make the new_size at least 64 bytes
-  new_size = std::max(2UL*new_size, 64UL) & (~63);
+  new_size = align(static_cast<std::size_t>(new_size)*2, 64);
   void* old_pointer = pointer;
   pointer = this->allocate(new_size);
   std::memcpy(pointer, old_pointer, old_size);
@@ -107,7 +113,7 @@ bool arena_allocator::reset()
   return true;
 }
 
-void  arena_allocator::deallocate(void* pointer)
+void  arena_allocator::deallocate(void* /* pointer */)
 {
 }
 }

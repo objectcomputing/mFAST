@@ -21,9 +21,6 @@
 #include <boost/algorithm/string.hpp>
 namespace {
 
-
-// TODO: check mandatory field with default operator must have initial value
-
 struct cstr_compare
 {
   bool operator()(const char* lhs, const char* rhs) const
@@ -151,8 +148,8 @@ bool FastXML2Source::VisitExit( const XMLDocument& /*doc*/ )
   return out_.good();
 }
 
-bool FastXML2Source::VisitExitTemplates (const XMLElement & element,
-                                         std::size_t        numFields)
+bool FastXML2Source::VisitExitTemplates (const XMLElement& element,
+                                         std::size_t /* numFields */)
 {
   std::string instructions = template_instructions_.str();
   if (instructions.size())
@@ -196,9 +193,9 @@ void FastXML2Source::add_to_instruction_list(const std::string & name_attr)
   subinstructions_list_.back() += strm.str();
 }
 
-bool FastXML2Source::VisitEnterTemplate (const XMLElement & element,
+bool FastXML2Source::VisitEnterTemplate (const XMLElement & /* element */,
                                          const std::string& name_attr,
-                                         std::              size_t /* index */)
+                                         std::size_t /* index */)
 {
   std::string qulified_name = current_context().ns_ + "||" + name_attr;
   registry_[qulified_name] = filebase_;
@@ -232,7 +229,7 @@ bool FastXML2Source::output_typeref(const XMLElement & element)
 bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
                                         const std::string& name_attr,
                                         std::size_t        numFields,
-                                        std::              size_t /* index */)
+                                        std::size_t /* index */)
 {
   restore_scope(name_attr);
 
@@ -264,9 +261,9 @@ bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
   return output_typeref(element);
 }
 
-bool FastXML2Source::VisitEnterGroup (const XMLElement & element,
+bool FastXML2Source::VisitEnterGroup (const XMLElement & /* element */,
                                       const std::string& name_attr,
-                                      std::size_t        index)
+                                      std::size_t /* index */)
 {
   cref_scope_ << name_attr << "_cref::";
   out_ << "namespace " << name_attr << "_def\n"
@@ -281,7 +278,7 @@ bool FastXML2Source::VisitEnterGroup (const XMLElement & element,
 bool FastXML2Source::VisitExitGroup (const XMLElement & element,
                                      const std::string& name_attr,
                                      std::size_t        numFields,
-                                     std::size_t        index)
+                                     std::size_t /* index */)
 {
   output_subinstructions(name_attr);
 
@@ -301,7 +298,7 @@ bool FastXML2Source::VisitExitGroup (const XMLElement & element,
 
 bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
                                          const std::string& name_attr,
-                                         std::size_t        index)
+                                         std::size_t /* index */)
 {
   cref_scope_ << name_attr << "_element_cref::";
   out_ << "namespace " << name_attr << "_def\n"
@@ -346,7 +343,7 @@ bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
 bool FastXML2Source::VisitExitSequence (const XMLElement & element,
                                         const std::string& name_attr,
                                         std::size_t        numFields,
-                                        std::size_t        index)
+                                        std::size_t /* index */)
 {
 
   output_subinstructions(name_attr);
@@ -403,7 +400,9 @@ bool FastXML2Source::get_field_attributes(const XMLElement & element,
   return false;
 }
 
-bool FastXML2Source::VisitString (const XMLElement & element, const std::string& name_attr, std::size_t index)
+bool FastXML2Source::VisitString (const XMLElement & element,
+                                  const std::string& name_attr,
+                                  std::size_t /* index */)
 {
   std::string fieldOpName;
   std::string opContext;
@@ -438,7 +437,7 @@ bool FastXML2Source::VisitString (const XMLElement & element, const std::string&
 bool FastXML2Source::VisitInteger (const XMLElement & element,
                                    int                bits,
                                    const std::string& name_attr,
-                                   std::size_t        index)
+                                   std::size_t /* index */)
 {
   std::string fieldOpName;
   std::string opContext;
@@ -475,7 +474,7 @@ bool FastXML2Source::VisitInteger (const XMLElement & element,
 
 bool FastXML2Source::VisitDecimal (const XMLElement & element,
                                    const std::string& name_attr,
-                                   std::size_t        index)
+                                   std::size_t /* index */)
 {
   const XMLElement* mantissa_element = element.FirstChildElement("mantissa");
   const XMLElement* exponent_element = element.FirstChildElement("exponent");
@@ -486,7 +485,8 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
     std::string mantissa_opContext;
     std::string mantissa_initialValue;
 
-    get_field_attributes(*mantissa_element, name_attr + "_mantissa",
+    get_field_attributes(*mantissa_element,
+                         name_attr + "_mantissa",
                          mantissa_fieldOpName,
                          mantissa_opContext,
                          mantissa_initialValue);
@@ -504,7 +504,8 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
          << "  "<< mantissa_opContext << ",  // mantissa opContext\n"
          << "  nullable<int64_t>("<< mantissa_initialValue << "));// mantissa inital value\n\n";
 
-    get_field_attributes(*exponent_element, name_attr + "_exponent",
+    get_field_attributes(*exponent_element,
+                         name_attr + "_exponent",
                          exponent_fieldOpName,
                          exponent_opContext,
                          exponent_initialValue);
@@ -559,7 +560,7 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
 
 bool FastXML2Source::VisitByteVector (const XMLElement & element,
                                       const std::string& name_attr,
-                                      std::size_t        index)
+                                      std::size_t /* index */)
 {
   std::string fieldOpName;
   std::string opContext;
@@ -619,7 +620,7 @@ bool FastXML2Source::VisitByteVector (const XMLElement & element,
     out_ << "0,0,0}; // no length element\n\n";
   }
 
-    add_to_instruction_list(name_attr);
+  add_to_instruction_list(name_attr);
   return out_.good();
 }
 
@@ -635,7 +636,9 @@ void FastXML2Source::output_subinstructions(const std::string name_attr)
   subinstructions_list_.pop_back();
 }
 
-bool FastXML2Source::VisitTemplateRef(const XMLElement & element, const std::string& name_attr, std::size_t index)
+bool FastXML2Source::VisitTemplateRef(const XMLElement & element,
+                                      const std::string& name_attr,
+                                      std::size_t /* index */)
 {
   if (name_attr.size()) {
     std::string ns = get_optional_attr(element, "ns", current_context().ns_.c_str());
@@ -650,7 +653,7 @@ bool FastXML2Source::VisitTemplateRef(const XMLElement & element, const std::str
     else {
       std::stringstream err;
       err << "Error: Cannot find the definition for static templateRef name=\""
-                << name_attr << "\", ns=\"" << ns << "\"\n";
+          << name_attr << "\", ns=\"" << ns << "\"\n";
       throw std::runtime_error(err.str());
     }
     std::string tmp = cpp_namespace + name_attr;

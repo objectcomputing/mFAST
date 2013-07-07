@@ -20,6 +20,7 @@
 #include <mfast/codec_helper.h>
 #include <mfast/int_ref.h>
 #include <mfast/decoder_field_operator.h>
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstring>
@@ -30,7 +31,7 @@ using namespace mfast;
 
 
 
-BOOST_AUTO_TEST_SUITE( decoder_operator_test_suit )
+BOOST_AUTO_TEST_SUITE( test_decoder_operator )
 
 
 bool str_equal(const char* lhs, const char* rhs)
@@ -1035,14 +1036,14 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     // The base value depends on the state of the previous value in the following way:
    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 2);
+    BOOST_CHECK_EQUAL(ref , 2);  // TODO: MSVC Error
     BOOST_CHECK_EQUAL(strm.in_avail(), 0);
 
     uint64_cref prev(&inst.prev_value(), &inst);
     // check the previous value is properly set
     BOOST_CHECK(inst.prev_value().is_defined());
     BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value() , 2);
+    BOOST_CHECK_EQUAL(prev.value() , 2); // TODO: MSVC Error
   }
 
   {
@@ -1199,7 +1200,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     // The base value depends on the state of the previous value in the following way:
    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.mantissa(), 3); // 0 (base) + 3 (delta)
+    BOOST_CHECK_EQUAL(ref.mantissa(), 3); // 0 (base) + 3 (delta) // TODO: MSVC Error
     BOOST_CHECK_EQUAL(ref.exponent(),2); // 0 (base) + 2 (delta)
 
     BOOST_CHECK_EQUAL(strm.in_avail(), 0);
@@ -1208,7 +1209,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     // check the previous value is properly set
     BOOST_CHECK(inst.prev_value().is_defined());
     BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.mantissa(), 3);
+    BOOST_CHECK_EQUAL(prev.mantissa(), 3);  // TODO: MSVC Error
     BOOST_CHECK_EQUAL(prev.exponent(), 2);
 
   }
@@ -1299,8 +1300,8 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
   }
 
   { // testing mandatory field without initial value
-    const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
+    // const char* default_value = "initial_string";
+   
     ascii_field_instruction inst(operator_delta,
                                  presence_mandatory,
                                  1,
@@ -1474,8 +1475,8 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
   }
 
   { // testing mandatory field without initial value
-    const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
+    //const char* default_value = "initial_string";
+    
     unicode_field_instruction inst(operator_delta,
                                  presence_mandatory,
                                  1,
@@ -1662,6 +1663,8 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     inst.construct_value(storage, &alloc);
 
     ascii_string_mref ref(&alloc, &storage, &inst);
+    
+    ref.as_initial_value();
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
@@ -1673,7 +1676,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     uint64_t old_mask = pmap.mask();
 
 
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
+    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap); // TODO: problem
 
     // make sure we consume one bit in presence map
     BOOST_CHECK_EQUAL(old_mask >> 1 , pmap.mask());
@@ -1902,8 +1905,8 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
   }
   { // testing optional field without initial value while tail value not in the stream
-    const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
+    // const char* default_value = "initial_string";
+    
     ascii_field_instruction inst(operator_tail,
                                  presence_optional,
                                  1,

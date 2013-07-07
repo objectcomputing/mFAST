@@ -24,11 +24,10 @@
 #include <sstream>
 struct indent_t {};
 
-template <typename OSTREAM>
-class indented_ostream : public OSTREAM
+class indented_stringstream
 {
   public:
-    indented_ostream()
+    indented_stringstream()
       : indent_level_(0)
     {
     }
@@ -45,33 +44,45 @@ class indented_ostream : public OSTREAM
 
     void reset_indent(std::size_t level=0)
     {
-      indent_level_ = 0;
+      indent_level_ = level;
     }
 
     std::size_t indent_level() const
     {
       return indent_level_;
     }
+
+    indented_stringstream& operator <<(indent_t)
+    {
+      if (indent_level() > 0)
+        os_ << std::setw(indent_level()*2) << ' ';
+      return *this;
+    }
+
+    template <typename T>
+    indented_stringstream& operator <<(const T& t)
+    {
+      os_ << t;
+      return *this;
+    }
+    
+    std::string str() const {
+      return os_.str();
+    }
+    
+    void str(const char* s) {
+      os_.str(s);
+    }
+    
+    void clear() {
+      os_.clear();
+    }
+
   private:
     std::size_t indent_level_;
+    std::stringstream os_;
 };
 
-
-inline indented_ostream<std::stringstream>&
-operator << (indented_ostream<std::stringstream>& strm, indent_t)
-{
-  if (strm.indent_level() > 0)
-    strm << std::setw(strm.indent_level()*2) << ' ';
-  return strm;
-}
-
-template <typename T>
-inline indented_ostream<std::stringstream>&
-operator << (indented_ostream<std::stringstream>& strm, const T& t)
-{
-  static_cast<std::ostream&>(strm) << t;
-  return strm;
-}
 
 
 

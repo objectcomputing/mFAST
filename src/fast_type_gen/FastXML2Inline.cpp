@@ -18,7 +18,8 @@
 //
 #include "FastXML2Inline.h"
 
-FastXML2Inline::FastXML2Inline(const char* filebase, templates_registry_t& registry)
+FastXML2Inline::FastXML2Inline(const char*           filebase,
+                               templates_registry_t& registry)
   : FastCodeGenBase(filebase, ".inl")
   , registry_(registry)
 {
@@ -40,9 +41,9 @@ void FastXML2Inline::restore_scope(const std::string& name_attr)
   mref_scope_.str(str);
 }
 
-bool FastXML2Inline::VisitEnterTemplate (const XMLElement & element,
+bool FastXML2Inline::VisitEnterTemplate (const XMLElement & /* element */,
                                          const std::string& name_attr,
-                                         std::              size_t /* index */)
+                                         std::size_t /* index */)
 {
   out_ << "\ninline\n"
        << name_attr << "_cref::" << name_attr << "_cref(\n"
@@ -95,17 +96,17 @@ bool FastXML2Inline::VisitEnterTemplate (const XMLElement & element,
   return out_.good();
 }
 
-bool FastXML2Inline::VisitExitTemplate (const XMLElement & element,
+bool FastXML2Inline::VisitExitTemplate (const XMLElement & /* element */,
                                         const std::string& name_attr,
-                                        std::size_t        numFields,
-                                        std::              size_t /* index */)
+                                        std::size_t /* numFields */,
+                                        std::size_t /* index */)
 {
 
   restore_scope(name_attr);
   return out_.good();
 }
 
-bool FastXML2Inline::VisitEnterGroup (const XMLElement & element,
+bool FastXML2Inline::VisitEnterGroup (const XMLElement & /* element */,
                                       const std::string& name_attr,
                                       std::size_t        index)
 {
@@ -139,17 +140,16 @@ bool FastXML2Inline::VisitEnterGroup (const XMLElement & element,
   return true;
 }
 
-bool FastXML2Inline::VisitExitGroup (const XMLElement & element,
+bool FastXML2Inline::VisitExitGroup (const XMLElement & /* element */,
                                      const std::string& name_attr,
-                                     std::size_t        numFields,
-                                     std::size_t        index)
+                                     std::size_t /* numFields */,
+                                     std::size_t /* index */)
 {
-
   restore_scope(name_attr);
   return true;
 }
 
-bool FastXML2Inline::VisitEnterSequence (const XMLElement & element,
+bool FastXML2Inline::VisitEnterSequence (const XMLElement & /* element */,
                                          const std::string& name_attr,
                                          std::size_t        index)
 {
@@ -184,12 +184,11 @@ bool FastXML2Inline::VisitEnterSequence (const XMLElement & element,
   return true;
 }
 
-bool FastXML2Inline::VisitExitSequence (const XMLElement & element,
+bool FastXML2Inline::VisitExitSequence (const XMLElement & /* element */,
                                         const std::string& name_attr,
-                                        std::size_t        numFields,
-                                        std::size_t        index)
+                                        std::size_t /* numFields */,
+                                        std::size_t /* index */)
 {
-
   restore_scope(name_attr);
   return true;
 }
@@ -258,7 +257,9 @@ bool FastXML2Inline::VisitByteVector (const XMLElement & element,
   return true;
 }
 
-bool FastXML2Inline::VisitTemplateRef(const XMLElement & element, const std::string& name_attr, std::size_t index)
+bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
+                                      const std::string& name_attr,
+                                      std::size_t        index)
 {
   if (name_attr.size()) {
     std::string ns = get_optional_attr(element, "ns", current_context().ns_.c_str());
@@ -273,7 +274,7 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element, const std::str
          << qulified_name << "_cref\n"
          << cref_scope_.str() << "get_" << name_attr << "() const\n"
          << "{\n"
-        << "  return this->const_field("<< index << ").static_cast_as<" << qulified_name << "_cref>();\n"
+         << "  return this->const_field("<< index << ").static_cast_as<" << qulified_name << "_cref>();\n"
          << "}\n\n";
 
 

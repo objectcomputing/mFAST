@@ -30,7 +30,9 @@ class DependencyTracker
     {
     }
 
-    virtual bool VisitTemplateRef(const XMLElement & element, const std::string& name_attr, std::size_t index)
+    virtual bool VisitTemplateRef(const XMLElement & element,
+                                  const std::string& name_attr,
+                                  std::size_t /* index */)
     {
       if (name_attr.size()) {
         std::string ns = get_optional_attr(element, "ns", current_context().ns_.c_str());
@@ -98,7 +100,9 @@ bool FastXML2Header::VisitExit( const XMLDocument& /*doc*/ )
   return out_.good();
 }
 
-bool FastXML2Header::VisitEnterTemplate (const XMLElement & element, const std::string& name_attr, std::size_t index)
+bool FastXML2Header::VisitEnterTemplate (const XMLElement & element,
+                                         const std::string& name_attr,
+                                         std::size_t /* index */)
 {
   header_cref_ << "\n"
                << indent << "class " << name_attr << "_cref\n"
@@ -131,7 +135,10 @@ bool FastXML2Header::VisitEnterTemplate (const XMLElement & element, const std::
   return true;
 }
 
-bool FastXML2Header::VisitExitTemplate (const XMLElement & element, const std::string& name_attr, std::size_t numFields, std::size_t index)
+bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
+                                        const std::string& name_attr,
+                                        std::size_t        numFields,
+                                        std::size_t /* index */)
 {
   header_cref_.dec_indent(2);
   header_mref_.dec_indent(2);
@@ -183,7 +190,9 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element, const std::s
   return out_.good();
 }
 
-bool FastXML2Header::VisitEnterGroup (const XMLElement & element, const std::string& name_attr, std::size_t index)
+bool FastXML2Header::VisitEnterGroup (const XMLElement & /* element */,
+                                      const std::string& name_attr,
+                                      std::size_t /* index */)
 {
   header_cref_ << "\n"
                << indent << "typedef mfast::group_cref " << name_attr << "_cref_base;\n"
@@ -213,7 +222,10 @@ bool FastXML2Header::VisitEnterGroup (const XMLElement & element, const std::str
   return true;
 }
 
-bool FastXML2Header::VisitExitGroup (const XMLElement & element, const std::string& name_attr, std::size_t numFields, std::size_t index)
+bool FastXML2Header::VisitExitGroup (const XMLElement   & /* element */,
+                                     const std::string& name_attr,
+                                     std::size_t /* numFields */,
+                                     std::size_t /* index */)
 {
   header_cref_.dec_indent(2);
   header_mref_.dec_indent(2);
@@ -227,7 +239,9 @@ bool FastXML2Header::VisitExitGroup (const XMLElement & element, const std::stri
   return true;
 }
 
-bool FastXML2Header::VisitEnterSequence (const XMLElement & element, const std::string& name_attr, std::size_t index)
+bool FastXML2Header::VisitEnterSequence (const XMLElement   & /* element */,
+                                         const std::string& name_attr,
+                                         std::size_t        /* index */)
 {
   std::string name = name_attr + "_element";
   header_cref_ << "\n"
@@ -259,7 +273,10 @@ bool FastXML2Header::VisitEnterSequence (const XMLElement & element, const std::
   return true;
 }
 
-bool FastXML2Header::VisitExitSequence (const XMLElement & element, const std::string& name_attr, std::size_t numFields, std::size_t index)
+bool FastXML2Header::VisitExitSequence (const XMLElement & /* element */,
+                                        const std::string& name_attr,
+                                        std::size_t /* numFields */,
+                                        std::size_t /* index */)
 {
   header_cref_.dec_indent(2);
   header_mref_.dec_indent(2);
@@ -279,7 +296,7 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element, const std::s
 bool FastXML2Header::VisitEnterSimpleValue (const XMLElement & element,
                                             const char*        cpp_type,
                                             const std::string& name_attr,
-                                            std::size_t        index)
+                                            std::size_t /* index */)
 {
   header_cref_ << indent << "mfast::"<< cpp_type << "_cref get_" << name_attr << "() const;\n";
   if (!is_mandatory_constant(element)) {

@@ -59,7 +59,7 @@ bool FastXMLVisitor::VisitEnterTemplate(const XMLElement & /* element */, const 
   return true;
 }
 
-bool FastXMLVisitor::VisitExitTemplate(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t /* numFields */, std::size_t index)
+bool FastXMLVisitor::VisitExitTemplate(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t /* numFields */, std::size_t /* index */)
 {
   return true;
 }
@@ -74,7 +74,7 @@ bool FastXMLVisitor::VisitEnterGroup(const XMLElement & /* element */, const std
   return true;
 }
 
-bool FastXMLVisitor::VisitExitGroup(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t /* numFields */, std::size_t index)
+bool FastXMLVisitor::VisitExitGroup(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t /* numFields */, std::size_t /* index */)
 {
   return true;
 }
@@ -84,12 +84,12 @@ bool FastXMLVisitor::VisitEnterSequence(const XMLElement & /* element */, const 
   return true;
 }
 
-bool FastXMLVisitor::VisitExitSequence(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t /* numFields */, std::size_t index)
+bool FastXMLVisitor::VisitExitSequence(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t /* numFields */, std::size_t /* index */)
 {
   return true;
 }
 
-bool FastXMLVisitor::VisitInteger(const XMLElement & /* element */, int bits, const std::string& /* name_attr */, std::size_t /* index */)
+bool FastXMLVisitor::VisitInteger(const XMLElement & /* element */, int /* bits */, const std::string& /* name_attr */, std::size_t /* index */)
 {
   return true;
 }
