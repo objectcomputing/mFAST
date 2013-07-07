@@ -44,7 +44,7 @@ class decimal_cref
     {
     }
 
-    decimal_cref(const value_storage_t*   storage,
+    decimal_cref(const value_storage*   storage,
                  const field_instruction* instruction)
       : field_cref(storage, instruction)
     {
@@ -62,12 +62,12 @@ class decimal_cref
 
     int64_t mantissa() const
     {
-      return this->storage()->decimal_storage.mantissa_;
+      return this->storage()->of_decimal.mantissa_;
     }
 
     int16_t exponent() const
     {
-      return static_cast<int8_t>(this->storage()->decimal_storage.exponent_);
+      return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
     }
 
     instruction_cptr instruction() const
@@ -75,9 +75,9 @@ class decimal_cref
       return static_cast<instruction_cptr>(instruction_);
     }
 
-    value_storage_t default_base_value() const
+    value_storage default_base_value() const
     {
-      value_storage_t v;
+      value_storage v;
       v.defined(true);
       v.present(true);
       return v;
@@ -100,7 +100,7 @@ class exponent_mref
     }
 
     exponent_mref(allocator                *               /* alloc */,
-                  value_storage_t*         storage,
+                  value_storage*         storage,
                   const field_instruction* instruction)
       : field_cref(storage, instruction)
     {
@@ -128,18 +128,18 @@ class exponent_mref
 
     void as(int16_t v) const
     {
-      this->storage()->decimal_storage.exponent_ = v;
+      this->storage()->of_decimal.exponent_ = v;
       this->storage()->present(true);
     }
 
     int16_t value() const
     {
-      return this->storage()->decimal_storage.exponent_;
+      return this->storage()->of_decimal.exponent_;
     }
 
-    value_storage_t default_base_value() const
+    value_storage default_base_value() const
     {
-      value_storage_t v;
+      value_storage v;
       v.defined(true);
       v.present(true);
       return v;
@@ -150,24 +150,24 @@ class exponent_mref
     int16_t& value_ref() const
     {
       this->storage()->present(true);
-      return this->storage()->decimal_storage.exponent_;
+      return this->storage()->of_decimal.exponent_;
     }
 
-    value_storage_t* storage() const
+    value_storage* storage() const
     {
-      return const_cast<value_storage_t*>(field_cref::storage());
+      return const_cast<value_storage*>(field_cref::storage());
     }
 
     friend class mfast::detail::codec_helper;
 
-    void copy_from(value_storage_t v) const
+    void copy_from(value_storage v) const
     {
-      as(v.decimal_storage.exponent_);
+      as(v.of_decimal.exponent_);
     }
 
-    void save_to(value_storage_t& v) const
+    void save_to(value_storage& v) const
     {
-      v.decimal_storage.exponent_ = value();
+      v.of_decimal.exponent_ = value();
       v.defined(true);
       v.present(this->present());
     }
@@ -189,7 +189,7 @@ class decimal_mref
     }
 
     decimal_mref(allocator*       alloc,
-                 value_storage_t* storage,
+                 value_storage* storage,
                  instruction_cptr instruction)
       : base_type(alloc, storage, instruction)
     {
@@ -202,38 +202,38 @@ class decimal_mref
 
     int64_t mantissa() const
     {
-      return this->storage()->decimal_storage.mantissa_;
+      return this->storage()->of_decimal.mantissa_;
     }
 
     int8_t exponent() const
     {
-      return static_cast<int8_t>(this->storage()->decimal_storage.exponent_);
+      return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
     }
 
     void as(int64_t mant, int16_t exp) const
     {
       assert (exp <= 64 && exp >= -64);
-      this->storage()->decimal_storage.mantissa_ = mant;
-      this->storage()->decimal_storage.exponent_ = exp;
+      this->storage()->of_decimal.mantissa_ = mant;
+      this->storage()->of_decimal.exponent_ = exp;
       this->storage()->present(1);
     }
 
     void set_mantissa(int64_t v) const
     {
       this->storage()->present(1);
-      this->storage()->decimal_storage.mantissa_ = v;
+      this->storage()->of_decimal.mantissa_ = v;
     }
 
     void set_exponent(int32_t v) const
     {
       this->storage()->present(1);
-      this->storage()->decimal_storage.exponent_ = v;
+      this->storage()->of_decimal.exponent_ = v;
     }
 
     void as_initial_value() const
     {
-      this->storage()->decimal_storage.mantissa_ = instruction()->mantissa_initial_value();
-      this->storage()->decimal_storage.exponent_ = instruction()->exponent_initial_value();
+      this->storage()->of_decimal.mantissa_ = instruction()->mantissa_initial_value();
+      this->storage()->of_decimal.exponent_ = instruction()->exponent_initial_value();
       this->storage()->present(1);
     }
 
@@ -256,15 +256,15 @@ class decimal_mref
     friend fast_istream& operator >> (fast_istream& strm, const decimal_mref& mref);
     friend class mfast::detail::codec_helper;
 
-    void copy_from(value_storage_t v) const
+    void copy_from(value_storage v) const
     {
       *this->storage() = v;
     }
 
-    void save_to(value_storage_t& v) const
+    void save_to(value_storage& v) const
     {
-      v.decimal_storage.exponent_ = exponent();
-      v.decimal_storage.mantissa_ = mantissa();
+      v.of_decimal.exponent_ = exponent();
+      v.of_decimal.mantissa_ = mantissa();
       v.defined(true);
       v.present(this->present());
     }

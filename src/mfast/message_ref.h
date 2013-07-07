@@ -41,7 +41,7 @@ class message_cref
     typedef boost::false_type canbe_optional;
     typedef const template_instruction* instruction_cptr;
 
-    message_cref(const value_storage_t* storage,
+    message_cref(const value_storage* storage,
                  instruction_cptr       instruction);
 
     uint32_t id() const;
@@ -75,11 +75,11 @@ class message_cref
     friend class decoder_visitor;
 
     const template_instruction* instruction_;
-    const value_storage_t* storage_;
+    const value_storage* storage_;
 
-    const value_storage_t* field_storage(size_t index) const;
+    const value_storage* field_storage(size_t index) const;
 
-    // const value_storage_t* storage_for(const message_cref& other) const;
+    // const value_storage* storage_for(const message_cref& other) const;
     friend class message_base;
 };
 
@@ -94,7 +94,7 @@ class make_message_mref
     typedef typename base_type::instruction_cptr instruction_cptr;
 
     make_message_mref(allocator*       alloc,
-                      value_storage_t* storage,
+                      value_storage* storage,
                       instruction_cptr instruction);
 
 
@@ -153,7 +153,7 @@ class message_base
     const char* name() const;
 
   protected:
-    const value_storage_t* storage_for(const message_cref& other) const;
+    const value_storage* storage_for(const message_cref& other) const;
 
     friend struct decoder_impl;
 
@@ -166,7 +166,7 @@ class message_base
 
     allocator*                  alloc_;
     const template_instruction* instruction_;
-    value_storage_t my_storage_;
+    value_storage my_storage_;
 };
 
 
@@ -174,7 +174,7 @@ class message_base
 ////////////////////////////
 
 inline
-message_cref::message_cref(const value_storage_t*      storage,
+message_cref::message_cref(const value_storage*      storage,
                            const template_instruction* instruction)
   : instruction_(instruction)
   , storage_(storage)
@@ -218,10 +218,10 @@ message_cref::const_field(size_t index) const
   return field_cref(field_storage(index),instruction_->subinstructions_[index]);
 }
 
-inline const value_storage_t*
+inline const value_storage*
 message_cref::field_storage(size_t index) const
 {
-  return &storage_->group_storage.content_[index];
+  return &storage_->of_group.content_[index];
 }
 
 /// return -1 if no such field is found
@@ -256,7 +256,7 @@ message_cref::subinstruction(size_t index) const
 template <typename ConstMessageRef>
 inline
 make_message_mref<ConstMessageRef>::make_message_mref(allocator*                                           alloc,
-                                                      value_storage_t*                                     storage,
+                                                      value_storage*                                     storage,
                                                       typename make_message_mref<ConstMessageRef>::instruction_cptr instruction)
   : base_type(alloc, storage, instruction)
 {
@@ -322,7 +322,7 @@ message_base::cref() const
   return message_cref(&my_storage_, instruction_);
 }
 
-inline const value_storage_t*
+inline const value_storage*
 message_base::storage_for(const message_cref& other) const
 {
   return other.storage_;
@@ -331,7 +331,7 @@ message_base::storage_for(const message_cref& other) const
 inline void
 message_base::reset()
 {
-  my_storage_.group_storage.content_ = 0;
+  my_storage_.of_group.content_ = 0;
 }
 
 inline const char*

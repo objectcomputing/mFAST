@@ -87,12 +87,12 @@ inline fast_istream& operator >> (fast_istream& strm, const byte_vector_mref& mr
 
 inline fast_istream& operator >> (fast_istream& strm, const decimal_mref& mref)
 {
-  value_storage_t* storage = mref.storage();
-  if (strm.decode(storage->decimal_storage.exponent_,
+  value_storage* storage = mref.storage();
+  if (strm.decode(storage->of_decimal.exponent_,
                   mref.instruction()->is_nullable()))
   {
     storage->present(true);
-    strm.decode(storage->decimal_storage.mantissa_, false);
+    strm.decode(storage->of_decimal.mantissa_, false);
   }
   else {
     mref.as_absent();

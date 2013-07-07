@@ -41,7 +41,7 @@ class group_cref
     {
     }
 
-    group_cref(const value_storage_t*   storage,
+    group_cref(const value_storage*   storage,
                const field_instruction* instruction)
       : field_cref(storage, instruction)
     {
@@ -74,11 +74,11 @@ class group_cref
     void accept_accessor(FieldAccesor&) const;
 
   protected:
-    const value_storage_t* field_storage(size_t index) const;
+    const value_storage* field_storage(size_t index) const;
     void as_present() const
     {
       if (instruction()->optional())
-        const_cast<value_storage_t*>(storage_)->present(true);
+        const_cast<value_storage*>(storage_)->present(true);
     }
   private:
     group_cref& operator= (const group_cref&);
@@ -106,13 +106,13 @@ class make_group_mref
 
     template <typename Instruction>
     make_group_mref(allocator*         alloc,
-                    value_storage_t*   storage,
+                    value_storage*   storage,
                     const Instruction* instruction)
       : base_type(alloc, storage, instruction)
     {
     }
 
-    make_group_mref(value_storage_t* storage,
+    make_group_mref(value_storage* storage,
                     allocator*       alloc)
       : base_type(storage, alloc)
     {
@@ -138,7 +138,7 @@ class make_group_mref
 
 
   protected:
-    value_storage_t* field_storage(size_t index) const;
+    value_storage* field_storage(size_t index) const;
   private:
     make_group_mref& operator= (const make_group_mref&);
     friend class field_mutator_adaptor_base;
@@ -152,11 +152,11 @@ typedef make_group_mref<group_cref> group_mref;
 ///////////////////////////////////////////////////////////////////////////////
 
 
-inline const value_storage_t*
+inline const value_storage*
 group_cref::field_storage(size_t index) const
 {
-  const value_storage_t* storages =
-    static_cast<const value_storage_t*>(storage_->array_storage.content_);
+  const value_storage* storages =
+    static_cast<const value_storage*>(storage_->of_array.content_);
   return &storages[index];
 }
 
@@ -184,10 +184,10 @@ group_cref::field_index_with_name(const char* name) const
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename ConstGroupRef>
-inline value_storage_t*
+inline value_storage*
 make_group_mref<ConstGroupRef>::field_storage(size_t index) const
 {
-  return const_cast<value_storage_t*>(base_type::field_storage(index));
+  return const_cast<value_storage*>(base_type::field_storage(index));
 }
 
 template <typename ConstGroupRef>
@@ -209,7 +209,7 @@ make_group_mref<ConstGroupRef>::ensure_valid() const
   // all subfields' storage are zero-ed instead of properly initialized. Upon the
   // decoder visit this field, we need to check if the memory for the subfields of this
   // group is allocated. If not, we need to allocate the memory for the subfields.
-  this->instruction()->ensure_valid_storage(const_cast<value_storage_t&>(*this->storage_), this->alloc_);
+  this->instruction()->ensure_valid_storage(const_cast<value_storage&>(*this->storage_), this->alloc_);
 }
 
 }

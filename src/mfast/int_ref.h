@@ -42,7 +42,7 @@ class int_cref
     {
     }
 
-    int_cref(const value_storage_t*   storage,
+    int_cref(const value_storage*   storage,
              instruction_cptr instruction)
       : field_cref(storage, instruction)
     {
@@ -66,7 +66,7 @@ class int_cref
 
     T value() const
     {
-      return *reinterpret_cast<const T*>(&storage_->uint_storage.content_);
+      return *reinterpret_cast<const T*>(&storage_->of_uint.content_);
     }
 
     instruction_cptr instruction() const
@@ -100,7 +100,7 @@ class int_mref
     }
 
     int_mref(allocator*               alloc,
-             value_storage_t*         storage,
+             value_storage*         storage,
              instruction_cptr instruction)
       : base_type(alloc, storage, instruction)
     {
@@ -125,7 +125,7 @@ class int_mref
     void as_initial_value() const
     {
       this->storage()->present(1);
-      this->storage()->uint_storage.content_ = this->instruction()->initial_value();
+      this->storage()->of_uint.content_ = this->instruction()->initial_value();
     }
 
     const int_mref& operator ++ () const
@@ -143,7 +143,7 @@ class int_mref
 
     T value() const
     {
-      return *reinterpret_cast<const T*>(&this->storage()->uint_storage.content_);
+      return *reinterpret_cast<const T*>(&this->storage()->of_uint.content_);
     }
 
   protected:
@@ -161,7 +161,7 @@ class int_mref
     T& value_ref() const
     {
       this->storage()->present(1);
-      return *reinterpret_cast<T*>(&this->storage()->uint_storage.content_);
+      return *reinterpret_cast<T*>(&this->storage()->of_uint.content_);
     }
 
     void as_present(bool present) const
@@ -176,14 +176,14 @@ class int_mref
 
     friend class mfast::detail::codec_helper;
 
-    void copy_from(value_storage_t v) const
+    void copy_from(value_storage v) const
     {
-      as(*reinterpret_cast<T*>(&v.uint_storage.content_));
+      as(*reinterpret_cast<T*>(&v.of_uint.content_));
     }
 
-    void save_to(value_storage_t& v) const
+    void save_to(value_storage& v) const
     {
-      v.uint_storage.content_ = this->storage()->uint_storage.content_;
+      v.of_uint.content_ = this->storage()->of_uint.content_;
       v.defined(true);
       v.present(this->present());
     }
@@ -194,8 +194,6 @@ typedef int_mref<int32_t> int32_mref;
 typedef int_mref<uint32_t> uint32_mref;
 typedef int_mref<int64_t> int64_mref;
 typedef int_mref<uint64_t> uint64_mref;
-
-
 };
 
 

@@ -187,7 +187,7 @@ decoder_impl::pre_visit(const sequence_mref& mref)
   debug_ << "decoding sequence " << mref.name()  << " ---\n";
 
   uint32_field_instruction* length_instruction = mref.instruction()->sequence_length_instruction_;
-  value_storage_t storage;
+  value_storage storage;
 
   debug_ << "  decoding sequence length " << mref.name()  << " : stream -> " << *strm_ << "\n";
   uint32_mref length_mref(0, &storage, length_instruction);

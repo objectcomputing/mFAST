@@ -30,7 +30,7 @@ namespace mfast {
 
 
 namespace detail {
-extern const value_storage_t null_storage;
+extern const value_storage null_storage;
 
 class field_storage_helper;
 }
@@ -52,7 +52,7 @@ class field_cref
     {
     }
 
-    field_cref(const value_storage_t*   storage,
+    field_cref(const value_storage*     storage,
                const field_instruction* instruction)
       : instruction_(instruction)
       , storage_(storage)
@@ -94,8 +94,8 @@ class field_cref
     {
       if (field_type() != field_type_templateref)
         return instruction_->id();
-      if (storage_->templateref_storage.instruction_storage.instruction_)
-        return storage_->templateref_storage.instruction_storage.instruction_->id();
+      if (storage_->of_templateref.of_instruction.instruction_)
+        return storage_->of_templateref.of_instruction.instruction_->id();
       return 0;
     }
 
@@ -126,13 +126,13 @@ class field_cref
     field_cref& operator = (const field_cref&);
 
 
-    const value_storage_t* storage () const
+    const value_storage* storage () const
     {
       return storage_;
     }
 
     const field_instruction* instruction_;
-    const value_storage_t* storage_;
+    const value_storage* storage_;
 
     friend class mfast::detail::field_storage_helper;
 
@@ -163,6 +163,7 @@ class make_field_mref_base<T, boost::true_type>
         ptr->storage()->present(0);
       }
     }
+
 };
 
 }
@@ -181,8 +182,8 @@ class make_field_mref
     {
     }
 
-    make_field_mref(allocator*         alloc,
-                    value_storage_t*   storage,
+    make_field_mref(allocator*       alloc,
+                    value_storage*   storage,
                     instruction_cptr instruction)
       : ConstFieldRef(storage, instruction)
       , alloc_(alloc)
@@ -195,8 +196,8 @@ class make_field_mref
     {
     }
 
-    make_field_mref(value_storage_t* storage,
-                    allocator*       alloc)
+    make_field_mref(value_storage* storage,
+                    allocator*     alloc)
       : ConstFieldRef(storage)
       , alloc_(alloc)
     {
@@ -231,9 +232,9 @@ class make_field_mref
     }
 
   protected:
-    value_storage_t* storage () const
+    value_storage* storage () const
     {
-      return const_cast<value_storage_t*>(this->storage_);
+      return const_cast<value_storage*>(this->storage_);
     }
 
     allocator* alloc_;
@@ -267,6 +268,7 @@ struct remove_const_reference<T&>
 {
   typedef T type;
 };
+
 }
 
 
@@ -274,7 +276,7 @@ struct remove_const_reference<T&>
 namespace detail {
 
 inline field_cref
-field_ref_with_id(const value_storage_t*      storage,
+field_ref_with_id(const value_storage*        storage,
                   const group_content_helper* helper,
                   uint32_t                    id)
 {
@@ -288,7 +290,7 @@ field_ref_with_id(const value_storage_t*      storage,
 }
 
 inline field_mref
-field_ref_with_id(value_storage_t*            storage,
+field_ref_with_id(value_storage*              storage,
                   const group_content_helper* helper,
                   allocator*                  alloc,
                   uint32_t                    id)
@@ -302,7 +304,7 @@ field_ref_with_id(value_storage_t*            storage,
 }
 
 inline field_cref
-field_ref_with_name(const value_storage_t*      storage,
+field_ref_with_name(const value_storage*        storage,
                     const group_content_helper* helper,
                     const char*                 name)
 {
@@ -315,7 +317,7 @@ field_ref_with_name(const value_storage_t*      storage,
 }
 
 inline field_mref
-field_ref_with_name(value_storage_t*            storage,
+field_ref_with_name(value_storage*              storage,
                     const group_content_helper* helper,
                     allocator*                  alloc,
                     const char*                 name)

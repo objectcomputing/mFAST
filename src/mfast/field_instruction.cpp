@@ -23,38 +23,38 @@
 namespace mfast {
 
 void
-field_instruction::destruct_value(value_storage_t&,
-                                  allocator      *       ) const
+field_instruction::destruct_value(value_storage&,
+                                  allocator*) const
 {
 }
 
 void
-field_instruction::copy_value(const value_storage_t& src,
-                              value_storage_t&       dest,
-                              allocator              * /* alloc */) const
+field_instruction::copy_value(const value_storage& src,
+                              value_storage&       dest,
+                              allocator* /* alloc */) const
 {
-  dest.array_storage.content_ = src.array_storage.content_;
-  dest.array_storage.len_ = src.array_storage.len_;
-  dest.array_storage.capacity_ = 0;
+  dest.of_array.content_ = src.of_array.content_;
+  dest.of_array.len_ = src.of_array.len_;
+  dest.of_array.capacity_ = 0;
 }
 
 //////////////////////////////////////////////////////
 
-void integer_field_instruction_base::construct_value(value_storage_t& storage,
-                                                     allocator        * /* alloc */) const
+void integer_field_instruction_base::construct_value(value_storage& storage,
+                                                     allocator* /* alloc */) const
 {
-  storage.uint_storage.content_ = default_value_.uint_storage.content_;
-  storage.uint_storage.defined_bit_ = 1;
-  storage.uint_storage.present_ = !optional();
+  storage.of_uint.content_ = default_value_.of_uint.content_;
+  storage.of_uint.defined_bit_ = 1;
+  storage.of_uint.present_ = !optional();
 }
 
 /////////////////////////////////////////////////////////
 
-void decimal_field_instruction::construct_value(value_storage_t& storage,
-                                                allocator        *       ) const
+void decimal_field_instruction::construct_value(value_storage& storage,
+                                                allocator*       ) const
 {
   storage = default_value_;
-  storage.decimal_storage.present_ = !optional();
+  storage.of_decimal.present_ = !optional();
 }
 
 void decimal_field_instruction::accept(field_instruction_visitor& visitor,
@@ -65,36 +65,36 @@ void decimal_field_instruction::accept(field_instruction_visitor& visitor,
 
 /////////////////////////////////////////////////////////
 
-void string_field_instruction::construct_value(value_storage_t& storage,
-                                               allocator        *       ) const
+void string_field_instruction::construct_value(value_storage& storage,
+                                               allocator*       ) const
 {
   storage = default_value_;
   if (optional())
-    storage.array_storage.len_ = 0;
+    storage.of_array.len_ = 0;
 }
 
-void string_field_instruction::destruct_value(value_storage_t& storage,
-                                              allocator*       alloc) const
+void string_field_instruction::destruct_value(value_storage& storage,
+                                              allocator*     alloc) const
 {
-  if (storage.array_storage.capacity_) {
-    alloc->deallocate(storage.array_storage.content_);
+  if (storage.of_array.capacity_) {
+    alloc->deallocate(storage.of_array.content_);
   }
 }
 
-void string_field_instruction::copy_value(const value_storage_t& src,
-                                          value_storage_t&       dest,
-                                          allocator*             alloc) const
+void string_field_instruction::copy_value(const value_storage& src,
+                                          value_storage&       dest,
+                                          allocator*           alloc) const
 {
-  size_t len = src.array_storage.len_;
-  if (len && src.array_storage.content_ != default_value_.array_storage.content_) {
-    dest.array_storage.content_ = alloc->allocate(len);
-    dest.array_storage.capacity_ = len;
+  size_t len = src.of_array.len_;
+  if (len && src.of_array.content_ != default_value_.of_array.content_) {
+    dest.of_array.content_ = alloc->allocate(len);
+    dest.of_array.capacity_ = len;
   }
   else {
-    dest.array_storage.content_ = src.array_storage.content_;
-    dest.array_storage.capacity_ = 0;
+    dest.of_array.content_ = src.of_array.content_;
+    dest.of_array.capacity_ = 0;
   }
-  dest.array_storage.len_ = len;
+  dest.of_array.len_ = len;
 }
 
 /////////////////////////////////////////////////////////
@@ -119,16 +119,16 @@ void byte_vector_field_instruction::accept(field_instruction_visitor& visitor,
 
 /////////////////////////////////////////////////////////
 
-void group_content_helper::construct_group_subfields(value_storage_t* subfields,
-                                                     allocator*       alloc) const
+void group_content_helper::construct_group_subfields(value_storage* subfields,
+                                                     allocator*     alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     this->subinstructions_[i]->construct_value(subfields[i], alloc);
   }
 }
 
-void group_content_helper::destruct_group_subfields(value_storage_t* subfields,
-                                                    allocator*       alloc) const
+void group_content_helper::destruct_group_subfields(value_storage* subfields,
+                                                    allocator*     alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     this->subinstructions_[i]->destruct_value(subfields[i], alloc);
@@ -154,9 +154,9 @@ int group_content_helper::find_subinstruction_index_by_name(const char* name) co
 }
 
 // deep copy
-void group_content_helper::copy_group_subfields(const value_storage_t* src_subfields,
-                                                value_storage_t*       dest_subfields,
-                                                allocator*             alloc) const
+void group_content_helper::copy_group_subfields(const value_storage* src_subfields,
+                                                value_storage*       dest_subfields,
+                                                allocator*           alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     this->subinstructions_[i]->copy_value(src_subfields[i], dest_subfields[i], alloc);
@@ -165,36 +165,36 @@ void group_content_helper::copy_group_subfields(const value_storage_t* src_subfi
 
 ///////////////////////////////////////////////////////////////////
 
-void group_field_instruction::construct_value(value_storage_t& storage,
-                                              allocator*       alloc ) const
+void group_field_instruction::construct_value(value_storage& storage,
+                                              allocator*     alloc ) const
 {
-  storage.group_storage.present_ = !optional();
+  storage.of_group.present_ = !optional();
   // group field is never used for a dictionary key; so, we won't use this
   // function for reseting a key and thus no memory deallocation is required.
-  storage.group_storage.content_ =
-    static_cast<value_storage_t*>(alloc->allocate( this->group_content_byte_count() ));
+  storage.of_group.content_ =
+    static_cast<value_storage*>(alloc->allocate( this->group_content_byte_count() ));
 
-  construct_group_subfields(storage.group_storage.content_, alloc);
+  construct_group_subfields(storage.of_group.content_, alloc);
 }
 
-void group_field_instruction::destruct_value(value_storage_t& storage,
-                                             allocator*       alloc) const
+void group_field_instruction::destruct_value(value_storage& storage,
+                                             allocator*     alloc) const
 {
-  if (storage.group_storage.content_) {
-    destruct_group_subfields(storage.group_storage.content_, alloc);
-    alloc->deallocate(storage.group_storage.content_);
+  if (storage.of_group.content_) {
+    destruct_group_subfields(storage.of_group.content_, alloc);
+    alloc->deallocate(storage.of_group.content_);
   }
 }
 
-void group_field_instruction::copy_value(const value_storage_t& src,
-                                         value_storage_t&       dest,
-                                         allocator*             alloc) const
+void group_field_instruction::copy_value(const value_storage& src,
+                                         value_storage&       dest,
+                                         allocator*           alloc) const
 {
-  dest.group_storage.present_ = src.group_storage.present_;
-  dest.group_storage.content_ =
-    static_cast<value_storage_t*>(alloc->allocate( this->group_content_byte_count() ));
+  dest.of_group.present_ = src.of_group.present_;
+  dest.of_group.content_ =
+    static_cast<value_storage*>(alloc->allocate( this->group_content_byte_count() ));
 
-  copy_group_subfields(src.group_storage.content_, dest.group_storage.content_, alloc);
+  copy_group_subfields(src.of_group.content_, dest.of_group.content_, alloc);
 }
 
 void group_field_instruction::accept(field_instruction_visitor& visitor,
@@ -203,98 +203,98 @@ void group_field_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
-void group_field_instruction::ensure_valid_storage(value_storage_t& storage,
-                                                   allocator*       alloc) const
+void group_field_instruction::ensure_valid_storage(value_storage& storage,
+                                                   allocator*     alloc) const
 {
-  if (storage.group_storage.content_ == 0) {
+  if (storage.of_group.content_ == 0) {
     // group field is never used for a dictionary key; so, we won't use this
     // function for reseting a key and thus no memory deallocation is required.
-    storage.group_storage.content_ =
-      static_cast<value_storage_t*>(alloc->allocate( this->group_content_byte_count() ));
-    memset(storage.group_storage.content_, 0, this->group_content_byte_count());
+    storage.of_group.content_ =
+      static_cast<value_storage*>(alloc->allocate( this->group_content_byte_count() ));
+    memset(storage.of_group.content_, 0, this->group_content_byte_count());
   }
 }
 
 /////////////////////////////////////////////////////////
 
-void sequence_field_instruction::construct_sequence_elements(value_storage_t& storage,
-                                                             std::size_t      start,
-                                                             std::size_t      length,
-                                                             allocator*       alloc) const
+void sequence_field_instruction::construct_sequence_elements(value_storage& storage,
+                                                             std::size_t    start,
+                                                             std::size_t    length,
+                                                             allocator*     alloc) const
 {
-  value_storage_t* elements = static_cast<value_storage_t*>(storage.array_storage.content_);
+  value_storage* elements = static_cast<value_storage*>(storage.of_array.content_);
   for (std::size_t i = start; i < start+length; ++i ) {
     construct_group_subfields(&elements[i*subinstructions_count_], alloc);
   }
 }
 
-void sequence_field_instruction::destruct_sequence_elements(value_storage_t& storage,
-                                                            std::size_t      start,
-                                                            std::size_t      length,
-                                                            allocator*       alloc) const
+void sequence_field_instruction::destruct_sequence_elements(value_storage& storage,
+                                                            std::size_t    start,
+                                                            std::size_t    length,
+                                                            allocator*     alloc) const
 {
-  value_storage_t* elements = static_cast<value_storage_t*>(storage.array_storage.content_);
+  value_storage* elements = static_cast<value_storage*>(storage.of_array.content_);
   for (std::size_t i = start; i < start+length; ++i ) {
     destruct_group_subfields(&elements[i*subinstructions_count_], alloc);
   }
 }
 
-void sequence_field_instruction::construct_value(value_storage_t& storage,
-                                                 allocator*       alloc ) const
+void sequence_field_instruction::construct_value(value_storage& storage,
+                                                 allocator*     alloc ) const
 {
   // len_ == 0 is reserve for null/absent
-  storage.array_storage.len_ = optional() ? 0 : sequence_length_instruction_->initial_value()+1;
+  storage.of_array.len_ = optional() ? 0 : sequence_length_instruction_->initial_value()+1;
   if (sequence_length_instruction_ && sequence_length_instruction_->initial_value() > 0) {
     std::size_t element_size = this->group_content_byte_count();
     std::size_t reserve_size = (sequence_length_instruction_->initial_value())*element_size;
-    storage.array_storage.content_ = 0;
-    storage.array_storage.capacity_ =  alloc->reallocate(storage.array_storage.content_, 0, reserve_size)/element_size;
+    storage.of_array.content_ = 0;
+    storage.of_array.capacity_ =  alloc->reallocate(storage.of_array.content_, 0, reserve_size)/element_size;
     construct_sequence_elements(storage,0, sequence_length_instruction_->initial_value(), alloc);
   }
   else {
-    storage.array_storage.content_ = 0;
-    storage.array_storage.capacity_ = 0;
+    storage.of_array.content_ = 0;
+    storage.of_array.capacity_ = 0;
   }
 }
 
-void sequence_field_instruction::destruct_value(value_storage_t& storage,
-                                                allocator*       alloc ) const
+void sequence_field_instruction::destruct_value(value_storage& storage,
+                                                allocator*     alloc ) const
 {
-  if (storage.array_storage.capacity_ && storage.array_length() > 0) {
+  if (storage.of_array.capacity_ && storage.array_length() > 0) {
     destruct_sequence_elements(storage, 0, storage.array_length(), alloc);
-    alloc->deallocate(storage.array_storage.content_);
+    alloc->deallocate(storage.of_array.content_);
   }
 }
 
-void sequence_field_instruction::copy_value(const value_storage_t& src,
-                                            value_storage_t&       dest,
-                                            allocator*             alloc) const
+void sequence_field_instruction::copy_value(const value_storage& src,
+                                            value_storage&       dest,
+                                            allocator*           alloc) const
 {
-  std::size_t size = dest.array_storage.len_;
+  std::size_t size = dest.of_array.len_;
 
   if (size > 0)
     --size;
 
-  dest.array_storage.len_ = src.array_storage.len_;
+  dest.of_array.len_ = src.of_array.len_;
 
   if (size) {
     std::size_t element_size = this->group_content_byte_count();
     std::size_t reserve_size = size*element_size;
 
-    dest.array_storage.content_ = 0;
-    dest.array_storage.capacity_ =  alloc->reallocate(dest.array_storage.content_, 0, reserve_size)/element_size;
+    dest.of_array.content_ = 0;
+    dest.of_array.capacity_ =  alloc->reallocate(dest.of_array.content_, 0, reserve_size)/element_size;
 
-    const value_storage_t* src_elements =
-      *static_cast<const value_storage_t**>(src.array_storage.content_);
-    value_storage_t* dest_elements = *static_cast<value_storage_t**>(dest.array_storage.content_);
+    const value_storage* src_elements =
+      *static_cast<const value_storage**>(src.of_array.content_);
+    value_storage* dest_elements = *static_cast<value_storage**>(dest.of_array.content_);
 
     for (std::size_t i = 0; i < size; ++i ) {
       copy_group_subfields(&src_elements[i], &dest_elements[i], alloc);
     }
   }
   else {
-    dest.array_storage.content_ = 0;
-    dest.array_storage.capacity_ = 0;
+    dest.of_array.content_ = 0;
+    dest.of_array.capacity_ = 0;
   }
 }
 
@@ -308,20 +308,20 @@ void sequence_field_instruction::accept(field_instruction_visitor& visitor,
 
 
 
-void template_instruction::construct_value(value_storage_t& storage,
-                                           value_storage_t* fields_storage,
-                                           allocator*       alloc,
-                                           bool             construct_subfields) const
+void template_instruction::construct_value(value_storage& storage,
+                                           value_storage* fields_storage,
+                                           allocator*     alloc,
+                                           bool           construct_subfields) const
 {
   if (fields_storage) {
-    storage.group_storage.own_content_ = false;
+    storage.of_group.own_content_ = false;
   }
   else {
-    storage.group_storage.own_content_ = true;
-    fields_storage = static_cast<value_storage_t*>(
+    storage.of_group.own_content_ = true;
+    fields_storage = static_cast<value_storage*>(
       alloc->allocate(this->group_content_byte_count()));
   }
-  storage.group_storage.content_ = fields_storage;
+  storage.of_group.content_ = fields_storage;
 
   if (construct_subfields)
     construct_group_subfields(fields_storage, alloc);
@@ -329,21 +329,21 @@ void template_instruction::construct_value(value_storage_t& storage,
     memset(fields_storage, 0, this->group_content_byte_count());
 }
 
-void template_instruction::copy_construct_value(value_storage_t&       storage,
-                                                value_storage_t*       fields_storage,
-                                                allocator*             alloc,
-                                                const value_storage_t* src) const
+void template_instruction::copy_construct_value(value_storage&       storage,
+                                                value_storage*       fields_storage,
+                                                allocator*           alloc,
+                                                const value_storage* src) const
 {
   if (fields_storage) {
-    storage.group_storage.own_content_ = false;
+    storage.of_group.own_content_ = false;
   }
   else {
-    storage.group_storage.own_content_ = true;
-    fields_storage = static_cast<value_storage_t*>(
+    storage.of_group.own_content_ = true;
+    fields_storage = static_cast<value_storage*>(
       alloc->allocate(this->group_content_byte_count()));
   }
-  storage.group_storage.content_ = fields_storage;
-  copy_group_subfields(src->group_storage.content_,
+  storage.of_group.content_ = fields_storage;
+  copy_group_subfields(src->of_group.content_,
                        fields_storage,
                        alloc);
 
@@ -357,41 +357,42 @@ void template_instruction::accept(field_instruction_visitor& visitor,
 
 ///////////////////////////////////////////////////////////
 
-void templateref_instruction::construct_value(value_storage_t& storage,
-                                              allocator        *       ) const
+void templateref_instruction::construct_value(value_storage& storage,
+                                              allocator*       ) const
 {
-  storage.templateref_storage.instruction_storage.instruction_ = 0;
-  storage.templateref_storage.content_ = 0;
+  storage.of_templateref.of_instruction.instruction_ = 0;
+  storage.of_templateref.contˆent_ = 0;
 }
 
-void templateref_instruction::destruct_value(value_storage_t& storage,
-                                             allocator*       alloc) const
+void templateref_instruction::destruct_value(value_storage& storage,
+                                             allocator*     alloc) const
 {
-  if (storage.templateref_storage.instruction_storage.instruction_ && storage.templateref_storage.content_) {
-    storage.templateref_storage.instruction_storage.instruction_->destruct_group_subfields(
-      static_cast<value_storage_t*>(storage.templateref_storage.content_),
+  if (storage.of_templateref.of_instruction.instruction_ && storage.of_templateref.content_) {
+    storage.of_templateref.of_instruction.instruction_->destruct_group_subfields(
+      static_cast<value_storage*>(storage.of_templateref.content_),
       alloc);
-    alloc->deallocate(storage.templateref_storage.content_);
+    alloc->deallocate(storage.of_templateref.content_);
   }
 }
 
-void templateref_instruction::copy_value(const value_storage_t& src,
-                                         value_storage_t&       dest,
-                                         allocator*             alloc) const
+void templateref_instruction::copy_value(const value_storage& src,
+                                         value_storage&       dest,
+                                         allocator*           alloc) const
 {
-  dest.templateref_storage.instruction_storage.instruction_ = src.templateref_storage.instruction_storage.instruction_;
-  if (src.templateref_storage.instruction_storage.instruction_) {
-    dest.templateref_storage.content_ =
-      static_cast<value_storage_t*>(alloc->allocate( dest.templateref_storage.instruction_storage.instruction_->group_content_byte_count() ));
+  dest.of_templateref.of_instruction.instruction_ = src.of_templateref.of_instruction.instruction_;
+  if (src.of_templateref.of_instruction.instruction_) {
+    dest.of_templateref.content_ =
+      static_cast<value_storage*>(alloc->allocate( dest.of_templateref.of_instruction.instruction_->group_content_byte_count() ));
 
-    dest.templateref_storage.instruction_storage.instruction_->copy_group_subfields(
-      src.templateref_storage.content_,
-      dest.templateref_storage.content_,
+    dest.of_templateref.of_instruction.instruction_->copy_group_subfields(
+      src.of_templateref.content_,
+      dest.of_templateref.content_,
       alloc);
   }
 }
 
-void templateref_instruction::accept(field_instruction_visitor& visitor, void* context) const
+void templateref_instruction::accept(field_instruction_visitor& visitor,
+                                     void*                      context) const
 {
   visitor.visit(this, context);
 }

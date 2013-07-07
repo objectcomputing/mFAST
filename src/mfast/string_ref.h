@@ -50,8 +50,8 @@ class string_cref
     {
     }
 
-    string_cref(const value_storage_t* storage,
-                instruction_cptr       instruction)
+    string_cref(const value_storage* storage,
+                instruction_cptr     instruction)
       : vector_cref<char, IsAscii>(storage, instruction)
     {
     }
@@ -215,7 +215,7 @@ class string_cref
 
     const char* c_str() const
     {
-      if (this->storage()->array_storage.capacity_ > 0) {
+      if (this->storage()->of_array.capacity_ > 0) {
         const_cast<char&>(*this->end()) = '\0';
       }
       return this->data();
@@ -241,7 +241,7 @@ class string_mref
     }
 
     string_mref(allocator*       alloc,
-                value_storage_t* storage,
+                value_storage*   storage,
                 instruction_cptr instruction)
       : base_type(alloc, storage, instruction)
     {

@@ -158,7 +158,7 @@ void dictionary_builder::visit(const template_instruction* src_inst, void* dest_
     dest = itr->second;
   }
   else {
-      BOOST_THROW_EXCEPTION(template_not_found_error(src_inst->name(), current_template_.c_str()));
+    BOOST_THROW_EXCEPTION(template_not_found_error(src_inst->name(), current_template_.c_str()));
   }
 }
 
@@ -211,12 +211,12 @@ void dictionary_builder::visit(const sequence_field_instruction* src_inst, void*
   }
 }
 
-value_storage_t*
+value_storage*
 dictionary_builder::get_dictionary_storage(const char*         key,
                                            const char*         ns,
                                            const op_context_t* op_context,
                                            field_type_enum_t   field_type,
-                                           value_storage_t*    candidate_storage)
+                                           value_storage*      candidate_storage)
 {
   const char* dict = "";
 

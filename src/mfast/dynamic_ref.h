@@ -28,7 +28,7 @@ class dynamic_cref
   public:
     typedef const templateref_instruction* instruction_cptr;
 
-    dynamic_cref(const value_storage_t* storage,
+    dynamic_cref(const value_storage* storage,
                  instruction_cptr)
       : storage_(storage)
     {
@@ -56,10 +56,10 @@ class dynamic_cref
   protected:
     const template_instruction* instruction() const
     {
-      return storage_->templateref_storage.instruction_storage.instruction_;
+      return storage_->of_templateref.of_instruction.instruction_;
     }
 
-    const value_storage_t* storage_;
+    const value_storage* storage_;
 };
 
 class dynamic_mref
@@ -67,7 +67,7 @@ class dynamic_mref
 {
   public:
     dynamic_mref(allocator*       alloc,
-                 value_storage_t* storage,
+                 value_storage*   storage,
                  instruction_cptr inst)
       : dynamic_cref(storage, inst), alloc_(alloc)
     {
@@ -117,13 +117,13 @@ class dynamic_mref
         this->instruction()->destruct_value(*storage(), alloc_);
       }
       inst->construct_value(*storage(), 0, alloc_, construct_subfields);
-      storage()->templateref_storage.instruction_storage.instruction_ = inst;
+      storage()->of_templateref.of_instruction.instruction_ = inst;
     }
 
   private:
-    value_storage_t* storage()
+    value_storage* storage()
     {
-      return const_cast<value_storage_t*>(storage_);
+      return const_cast<value_storage*>(storage_);
     }
 
     allocator*       alloc_;

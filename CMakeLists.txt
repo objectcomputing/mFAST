@@ -78,6 +78,8 @@ foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
 	set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
 endforeach(var)
 
+## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated. 
+## Not at the time when "make" is called. 
 file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_command(

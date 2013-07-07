@@ -20,7 +20,7 @@
 
 namespace mfast {
   namespace detail {
-    const value_storage_t null_storage;
+    const value_storage null_storage;
   }
 }
 

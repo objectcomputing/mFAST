@@ -49,8 +49,8 @@ class vector_cref
     {
     }
 
-    vector_cref(const value_storage_t*   storage,
-                instruction_cptr instruction)
+    vector_cref(const value_storage* storage,
+                instruction_cptr     instruction)
       : field_cref(storage, instruction)
     {
     }
@@ -75,7 +75,7 @@ class vector_cref
      **/
     const T* data() const
     {
-      return static_cast<const T*>(storage_->array_storage.content_);
+      return static_cast<const T*>(storage_->of_array.content_);
     }
 
     size_t size() const
@@ -151,8 +151,8 @@ class make_vector_mref
     {
     }
 
-    make_vector_mref(allocator*               alloc,
-                     value_storage_t*         storage,
+    make_vector_mref(allocator*       alloc,
+                     value_storage*   storage,
                      instruction_cptr instruction)
       : base_type(alloc, storage, instruction)
     {
@@ -170,7 +170,7 @@ class make_vector_mref
 
     value_type* data() const
     {
-      return static_cast<value_type*>(this->storage()->array_storage.content_);
+      return static_cast<value_type*>(this->storage()->of_array.content_);
     }
 
     iterator begin() const
@@ -244,9 +244,9 @@ class make_vector_mref
 
     void shallow_assign(const value_type* addr, size_t n) const
     {
-      this->storage()->array_storage.content_ = const_cast<char*>(addr);
+      this->storage()->of_array.content_ = const_cast<char*>(addr);
       this->storage()->array_length(n);
-      this->storage()->array_storage.capacity_ = 0;
+      this->storage()->of_array.capacity_ = 0;
     }
 
     void replace(size_t pos, size_t count,
@@ -259,20 +259,20 @@ class make_vector_mref
     }
 
     friend class mfast::detail::codec_helper;
-    void copy_from(const value_storage_t& v) const
+    void copy_from(const value_storage& v) const
     {
-      if (this->capacity()==0 || this->storage()->array_storage.content_ != v.array_storage.content_) {
-        const char* ptr = static_cast<const char*>(v.array_storage.content_);
+      if (this->capacity()==0 || this->storage()->of_array.content_ != v.of_array.content_) {
+        const char* ptr = static_cast<const char*>(v.of_array.content_);
         this->assign(ptr,
                      ptr+ v.array_length());
       }
     }
 
-    void save_to(value_storage_t& v) const
+    void save_to(value_storage& v) const
     {
-      v.array_storage.content_ = this->storage()->array_storage.content_;
-      v.array_storage.len_ = this->storage()->array_storage.len_;
-      v.array_storage.capacity_ = 0;
+      v.of_array.content_ = this->storage()->of_array.content_;
+      v.of_array.len_ = this->storage()->of_array.len_;
+      v.of_array.capacity_ = 0;
       v.defined(true);
     }
 
@@ -304,7 +304,7 @@ class make_vector_mref
     // This behavior is different from the @c std::vector::capacity().
     size_t capacity() const
     {
-      return this->storage()->array_storage.capacity_;
+      return this->storage()->of_array.capacity_;
     }
 
     iterator shift(iterator position, size_t n) const;
@@ -323,21 +323,21 @@ const
     return;
   std::size_t reserve_size = (n+1);
 
-  if (capacity() > 0){
-    this->storage()->array_storage.capacity_
-      = this->alloc_->reallocate(this->storage()->array_storage.content_, capacity() , reserve_size);
+  if (capacity() > 0) {
+    this->storage()->of_array.capacity_
+      = this->alloc_->reallocate(this->storage()->of_array.content_, capacity(), reserve_size);
   }
   else {
-    void* old_addr = this->storage()->array_storage.content_;
-    this->storage()->array_storage.content_ = 0;
-    this->storage()->array_storage.capacity_
-      = this->alloc_->reallocate(this->storage()->array_storage.content_, 0, reserve_size);
+    void* old_addr = this->storage()->of_array.content_;
+    this->storage()->of_array.content_ = 0;
+    this->storage()->of_array.capacity_
+      = this->alloc_->reallocate(this->storage()->of_array.content_, 0, reserve_size);
     // Copy the old content to the new buffer.
     // In the case when the this->capacity == 0 && this->size() > 0,
     // reserve() could be invoked with n < this->size(). Thus, we can
     // only copy min(size(), n) elements to the new buffer.
     if (this->storage()->array_length() > 0 && n > 0) {
-      memcpy(this->storage()->array_storage.content_,
+      memcpy(this->storage()->of_array.content_,
              old_addr,
              std::min(this->size(), n) );
     }
@@ -364,7 +364,7 @@ const
   if (offset < this->size()) {
     std::memmove(src+(n*sizeof(value_type)), src, (this->size()+1-offset) * sizeof(value_type));
   }
-  this->storage()->array_storage.len_ += n;
+  this->storage()->of_array.len_ += n;
   return src;
 }
 

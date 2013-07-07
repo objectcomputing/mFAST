@@ -35,29 +35,29 @@ inline bool is_empty_string(const char* str)
   return str == 0 || str[0] == '\0';
 }
 
-
 class dictionary_resetter
 {
-public:
+  public:
 
-  void push_back(value_storage_t* entry)
-  {
-    impl_.push_back(entry);
-  }
-
-  void reset()
-  {
-    for (std::size_t i = 0; i < impl_.size(); ++i) {
-      impl_[i]->defined(false);
+    void push_back(value_storage* entry)
+    {
+      impl_.push_back(entry);
     }
-  }
 
-  std::size_t size() const {
-    return impl_.size();
-  }
+    void reset()
+    {
+      for (std::size_t i = 0; i < impl_.size(); ++i) {
+        impl_[i]->defined(false);
+      }
+    }
 
-private:
-  std::vector<value_storage_t*> impl_;
+    std::size_t size() const
+    {
+      return impl_.size();
+    }
+
+  private:
+    std::vector<value_storage*> impl_;
 };
 
 class dictionary_builder
@@ -70,9 +70,11 @@ class dictionary_builder
     void build(const templates_description* def);
 
     typedef std::map<uint32_t, template_instruction*> template_id_map_t;
-    const template_id_map_t& templates_map() const {
+    const template_id_map_t& templates_map() const
+    {
       return template_id_map_;
     }
+
   private:
 
     virtual void visit(const int32_field_instruction*, void*);
@@ -93,19 +95,19 @@ class dictionary_builder
                      const group_content_helper* src,
                      group_content_helper*       dest);
 
-    value_storage_t*
+    value_storage*
     get_dictionary_storage(const char*         key,
                            const char*         ns,
                            const op_context_t* op_context,
                            field_type_enum_t   field_type,
-                           value_storage_t*    candidate_storage);
+                           value_storage*      candidate_storage);
 
     template_instruction* find_template(uint32_t template_id);
 
     struct indexer_value_type
     {
       field_type_enum_t field_type_;
-      value_storage_t*  storage_;
+      value_storage*  storage_;
     };
 
     dictionary_resetter& resetter_;

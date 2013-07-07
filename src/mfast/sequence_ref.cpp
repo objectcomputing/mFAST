@@ -23,11 +23,11 @@ namespace mfast {
 namespace detail {
 
 void sequence_mref_helper::resize(const sequence_field_instruction* instruction,
-                                  value_storage_t*                  storage,
+                                  value_storage*                    storage,
                                   allocator*                        alloc,
                                   std::size_t                       n)
 {
-  std::size_t seq_size = storage->array_storage.len_;
+  std::size_t seq_size = storage->of_array.len_;
   if (seq_size) --seq_size;
 
   long diff = n- seq_size;
@@ -50,17 +50,17 @@ void sequence_mref_helper::resize(const sequence_field_instruction* instruction,
 }
 
 void sequence_mref_helper::reserve(const sequence_field_instruction* instruction,
-                                   value_storage_t*                  storage,
+                                   value_storage*                    storage,
                                    allocator*                        alloc,
                                    std::size_t                       n)
 {
-  if (n > storage->array_storage.capacity_)
+  if (n > storage->of_array.capacity_)
   {
     std::size_t element_size = instruction->group_content_byte_count ();
     std::size_t reserve_size = n*element_size;
-    storage->array_storage.capacity_ =
-      alloc->reallocate (storage->array_storage.content_,
-                         storage->array_storage.capacity_ * element_size,
+    storage->of_array.capacity_ =
+      alloc->reallocate (storage->of_array.content_,
+                         storage->of_array.capacity_ * element_size,
                          reserve_size)/element_size;
   }
 }

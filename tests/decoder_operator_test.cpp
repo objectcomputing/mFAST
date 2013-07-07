@@ -43,7 +43,7 @@ bool str_equal(const char* lhs, const char* rhs)
 BOOST_AUTO_TEST_CASE(operator_none_test)
 {
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     uint64_field_instruction inst(operator_none,
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
 {
 
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     // An optional field with the constant operator will occupy a single bit. If the bit is set, the value
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 {
 
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     uint64_field_instruction inst(operator_default,
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 BOOST_AUTO_TEST_CASE(operator_copy_test)
 {
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     uint64_field_instruction inst(operator_copy,
@@ -696,7 +696,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
 BOOST_AUTO_TEST_CASE(operator_increment_test)
 {
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     uint64_field_instruction inst(operator_increment,
@@ -963,7 +963,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
 BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
 {
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     uint64_field_instruction inst(operator_delta,
@@ -1130,7 +1130,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
 BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
 {
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     decimal_field_instruction inst(operator_delta,
@@ -1251,7 +1251,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
 BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
@@ -1426,7 +1426,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
@@ -1601,7 +1601,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";

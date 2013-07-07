@@ -36,7 +36,7 @@ class field_accessor_adaptor
 {
   FieldAccessor& accssor_;
 
-  value_storage_t& storage_of(const field_cref& ref)
+  value_storage& storage_of(const field_cref& ref)
   {
     return detail::field_storage_helper::storage_of(ref);
   }
@@ -95,74 +95,74 @@ class field_accessor_adaptor
 
     virtual void visit(const int32_field_instruction* inst, void* storage)
     {
-      int32_cref ref(static_cast<value_storage_t*>(storage), inst);
+      int32_cref ref(static_cast<value_storage*>(storage), inst);
       accssor_.visit(ref);
     }
 
     virtual void visit(const uint32_field_instruction* inst, void* storage)
     {
-      uint32_cref ref(static_cast<value_storage_t*>(storage), inst);
+      uint32_cref ref(static_cast<value_storage*>(storage), inst);
       accssor_.visit(ref);
     }
 
     virtual void visit(const int64_field_instruction* inst, void* storage)
     {
-      int64_cref ref(static_cast<value_storage_t*>(storage), inst);
+      int64_cref ref(static_cast<value_storage*>(storage), inst);
       accssor_.visit(ref);
     }
 
     virtual void visit(const uint64_field_instruction* inst, void* storage)
     {
-      uint64_cref ref(static_cast<value_storage_t*>(storage), inst);
+      uint64_cref ref(static_cast<value_storage*>(storage), inst);
       accssor_.visit(ref);
     }
 
     virtual void visit(const decimal_field_instruction* inst, void* storage)
     {
-      decimal_cref ref(static_cast<value_storage_t*>(storage),inst);
+      decimal_cref ref(static_cast<value_storage*>(storage),inst);
       accssor_.visit(ref);
     }
 
     virtual void visit(const ascii_field_instruction* inst, void* storage)
     {
-      ascii_string_cref ref(static_cast<value_storage_t*>(storage), inst);
+      ascii_string_cref ref(static_cast<value_storage*>(storage), inst);
       accssor_.visit(ref);
     }
 
     virtual void visit(const unicode_field_instruction* inst, void* storage)
     {
-      unicode_string_cref ref(static_cast<value_storage_t*>(storage), inst);
+      unicode_string_cref ref(static_cast<value_storage*>(storage), inst);
       accssor_.visit(ref);
     }
 
     virtual void visit(const byte_vector_field_instruction* inst, void* storage)
     {
-      byte_vector_cref ref(static_cast<value_storage_t*>(storage), inst);
+      byte_vector_cref ref(static_cast<value_storage*>(storage), inst);
       accssor_.visit(ref);
     }
 
     virtual void visit(const group_field_instruction* inst, void* storage)
     {
-      group_cref ref(static_cast<value_storage_t*>(storage), inst);
+      group_cref ref(static_cast<value_storage*>(storage), inst);
       this->visit(ref);
     }
 
     virtual void visit(const sequence_field_instruction* inst, void* storage)
     {
-      sequence_cref ref(static_cast<value_storage_t*>(storage), inst);
+      sequence_cref ref(static_cast<value_storage*>(storage), inst);
       this->visit(ref);
     }
 
     virtual void visit(const template_instruction* inst, void* storage)
     {
-      message_cref ref(static_cast<value_storage_t*>(storage), inst);
+      message_cref ref(static_cast<value_storage*>(storage), inst);
       this->visit(ref);
     }
 
     virtual void visit(const templateref_instruction* /* inst */, void* storage)
     {
-      value_storage_t* s = static_cast<value_storage_t*>(storage);
-      message_cref ref(s, s->templateref_storage.instruction_storage.instruction_);
+      value_storage* s = static_cast<value_storage*>(storage);
+      message_cref ref(s, s->of_templateref.of_instruction.instruction_);
       this->visit(ref);
     }
 
@@ -175,17 +175,17 @@ class field_mutator_adaptor_base
   : public field_instruction_visitor
 {
   protected:
-    value_storage_t* field_storage(const group_mref& ref, std::size_t i)
+    value_storage* field_storage(const group_mref& ref, std::size_t i)
     {
       return ref.field_storage(i);
     }
 
-    value_storage_t* field_storage(const message_mref& ref, std::size_t i)
+    value_storage* field_storage(const message_mref& ref, std::size_t i)
     {
       return ref.field_storage(i);
     }
 
-    value_storage_t* field_storage(const field_mref& ref)
+    value_storage* field_storage(const field_mref& ref)
     {
       return ref.storage();
     }
@@ -215,7 +215,7 @@ class field_mutator_adaptor
       , mutator_(mutator)
     {
     }
-    
+
     void visit(const group_mref& ref)
     {
       context_t context;
@@ -259,83 +259,84 @@ class field_mutator_adaptor
 
     virtual void visit(const int32_field_instruction* inst, void* storage)
     {
-      int32_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      int32_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 
     virtual void visit(const uint32_field_instruction* inst, void* storage)
     {
-      uint32_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      uint32_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 
     virtual void visit(const int64_field_instruction* inst, void* storage)
     {
-      int64_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      int64_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 
     virtual void visit(const uint64_field_instruction* inst, void* storage)
     {
-      uint64_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      uint64_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 
     virtual void visit(const decimal_field_instruction* inst, void* storage)
     {
-      decimal_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      decimal_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 
     virtual void visit(const ascii_field_instruction* inst, void* storage)
     {
-      ascii_string_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      ascii_string_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 
     virtual void visit(const unicode_field_instruction* inst, void* storage)
     {
-      unicode_string_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      unicode_string_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 
     virtual void visit(const byte_vector_field_instruction* inst, void* storage)
     {
-      byte_vector_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      byte_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 
     virtual void visit(const group_field_instruction* inst, void* storage)
     {
-      group_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      group_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       this->visit(ref);
     }
 
     virtual void visit(const sequence_field_instruction* inst, void* storage)
     {
-      sequence_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      sequence_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       this->visit(ref);
     }
 
     virtual void visit(const template_instruction* inst, void* storage)
     {
-      message_mref ref(alloc_, static_cast<value_storage_t*>(storage), inst);
+      message_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       this->visit(ref);
     }
 
     virtual void visit(const templateref_instruction* inst, void* storage)
     {
-      value_storage_t* v = static_cast<value_storage_t*>(storage);
+      value_storage* v = static_cast<value_storage*>(storage);
       context_t context;
       dynamic_mref dyn_mref(alloc_, v, inst);
       if (mutator_.pre_visit(dyn_mref, context)) {
-        message_mref mref(alloc_, v, v->templateref_storage.instruction_storage.instruction_);
+        message_mref mref(alloc_, v, v->of_templateref.of_instruction.instruction_);
         for (std::size_t i = 0; i < mref.fields_count(); ++i) {
           mref.subinstruction(i)->accept(*this, field_storage(mref, i));
         }
         mutator_.post_visit(dyn_mref,context);
       }
     }
+
 };
 
 ///////////////////////////////////////////////////////////

@@ -28,15 +28,16 @@ namespace detail {
 class field_storage_helper
 {
   public:
-    static value_storage_t& storage_of(const field_cref& ref)
+    static value_storage& storage_of(const field_cref& ref)
     {
-      return *const_cast<value_storage_t*>(ref.storage());
+      return *const_cast<value_storage*>(ref.storage());
     }
 
-    static value_storage_t* storage_ptr_of(const field_cref& ref)
+    static value_storage* storage_ptr_of(const field_cref& ref)
     {
-      return const_cast<value_storage_t*>(ref.storage());
+      return const_cast<value_storage*>(ref.storage());
     }
+
 };
 
 }

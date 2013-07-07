@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(byte_vector_test)
 BOOST_AUTO_TEST_CASE(extractor_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
   {
     const char* default_value = "initial_string";
     ascii_field_instruction inst(operator_copy,

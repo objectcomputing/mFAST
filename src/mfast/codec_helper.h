@@ -34,7 +34,7 @@ class codec_helper
 {
   public:
     template <typename T>
-    value_storage_t& previous_value_of(const T& mref) const
+    value_storage& previous_value_of(const T& mref) const
     {
       return const_cast<typename T::instruction_type*>(mref.instruction())->prev_value();
     }
@@ -52,11 +52,11 @@ class codec_helper
     }
 
     template <typename T>
-    const value_storage_t& delta_base_value_of(const T& mref) const
+    const value_storage& delta_base_value_of(const T& mref) const
     {
 
       // The base value depends on the state of the previous value in the following way:
-      value_storage_t& previous = previous_value_of(mref);
+      value_storage& previous = previous_value_of(mref);
 
       // * assigned – the base value is the previous value.
       // * undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
@@ -73,10 +73,10 @@ class codec_helper
     }
 
     template <typename T>
-    const value_storage_t& tail_base_value_of(const T& mref) const
+    const value_storage& tail_base_value_of(const T& mref) const
     {
       // The base value depends on the state of the previous value in the following way:
-      value_storage_t& previous = previous_value_of(mref);
+      value_storage& previous = previous_value_of(mref);
 
       // * assigned – the base value is the previous value.
       // * undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
@@ -118,13 +118,13 @@ class codec_helper
 
     template <typename STRING_MREF>
     void apply_string_delta(const STRING_MREF&                      mref,
-                            const value_storage_t&                  base_value,
+                            const value_storage&                  base_value,
                             int32_t                                 substraction_length,
                             const typename STRING_MREF::value_type* delta_str,
                             uint32_t                                delta_len) const
     {
       std::size_t base_len = base_value.array_length();
-      const typename STRING_MREF::value_type* base_str = static_cast<const typename STRING_MREF::value_type*>(base_value.array_storage.content_);
+      const typename STRING_MREF::value_type* base_str = static_cast<const typename STRING_MREF::value_type*>(base_value.of_array.content_);
       std::size_t delta_start_index;
       std::size_t base_start_index;
 

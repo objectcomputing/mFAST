@@ -295,7 +295,7 @@ class copy_or_increment_operator_impl
             save_previous_value(mref);
       } else {
 
-        value_storage_t& previous = previous_value_of(mref);
+        value_storage& previous = previous_value_of(mref);
 
         if (!previous.is_defined())
         {
@@ -341,7 +341,7 @@ class copy_or_increment_operator_impl
 struct null_operation
 {
   template <typename T>
-  void operator() (const T&, value_storage_t&) const
+  void operator() (const T&, value_storage&) const
   {
   }
 
@@ -415,7 +415,7 @@ class copy_operator
 struct increment_operation
 {
   template <typename T>
-  void operator()(T&, value_storage_t& previous) const
+  void operator()(T&, value_storage& previous) const
   {
     T tmp(0, &previous, 0);
     ++tmp;
@@ -566,7 +566,7 @@ class delta_operator
     int64_t d;
     if (stream.decode(d, mref.instruction()->is_nullable())) {
 
-      value_storage_t bv = delta_base_value_of( mref );
+      value_storage bv = delta_base_value_of( mref );
       T tmp(0, &bv, 0);
       d += tmp.value();
       typedef typename T::value_type int_type;
@@ -598,7 +598,7 @@ class delta_operator
       // It is a dynamic error [ERR D7] if the subtraction length is larger than the
       // number of characters in the base value, or if it does not fall in the value range of an int32.
       int32_t sub_len = substraction_length >= 0 ? substraction_length : ~substraction_length;
-      const value_storage_t& base_value = delta_base_value_of(mref);
+      const value_storage& base_value = delta_base_value_of(mref);
 
       if ( sub_len > static_cast<int32_t>(base_value.array_length()))
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
@@ -655,10 +655,10 @@ class delta_operator
       if(!mref.has_individual_operators()) {
         stream >> mref;
         if (mref.present()) {
-          value_storage_t bv = delta_base_value_of(mref);
+          value_storage bv = delta_base_value_of(mref);
 
-          mref.set_mantissa( mref.mantissa() + bv.decimal_storage.mantissa_);
-          mref.set_exponent( mref.exponent() + bv.decimal_storage.exponent_);
+          mref.set_mantissa( mref.mantissa() + bv.of_decimal.mantissa_);
+          mref.set_exponent( mref.exponent() + bv.of_decimal.exponent_);
           if (mref.exponent() > 63 || mref.exponent() < -63 )
             BOOST_THROW_EXCEPTION(fast_reportable_error("R1"));
           save_previous_value(mref);
@@ -728,7 +728,7 @@ class tail_operator
         // If the tail value is not present in the stream, the value of the field depends
         // on the state of the previous value in the following way:
 
-        value_storage_t& prev = previous_value_of(mref);
+        value_storage& prev = previous_value_of(mref);
 
         if (!prev.is_defined()) {
           //  * undefined – the value of the field is the initial value that also becomes the new previous value.

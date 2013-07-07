@@ -14,54 +14,54 @@ BOOST_AUTO_TEST_SUITE( test_value_storage )
 BOOST_AUTO_TEST_CASE(default_constructor_test)
 {
   using namespace mfast;
-  value_storage_t value;
+  value_storage value;
   
-  BOOST_CHECK_EQUAL(value.uint_storage.present_, 0);
-  BOOST_CHECK_EQUAL(value.uint_storage.defined_bit_, 0);
-  BOOST_CHECK_EQUAL(value.uint_storage.content_, 0LL);
+  BOOST_CHECK_EQUAL(value.of_uint.present_, 0);
+  BOOST_CHECK_EQUAL(value.of_uint.defined_bit_, 0);
+  BOOST_CHECK_EQUAL(value.of_uint.content_, 0LL);
   
-  BOOST_CHECK_EQUAL(value.decimal_storage.present_, 0);
-  BOOST_CHECK_EQUAL(value.decimal_storage.exponent_, 0);
-  BOOST_CHECK_EQUAL(value.decimal_storage.defined_bit_, 0);
-  BOOST_CHECK_EQUAL(value.decimal_storage.mantissa_, 0LL);
+  BOOST_CHECK_EQUAL(value.of_decimal.present_, 0);
+  BOOST_CHECK_EQUAL(value.of_decimal.exponent_, 0);
+  BOOST_CHECK_EQUAL(value.of_decimal.defined_bit_, 0);
+  BOOST_CHECK_EQUAL(value.of_decimal.mantissa_, 0LL);
   
-  BOOST_CHECK_EQUAL(value.group_storage.present_, 0);
-  BOOST_CHECK_EQUAL(value.group_storage.own_content_, 0);
-  BOOST_CHECK_EQUAL(value.group_storage.defined_bit_, 0);
-  BOOST_CHECK_EQUAL(value.group_storage.content_, NULLPTR);
+  BOOST_CHECK_EQUAL(value.of_group.present_, 0);
+  BOOST_CHECK_EQUAL(value.of_group.own_content_, 0);
+  BOOST_CHECK_EQUAL(value.of_group.defined_bit_, 0);
+  BOOST_CHECK_EQUAL(value.of_group.content_, NULLPTR);
   
-  BOOST_CHECK_EQUAL(value.array_storage.len_, 0);
-  BOOST_CHECK_EQUAL(value.array_storage.capacity_, 0);
-  BOOST_CHECK_EQUAL(value.array_storage.defined_bit_, 0);
-  BOOST_CHECK_EQUAL(value.array_storage.content_, NULLPTR);
+  BOOST_CHECK_EQUAL(value.of_array.len_, 0);
+  BOOST_CHECK_EQUAL(value.of_array.capacity_, 0);
+  BOOST_CHECK_EQUAL(value.of_array.defined_bit_, 0);
+  BOOST_CHECK_EQUAL(value.of_array.content_, NULLPTR);
   
-  BOOST_CHECK_EQUAL(value.templateref_storage.instruction_storage.instruction_, NULLPTR);
-  BOOST_CHECK_EQUAL(value.templateref_storage.content_, NULLPTR);
+  BOOST_CHECK_EQUAL(value.of_templateref.of_instruction.instruction_, NULLPTR);
+  BOOST_CHECK_EQUAL(value.of_templateref.content_, NULLPTR);
 }
 
 BOOST_AUTO_TEST_CASE(non_empty_constructor_test)
 {
   using namespace mfast;
-  value_storage_t value(1);
+  value_storage value(1);
 
-  BOOST_CHECK(value.uint_storage.present_ != 0);
-  BOOST_CHECK_EQUAL(value.uint_storage.defined_bit_, 1);
-  BOOST_CHECK_EQUAL(value.uint_storage.content_, 0LL);
+  BOOST_CHECK(value.of_uint.present_ != 0);
+  BOOST_CHECK_EQUAL(value.of_uint.defined_bit_, 1);
+  BOOST_CHECK_EQUAL(value.of_uint.content_, 0LL);
   
-  BOOST_CHECK(value.decimal_storage.present_ != 0);
-  BOOST_CHECK_EQUAL(value.decimal_storage.exponent_, 0);
-  BOOST_CHECK_EQUAL(value.decimal_storage.defined_bit_, 1);
-  BOOST_CHECK_EQUAL(value.decimal_storage.mantissa_, 0LL);
+  BOOST_CHECK(value.of_decimal.present_ != 0);
+  BOOST_CHECK_EQUAL(value.of_decimal.exponent_, 0);
+  BOOST_CHECK_EQUAL(value.of_decimal.defined_bit_, 1);
+  BOOST_CHECK_EQUAL(value.of_decimal.mantissa_, 0LL);
   
-  BOOST_CHECK(value.group_storage.present_ != 0);
-  BOOST_CHECK_EQUAL(value.group_storage.own_content_, 0);
-  BOOST_CHECK_EQUAL(value.group_storage.defined_bit_, 1);
-  BOOST_CHECK_EQUAL(value.group_storage.content_, NULLPTR);
+  BOOST_CHECK(value.of_group.present_ != 0);
+  BOOST_CHECK_EQUAL(value.of_group.own_content_, 0);
+  BOOST_CHECK_EQUAL(value.of_group.defined_bit_, 1);
+  BOOST_CHECK_EQUAL(value.of_group.content_, NULLPTR);
   
-  BOOST_CHECK(value.array_storage.len_ != 0);
-  BOOST_CHECK_EQUAL(value.array_storage.capacity_, 0);
-  BOOST_CHECK_EQUAL(value.array_storage.defined_bit_, 1);
-  BOOST_CHECK_EQUAL(value.array_storage.content_, NULLPTR);
+  BOOST_CHECK(value.of_array.len_ != 0);
+  BOOST_CHECK_EQUAL(value.of_array.capacity_, 0);
+  BOOST_CHECK_EQUAL(value.of_array.defined_bit_, 1);
+  BOOST_CHECK_EQUAL(value.of_array.content_, NULLPTR);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -34,8 +34,8 @@ class sequence_element_cref
     typedef boost::false_type canbe_optional;
     typedef const sequence_field_instruction* instruction_cptr;
 
-    sequence_element_cref(const value_storage_t* storage,
-                          instruction_cptr       instruction)
+    sequence_element_cref(const value_storage* storage,
+                          instruction_cptr     instruction)
       : instruction_(instruction)
       , storage_(storage)
     {
@@ -82,14 +82,14 @@ class sequence_element_cref
 
   protected:
     sequence_element_cref& operator= (const sequence_element_cref&);
-    const value_storage_t* field_storage(size_t index) const;
+    const value_storage* field_storage(size_t index) const;
     const field_instruction* subinstruction(size_t index) const
     {
       return instruction()->subinstruction(index);
     }
 
     const sequence_field_instruction* instruction_;
-    const value_storage_t* storage_;
+    const value_storage* storage_;
 };
 
 typedef make_group_mref<sequence_element_cref> sequence_element_mref;
@@ -107,8 +107,8 @@ class make_sequence_cref
     {
     }
 
-    make_sequence_cref(const value_storage_t* storage,
-                       instruction_cptr       instruction)
+    make_sequence_cref(const value_storage* storage,
+                       instruction_cptr     instruction)
       : field_cref(storage, instruction)
     {
     }
@@ -117,8 +117,8 @@ class make_sequence_cref
     operator [](size_t index) const
     {
       assert(index < size());
-      //const value_storage_t* storages =
-      //  static_cast<const value_storage_t*>(storage_->array_storage.content_);
+      //const value_storage* storages =
+      //  static_cast<const value_storage*>(storage_->of_array.content_);
       return reference(element_storage(index), this->instruction());
     }
 
@@ -151,10 +151,10 @@ class make_sequence_cref
       return instruction()->subinstruction(index);
     }
 
-    const value_storage_t* element_storage(std::size_t index) const
+    const value_storage* element_storage(std::size_t index) const
     {
-      const value_storage_t* storages =
-        static_cast<const value_storage_t*>(storage_->array_storage.content_);
+      const value_storage* storages =
+        static_cast<const value_storage*>(storage_->of_array.content_);
       return &storages[index*fields_count()];
     }
 
@@ -166,12 +166,12 @@ namespace detail {
 struct sequence_mref_helper
 {
   static void resize(const sequence_field_instruction* instruction,
-                     value_storage_t*                  storage,
+                     value_storage*                    storage,
                      allocator*                        alloc,
                      std::size_t                       n);
 
   static void reserve(const sequence_field_instruction* instruction,
-                      value_storage_t*                  storage,
+                      value_storage*                    storage,
                       allocator*                        alloc,
                       std::size_t                       n);
 };
@@ -193,14 +193,14 @@ class make_sequence_mref
     }
 
     make_sequence_mref(allocator*       alloc,
-                       value_storage_t* storage,
+                       value_storage*   storage,
                        instruction_cptr instruction)
       : base_type(alloc, storage, instruction)
     {
     }
 
-    make_sequence_mref(value_storage_t* storage,
-                       allocator*       alloc)
+    make_sequence_mref(value_storage* storage,
+                       allocator*     alloc)
       : base_type(storage,alloc)
     {
     }
@@ -227,9 +227,9 @@ class make_sequence_mref
     }
 
   private:
-    value_storage_t* element_storage(std::size_t index) const
+    value_storage* element_storage(std::size_t index) const
     {
-      return const_cast<value_storage_t*>(base_type::element_storage(index));
+      return const_cast<value_storage*>(base_type::element_storage(index));
     }
 
 };
@@ -242,7 +242,7 @@ typedef make_sequence_mref<sequence_element_mref> sequence_mref;
 
 //////////////////////////////////////////////////////////////
 
-inline const value_storage_t*
+inline const value_storage*
 sequence_element_cref::field_storage(size_t index) const
 {
   return &storage_[index];

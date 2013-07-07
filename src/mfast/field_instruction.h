@@ -140,15 +140,15 @@ class nullable
 class field_instruction
 {
   public:
-    virtual void construct_value(value_storage_t& storage,
-                                 allocator*       alloc) const=0;
-    virtual void destruct_value(value_storage_t& storage,
-                                allocator*       alloc) const;
+    virtual void construct_value(value_storage& storage,
+                                 allocator*     alloc) const=0;
+    virtual void destruct_value(value_storage& storage,
+                                allocator*     alloc) const;
 
     /// Perform deep copy
-    virtual void copy_value(const value_storage_t& src,
-                            value_storage_t&       dest,
-                            allocator*             alloc) const;
+    virtual void copy_value(const value_storage& src,
+                            value_storage&       dest,
+                            allocator*           alloc) const;
 
     virtual void accept(field_instruction_visitor&, void*) const=0;
     bool is_nullable() const
@@ -254,15 +254,15 @@ class integer_field_instruction_base
     {
     }
 
-    virtual void construct_value(value_storage_t& storage,
-                                 allocator*       alloc) const;
+    virtual void construct_value(value_storage& storage,
+                                 allocator*     alloc) const;
 
-    value_storage_t& prev_value()
+    value_storage& prev_value()
     {
       return *prev_value_;
     }
 
-    const value_storage_t& prev_value() const
+    const value_storage& prev_value() const
     {
       return *prev_value_;
     }
@@ -272,7 +272,7 @@ class integer_field_instruction_base
       return op_context_;
     }
 
-    const value_storage_t& default_value() const
+    const value_storage& default_value() const
     {
       return default_value_;
     }
@@ -281,9 +281,9 @@ class integer_field_instruction_base
 
     friend class dictionary_builder;
     const op_context_t* op_context_;
-    value_storage_t default_value_;
-    value_storage_t* prev_value_;
-    value_storage_t prev_storage_;
+    value_storage default_value_;
+    value_storage* prev_value_;
+    value_storage prev_storage_;
 };
 
 template <typename T>
@@ -308,7 +308,7 @@ class int_field_instruction
     {
       this->has_initial_value_ = !initial_value.is_null();
       if (this->has_initial_value_)
-        reinterpret_cast<T&>(this->default_value_.uint_storage.content_) = initial_value.value();
+        reinterpret_cast<T&>(this->default_value_.of_uint.content_) = initial_value.value();
     }
 
     int_field_instruction(const int_field_instruction& other)
@@ -320,7 +320,7 @@ class int_field_instruction
 
     T initial_value() const
     {
-      return *reinterpret_cast<const T*>(&this->default_value_.uint_storage.content_);
+      return *reinterpret_cast<const T*>(&this->default_value_.of_uint.content_);
     }
 
 };
@@ -416,8 +416,8 @@ class decimal_field_instruction
     {
       this->has_initial_value_ = !initial_value.is_null();
       if (this->has_initial_value_) {
-        this->default_value_.decimal_storage.exponent_ = initial_value.exponent();
-        this->default_value_.decimal_storage.mantissa_ = initial_value.mantissa();
+        this->default_value_.of_decimal.exponent_ = initial_value.exponent();
+        this->default_value_.of_decimal.mantissa_ = initial_value.mantissa();
       }
     }
 
@@ -441,8 +441,8 @@ class decimal_field_instruction
       assert(mantissa_instruction);
       this->has_initial_value_ = !exponent_initial_value.is_null();
       if (this->has_initial_value_ ) {
-        this->default_value_.decimal_storage.exponent_ = exponent_initial_value.value();
-        this->default_value_.decimal_storage.mantissa_ = mantissa_instruction->initial_value();
+        this->default_value_.of_decimal.exponent_ = exponent_initial_value.value();
+        this->default_value_.of_decimal.mantissa_ = mantissa_instruction->initial_value();
       }
 
       if (!has_pmap_bit_) {
@@ -459,16 +459,16 @@ class decimal_field_instruction
 
     int64_t mantissa_initial_value() const
     {
-      return this->default_value_.decimal_storage.mantissa_;
+      return this->default_value_.of_decimal.mantissa_;
     }
 
     int8_t exponent_initial_value() const
     {
-      return static_cast<int8_t>(this->default_value_.decimal_storage.exponent_);
+      return static_cast<int8_t>(this->default_value_.of_decimal.exponent_);
     }
 
-    virtual void construct_value(value_storage_t& storage,
-                                 allocator*       alloc) const;
+    virtual void construct_value(value_storage& storage,
+                                 allocator*     alloc) const;
 
 
     virtual void accept(field_instruction_visitor&, void*) const;
@@ -510,12 +510,12 @@ class string_field_instruction
       this->has_initial_value_ = (initial_value != 0);
       if (initial_value) {
         this->has_initial_value_ = 1;
-        this->default_value_.array_storage.content_ = const_cast<char*>(initial_value);
+        this->default_value_.of_array.content_ = const_cast<char*>(initial_value);
         this->default_value_.array_length(initial_value_length);
       }
       else {
         this->has_initial_value_ = 0;
-        this->default_value_.array_storage.content_ = const_cast<char*>("");
+        this->default_value_.of_array.content_ = const_cast<char*>("");
         this->default_value_.array_length(0);
       }
     }
@@ -528,24 +528,24 @@ class string_field_instruction
     {
     }
 
-    virtual void construct_value(value_storage_t& storage,
-                                 allocator*       alloc) const;
-    virtual void destruct_value(value_storage_t& storage,
-                                allocator*       alloc) const;
+    virtual void construct_value(value_storage& storage,
+                                 allocator*     alloc) const;
+    virtual void destruct_value(value_storage& storage,
+                                allocator*     alloc) const;
 
 
     // perform deep copy
-    virtual void copy_value(const value_storage_t& src,
-                            value_storage_t&       dest,
-                            allocator*             alloc) const;
+    virtual void copy_value(const value_storage& src,
+                            value_storage&       dest,
+                            allocator*           alloc) const;
 
 
-    value_storage_t& prev_value()
+    value_storage& prev_value()
     {
       return *prev_value_;
     }
 
-    const value_storage_t& prev_value() const
+    const value_storage& prev_value() const
     {
       return *prev_value_;
     }
@@ -555,7 +555,7 @@ class string_field_instruction
       return op_context_;
     }
 
-    const value_storage_t& default_value() const
+    const value_storage& default_value() const
     {
       return default_value_;
     }
@@ -563,9 +563,9 @@ class string_field_instruction
   protected:
     friend class dictionary_builder;
     const op_context_t* op_context_;
-    value_storage_t default_value_;
-    value_storage_t* prev_value_;
-    value_storage_t prev_storage_;
+    value_storage default_value_;
+    value_storage* prev_value_;
+    value_storage prev_storage_;
 };
 
 
@@ -703,19 +703,19 @@ struct group_content_helper
   {
   }
 
-  void construct_group_subfields(value_storage_t* group_content,
-                                 allocator*       alloc) const;
-  void destruct_group_subfields(value_storage_t* group_content,
-                                allocator*       alloc) const;
+  void construct_group_subfields(value_storage* group_content,
+                                 allocator*     alloc) const;
+  void destruct_group_subfields(value_storage* group_content,
+                                allocator*     alloc) const;
 
-  void copy_group_subfields(const value_storage_t* src,
-                            value_storage_t*       dest,
-                            allocator*             alloc) const;
+  void copy_group_subfields(const value_storage* src,
+                            value_storage*       dest,
+                            allocator*           alloc) const;
 
   /// Returns the number of bytes needed for the content of the group
   uint32_t group_content_byte_count() const
   {
-    return subinstructions_count_ * sizeof(value_storage_t);
+    return subinstructions_count_ * sizeof(value_storage);
   }
 
   /// Returns the index for the subinstruction with specified id,
@@ -733,7 +733,7 @@ struct group_content_helper
 
   field_instruction* subinstruction(std::size_t index) const
   {
-      assert(index < subinstructions_count_);
+    assert(index < subinstructions_count_);
     return subinstructions_[index];
   }
 
@@ -779,21 +779,21 @@ class group_field_instruction
       has_pmap_bit_ = subinstruction_has_pmap_bit();
     }
 
-    virtual void construct_value(value_storage_t& storage,
-                                 allocator*       alloc) const;
-    virtual void destruct_value(value_storage_t& storage,
-                                allocator*       alloc) const;
+    virtual void construct_value(value_storage& storage,
+                                 allocator*     alloc) const;
+    virtual void destruct_value(value_storage& storage,
+                                allocator*     alloc) const;
 
     // perform deep copy
-    virtual void copy_value(const value_storage_t& src,
-                            value_storage_t&       dest,
-                            allocator*             alloc) const;
+    virtual void copy_value(const value_storage& src,
+                            value_storage&       dest,
+                            allocator*           alloc) const;
 
     virtual void accept(field_instruction_visitor&, void*) const;
 
 
-    void ensure_valid_storage(value_storage_t& storage,
-                              allocator*       alloc) const;
+    void ensure_valid_storage(value_storage& storage,
+                              allocator*     alloc) const;
 };
 
 template <typename T>
@@ -844,24 +844,24 @@ class sequence_field_instruction
       has_pmap_bit_ = subinstruction_has_pmap_bit();
     }
 
-    virtual void construct_value(value_storage_t& storage,
-                                 allocator*       alloc) const;
-    virtual void destruct_value(value_storage_t& storage,
-                                allocator*       alloc) const;
+    virtual void construct_value(value_storage& storage,
+                                 allocator*     alloc) const;
+    virtual void destruct_value(value_storage& storage,
+                                allocator*     alloc) const;
 
-    void construct_sequence_elements(value_storage_t& storage,
-                                     std::size_t      start,
-                                     std::size_t      length,
-                                     allocator*       alloc) const;
-    void destruct_sequence_elements(value_storage_t& storage,
-                                    std::size_t      start,
-                                    std::size_t      length,
-                                    allocator*       alloc) const;
+    void construct_sequence_elements(value_storage& storage,
+                                     std::size_t    start,
+                                     std::size_t    length,
+                                     allocator*     alloc) const;
+    void destruct_sequence_elements(value_storage& storage,
+                                    std::size_t    start,
+                                    std::size_t    length,
+                                    allocator*     alloc) const;
 
     // perform deep copy
-    virtual void copy_value(const value_storage_t& src,
-                            value_storage_t&       dest,
-                            allocator*             alloc) const;
+    virtual void copy_value(const value_storage& src,
+                            value_storage&       dest,
+                            allocator*           alloc) const;
 
     virtual void accept(field_instruction_visitor&, void*) const;
 
@@ -930,18 +930,18 @@ class template_instruction
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
 #endif
-    
-    void construct_value(value_storage_t& storage,
-                         value_storage_t* fields_storage,
-                         allocator*       alloc,
-                         bool             construct_subfields=true) const;
 
-                         
-    void copy_construct_value(value_storage_t&       storage,
-                              value_storage_t*       fields_storage,
-                              allocator*             alloc,
-                              const value_storage_t* src) const;
-                              
+    void construct_value(value_storage& storage,
+                         value_storage* fields_storage,
+                         allocator*     alloc,
+                         bool           construct_subfields=true) const;
+
+
+    void copy_construct_value(value_storage&       storage,
+                              value_storage*       fields_storage,
+                              allocator*           alloc,
+                              const value_storage* src) const;
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -990,16 +990,16 @@ class templateref_instruction
     {
     }
 
-    virtual void construct_value(value_storage_t& storage,
-                                 allocator*       alloc) const;
-    virtual void destruct_value(value_storage_t& storage,
-                                allocator*       alloc) const;
+    virtual void construct_value(value_storage& storage,
+                                 allocator*     alloc) const;
+    virtual void destruct_value(value_storage& storage,
+                                allocator*     alloc) const;
 
 
     /// Perform deep copy
-    virtual void copy_value(const value_storage_t& src,
-                            value_storage_t&       dest,
-                            allocator*             alloc) const;
+    virtual void copy_value(const value_storage& src,
+                            value_storage&       dest,
+                            allocator*           alloc) const;
 
     virtual void accept(field_instruction_visitor&, void*) const;
 
@@ -1013,9 +1013,9 @@ class templates_description
   public:
     template <unsigned SIZE>
     templates_description(
-      const char*               ns,
-      const char*               template_ns,
-      const char*               dictionary,
+      const char* ns,
+      const char* template_ns,
+      const char* dictionary,
       const template_instruction* (&instructions)[SIZE])
       : ns_(ns)
       , template_ns_(template_ns)

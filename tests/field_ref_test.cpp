@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_SUITE( test_field_ref )
 BOOST_AUTO_TEST_CASE(integer_field_test)
 {
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   uint64_cref null_ref;
 
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
 
 
     {
-      value_storage_t base_value = helper.delta_base_value_of(ref);
+      value_storage base_value = helper.delta_base_value_of(ref);
       uint64_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK_EQUAL(base_cref, UINT64_MAX);
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     {
       ref = 4;
       helper.save_previous_value(ref);
-      value_storage_t base_value = helper.delta_base_value_of(ref);
+      value_storage base_value = helper.delta_base_value_of(ref);
       uint64_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK_EQUAL(base_cref, 4);
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
 BOOST_AUTO_TEST_CASE(decimal_field_test)
 {
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     decimal_field_instruction inst(operator_copy,
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     // * empty – it is a dynamic error [ERR D6] if the previous value is empty.
 
     {
-      value_storage_t base_value = helper.delta_base_value_of(ref);
+      value_storage base_value = helper.delta_base_value_of(ref);
       decimal_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK_EQUAL(base_cref.mantissa(), INT64_MAX);
@@ -305,7 +305,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
       ref.set_mantissa(4);
       ref.set_exponent(0);
       helper.save_previous_value(ref);
-      value_storage_t base_value = helper.delta_base_value_of(ref);
+      value_storage base_value = helper.delta_base_value_of(ref);
       decimal_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK_EQUAL(base_cref.mantissa(), 4);
@@ -319,7 +319,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
 BOOST_AUTO_TEST_CASE(decimal_field_test2)
 {
   malloc_allocator allocator;
-  value_storage_t storage;
+  value_storage storage;
 
   {
     mantissa_field_instruction mantissa_inst(operator_copy, 0, nullable<int64_t>(6));
@@ -380,7 +380,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
 BOOST_AUTO_TEST_CASE(string_field_instruction_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
   const char* default_value = "initial_string";
   {
     ascii_field_instruction inst(operator_copy,
@@ -407,7 +407,7 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
 BOOST_AUTO_TEST_CASE(string_field_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
   const char* default_value = "initial_string";
   ascii_field_instruction inst(operator_copy,
                                presence_optional,
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
   inst.construct_value(storage, &alloc);
   BOOST_CHECK_EQUAL(inst.has_initial_value(),        true);
 
-  BOOST_CHECK_EQUAL(storage.array_storage.capacity_, 0);
+  BOOST_CHECK_EQUAL(storage.of_array.capacity_, 0);
 
   {
     ascii_string_cref cref(&storage, &inst);
@@ -463,7 +463,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
 
     ref.shallow_assign("abcde");
     BOOST_CHECK(ref == "abcde");
-    BOOST_CHECK_EQUAL(storage.array_storage.capacity_, 0);
+    BOOST_CHECK_EQUAL(storage.of_array.capacity_, 0);
 
     ref.as_absent();
       BOOST_CHECK(ref.absent());
@@ -481,7 +481,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     // * empty – it is a dynamic error [ERR D6] if the previous value is empty.
 
     {
-      value_storage_t base_value = helper.delta_base_value_of(ref);
+      value_storage base_value = helper.delta_base_value_of(ref);
       ascii_string_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "initial_string" );
@@ -493,7 +493,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     {
       ref = "4";
       helper.save_previous_value(ref);
-      value_storage_t base_value = helper.delta_base_value_of(ref);
+      value_storage base_value = helper.delta_base_value_of(ref);
       ascii_string_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "4");
@@ -507,7 +507,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     // * empty – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     //
     {
-      value_storage_t base_value = helper.tail_base_value_of(ref);
+      value_storage base_value = helper.tail_base_value_of(ref);
       ascii_string_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "4");
@@ -515,7 +515,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     ref.as_absent();
     helper.save_previous_value(ref);
     {
-      value_storage_t base_value = helper.tail_base_value_of(ref);
+      value_storage base_value = helper.tail_base_value_of(ref);
       ascii_string_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "initial_string" );
@@ -524,7 +524,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     helper.previous_value_of(ref).defined(false);
 
     {
-      value_storage_t base_value = helper.tail_base_value_of(ref);
+      value_storage base_value = helper.tail_base_value_of(ref);
       ascii_string_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "initial_string" );
@@ -540,7 +540,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
 BOOST_AUTO_TEST_CASE(string_delta_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
   const char* default_value = "initial_string";
   ascii_field_instruction inst(operator_copy,
                                presence_optional,
@@ -555,8 +555,8 @@ BOOST_AUTO_TEST_CASE(string_delta_test)
   {
     ascii_string_mref mref(&alloc, &storage, &inst);
     const char* base_str = "base_value";
-    value_storage_t base_value;
-    base_value.array_storage.content_ = const_cast<char*>(base_str);
+    value_storage base_value;
+    base_value.of_array.content_ = const_cast<char*>(base_str);
     base_value.array_length( strlen(base_str) );
 
 
@@ -582,7 +582,7 @@ BOOST_AUTO_TEST_CASE(string_delta_test)
 BOOST_AUTO_TEST_CASE(group_field_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
 
   unsigned char f0_initial[] = "\x01\x02\x03\x04\x05";
   const char* f1_initial = "abcdefg";
@@ -613,11 +613,11 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                      instructions,
                                      2);
 
-  BOOST_CHECK_EQUAL(group_inst.group_content_byte_count(), 2 * sizeof(value_storage_t) );
+  BOOST_CHECK_EQUAL(group_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
   group_inst.construct_value(storage, &alloc);
 
-  BOOST_CHECK(storage.group_storage.content_ != 0);
+  BOOST_CHECK(storage.of_group.content_ != 0);
   {
     group_cref ref(&storage, &group_inst);
     BOOST_CHECK_EQUAL(ref.present(),  false);
@@ -698,7 +698,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
 BOOST_AUTO_TEST_CASE(sequence_field_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
 
   unsigned char f0_initial[] = "\x01\x02\x03\x04\x05";
   const char* f1_initial = "abcdefg";
@@ -739,7 +739,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                            &length_inst);
 
     BOOST_CHECK_EQUAL(sequence_inst.subinstructions_count(),      2);
-    BOOST_CHECK_EQUAL(sequence_inst.group_content_byte_count(), 2 * sizeof(value_storage_t) );
+    BOOST_CHECK_EQUAL(sequence_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
   sequence_inst.construct_value(storage, &alloc);
 
@@ -839,13 +839,13 @@ class mock_field_instruction
     mutable int copy_value_deep_called_;
 
 
-    virtual void construct_value(value_storage_t& /* storage */,
+    virtual void construct_value(value_storage& /* storage */,
                                  allocator      *       /* alloc */) const
     {
       construct_value_called_++;
     }
 
-    virtual void destruct_value(value_storage_t& /* storage */,
+    virtual void destruct_value(value_storage& /* storage */,
                                 allocator      *       /* alloc */) const
     {
       destruct_value_called_++;
@@ -853,8 +853,8 @@ class mock_field_instruction
 
 
     /// Perform deep copy
-    virtual void copy_value(const value_storage_t& /* src */,
-                            value_storage_t      & /* dest */,
+    virtual void copy_value(const value_storage& /* src */,
+                            value_storage      & /* dest */,
                             allocator            *             /* alloc */) const
     {
       copy_value_deep_called_++;
@@ -869,7 +869,7 @@ class mock_field_instruction
 BOOST_AUTO_TEST_CASE(sequence_resize_test)
 {
   debug_allocator alloc;
-  value_storage_t storage;
+  value_storage storage;
 
   mock_field_instruction mock0;
 

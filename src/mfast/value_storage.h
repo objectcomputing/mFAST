@@ -26,13 +26,13 @@ namespace mfast
 {
   class template_instruction;
 
-  union value_storage_t {
+  union value_storage {
     struct {
       uint32_t present_;                ///< indicate if the value is present,
       uint32_t padding_ : 31;
       uint32_t defined_bit_ : 1;
       uint64_t content_;
-    } uint_storage;
+    } of_uint;
 
     struct {
       uint32_t present_;                ///< indicate if the value is present,
@@ -40,15 +40,15 @@ namespace mfast
       uint16_t padding_ : 15;
       uint16_t defined_bit_ : 1;
       int64_t mantissa_;
-    } decimal_storage;
+    } of_decimal;
 
     struct {
       uint32_t present_;                ///< indicate if the value is present,
       uint32_t own_content_ : 1;          ///< indicate if \a content_ should be deallocated
       uint32_t padding_ : 30;
       uint32_t defined_bit_ : 1;
-      value_storage_t* content_;
-    } group_storage; ///< used for group or template
+      value_storage* content_;
+    } of_group; ///< used for group or template
 
     struct {
       uint32_t len_; ///< the length+1 of content; it represents null value or content is absent when len==0.
@@ -59,65 +59,65 @@ namespace mfast
       uint32_t defined_bit_ : 1; ///< used by FAST encoder/decoder for tracking if a dictionary
                                  ///< value is defined or not.
       void* content_;
-    } array_storage;
+    } of_array;
 
     struct
     {
       union {
         const template_instruction* instruction_;
         uint64_t dummy; // make sure content_ and instruction_ won't be packed together in 32 bits environment
-      } instruction_storage;
+      } of_instruction;
 
-      value_storage_t* content_;
-    } templateref_storage;
+      value_storage* content_;
+    } of_templateref;
 
 
     // construct an undefined value
-    value_storage_t()
+    value_storage()
     {
-      uint_storage.content_ = 0;
-      uint_storage.padding_ = 0;
-      uint_storage.defined_bit_ = 0;
-      uint_storage.present_ = 0;
+      of_uint.content_ = 0;
+      of_uint.padding_ = 0;
+      of_uint.defined_bit_ = 0;
+      of_uint.present_ = 0;
     };
 
     // construct a defined non-empty value
-    value_storage_t(int)
+    value_storage(int)
     {
-      uint_storage.content_ = 0;
-      uint_storage.padding_ = 0;
-      uint_storage.defined_bit_ = 1;
-      uint_storage.present_ = 1;
+      of_uint.content_ = 0;
+      of_uint.padding_ = 0;
+      of_uint.defined_bit_ = 1;
+      of_uint.present_ = 1;
     };
 
     bool is_defined() const
     {
-      return array_storage.defined_bit_;
+      return of_array.defined_bit_;
     }
 
     void defined(bool v)
     {
-      array_storage.defined_bit_ = v;
+      of_array.defined_bit_ = v;
     }
 
     bool is_empty() const
     {
-      return array_storage.len_ == 0;
+      return of_array.len_ == 0;
     }
 
     void present(bool p)
     {
-      array_storage.len_ = p;
+      of_array.len_ = p;
     }
 
     uint32_t array_length() const
     {
-      return array_storage.len_ == 0 ? 0 : array_storage.len_ -1;
+      return of_array.len_ == 0 ? 0 : of_array.len_ -1;
     }
 
     void array_length(uint32_t n)
     {
-      array_storage.len_ = n+1;
+      of_array.len_ = n+1;
     }
   };
   
