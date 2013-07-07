@@ -361,7 +361,7 @@ void templateref_instruction::construct_value(value_storage& storage,
                                               allocator*       ) const
 {
   storage.of_templateref.of_instruction.instruction_ = 0;
-  storage.of_templateref.contˆent_ = 0;
+  storage.of_templateref.content_ = 0;
 }
 
 void templateref_instruction::destruct_value(value_storage& storage,
