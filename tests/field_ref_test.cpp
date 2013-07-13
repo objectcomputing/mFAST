@@ -42,7 +42,6 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
 
   uint64_cref null_ref;
 
-  BOOST_CHECK(!null_ref);
   BOOST_CHECK(!null_ref.present() );
 
   {
@@ -71,16 +70,16 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
 
     ref = 5;
     BOOST_CHECK( ref.present() );
-    BOOST_CHECK_EQUAL(ref, 5);
+    BOOST_CHECK_EQUAL(ref.value(), 5);
 
     ref.as_initial_value();
     BOOST_CHECK( ref.present() );
-    BOOST_CHECK_EQUAL(ref, UINT64_MAX);
+    BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
 
     // test convertion from field_mref to field_cref
 
     uint64_cref another_cref(ref);
-    BOOST_CHECK_EQUAL(another_cref, UINT64_MAX);
+    BOOST_CHECK_EQUAL(another_cref.value(), UINT64_MAX);
 
 
     ref.as_absent();
@@ -100,7 +99,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
       value_storage base_value = helper.delta_base_value_of(ref);
       uint64_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
-      BOOST_CHECK_EQUAL(base_cref, UINT64_MAX);
+      BOOST_CHECK_EQUAL(base_cref.value(), UINT64_MAX);
     }
     {
       helper.save_previous_value(ref);
@@ -112,7 +111,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
       value_storage base_value = helper.delta_base_value_of(ref);
       uint64_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
-      BOOST_CHECK_EQUAL(base_cref, 4);
+      BOOST_CHECK_EQUAL(base_cref.value(), 4);
     }
   }
 
@@ -132,7 +131,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     BOOST_CHECK(cref.present() );
     BOOST_CHECK_EQUAL(cref.id(), 1);
     BOOST_CHECK( strcmp(cref.name(), "test_uint64") == 0);
-    BOOST_CHECK_EQUAL( cref, UINT64_MAX);
+    BOOST_CHECK_EQUAL( cref.value(), UINT64_MAX);
 
     uint64_mref ref(&allocator, &storage, &inst);
     BOOST_CHECK(ref.present() );
@@ -156,7 +155,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
 
     int32_cref cref(&storage, &inst);
     BOOST_CHECK(cref.present() );
-    BOOST_CHECK_EQUAL(cref, INT32_MIN);
+    BOOST_CHECK_EQUAL(cref.value(), INT32_MIN);
   }
 
 

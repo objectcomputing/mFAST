@@ -59,10 +59,9 @@ class int_cref
     }
 
 
-    // test if the field value is null
-    operator T () const {
-      return value();
-    }
+    // operator T () const {
+    //   return value();
+    // }
 
     T value() const
     {
@@ -128,18 +127,18 @@ class int_mref
       this->storage()->of_uint.content_ = this->instruction()->initial_value();
     }
 
-    const int_mref& operator ++ () const
-    {
-      ++value_ref();
-      return *this;
-    }
+    // const int_mref& operator ++ () const
+    // {
+    //   ++value_ref();
+    //   return *this;
+    // }
 
-    T operator ++(int) const
-    {
-      T result = value();
-      ++value_ref();
-      return result;
-    }
+    // T operator ++(int) const
+    // {
+    //   T result = value();
+    //   ++value_ref();
+    //   return result;
+    // }
 
     T value() const
     {

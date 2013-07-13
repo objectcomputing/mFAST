@@ -36,8 +36,9 @@ namespace mfast
 
     struct {
       uint32_t present_;                ///< indicate if the value is present,
-      int16_t exponent_;
-      uint16_t padding_ : 15;
+      int8_t exponent_;
+      int8_t padding1_;
+      uint16_t padding2_ : 15;
       uint16_t defined_bit_ : 1;
       int64_t mantissa_;
     } of_decimal;

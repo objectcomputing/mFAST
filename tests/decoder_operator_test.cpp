@@ -519,7 +519,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 5);
+    BOOST_CHECK_EQUAL(ref.value() , 5);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
 
     // check the previous value is properly set
@@ -607,7 +607,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , UINT64_MAX);
+    BOOST_CHECK_EQUAL(ref.value() , UINT64_MAX);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
@@ -627,7 +627,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 5);
+    BOOST_CHECK_EQUAL(ref.value() , 5);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
 
     // check the previous value is properly set
@@ -726,7 +726,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     BOOST_CHECK_EQUAL(old_mask >>1 , pmap.mask());
 
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 0);
+    BOOST_CHECK_EQUAL(ref.value() , 0);
     BOOST_CHECK_EQUAL(strm.in_avail(), 0);
 
     uint64_cref prev(&inst.prev_value(), &inst);
@@ -766,7 +766,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , UINT64_MAX);
+    BOOST_CHECK_EQUAL(ref.value() , UINT64_MAX);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
@@ -786,7 +786,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value incremented by one. The incremented value also becomes the new previous value.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 6);
+    BOOST_CHECK_EQUAL(ref.value() , 6);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
 
     // check the previous value is properly set
@@ -874,7 +874,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , UINT64_MAX);
+    BOOST_CHECK_EQUAL(ref.value() , UINT64_MAX);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
@@ -894,7 +894,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value incremented by one. The incremented value also becomes the new previous value.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 6);
+    BOOST_CHECK_EQUAL(ref.value() , 6);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
 
     // check the previous value is properly set
@@ -996,7 +996,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     // The base value depends on the state of the previous value in the following way:
    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 7);
+    BOOST_CHECK_EQUAL(ref.value() , 7);
     BOOST_CHECK_EQUAL(strm.in_avail(), 0);
 
     uint64_cref prev(&inst.prev_value(), &inst);
@@ -1036,7 +1036,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     // The base value depends on the state of the previous value in the following way:
    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 2);  // TODO: MSVC Error
+    BOOST_CHECK_EQUAL(ref.value() , 2);  
     BOOST_CHECK_EQUAL(strm.in_avail(), 0);
 
     uint64_cref prev(&inst.prev_value(), &inst);
@@ -1078,7 +1078,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     // The base value depends on the state of the previous value in the following way:
    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref , 6);
+    BOOST_CHECK_EQUAL(ref.value() , 6);
     BOOST_CHECK_EQUAL(strm.in_avail(), 0);
 
     uint64_cref prev(&inst.prev_value(), &inst);

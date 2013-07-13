@@ -59,6 +59,10 @@ struct decoder_impl
   bool force_reset_;
   debug_stream debug_;
   presence_map* current_;
+  
+#ifdef REPORT_OVERFLOW
+  std::ostream* overflow_log_;
+#endif
 
   decoder_impl();
   ~decoder_impl();
@@ -89,6 +93,9 @@ inline
 decoder_impl::decoder_impl()
   : strm_(0)
 {
+#ifdef REPORT_OVERFLOW
+  overflow_log_ = 0;
+#endif
 }
 
 void decoder_impl::reset_messages()
@@ -283,6 +290,10 @@ decoder_impl::post_visit(const dynamic_mref& /* mref */, struct_context& context
 message_base*
 decoder_impl::decode_segment(fast_istream* strm)
 {
+#ifdef REPORT_OVERFLOW
+  strm->overflow_log_ = this->overflow_log_;
+#endif
+  
   strm_ = strm;
   struct_context context;
   decode_pmap(context);
@@ -385,6 +396,14 @@ decoder::debug_log(std::ostream& log)
   impl_->debug_.set(log);
 }
 
+#endif
+
+#ifdef REPORT_OVERFLOW
+void 
+decoder::overflow_log(std::ostream& os)
+{
+  impl_->overflow_log_ = &log;
+}
 #endif
 
 }

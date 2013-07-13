@@ -23,7 +23,7 @@
 #include "mfast/decoder_field_operator.h"
 #include "mfast/codec_helper.h"
 #include "mfast/fast_istream_extractor.h"
-
+#include "mfast/check_overflow.h"
 namespace mfast
 {
 
@@ -417,8 +417,7 @@ struct increment_operation
   template <typename T>
   void operator()(T&, value_storage& previous) const
   {
-    T tmp(0, &previous, 0);
-    ++tmp;
+     ++reinterpret_cast<typename T::value_type&>(previous.of_uint.content_);
   }
 
 };
@@ -554,7 +553,6 @@ class default_operator
 };
 
 
-
 class delta_operator
   : public decoder_field_operator
   , public mfast::detail::codec_helper
@@ -568,15 +566,10 @@ class delta_operator
 
       value_storage bv = delta_base_value_of( mref );
       T tmp(0, &bv, 0);
-      d += tmp.value();
-      typedef typename T::value_type int_type;
-      int_type r = static_cast<int_type> (d);
 
-      // check overflow
-      if (d != static_cast<int64_t>(r)) // TODO : signed, unsigned
-        BOOST_THROW_EXCEPTION(fast_reportable_error("R4"));
-
-      mref.as( r );
+      check_overflow(tmp.value(), d, mref.instruction(), stream);
+      mref.as( tmp.value()+d );
+      
       save_previous_value(mref);
     }
     else {
@@ -657,10 +650,13 @@ class delta_operator
         if (mref.present()) {
           value_storage bv = delta_base_value_of(mref);
 
-          mref.set_mantissa( mref.mantissa() + bv.of_decimal.mantissa_);
-          mref.set_exponent( mref.exponent() + bv.of_decimal.exponent_);
-          if (mref.exponent() > 63 || mref.exponent() < -63 )
-            BOOST_THROW_EXCEPTION(fast_reportable_error("R1"));
+          check_overflow(bv.of_decimal.mantissa_, mref.mantissa(), mref.instruction(), stream);
+          check_overflow(bv.of_decimal.exponent_, mref.exponent(), mref.instruction(), stream);
+          mref.set_mantissa( bv.of_decimal.mantissa_ + mref.mantissa() );          
+          mref.set_exponent( bv.of_decimal.exponent_ + mref.exponent() );
+          // if (mref.exponent() > 63 || mref.exponent() < -63 )
+          //   BOOST_THROW_EXCEPTION(fast_reportable_error("R1"));
+          // 
           save_previous_value(mref);
         }
         else {

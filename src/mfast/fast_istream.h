@@ -38,6 +38,9 @@ class fast_istream
       : gptr_(buf)
       , egptr_(buf+sz)
     {
+#ifdef REPORT_OVERFLOW
+      overflow_log_ = 0;
+#endif
     }
 
     size_t in_avail() const
@@ -176,6 +179,14 @@ class fast_istream
       gptr_ += n;
     }
 
+#ifdef REPORT_OVERFLOW
+    std::ostream& overflow_log ()
+    {
+      return *overflow_log_;
+    }
+    std::ostream* overflow_log_;
+#endif
+  
   private:
 
     unsigned char sbumpc()
@@ -197,9 +208,9 @@ struct int_trait;
 
 
 template <>
-struct int_trait<int16_t>   // only used for decoding decimal exponent
+struct int_trait<int8_t>   // only used for decoding decimal exponent
 {
-  typedef int16_t temp_type;
+  typedef int8_t temp_type;
 };
 
 

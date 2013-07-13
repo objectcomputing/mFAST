@@ -21,10 +21,16 @@
 
 #include <cmath>
 #include <cfloat>
+#include <boost/multiprecision/cpp_dec_float.hpp>
+
 #include "mfast/field_ref.h"
 #include "mfast/int_ref.h"
 
 namespace mfast {
+  
+typedef boost::multiprecision::cpp_dec_float<18> decimal_backend;
+  
+typedef boost::multiprecision::number<decimal_backend> decimal;
 
 class allocator;
 
@@ -65,10 +71,18 @@ class decimal_cref
       return this->storage()->of_decimal.mantissa_;
     }
 
-    int16_t exponent() const
+    int8_t exponent() const
     {
       return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
     }
+    
+    decimal value() const 
+    {
+      decimal r( mantissa() );
+      r *= decimal_backend(1.0, exponent());
+      return r;
+    }
+    
 
     instruction_cptr instruction() const
     {
@@ -126,13 +140,13 @@ class exponent_mref
       as(this->instruction()->exponent_initial_value());
     }
 
-    void as(int16_t v) const
+    void as(int8_t v) const
     {
       this->storage()->of_decimal.exponent_ = v;
       this->storage()->present(true);
     }
 
-    int16_t value() const
+    int8_t value() const
     {
       return this->storage()->of_decimal.exponent_;
     }
@@ -147,7 +161,7 @@ class exponent_mref
 
   private:
     friend fast_istream& operator >> (fast_istream& strm, const exponent_mref& mref);
-    int16_t& value_ref() const
+    int8_t& value_ref() const
     {
       this->storage()->present(true);
       return this->storage()->of_decimal.exponent_;
@@ -210,13 +224,28 @@ class decimal_mref
       return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
     }
 
-    void as(int64_t mant, int16_t exp) const
+    void as(int64_t mant, int8_t exp) const
     {
       assert (exp <= 64 && exp >= -64);
       this->storage()->of_decimal.mantissa_ = mant;
       this->storage()->of_decimal.exponent_ = exp;
       this->storage()->present(1);
     }
+    
+    template <unsigned Digits10, class ExponentType, class Allocator>
+    void as(boost::multiprecision::number<boost::multiprecision::cpp_dec_float<Digits10,ExponentType,Allocator> > d)
+    {
+      double m;
+      int32_t exp;
+      d.backend().extract_parts(m, exp);
+      d *= decimal_backend(1.0, 18-exp);
+      this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
+      this->storage()->of_decimal.exponent_ = exp-18;
+      normalize();
+      this->storage()->present(1);
+    }
+    
+    
 
     void set_mantissa(int64_t v) const
     {
@@ -250,6 +279,17 @@ class decimal_mref
     bool has_individual_operators() const
     {
       return this->instruction()->field_type() == field_type_exponent;
+    }
+    
+    void normalize()
+    {
+      while (mantissa() != 0 && mantissa() % 10 == 0) {
+        this->set_mantissa(mantissa()/10);
+        this->set_exponent(exponent()+1);
+      }
+
+      if (mantissa() == 0)
+        this->set_exponent(0);
     }
 
   private:

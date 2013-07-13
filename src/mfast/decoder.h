@@ -63,6 +63,10 @@ class decoder
 #ifndef NDEBUG
     void debug_log(std::ostream& os);
 #endif
+    
+#ifdef REPORT_OVERFLOW
+    void overflow_log(std::ostream& os);
+#endif
 
   private:
     decoder_impl* impl_;
