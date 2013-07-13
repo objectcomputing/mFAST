@@ -23,7 +23,6 @@
 #include "string_ref.h"
 #include "decimal_ref.h"
 #include <iostream>
-#include <sstream>
 #include <iomanip>
 #include <boost/io/ios_state.hpp>
 
@@ -75,31 +74,7 @@ inline std::ostream& operator << (std::ostream& os, const byte_vector_cref& cref
 
 inline std::ostream& operator << (std::ostream& os, const decimal_cref& cref)
 {
-  if (cref.exponent() >=0 ){
-    os << cref.mantissa();
-    for (int i = 0; i < cref.exponent(); ++i) {
-      os << "0";
-    }
-  }
-  else {
-    std::stringstream temp;
-    temp << cref.mantissa();
-    std::string str = temp.str();
-    int integer_part_digits = str.size() + cref.exponent();
-    if (integer_part_digits > 0) {
-      str.insert(integer_part_digits, 1, '.');
-      os << str;
-    }
-    else if (integer_part_digits < 0){
-      boost::io::ios_flags_saver  ifs( os );
-      os.precision(-integer_part_digits);
-      os.setf( std::ios::fixed, std:: ios::floatfield ); // floatfield set to fixed
-      os << 0.0L << temp;
-    }
-    else {
-      os << "0." << temp;
-    }
-  }
+  os << cref.value();
   return os;
 }
 }
