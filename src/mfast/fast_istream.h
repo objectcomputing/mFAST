@@ -22,7 +22,7 @@
 #include <limits>
 #include <boost/type_traits.hpp>
 
-#include "presence_map.h"
+#include "decoder_presence_map.h"
 #include "field_instruction.h"
 #include "exceptions.h"
 #include <iostream>
@@ -80,7 +80,7 @@ class fast_istream
     decode(T& result, bool nullable);
 
 
-    void decode(presence_map& pmap)
+    void decode(decoder_presence_map& pmap)
     {
       if (!pmap.load(gptr_)) {
         while (0 == (sbumpc() & 0x80)) ;

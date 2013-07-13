@@ -16,14 +16,14 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "presence_map.h"
+#include "decoder_presence_map.h"
 
 
 #ifndef NDEBUG
 
 namespace mfast {
 std::ostream&
-operator << (std::ostream& os, const presence_map& pmap)
+operator << (std::ostream& os, const decoder_presence_map& pmap)
 {
   uint64_t mask = pmap.mask_ >> 1;
   if (mask == 0) {

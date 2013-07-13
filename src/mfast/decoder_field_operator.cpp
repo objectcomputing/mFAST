@@ -18,7 +18,7 @@
 //
 
 #include "mfast/fast_istream.h"
-#include "mfast/presence_map.h"
+#include "mfast/decoder_presence_map.h"
 #include "mfast/codec_helper.h"
 #include "mfast/decoder_field_operator.h"
 #include "mfast/codec_helper.h"
@@ -30,56 +30,56 @@ namespace mfast
 void
 decoder_field_operator::decode(const int32_mref& /* mref */,
                                fast_istream&     /* stream */,
-                               presence_map&     /* pmap */) const
+                               decoder_presence_map&     /* pmap */) const
 {
 }
 
 void
 decoder_field_operator::decode(const uint32_mref& /* mref */,
                                fast_istream&      /* stream */,
-                               presence_map&      /* pmap */) const
+                               decoder_presence_map&      /* pmap */) const
 {
 }
 
 void
 decoder_field_operator::decode(const int64_mref& /* mref */,
                                fast_istream&     /* stream */,
-                               presence_map&     /* pmap */) const
+                               decoder_presence_map&     /* pmap */) const
 {
 }
 
 void
 decoder_field_operator::decode(const uint64_mref& /* mref */,
                                fast_istream&      /* stream */,
-                               presence_map&      /* pmap */) const
+                               decoder_presence_map&      /* pmap */) const
 {
 }
 
 void
 decoder_field_operator::decode(const ascii_string_mref& /* mref */,
                                fast_istream&            /* stream */,
-                               presence_map&            /* pmap */) const
+                               decoder_presence_map&            /* pmap */) const
 {
 }
 
 void
 decoder_field_operator::decode(const unicode_string_mref& /* mref */,
                                fast_istream&              /* stream */,
-                               presence_map&              /* pmap */) const
+                               decoder_presence_map&              /* pmap */) const
 {
 }
 
 void
 decoder_field_operator::decode(const byte_vector_mref& /* mref */,
                                fast_istream&           /* stream */,
-                               presence_map&           /* pmap */) const
+                               decoder_presence_map&           /* pmap */) const
 {
 }
 
 void
 decoder_field_operator::decode(const decimal_mref& /* mref */,
                                fast_istream&       /* stream */,
-                               presence_map&       /* pmap */) const
+                               decoder_presence_map&       /* pmap */) const
 {
 }
 
@@ -91,7 +91,7 @@ struct decimal_decorder
 {
   void decode_decimal(const decimal_mref& mref,
                       fast_istream&       stream,
-                      presence_map&       pmap) const
+                      decoder_presence_map&       pmap) const
   {
     const Operator* derived = static_cast<const Operator*>(this);
     if(!mref.has_individual_operators())
@@ -117,7 +117,7 @@ class no_operator
     template <typename T>
     void decode_impl(const T&      mref,
                      fast_istream& stream,
-                     presence_map  & /* pmap */) const
+                     decoder_presence_map  & /* pmap */) const
     {
       stream >> mref;
 
@@ -134,56 +134,56 @@ class no_operator
 
     virtual void decode(const int32_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint32_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const int64_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint64_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const ascii_string_mref& mref,
                         fast_istream&            stream,
-                        presence_map&            pmap) const
+                        decoder_presence_map&            pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const unicode_string_mref& mref,
                         fast_istream&              stream,
-                        presence_map&              pmap) const
+                        decoder_presence_map&              pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const byte_vector_mref& mref,
                         fast_istream&           stream,
-                        presence_map&           pmap) const
+                        decoder_presence_map&           pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const decimal_mref& mref,
                         fast_istream&       stream,
-                        presence_map&       pmap) const
+                        decoder_presence_map&       pmap) const
     {
       decode_decimal(mref, stream,pmap);
     }
@@ -199,7 +199,7 @@ class constant_operator
     template <typename T>
     void decode_impl(const T&      mref,
                      fast_istream& /* stream */,
-                     presence_map& pmap) const
+                     decoder_presence_map& pmap) const
     {
 
       // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
@@ -222,56 +222,56 @@ class constant_operator
 
     virtual void decode(const int32_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint32_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const int64_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint64_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const ascii_string_mref& mref,
                         fast_istream&            stream,
-                        presence_map&            pmap) const
+                        decoder_presence_map&            pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const unicode_string_mref& mref,
                         fast_istream&              stream,
-                        presence_map&              pmap) const
+                        decoder_presence_map&              pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const byte_vector_mref& mref,
                         fast_istream&           stream,
-                        presence_map&           pmap) const
+                        decoder_presence_map&           pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const decimal_mref& mref,
                         fast_istream&       stream,
-                        presence_map&       pmap) const
+                        decoder_presence_map&       pmap) const
     {
       decode_decimal(mref, stream,pmap);
     }
@@ -287,7 +287,7 @@ class copy_or_increment_operator_impl
     template <typename T>
     void decode_impl(const T&      mref,
                      fast_istream& stream,
-                     presence_map& pmap) const
+                     decoder_presence_map& pmap) const
     {
       if (pmap.is_next_bit_set()) {
         stream >> mref;
@@ -356,56 +356,56 @@ class copy_operator
   public:
     virtual void decode(const int32_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint32_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const int64_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint64_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const ascii_string_mref& mref,
                         fast_istream&            stream,
-                        presence_map&            pmap) const
+                        decoder_presence_map&            pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const unicode_string_mref& mref,
                         fast_istream&              stream,
-                        presence_map&              pmap) const
+                        decoder_presence_map&              pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const byte_vector_mref& mref,
                         fast_istream&           stream,
-                        presence_map&           pmap) const
+                        decoder_presence_map&           pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const decimal_mref& mref,
                         fast_istream&       stream,
-                        presence_map&       pmap) const
+                        decoder_presence_map&       pmap) const
     {
       decode_decimal(mref, stream,pmap);
     }
@@ -430,28 +430,28 @@ class increment_operator
   public:
     virtual void decode(const int32_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint32_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const int64_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint64_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
@@ -468,7 +468,7 @@ class default_operator
     template <typename T>
     void decode_impl(const T&      mref,
                      fast_istream& stream,
-                     presence_map& pmap) const
+                     decoder_presence_map& pmap) const
     {
       // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
       // Optional integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream in a nullable representation.
@@ -496,56 +496,56 @@ class default_operator
 
     virtual void decode(const int32_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint32_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const int64_mref& mref,
                         fast_istream&     stream,
-                        presence_map&     pmap) const
+                        decoder_presence_map&     pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const uint64_mref& mref,
                         fast_istream&      stream,
-                        presence_map&      pmap) const
+                        decoder_presence_map&      pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const ascii_string_mref& mref,
                         fast_istream&            stream,
-                        presence_map&            pmap) const
+                        decoder_presence_map&            pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const unicode_string_mref& mref,
                         fast_istream&              stream,
-                        presence_map&              pmap) const
+                        decoder_presence_map&              pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const byte_vector_mref& mref,
                         fast_istream&           stream,
-                        presence_map&           pmap) const
+                        decoder_presence_map&           pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const decimal_mref& mref,
                         fast_istream&       stream,
-                        presence_map&       pmap) const
+                        decoder_presence_map&       pmap) const
     {
       decode_decimal(mref, stream,pmap);
     }
@@ -581,7 +581,7 @@ class delta_operator
   template <typename T>
   void decode_string(const T&      mref,
                      fast_istream& stream,
-                     presence_map& /* pmap */) const
+                     decoder_presence_map& /* pmap */) const
   {
     // The delta value is represented as a Signed Integer subtraction length followed by an ASCII String.
     // If the delta is nullable, the subtraction length is nullable. A NULL delta is represented as a
@@ -615,35 +615,35 @@ class delta_operator
   public:
     virtual void decode(const int32_mref& mref,
                         fast_istream&     stream,
-                        presence_map      & /* pmap */) const
+                        decoder_presence_map      & /* pmap */) const
     {
       this->decode_integer(mref, stream);
     }
 
     virtual void decode(const uint32_mref& mref,
                         fast_istream&      stream,
-                        presence_map       & /* pmap */) const
+                        decoder_presence_map       & /* pmap */) const
     {
       decode_integer(mref, stream);
     }
 
     virtual void decode(const int64_mref& mref,
                         fast_istream&     stream,
-                        presence_map      & /* pmap */) const
+                        decoder_presence_map      & /* pmap */) const
     {
       decode_integer(mref, stream);
     }
 
     virtual void decode(const uint64_mref& mref,
                         fast_istream&      stream,
-                        presence_map       & /* pmap */) const
+                        decoder_presence_map       & /* pmap */) const
     {
       decode_integer(mref, stream);
     }
 
     virtual void decode(const decimal_mref& mref,
                         fast_istream&       stream,
-                        presence_map&       pmap) const
+                        decoder_presence_map&       pmap) const
     {
       if(!mref.has_individual_operators()) {
         stream >> mref;
@@ -675,21 +675,21 @@ class delta_operator
 
     virtual void decode(const ascii_string_mref& mref,
                         fast_istream&            stream,
-                        presence_map&            pmap) const
+                        decoder_presence_map&            pmap) const
     {
       decode_string(mref, stream, pmap);
     }
 
     virtual void decode(const unicode_string_mref& mref,
                         fast_istream&              stream,
-                        presence_map&              pmap) const
+                        decoder_presence_map&              pmap) const
     {
       decode_string(mref, stream, pmap);
     }
 
     virtual void decode(const byte_vector_mref& mref,
                         fast_istream&           stream,
-                        presence_map&           pmap) const
+                        decoder_presence_map&           pmap) const
     {
       decode_string(mref, stream, pmap);
     }
@@ -705,7 +705,7 @@ class tail_operator
     template <typename T>
     void decode_impl(const T&      mref,
                      fast_istream& stream,
-                     presence_map& pmap) const
+                     decoder_presence_map& pmap) const
     {
       if (pmap.is_next_bit_set()) {
 
@@ -762,21 +762,21 @@ class tail_operator
 
     virtual void decode(const ascii_string_mref& mref,
                         fast_istream&            stream,
-                        presence_map&            pmap) const
+                        decoder_presence_map&            pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const unicode_string_mref& mref,
                         fast_istream&              stream,
-                        presence_map&              pmap) const
+                        decoder_presence_map&              pmap) const
     {
       decode_impl(mref, stream, pmap);
     }
 
     virtual void decode(const byte_vector_mref& mref,
                         fast_istream&           stream,
-                        presence_map&           pmap) const
+                        decoder_presence_map&           pmap) const
     {
       decode_impl(mref, stream, pmap);
     }

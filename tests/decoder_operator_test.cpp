@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
 
     strm.decode(pmap);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
 
     strm.decode(pmap);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
       // testing when the presence bit is set
       char data[] = "\xC0\x80";
       fast_istream strm(data, 2);
-      presence_map pmap;
+      decoder_presence_map pmap;
 
       strm.decode(pmap);
       BOOST_CHECK_EQUAL(strm.in_avail(), 1);
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
       // testing when the presence bit is not set
       char data[] = "\x80\x80";
       fast_istream strm(data, 2);
-      presence_map pmap;
+      decoder_presence_map pmap;
 
       strm.decode(pmap);
       BOOST_CHECK_EQUAL(strm.in_avail(), 1);
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
 
     strm.decode(pmap);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
 
 
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
 
     strm.decode(pmap);
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
 
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
@@ -366,7 +366,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
 
     // The default operator specifies that the value of a field is either present in the stream or it will be the initial value.
 
@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
 
     strm.decode(pmap);
     BOOST_CHECK_EQUAL(strm.in_avail(), 1);
@@ -445,7 +445,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
 
 
@@ -483,7 +483,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
 
     strm.decode(pmap);
@@ -554,7 +554,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
@@ -591,7 +591,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – one bit.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
     strm.decode(pmap);
@@ -668,7 +668,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
 
       char data[] = "\x80\x80";
       fast_istream strm(data, 2);
-      presence_map pmap;
+      decoder_presence_map pmap;
       // Optional integer, decimal, string and byte vector fields – one bit.
       // A NULL indicates that the value is absent and the state of the previous value is set to empty
       strm.decode(pmap);
@@ -712,7 +712,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
 
 
@@ -750,7 +750,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
 
     strm.decode(pmap);
@@ -821,7 +821,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
@@ -858,7 +858,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – one bit.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
     strm.decode(pmap);
@@ -935,7 +935,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
 
       char data[] = "\x80\x80";
       fast_istream strm(data, 2);
-      presence_map pmap;
+      decoder_presence_map pmap;
       // Optional integer, decimal, string and byte vector fields – one bit.
       // A NULL indicates that the value is absent and the state of the previous value is set to empty
       strm.decode(pmap);
@@ -979,7 +979,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
 
     char data[] = "\xC0\x82";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – no bit.
 
 
@@ -1019,7 +1019,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
 
     char data[] = "\xC0\x82";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – no bit.
 
 
@@ -1060,7 +1060,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
 
     char data[] = "\xC0\x82";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
 
     //Optional integer, decimal, string and byte vector fields – no bit.
     // The delta appears in the stream in a nullable representation. A NULL indicates that the delta is absent.
@@ -1102,7 +1102,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
 
     //Optional integer, decimal, string and byte vector fields – no bit.
     // The delta appears in the stream in a nullable representation. A NULL indicates that the delta is absent.
@@ -1144,7 +1144,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     decimal_mref ref(&allocator, &storage, &inst);
     char data[] = "\xC0\x82\x83";
     fast_istream strm(data, 3);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1184,7 +1184,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     decimal_mref ref(&allocator, &storage, &inst);
     char data[] = "\xC0\x82\x83";
     fast_istream strm(data, 3);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1225,7 +1225,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     decimal_mref ref(&allocator, &storage, &inst);
     char data[] = "\xC0\x80\x83";
     fast_istream strm(data, 3);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1270,7 +1270,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
     char data[] = "\xC0\x86\x76\x61\x6C\x75\xE5";
     fast_istream strm(data, 7);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1314,7 +1314,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
     char data[] = "\xC0\x86\x76\x61\x6C\x75\xE5";
     fast_istream strm(data, 7);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1348,7 +1348,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1393,7 +1393,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
     char data[] = "\xC0\x83\x41\x42\x43\xC4";
     fast_istream strm(data, 6);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1445,7 +1445,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 
     char data[] = "\xC0\x86\x85\x76\x61\x6C\x75\x65";
     fast_istream strm(data, 8);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1489,7 +1489,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 
     char data[] = "\xC0\x86\x85\x76\x61\x6C\x75\x65";
     fast_istream strm(data, 8);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1523,7 +1523,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1568,7 +1568,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 
     char data[] = "\xC0\x83\x84\x41\x42\x43\x44";
     fast_istream strm(data, 7);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional integer, decimal, string and byte vector fields – no bit.
 
     strm.decode(pmap);
@@ -1620,7 +1620,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     char data[] = "\xC0\x76\x61\x6C\x75\xE5";
     fast_istream strm(data, 6);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory string and byte vector fields – one bit.
 
     strm.decode(pmap);
@@ -1668,7 +1668,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory string and byte vector fields – one bit.
 
     strm.decode(pmap);
@@ -1725,7 +1725,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Mandatory string and byte vector fields – one bit.
 
     strm.decode(pmap);
@@ -1761,7 +1761,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     char data[] = "\xC0\x76\x61\x6C\x75\xE5";
     fast_istream strm(data, 6);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional string and byte vector fields – one bit.
     // The tail value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty.
@@ -1808,7 +1808,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     char data[] = "\xC0\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional string and byte vector fields – one bit.
     // The tail value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty.
@@ -1850,7 +1850,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional string and byte vector fields – one bit.
 
     strm.decode(pmap);
@@ -1919,7 +1919,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     char data[] = "\x80\x80";
     fast_istream strm(data, 2);
-    presence_map pmap;
+    decoder_presence_map pmap;
     // Optional string and byte vector fields – one bit.
 
     strm.decode(pmap);

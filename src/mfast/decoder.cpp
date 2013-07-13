@@ -20,7 +20,7 @@
 #include "decoder_field_operator.h"
 #include "field_visitor.h"
 #include <boost/container/map.hpp>
-#include "presence_map.h"
+#include "decoder_presence_map.h"
 #include "sequence_ref.h"
 #include "dictionary_builder.h"
 #include "malloc_allocator.h"
@@ -37,8 +37,8 @@ struct decoder_impl
 
   struct struct_context
   {
-    presence_map pmap_;
-    presence_map* prev_pmap_;
+    decoder_presence_map pmap_;
+    decoder_presence_map* prev_pmap_;
 
     struct_context()
       : prev_pmap_(0)
@@ -58,7 +58,7 @@ struct decoder_impl
   message_base* active_message_;
   bool force_reset_;
   debug_stream debug_;
-  presence_map* current_;
+  decoder_presence_map* current_;
   
 #ifdef REPORT_OVERFLOW
   std::ostream* overflow_log_;
@@ -67,7 +67,7 @@ struct decoder_impl
   decoder_impl();
   ~decoder_impl();
   void reset_messages();
-  presence_map& current_pmap();
+  decoder_presence_map& current_pmap();
   void decode_pmap(struct_context& context);
   void restore_pmap(struct_context& context);
 
@@ -113,7 +113,7 @@ decoder_impl::~decoder_impl()
   reset_messages();
 }
 
-inline presence_map&
+inline decoder_presence_map&
 decoder_impl::current_pmap()
 {
   return *current_;
@@ -258,7 +258,7 @@ decoder_impl::pre_visit(dynamic_mref& mref, struct_context& context)
   decode_pmap(context);
   debug_ << "   decoded pmap -> " << current_pmap() << "\n";
 
-  presence_map& pmap = current_pmap();
+  decoder_presence_map& pmap = current_pmap();
 
   if (pmap.is_next_bit_set()) {
     uint32_t template_id;
@@ -298,7 +298,7 @@ decoder_impl::decode_segment(fast_istream* strm)
   struct_context context;
   decode_pmap(context);
 
-  presence_map& pmap = current_pmap();
+  decoder_presence_map& pmap = current_pmap();
 
   debug_ << "decoding segment : pmap -> " << pmap << "\n"
          << "                   entity -> " << *strm  << "\n";

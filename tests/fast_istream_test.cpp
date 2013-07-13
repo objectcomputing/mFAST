@@ -366,14 +366,14 @@ BOOST_AUTO_TEST_CASE(extractor_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(presence_map_test)
+BOOST_AUTO_TEST_CASE(decoder_presence_map_test)
 {
   {
     char data[]= "\xC0";
     fast_istream strm(data, 1);
     debug_allocator alloc;
 
-    presence_map pmap;
+    decoder_presence_map pmap;
     strm.decode(pmap);
 
     BOOST_CHECK_EQUAL(strm.in_avail(), 0);
@@ -388,7 +388,7 @@ BOOST_AUTO_TEST_CASE(presence_map_test)
       char data[]= "\x40\x81";
       fast_istream strm(data, 2);
 
-      presence_map pmap;
+      decoder_presence_map pmap;
       strm.decode(pmap);
 
       BOOST_CHECK_EQUAL(strm.in_avail(), 0);
@@ -417,7 +417,7 @@ BOOST_AUTO_TEST_CASE(presence_map_test)
 
       fast_istream strm(data, 2);
 
-      presence_map pmap;
+      decoder_presence_map pmap;
       strm.decode(pmap);
 
       BOOST_CHECK_EQUAL(strm.in_avail(), 0);
@@ -439,7 +439,7 @@ BOOST_AUTO_TEST_CASE(presence_map_test)
       char data[]= "\x40\x40\x40\x40\x40\x40\x40\x40\xC0";
       fast_istream strm(data, 9);
 
-      presence_map pmap;
+      decoder_presence_map pmap;
       strm.decode(pmap);
 
       BOOST_CHECK_EQUAL(strm.in_avail(), 0);

@@ -16,17 +16,17 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef PRESENCE_MAP_H_MWSEB461
-#define PRESENCE_MAP_H_MWSEB461
+#ifndef DECODER_PRESENCE_MAP_H_MWSEB461
+#define DECODER_PRESENCE_MAP_H_MWSEB461
 #include <stdint.h>
 #include <iostream>
 
 namespace mfast {
 
-class presence_map
+class decoder_presence_map
 {
   public:
-    presence_map()
+    decoder_presence_map()
       : cur_bitmap_ (0)
       , mask_(0)
       , continue_(0)
@@ -72,9 +72,9 @@ class presence_map
     uint64_t cur_bitmap_;
     uint64_t mask_;
     const char* continue_;
-    friend std::ostream& operator << (std::ostream&, const mfast::presence_map&);
+    friend std::ostream& operator << (std::ostream&, const mfast::decoder_presence_map&);
 };
 
 }
 
-#endif /* end of include guard: PRESENCE_MAP_H_MWSEB461 */
+#endif /* end of include guard: DECODER_PRESENCE_MAP_H_MWSEB461 */
