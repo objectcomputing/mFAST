@@ -81,8 +81,12 @@ class fast_istream
           len -=  nullable;
           return true;
         }
-        else if (nullable && c == '\x00' && buf_->sbumpc() == '\x80')
-          return true;
+        else if (nullable && c == '\x00') {
+          c = buf_->sgetc();
+          buf_->gbump(1);
+          if (c == '\x80')
+            return true;
+        }
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D9"));
       }
 

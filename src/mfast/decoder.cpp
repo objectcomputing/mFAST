@@ -389,7 +389,9 @@ decoder::decode(const char*& first, const char* last, bool force_reset)
   assert(first < last);
   fast_istreambuf sb(first, last-first);
   impl_->force_reset_ = force_reset;
-  return impl_->decode_segment(sb)->cref();
+  message_cref  result = impl_->decode_segment(sb)->cref();
+  first = sb.gptr();
+  return result;
 }
 
 void

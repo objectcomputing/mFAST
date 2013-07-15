@@ -26,6 +26,7 @@
 namespace mfast
 {
 
+class decoder;
 class fast_istream;
 class decoder_presence_map;
 
@@ -61,6 +62,7 @@ class fast_istreambuf
   protected:
     friend class fast_istream;
     friend class decoder_presence_map;
+    friend class decoder;
     
     void gbump (int n)
     {
