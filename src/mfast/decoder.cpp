@@ -27,7 +27,7 @@
 #include "exceptions.h"
 #include "debug_stream.h"
 #include "output.h"
-
+#include "fast_istream.h"
 namespace mfast {
 
 typedef boost::container::map<uint32_t, message_base> message_map_t;
@@ -47,7 +47,7 @@ struct decoder_impl
 
   };
 
-  fast_istream* strm_;
+  fast_istream strm_;
   allocator* alloc_;
   dictionary_resetter resetter_;
 
@@ -59,10 +59,7 @@ struct decoder_impl
   bool force_reset_;
   debug_stream debug_;
   decoder_presence_map* current_;
-  
-#ifdef REPORT_OVERFLOW
-  std::ostream* overflow_log_;
-#endif
+  std::ostream* warning_log_;
 
   decoder_impl();
   ~decoder_impl();
@@ -85,17 +82,15 @@ struct decoder_impl
   bool pre_visit(dynamic_mref&, struct_context& context);
   void post_visit(const dynamic_mref&, struct_context& context);
 
-  message_base*  decode_segment(fast_istream* strm);
+  message_base*  decode_segment(fast_istreambuf& sb);
 };
 
 
 inline
 decoder_impl::decoder_impl()
   : strm_(0)
+  , warning_log_(0)
 {
-#ifdef REPORT_OVERFLOW
-  overflow_log_ = 0;
-#endif
 }
 
 void decoder_impl::reset_messages()
@@ -124,7 +119,7 @@ decoder_impl::decode_pmap(struct_context& context)
 {
   context.prev_pmap_ = current_;
   current_ = &context.pmap_;
-  strm_->decode(current_pmap());
+  strm_.decode(current_pmap());
 }
 
 inline void
@@ -139,12 +134,12 @@ inline void
 decoder_impl::visit(const SimpleMRef& mref)
 {
   debug_ << "   decoding " << mref.name() << ": pmap -> " << current_pmap() << "\n"
-         << "               stream -> " << *strm_ << "\n";
+         << "               stream -> " << strm_ << "\n";
 
   decoder_field_operator* field_operator
     = decoder_operators[mref.instruction()->field_operator()];
   field_operator->decode(mref,
-                         *strm_,
+                         strm_,
                          current_pmap());
 
   if (mref.present())
@@ -196,7 +191,7 @@ decoder_impl::pre_visit(const sequence_mref& mref)
   uint32_field_instruction* length_instruction = mref.instruction()->sequence_length_instruction_;
   value_storage storage;
 
-  debug_ << "  decoding sequence length " << mref.name()  << " : stream -> " << *strm_ << "\n";
+  debug_ << "  decoding sequence length " << mref.name()  << " : stream -> " << strm_ << "\n";
   uint32_mref length_mref(0, &storage, length_instruction);
   this->visit(length_mref);
 
@@ -263,7 +258,7 @@ decoder_impl::pre_visit(dynamic_mref& mref, struct_context& context)
   if (pmap.is_next_bit_set()) {
     uint32_t template_id;
 
-    strm_->decode(template_id, false);
+    strm_.decode(template_id, false);
     debug_ << "   decoded template id -> " << template_id << "\n";
 
     // find the message with corresponding template id
@@ -288,26 +283,23 @@ decoder_impl::post_visit(const dynamic_mref& /* mref */, struct_context& context
 }
 
 message_base*
-decoder_impl::decode_segment(fast_istream* strm)
+decoder_impl::decode_segment(fast_istreambuf& sb)
 {
-#ifdef REPORT_OVERFLOW
-  strm->overflow_log_ = this->overflow_log_;
-#endif
-  
-  strm_ = strm;
+
+  strm_.reset(&sb);
   struct_context context;
   decode_pmap(context);
 
   decoder_presence_map& pmap = current_pmap();
 
   debug_ << "decoding segment : pmap -> " << pmap << "\n"
-         << "                   entity -> " << *strm  << "\n";
+         << "                   entity -> " << strm_  << "\n";
 
 
   if (pmap.is_next_bit_set()) {
     uint32_t template_id;
 
-    strm_->decode(template_id, false);
+    strm_.decode(template_id, false);
 
     debug_ << "decoded template id = " << template_id << "\n";
 
@@ -379,31 +371,37 @@ decoder::include(const templates_description** descriptions, std::size_t descrip
   }
 }
 
+/*
 message_cref
-decoder::decode(fast_istream& strm, bool force_reset)
+decoder::decode(fast_istreambuf& sb, bool force_reset)
 {
 
-  assert(strm.in_avail() != 0);
+  assert(sb.in_avail() != 0);
 
   impl_->force_reset_ = force_reset;
-  return impl_->decode_segment(&strm)->cref();
+  return impl_->decode_segment(sb)->cref();
+}
+*/
+
+message_cref 
+decoder::decode(const char*& first, const char* last, bool force_reset)
+{
+  assert(first < last);
+  fast_istreambuf sb(first, last-first);
+  impl_->force_reset_ = force_reset;
+  return impl_->decode_segment(sb)->cref();
 }
 
-#ifndef NDEBUG
 void
-decoder::debug_log(std::ostream& log)
+decoder::debug_log(std::ostream* log)
 {
   impl_->debug_.set(log);
 }
 
-#endif
-
-#ifdef REPORT_OVERFLOW
-void 
-decoder::overflow_log(std::ostream& os)
+void
+decoder::warning_log(std::ostream* os)
 {
-  impl_->overflow_log_ = &log;
+  impl_->strm_.warning_log(os);
 }
-#endif
 
 }

@@ -35,7 +35,8 @@ BOOST_AUTO_TEST_CASE(int32_test)
 {
   {
     char data[] = "\x39\x45\xa4";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     int32_t value;
     BOOST_CHECK(strm.decode(value,true));
@@ -44,7 +45,8 @@ BOOST_AUTO_TEST_CASE(int32_test)
 
   {
     char data[] = "\x39\x45\xa3";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     int32_t value;
     BOOST_CHECK(strm.decode(value,false));
@@ -53,7 +55,8 @@ BOOST_AUTO_TEST_CASE(int32_test)
 
   {
     char data[] = "\x46\x3a\xdd";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     int32_t value;
     BOOST_CHECK(strm.decode(value,true));
@@ -62,7 +65,8 @@ BOOST_AUTO_TEST_CASE(int32_test)
 
   {
     char data[] = "\x7c\x1b\x1b\x9d";
-    fast_istream strm(data, 4);
+    fast_istreambuf sb(data, 4);
+    fast_istream strm(&sb);
 
     int32_t value;
     BOOST_CHECK(strm.decode(value,false));
@@ -71,7 +75,8 @@ BOOST_AUTO_TEST_CASE(int32_test)
 
   {
     char data[] = "\x00\x40\x81";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     int32_t value;
     BOOST_CHECK(strm.decode(value,false));
@@ -80,7 +85,8 @@ BOOST_AUTO_TEST_CASE(int32_test)
 
   {
     char data[] = "\x7F\x3f\xff";
-    fast_istream strm(data, 4);
+    fast_istreambuf sb(data, 4);
+    fast_istream strm(&sb);
 
     int32_t value;
     BOOST_CHECK(strm.decode(value,false));
@@ -93,14 +99,16 @@ BOOST_AUTO_TEST_CASE(uint32_test)
 {
   {
     char data[] = "\x80";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     uint32_t value;
     BOOST_CHECK(!strm.decode(value,true));
   }
   {
     char data[] = "\x81";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     uint32_t value;
     BOOST_CHECK(strm.decode(value,true));
@@ -109,7 +117,8 @@ BOOST_AUTO_TEST_CASE(uint32_test)
 
   {
     char data[] = "\x82";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     uint32_t value;
     BOOST_CHECK(strm.decode(value,true));
@@ -118,7 +127,8 @@ BOOST_AUTO_TEST_CASE(uint32_test)
 
   {
     char data[] = "\x39\x45\xa4";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     uint32_t value;
     BOOST_CHECK(strm.decode(value,true));
@@ -127,7 +137,8 @@ BOOST_AUTO_TEST_CASE(uint32_test)
 
   {
     char data[] = "\x80";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     uint32_t value;
     BOOST_CHECK(strm.decode(value,false));
@@ -136,7 +147,8 @@ BOOST_AUTO_TEST_CASE(uint32_test)
   }
   {
     char data[] = "\x81";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     uint32_t value;
     BOOST_CHECK(strm.decode(value,false));
@@ -146,7 +158,8 @@ BOOST_AUTO_TEST_CASE(uint32_test)
 
   {
     char data[] = "\x39\x45\xa3";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
 
     uint32_t value;
     BOOST_CHECK(strm.decode(value,false));
@@ -155,7 +168,8 @@ BOOST_AUTO_TEST_CASE(uint32_test)
 
   {
     char data[] = "\x10\x00\x00\x00\x80";
-    fast_istream strm(data, 5);
+    fast_istreambuf sb(data, 5);
+    fast_istream strm(&sb);
 
     uint32_t value;
     BOOST_CHECK(strm.decode(value,true));
@@ -163,11 +177,26 @@ BOOST_AUTO_TEST_CASE(uint32_test)
   }
 }
 
+BOOST_AUTO_TEST_CASE(int64_test)
+{
+  {
+    char data[] = "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80";
+    fast_istreambuf sb(data, 10);
+    fast_istream strm(&sb);
+
+    int64_t value;
+    BOOST_CHECK (strm.decode(value,true));
+    BOOST_CHECK_EQUAL(value, std::numeric_limits<int64_t>::max());
+  }
+}
+
+
 BOOST_AUTO_TEST_CASE(uint64_test)
 {
   {
     char data[] = "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80";
-    fast_istream strm(data, 10);
+    fast_istreambuf sb(data, 10);
+    fast_istream strm(&sb);
 
     uint64_t value;
     BOOST_CHECK (strm.decode(value,true));
@@ -184,80 +213,100 @@ BOOST_AUTO_TEST_CASE(ascii_string_test)
   uint32_t len;
   {
     char data[] = "\x80";
-    fast_istream strm(data, 1);
+    fast_istreambuf sb(data, 1);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK( strm.decode(str, len, false, instruction) );
     BOOST_CHECK_EQUAL( len,             0);
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
 
   {
     char data[] = "\x00\x80";
-    fast_istream strm(data, 2);
+    fast_istreambuf sb(data, 2);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK( strm.decode(str, len, false, instruction) );
     BOOST_CHECK_EQUAL( len,             1);
     BOOST_CHECK_EQUAL( str[0],      '\x0');
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
 
   {
     char data[] = "\x00\xC0";
-    fast_istream strm(data, 2);
+    fast_istreambuf sb(data, 2);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK_THROW( strm.decode(str, len, false, instruction), mfast::fast_error );
   }
 
   {
     char data[] = "\x80";
-    fast_istream strm(data, 1);
+    fast_istreambuf sb(data, 1);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK( !strm.decode(str, len, true, instruction) );
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
 
   {
     char data[] = "\x00\x80";
-    fast_istream strm(data, 2);
+    fast_istreambuf sb(data, 2);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK( strm.decode(str, len, true, instruction) );
     BOOST_CHECK_EQUAL( len,             0);
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
 
   {
     char data[] = "\x00\xC0";
-    fast_istream strm(data, 2);
+    fast_istreambuf sb(data, 2);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK_THROW( strm.decode(str, len, true, instruction), mfast::fast_error );
   }
 
   {
     char data[] = "\x00\x00\x80";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK( strm.decode(str, len, true, instruction) );
     BOOST_CHECK_EQUAL( len,             1);
     BOOST_CHECK_EQUAL( str[0],      '\x0');
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
 
   {
     char data[] = "\x00\x00\xC0";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK_THROW( strm.decode(str, len, true, instruction), mfast::fast_error );
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
 
   {
     char data[] = "\x40\x40\xC0";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK( strm.decode(str, len, true, instruction) );
 
     BOOST_CHECK_EQUAL( len,             3);
     BOOST_CHECK_EQUAL( str,          data);
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
   {
     char data[] = "\x40\x40\xC0";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK( strm.decode(str, len, false, instruction) );
     BOOST_CHECK_EQUAL( len,             3);
     BOOST_CHECK_EQUAL( str,          data);
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
 }
 
@@ -267,41 +316,51 @@ BOOST_AUTO_TEST_CASE(byte_vector_test)
   uint32_t len;
   {
     char data[] = "\x80";
-    fast_istream strm(data, 1);
+    fast_istreambuf sb(data, 1);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK(!strm.decode(str, len, true, 0));
   }
   {
     // empty byte vector
     char data[] = "\x80";
-    fast_istream strm(data, 1);
+    fast_istreambuf sb(data, 1);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK(strm.decode(str, len, false, 0));
     BOOST_CHECK_EQUAL( len,             0);
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
 
   }
   {
     // empty byte vector
     char data[] = "\x81";
-    fast_istream strm(data, 1);
+    fast_istreambuf sb(data, 1);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK(strm.decode(str, len, true, 0));
     BOOST_CHECK_EQUAL( len,             0);
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
   {
     char data[] = "\x81\xC0";
-    fast_istream strm(data, 2);
+    fast_istreambuf sb(data, 2);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK(strm.decode(str, len, false, 0));
     BOOST_CHECK_EQUAL( len,                                   1);
     BOOST_CHECK_EQUAL( reinterpret_cast<const char*>(str), data + 1);
-    BOOST_CHECK_EQUAL( strm.in_avail(),                       0);
+    BOOST_CHECK_EQUAL( sb.in_avail(),                       0);
   }
   {
     char data[] = "\x82\xC0";
-    fast_istream strm(data, 2);
+    fast_istreambuf sb(data, 2);
+    fast_istream strm(&sb);
+    
     BOOST_CHECK(strm.decode(str, len, true, 0));
     BOOST_CHECK_EQUAL( len,                                   1);
     BOOST_CHECK_EQUAL( reinterpret_cast<const char*>(str), data + 1);
-    BOOST_CHECK_EQUAL( strm.in_avail(),                       0);
+    BOOST_CHECK_EQUAL( sb.in_avail(),                       0);
   }
 }
 
@@ -323,11 +382,13 @@ BOOST_AUTO_TEST_CASE(extractor_test)
     ascii_string_mref mref(&alloc, &storage, &inst);
 
     char data[] = "\x41\x41\xC1";
-    fast_istream strm(data, 3);
+    fast_istreambuf sb(data, 3);
+    fast_istream strm(&sb);
+    
     strm >> mref;
     BOOST_CHECK_EQUAL( mref.size(), 3);
     BOOST_CHECK( mref ==  "AAA");
-    BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
   }
 
   {
@@ -344,22 +405,26 @@ BOOST_AUTO_TEST_CASE(extractor_test)
 
     {
       char data[] = "\x80";
-      fast_istream strm(data, 1);
+      fast_istreambuf sb(data, 1);
+      fast_istream strm(&sb);
+      
       strm >> mref;
 
       BOOST_CHECK( mref.absent() );
-      BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+      BOOST_CHECK_EQUAL( sb.in_avail(), 0);
     }
 
     {
       char data[] = "\x85\x81";
-      fast_istream strm(data, 2);
+      fast_istreambuf sb(data, 2);
+      fast_istream strm(&sb);
+      
       strm >> mref;
 
       BOOST_CHECK( mref.present() );
       BOOST_CHECK_EQUAL( mref.mantissa(), 1 );
       BOOST_CHECK_EQUAL( mref.exponent(), 4 );
-      BOOST_CHECK_EQUAL( strm.in_avail(), 0);
+      BOOST_CHECK_EQUAL( sb.in_avail(), 0);
     }
 
   }
@@ -370,13 +435,15 @@ BOOST_AUTO_TEST_CASE(decoder_presence_map_test)
 {
   {
     char data[]= "\xC0";
-    fast_istream strm(data, 1);
+    fast_istreambuf sb(data, 1);
+    fast_istream strm(&sb);
+    
     debug_allocator alloc;
 
     decoder_presence_map pmap;
     strm.decode(pmap);
 
-    BOOST_CHECK_EQUAL(strm.in_avail(), 0);
+    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
       BOOST_CHECK(pmap.is_next_bit_set());
 
     for (int i =0; i < 8; ++i) {
@@ -386,12 +453,13 @@ BOOST_AUTO_TEST_CASE(decoder_presence_map_test)
 
     {
       char data[]= "\x40\x81";
-      fast_istream strm(data, 2);
+      fast_istreambuf sb(data, 2);
+      fast_istream strm(&sb);
 
       decoder_presence_map pmap;
       strm.decode(pmap);
 
-      BOOST_CHECK_EQUAL(strm.in_avail(), 0);
+      BOOST_CHECK_EQUAL(sb.in_avail(), 0);
 
         BOOST_CHECK(pmap.is_next_bit_set());
 
@@ -415,12 +483,13 @@ BOOST_AUTO_TEST_CASE(decoder_presence_map_test)
       data[0] = '\x40';
       data[1] = '\x81';
 
-      fast_istream strm(data, 2);
+      fast_istreambuf sb(data, 2);
+      fast_istream strm(&sb);
 
       decoder_presence_map pmap;
       strm.decode(pmap);
 
-      BOOST_CHECK_EQUAL(strm.in_avail(), 0);
+      BOOST_CHECK_EQUAL(sb.in_avail(), 0);
 
         BOOST_CHECK(pmap.is_next_bit_set());
 
@@ -437,12 +506,13 @@ BOOST_AUTO_TEST_CASE(decoder_presence_map_test)
 
     {
       char data[]= "\x40\x40\x40\x40\x40\x40\x40\x40\xC0";
-      fast_istream strm(data, 9);
+      fast_istreambuf sb(data, 9);
+      fast_istream strm(&sb);
 
       decoder_presence_map pmap;
       strm.decode(pmap);
 
-      BOOST_CHECK_EQUAL(strm.in_avail(), 0);
+      BOOST_CHECK_EQUAL(sb.in_avail(), 0);
 
       for (int i = 0; i < 9; ++i) {
           BOOST_CHECK(pmap.is_next_bit_set());

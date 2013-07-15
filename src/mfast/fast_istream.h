@@ -1,74 +1,33 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
-// All rights reserved.
-//
-// This file is part of mFAST.
-//
-//     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
-//
-//     mFAST is distributed in the hope that it will be useful,
-//     but WITHOUT ANY WARRANTY; without even the implied warranty of
-//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//     GNU General Public License for more details.
-//
-//     You should have received a copy of the GNU Lesser General Public License
-//     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
-//
-#ifndef FAST_ISTREAM_H_7X1JL4X6
-#define FAST_ISTREAM_H_7X1JL4X6
-#include <stdexcept>
+#ifndef FAST_ISTREAM_H_LBVLPJ93
+#define FAST_ISTREAM_H_LBVLPJ93
+
 #include <limits>
 #include <boost/type_traits.hpp>
 
-#include "decoder_presence_map.h"
-#include "field_instruction.h"
-#include "exceptions.h"
-#include <iostream>
+#include "mfast/field_instruction.h"
+#include "mfast/fast_istreambuf.h"
+#include "mfast/decoder_presence_map.h"
 
 namespace mfast
 {
+
 class fast_istream;
 std::ostream& operator << (std::ostream& os, const fast_istream& istream);
 class fast_istream
 {
   public:
-    fast_istream(const char* buf, std::size_t sz)
-      : gptr_(buf)
-      , egptr_(buf+sz)
-    {
-#ifdef REPORT_OVERFLOW
-      overflow_log_ = 0;
-#endif
-    }
 
-    size_t in_avail() const
-    {
-      return egptr_-gptr_;
-    }
+    fast_istream(fast_istreambuf* sb);
 
+    void reset(fast_istreambuf* sb);
+    
     bool eof() const {
-      return in_avail() == 0;
+      return buf_->in_avail() == 0;
     }
 
     bool operator!() const {
-       return in_avail() == 0;
+       return buf_->in_avail() == 0;
     }
-
-    // get the length of the stop bit encoded entity
-    std::size_t
-    get_entity_length()
-    {
-      const std::size_t n = in_avail();
-      for (std::size_t i = 0; i < n; ++i)
-      {
-        if (gptr_[i] & 0x80)
-          return i+1;
-      }
-      BOOST_THROW_EXCEPTION(fast_dynamic_error("Buffer underflow"));
-    }
-
 
     /**
      * Decode an integer and store the result in @a result.
@@ -76,14 +35,14 @@ class fast_istream
      * @return false if the decoded value is null
      **/
     template <typename T>
-    typename boost::enable_if< boost::is_integral<T> ,bool>::type
+    typename boost::enable_if< boost::is_integral<T>,bool>::type
     decode(T& result, bool nullable);
 
 
     void decode(decoder_presence_map& pmap)
     {
-      if (!pmap.load(gptr_)) {
-        while (0 == (sbumpc() & 0x80)) ;
+      if (!pmap.load(*buf_)) {
+        while (0 == (buf_->sbumpc() & 0x80)) ;
       }
     }
 
@@ -100,33 +59,35 @@ class fast_istream
      * @param [in] instruction The field instruction
      * @return false if the decoded value is null
      **/
-    bool decode(const char*&                 ascii,
-                uint32_t&                    len,
-                bool                         nullable,
+    bool decode(const char*& ascii,
+                uint32_t&    len,
+                bool         nullable,
                 const ascii_field_instruction* /* instruction */)
     {
-      char c = *gptr_;
-      ascii = gptr_;
+      char c = buf_->sgetc();
+      ascii = buf_->gptr();
       if ((c & '\x7F') == 0) {
-        gptr_++;
+        buf_->gbump(1);
 
         if (c == '\x80') {
           len = 0;
           return !nullable;
         }
-        c = *gptr_++;
+        c = buf_->sgetc();
+        buf_->gbump(1);
+
         len = 1;
         if (c == '\x80') {
           len -=  nullable;
           return true;
         }
-        else if (nullable && c == '\x00' && *gptr_++ == '\x80')
+        else if (nullable && c == '\x00' && buf_->sbumpc() == '\x80')
           return true;
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D9"));
       }
 
-      len = get_entity_length();
-      gptr_ += len;
+      len = buf_->get_entity_length();
+      buf_->gbump(len);
       return true;
     }
 
@@ -138,15 +99,15 @@ class fast_istream
      * @param [in] instruction
      * @return false if the decoded value is null
      **/
-    bool decode(const char*&                   bv,
-                uint32_t&                      len,
-                bool                           nullable,
+    bool decode(const char*& bv,
+                uint32_t&    len,
+                bool         nullable,
                 const unicode_field_instruction* /* instruction */)
     {
       if (this->decode(len, nullable))
       {
-        bv = gptr_;
-        gptr_ += len;
+        bv = buf_->gptr();
+        buf_->gbump(len);
         return true;
       }
       return false;
@@ -160,46 +121,47 @@ class fast_istream
      * @param [in] instruction
      * @return false if the decoded value is null
      **/
-    bool decode(const unsigned char*&              bv,
-                uint32_t&                          len,
-                bool                               nullable,
+    bool decode(const unsigned char*& bv,
+                uint32_t&             len,
+                bool                  nullable,
                 const byte_vector_field_instruction* /* instruction */)
     {
       if (this->decode(len, nullable))
       {
-        bv = reinterpret_cast<const unsigned char*>(gptr_);
-        gptr_ += len;
+        bv = reinterpret_cast<const unsigned char*>(buf_->gptr());
+        buf_->gbump(len);
         return true;
       }
       return false;
     }
 
-    void gbump (int n)
+    std::ostream& warning_log ()
     {
-      gptr_ += n;
+      return *warning_log_;
+    }
+    
+    void warning_log (std::ostream* log)
+    {
+      warning_log_ = log;
     }
 
-#ifdef REPORT_OVERFLOW
-    std::ostream& overflow_log ()
-    {
-      return *overflow_log_;
-    }
-    std::ostream* overflow_log_;
-#endif
-  
   private:
 
-    unsigned char sbumpc()
+    friend std::ostream& operator << (std::ostream& os, const fast_istream& istream);
+
+    const char* gptr() const
     {
-      if (in_avail() < 1)
-        BOOST_THROW_EXCEPTION(fast_dynamic_error("Buffer underflow"));
-      return *(gptr_++);
+      return buf_->gptr_;
     }
 
-    const char*gptr_, *egptr_;
-    friend std::ostream& operator << (std::ostream& os, const fast_istream& istream);
-};
+    const char* egptr() const
+    {
+      return buf_->egptr_;
+    }
 
+    fast_istreambuf* buf_;
+    std::ostream* warning_log_;
+};
 
 namespace detail {
 
@@ -208,7 +170,7 @@ struct int_trait;
 
 
 template <>
-struct int_trait<int8_t>   // only used for decoding decimal exponent
+struct int_trait<int8_t>     // only used for decoding decimal exponent
 {
   typedef int8_t temp_type;
 };
@@ -254,7 +216,7 @@ struct temp_uint64_t
     return *this;
   }
 
-  temp_uint64_t& operator <<= (int /* shiftbits */)     // shiftbits should always be 7
+  temp_uint64_t& operator <<= (int /* shiftbits */)       // shiftbits should always be 7
   {
     carry =  (value == 0x0200000000000000ULL);
     value <<= 7;
@@ -304,13 +266,25 @@ inline bool to_nullable_value(uint64_t& result, temp_uint64_t tmp, bool is_posit
 
 }
 
+inline fast_istream::fast_istream(fast_istreambuf* sb)
+  : buf_(sb)
+  , warning_log_(0)
+{
+}
+
+inline void
+fast_istream::reset(fast_istreambuf* sb)
+{
+  buf_ = sb;
+}
+
 template <typename T>
-typename boost::enable_if< boost::is_integral<T> ,bool>::type
+typename boost::enable_if< boost::is_integral<T>,bool>::type
 fast_istream::decode(T& result, bool nullable)
 {
   typename detail::int_trait<T>::temp_type tmp = 0;
 
-  char c = sbumpc();
+  char c = buf_->sbumpc();
   bool is_positive = true;
 
   if (boost::is_unsigned<T>::value) {
@@ -334,7 +308,7 @@ fast_istream::decode(T& result, bool nullable)
 
   while ( (c & 0x80) == 0 && consumed_bytes < max_bytes) {
     tmp <<= 7;
-    c = sbumpc();
+    c = buf_->sbumpc();
     tmp |= ( c & 0x7F );
     ++consumed_bytes;
   };
@@ -353,4 +327,5 @@ fast_istream::decode(T& result, bool nullable)
 
 }
 
-#endif /* end of include guard: FAST_ISTREAM_H_7X1JL4X6 */
+
+#endif /* end of include guard: FAST_ISTREAM_H_LBVLPJ93 */

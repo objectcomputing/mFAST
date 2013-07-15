@@ -18,8 +18,8 @@
 //
 #ifndef DECODER_H_WYWT9TG7
 #define DECODER_H_WYWT9TG7
-#include "fast_istream.h"
-#include "message_ref.h"
+#include "mfast/fast_istream.h"
+#include "mfast/message_ref.h"
 
 
 namespace mfast
@@ -58,15 +58,18 @@ class decoder
       include(descriptions, N);
     }
     /// Decode a  message.
-    message_cref decode(fast_istream& strm, bool force_reset = false);
-
-#ifndef NDEBUG
-    void debug_log(std::ostream& os);
-#endif
+    // message_cref decode(fast_istreambuf& sb, bool force_reset = false);
     
-#ifdef REPORT_OVERFLOW
-    void overflow_log(std::ostream& os);
-#endif
+    /// Decode a  message.
+    ///
+    /// @param[in,out] first The initial position of the buffer to be decoded. After decoding
+    ///                the parameter is set to position of the first unconsumed data byte.
+    /// @param[in] last The last position of the buffer to be decoded.
+    /// @param[in] force_reset Force the decoder to reset and discard all exisiting history values.
+    message_cref decode(const char*& first, const char* last, bool force_reset = false);
+
+    void debug_log(std::ostream* os);    
+    void warning_log(std::ostream* os);
 
   private:
     decoder_impl* impl_;

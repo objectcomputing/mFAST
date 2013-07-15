@@ -118,13 +118,13 @@ int main(int argc, const char** argv)
 
       for (std::size_t j = 0; j < repeat_count; ++j) {
 
-        mfast::fast_istream strm(&message_contents[0], message_contents.size());
-        for (std::size_t i = 0; i < head_n && !strm.eof(); ++i) {
-          strm.gbump(skip_header_bytes);
-          if (!strm.eof()) {
-            // mfast::message_cref ref = 
-              coder.decode(strm, force_reset || (i == 0) ); 
-          }
+        const char *first = &message_contents[0] + skip_header_bytes;
+        const char *last = &message_contents[0] + message_contents.size();
+        bool first_message = true;
+        while (first < last ) {
+          coder.decode(first, last, force_reset || first_message ); 
+          first_message = false;
+          first += skip_header_bytes;
         }
       }
     }

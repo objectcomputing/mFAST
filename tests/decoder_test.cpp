@@ -61,11 +61,10 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
     "\xB8\x81\x82\x83"
   };
 
-  fast_istream strm(data, 4);
+  const char* first = data;
+  const char* last = data+sizeof(data)-1;
 
-  BOOST_CHECK(strm);
-
-  message_cref msg = coder.decode(strm);
+  message_cref msg = coder.decode(first, last);
 
   BOOST_CHECK_EQUAL(msg.fields_count(), 3);
   BOOST_CHECK_PREDICATE(str_equal, (msg.name())("Test"));
@@ -122,30 +121,29 @@ BOOST_AUTO_TEST_CASE(group_test)
     "\xB0\x81\xE0\x82\x83"
   };
 
-  fast_istream strm(data, 5);
+  const char* first = data;
+  const char* last = data+sizeof(data)-1;
 
-  BOOST_CHECK(strm);
-
-  message_cref msg = coder.decode(strm);
+  message_cref msg = coder.decode(first, last);
 
   BOOST_CHECK_EQUAL(msg.fields_count(), 2);
   BOOST_CHECK_PREDICATE(str_equal, (msg.name())("Test"));
 
   field_cref f1 = msg.const_field(0);
-    BOOST_CHECK_EQUAL(f1.id(),                        11);
-    BOOST_CHECK_EQUAL(f1.field_type(), field_type_uint32);
-    BOOST_CHECK_EQUAL(f1.optional(),               false);
+  BOOST_CHECK_EQUAL(f1.id(),                        11);
+  BOOST_CHECK_EQUAL(f1.field_type(), field_type_uint32);
+  BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
   uint32_cref field1 = f1.static_cast_as<uint32_cref>();
-    BOOST_CHECK_EQUAL(field1.value(),                 1);
+  BOOST_CHECK_EQUAL(field1.value(),                 1);
 
   field_cref f2 = msg.const_field(1);
-    BOOST_CHECK_EQUAL(f2.field_type(), field_type_group);
-    BOOST_CHECK_EQUAL(f2.optional(),               true);
+  BOOST_CHECK_EQUAL(f2.field_type(), field_type_group);
+  BOOST_CHECK_EQUAL(f2.optional(),               true);
 
   group_cref field2 = f2.static_cast_as<group_cref>();
-    BOOST_CHECK_EQUAL(field2.fields_count(),          2);
+  BOOST_CHECK_EQUAL(field2.fields_count(),          2);
   {
     field_cref sub_f0 = field2.const_field(0);
 
@@ -195,35 +193,34 @@ BOOST_AUTO_TEST_CASE(sequence_test)
     "\xA0\x81\x83\xE0\x82\x83\xE0\x80\x81"
   };
 
-  fast_istream strm(data, 9);
+  const char* first = data;
+  const char* last = data+sizeof(data)-1;
 
-  BOOST_CHECK(strm);
-
-  message_cref msg = coder.decode(strm);
+  message_cref msg = coder.decode(first, last);
 
   BOOST_CHECK_EQUAL(msg.fields_count(), 2);
   BOOST_CHECK_PREDICATE(str_equal, (msg.name())("Test"));
 
   field_cref f1 = msg.const_field(0);
-      BOOST_CHECK_EQUAL(f1.id(),                        11);
-      BOOST_CHECK_EQUAL(f1.field_type(), field_type_uint32);
-      BOOST_CHECK_EQUAL(f1.optional(),               false);
+  BOOST_CHECK_EQUAL(f1.id(),                        11);
+  BOOST_CHECK_EQUAL(f1.field_type(), field_type_uint32);
+  BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
   uint32_cref field1 = f1.static_cast_as<uint32_cref>();
-      BOOST_CHECK_EQUAL(field1.value(),                    1);
+  BOOST_CHECK_EQUAL(field1.value(),                    1);
 
   field_cref f2 = msg.const_field(1);
-      BOOST_CHECK_EQUAL(f2.field_type(), field_type_sequence);
-      BOOST_CHECK_EQUAL(f2.optional(),                  true);
+  BOOST_CHECK_EQUAL(f2.field_type(), field_type_sequence);
+  BOOST_CHECK_EQUAL(f2.optional(),                  true);
 
   sequence_cref seq_field = f2.static_cast_as<sequence_cref>();
-      BOOST_CHECK_EQUAL(seq_field.size(),                  2);
+  BOOST_CHECK_EQUAL(seq_field.size(),                  2);
 
   {
     sequence_element_cref elem0 = seq_field[0];
 
-      BOOST_CHECK_EQUAL(elem0.fields_count(), 2);
+    BOOST_CHECK_EQUAL(elem0.fields_count(), 2);
     {
       field_cref sub_f0 = elem0.const_field(0);
 
@@ -292,29 +289,28 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
     "\xF8\x82\x81\x82\x83"
   };
 
-  fast_istream strm(data, 5);
+  const char* first = data;
+  const char* last = data+sizeof(data)-1;
 
-  BOOST_CHECK(strm);
-
-  message_cref msg = coder.decode(strm);
+  message_cref msg = coder.decode(first, last);
 
   BOOST_CHECK_EQUAL(msg.fields_count(), 2);
   BOOST_CHECK_PREDICATE(str_equal, (msg.name())("Test"));
 
   field_cref f1 = msg.const_field(0);
-    BOOST_CHECK_EQUAL(f1.id(),                        11);
-    BOOST_CHECK_EQUAL(f1.field_type(), field_type_uint32);
-    BOOST_CHECK_EQUAL(f1.optional(),               false);
+  BOOST_CHECK_EQUAL(f1.id(),                        11);
+  BOOST_CHECK_EQUAL(f1.field_type(), field_type_uint32);
+  BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
   uint32_cref field1 = f1.static_cast_as<uint32_cref>();
-    BOOST_CHECK_EQUAL(field1.value(),                    1);
+  BOOST_CHECK_EQUAL(field1.value(),                    1);
 
   field_cref f2 = msg.const_field(1);
-    BOOST_CHECK_EQUAL(f2.field_type(), field_type_template);
+  BOOST_CHECK_EQUAL(f2.field_type(), field_type_template);
 
   message_cref field2 = f2.static_cast_as<message_cref>();
-    BOOST_CHECK_EQUAL(field2.fields_count(),             2);
+  BOOST_CHECK_EQUAL(field2.fields_count(),             2);
   {
     field_cref sub_f0 = field2.const_field(0);
 
@@ -362,29 +358,28 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
     "\xE0\x82\x81\xF0\x81\x82\x83"
   };
 
-  fast_istream strm(data, 7);
+  const char* first = data;
+  const char* last = data+sizeof(data)-1;
 
-  BOOST_CHECK(strm);
-
-  message_cref msg = coder.decode(strm);
+  message_cref msg = coder.decode(first, last);
 
   BOOST_CHECK_EQUAL(msg.fields_count(), 2);
   BOOST_CHECK_PREDICATE(str_equal, (msg.name())("Test"));
 
   field_cref f1 = msg.const_field(0);
-    BOOST_CHECK_EQUAL(f1.id(),                        11);
-    BOOST_CHECK_EQUAL(f1.field_type(), field_type_uint32);
-    BOOST_CHECK_EQUAL(f1.optional(),               false);
+  BOOST_CHECK_EQUAL(f1.id(),                        11);
+  BOOST_CHECK_EQUAL(f1.field_type(), field_type_uint32);
+  BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
   uint32_cref field1 = f1.static_cast_as<uint32_cref>();
-    BOOST_CHECK_EQUAL(field1.value(),                       1);
+  BOOST_CHECK_EQUAL(field1.value(),                       1);
 
   field_cref f2 = msg.const_field(1);
-    BOOST_CHECK_EQUAL(f2.field_type(), field_type_templateref);
+  BOOST_CHECK_EQUAL(f2.field_type(), field_type_templateref);
 
   message_cref field2 = f2.static_cast_as<dynamic_cref>().static_cast_as<message_cref>();
-    BOOST_CHECK_EQUAL(field2.fields_count(),                2);
+  BOOST_CHECK_EQUAL(field2.fields_count(),                2);
   {
     field_cref sub_f0 = field2.const_field(0);
 
@@ -431,16 +426,15 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
     "\x80"   // third message
   };
 
-  fast_istream strm(data, 6);
-
-  BOOST_CHECK(strm);
+  const char* first = data;
+  const char* last = data+sizeof(data)-1;
 
   {
     // message_cref msg1 =
-    coder.decode(strm);
+    coder.decode(first, last);
   }
   {
-    message_cref msg2 = coder.decode(strm);
+    message_cref msg2 = coder.decode(first, last);
     // msg2 should have the same value of meg1
 
     uint32_cref field1 = msg2.const_field(0).static_cast_as<uint32_cref>();
@@ -453,7 +447,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
     BOOST_CHECK_EQUAL(field3.value(), 3);
   }
   {
-    message_cref msg3 = coder.decode(strm, true);
+    message_cref msg3 = coder.decode(first, last, true);
     // decoding with reset, all values should be defualts
 
     uint32_cref field1 = msg3.const_field(0).static_cast_as<uint32_cref>();
@@ -493,16 +487,16 @@ BOOST_AUTO_TEST_CASE(auto_reset_test)
     "\x80"   // third message
   };
 
-  fast_istream strm(data, 6);
+  const char* first = data;
+  const char* last = data+sizeof(data)-1;
 
-  BOOST_CHECK(strm);
 
   {
     // message_cref msg1 =
-    coder.decode(strm); 
+    coder.decode(first, last);
   }
   {
-    message_cref msg2 = coder.decode(strm, true);
+    message_cref msg2 = coder.decode(first, last, true);
     // decoding with reset, all values should be defualts
 
     uint32_cref field1 = msg2.const_field(0).static_cast_as<uint32_cref>();
@@ -613,12 +607,13 @@ BOOST_AUTO_TEST_CASE(allocator_decode_test)
   const templates_description* descriptions[] = { &description };
 
   coder.include(descriptions);
-    BOOST_CHECK_EQUAL(alloc.allocate_called_count_, 1);
+  BOOST_CHECK_EQUAL(alloc.allocate_called_count_, 1);
 
-  fast_istream strm(data, sizeof(data));
+  const char* first = data;
+  const char* last = data+sizeof(data)-1;
 
   {
-    message_cref msg1 = coder.decode(strm);
+    message_cref msg1 = coder.decode(first, last);
     BOOST_CHECK_EQUAL(alloc.allocate_called_count_,   2);
     BOOST_CHECK_EQUAL(alloc.reallocate_called_count_, 4);
     BOOST_CHECK_EQUAL(alloc.deallocate_called_count_, 0);
@@ -635,7 +630,7 @@ BOOST_AUTO_TEST_CASE(allocator_decode_test)
   }
 
   {
-    message_cref msg2 = coder.decode(strm);
+    message_cref msg2 = coder.decode(first, last);
     BOOST_CHECK_EQUAL(alloc.allocate_called_count_,    3);
     BOOST_CHECK_EQUAL(alloc.reallocate_called_count_, 10);
     BOOST_CHECK_EQUAL(alloc.deallocate_called_count_,  0);

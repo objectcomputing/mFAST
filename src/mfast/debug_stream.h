@@ -29,7 +29,7 @@ struct debug_stream {
   {
   }
 
-  void set(std::ostream&) {
+  void set(std::ostream*) {
   }
 
 
@@ -61,8 +61,9 @@ class debug_stream
     {
     }
 
-    void set(std::ostream& os) {
-      os_ = &os;
+    void set(std::ostream* os) 
+    {
+      os_ = os;
     }
 
     template <class T>

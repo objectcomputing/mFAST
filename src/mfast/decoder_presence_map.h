@@ -19,7 +19,7 @@
 #ifndef DECODER_PRESENCE_MAP_H_MWSEB461
 #define DECODER_PRESENCE_MAP_H_MWSEB461
 #include <stdint.h>
-#include <iostream>
+#include "mfast/fast_istreambuf.h"
 
 namespace mfast {
 
@@ -42,9 +42,26 @@ class decoder_presence_map
       bool result = (cur_bitmap_ & mask_) != 0;
       return result;
     }
+    
 
-    bool load(const char*& addr)
+    bool load(fast_istreambuf& buf)
     {
+      const char* addr = buf.gptr();
+      bool result = load(addr);
+      buf.gbump(addr-buf.gptr());
+      return result;
+    }
+
+    // only used for test case verification
+    uint64_t mask() const
+    {
+      return mask_;
+    }
+
+  private:
+    
+    bool load(const char*& addr)
+    {      
       bool load_complete = false;
       const int max_load_byes = sizeof(uint64_t)*8/7;
       mask_ = 1;
@@ -61,14 +78,7 @@ class decoder_presence_map
       }
       return load_complete;
     }
-
-    // only used for test case verification
-    uint64_t mask() const
-    {
-      return mask_;
-    }
-
-  private:
+    
     uint64_t cur_bitmap_;
     uint64_t mask_;
     const char* continue_;

@@ -22,7 +22,7 @@ namespace mfast
   typedef boost::multiprecision::int128_t int128_t;
   inline void report_overflow(const field_instruction* instruction, fast_istream& stream)
   {
-    stream.overflow_log() << "Instruction " << instruction->name() << " id= " << instruction->id() << " overflow\n";
+    stream.warning_log() << "Instruction " << instruction->name() << " id= " << instruction->id() << " overflow\n";
   }
   
   inline void check_overflow(int32_t base, int64_t delta, const field_instruction* instruction, fast_istream& stream)

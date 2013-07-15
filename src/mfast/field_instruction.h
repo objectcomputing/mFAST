@@ -745,6 +745,16 @@ struct group_content_helper
     }
     return false;
   }
+  
+  std::size_t pmap_size() const 
+  {
+    std::size_t n = 0;
+    for (uint32_t i = 0; i < subinstructions_count_; ++i) {
+      if (subinstruction(i)->has_pmap_bit())
+        ++n;
+    }
+    return n;
+  }
 
   const char* dictionary_;
   field_instruction** subinstructions_;
