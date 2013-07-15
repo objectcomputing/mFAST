@@ -23,8 +23,9 @@
 #include <limits>
 #include <vector>
 #include "example.h"
-// #include <boost/chrono/chrono.hpp>
 
+#include <boost/exception/diagnostic_information.hpp> 
+// #include <boost/chrono/chrono.hpp>
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 

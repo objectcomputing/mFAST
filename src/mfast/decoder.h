@@ -18,7 +18,6 @@
 //
 #ifndef DECODER_H_WYWT9TG7
 #define DECODER_H_WYWT9TG7
-#include "mfast/fast_istream.h"
 #include "mfast/message_ref.h"
 
 

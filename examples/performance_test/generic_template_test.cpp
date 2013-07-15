@@ -23,6 +23,9 @@
 #include <cstring>
 #include <limits>
 #include <vector>
+
+#include <boost/exception/diagnostic_information.hpp> 
+
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 const char usage[] =
