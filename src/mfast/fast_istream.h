@@ -267,12 +267,12 @@ struct temp_uint64_t
 };
 
 template <typename T>
-inline bool to_nullable_value(T& result, typename int_trait<T>::temp_type tmp)
+inline bool to_nullable_value(T& result, typename int_trait<T>::temp_type tmp, bool is_positive)
 {
   if (tmp == 0) {
     return false;
   }
-  else if (tmp > 0)
+  else if (is_positive)
     result = static_cast<T>(tmp -1);
   else
     result = static_cast<T>(tmp);
@@ -285,7 +285,7 @@ struct int_trait<uint64_t>
   typedef temp_uint64_t temp_type;
 };
 
-inline bool to_nullable_value(uint64_t& result, temp_uint64_t tmp)
+inline bool to_nullable_value(uint64_t& result, temp_uint64_t tmp, bool is_positive)
 {
   if (tmp.value == 0) {
     if (!tmp.carry)
@@ -294,7 +294,7 @@ inline bool to_nullable_value(uint64_t& result, temp_uint64_t tmp)
       result = std::numeric_limits<uint64_t>::max();
     }
   }
-  else if (tmp.value > 0)
+  else if (is_positive)
     result = tmp.value -1;
   else
     result = tmp.value;
@@ -311,17 +311,19 @@ fast_istream::decode(T& result, bool nullable)
   typename detail::int_trait<T>::temp_type tmp = 0;
 
   char c = sbumpc();
+  bool is_positive = true;
 
   if (boost::is_unsigned<T>::value) {
     tmp = c & 0x7F;
   }
   else {
     if (c & 0x40) {
-      // this is a signed integer
+      // this is a negtive integer
+      is_positive = false;
       tmp = (static_cast<T>(-1) << 7) | (c & 0x7F);
     }
     else {
-      // unsigned integer, mask the most significat two bits
+      // positive integer, mask the most significat two bits
       tmp = c & 0x3F;
     }
   }
@@ -341,7 +343,7 @@ fast_istream::decode(T& result, bool nullable)
     BOOST_THROW_EXCEPTION(fast_dynamic_error("D2"));
 
   if (nullable) {
-    return detail::to_nullable_value(result, tmp);
+    return detail::to_nullable_value(result, tmp, is_positive);
   }
   else {
     result = static_cast<T>(tmp);
