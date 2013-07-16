@@ -27,7 +27,8 @@
 #include <mfast/message_ref.h>
 #include <mfast/dynamic_ref.h>
 #include <mfast/malloc_allocator.h>
-#include <mfast/decoder.h>
 #include <mfast/field_visitor.h>
 #include <mfast/arena_allocator.h>
+#include <mfast/decoder.h>
+
 #endif /* end of include guard: MFAST_H_4EMINVTV */

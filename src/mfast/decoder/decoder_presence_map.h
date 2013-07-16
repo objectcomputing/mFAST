@@ -19,7 +19,7 @@
 #ifndef DECODER_PRESENCE_MAP_H_MWSEB461
 #define DECODER_PRESENCE_MAP_H_MWSEB461
 #include <stdint.h>
-#include "mfast/fast_istreambuf.h"
+#include "mfast/decoder/fast_istreambuf.h"
 
 namespace mfast {
 

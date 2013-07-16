@@ -19,10 +19,10 @@
 #ifndef FAST_ISTREAM_EXTRACTOR_H_AMFDBCO
 #define FAST_ISTREAM_EXTRACTOR_H_AMFDBCO
 
-#include "mfast/fast_istream.h"
 #include "mfast/int_ref.h"
 #include "mfast/string_ref.h"
 #include "mfast/decimal_ref.h"
+#include "mfast/decoder/fast_istream.h"
 
 namespace mfast
 {

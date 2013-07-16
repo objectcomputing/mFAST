@@ -1,5 +1,5 @@
-file (GLOB headers "*.h") ## retrieve all header files in cirst directory
-file (GLOB sources "*.cpp")     ## retrieve all source files in current directory
+file (GLOB_RECURSE headers "*.h") ## retrieve all header files in current directory
+file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current directory
 
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)

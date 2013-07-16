@@ -17,7 +17,6 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include <mfast.h>
-#include <mfast/decoder.h>
 #include <mfast/dynamic_templates_description.h>
 
 #define BOOST_TEST_DYN_LINK

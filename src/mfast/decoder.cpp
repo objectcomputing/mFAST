@@ -16,18 +16,18 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "decoder.h"
-#include "decoder_field_operator.h"
-#include "field_visitor.h"
 #include <boost/container/map.hpp>
-#include "decoder_presence_map.h"
-#include "sequence_ref.h"
-#include "dictionary_builder.h"
-#include "malloc_allocator.h"
-#include "exceptions.h"
-#include "debug_stream.h"
-#include "output.h"
-#include "fast_istream.h"
+#include "mfast/decoder.h"
+#include "mfast/field_visitor.h"
+#include "mfast/sequence_ref.h"
+#include "mfast/dictionary_builder.h"
+#include "mfast/malloc_allocator.h"
+#include "mfast/exceptions.h"
+#include "mfast/debug_stream.h"
+#include "mfast/output.h"
+#include "mfast/decoder/decoder_presence_map.h"
+#include "mfast/decoder/decoder_field_operator.h"
+#include "mfast/decoder/fast_istream.h"
 namespace mfast {
 
 typedef boost::container::map<uint32_t, message_base> message_map_t;
@@ -371,17 +371,6 @@ decoder::include(const templates_description** descriptions, std::size_t descrip
   }
 }
 
-/*
-message_cref
-decoder::decode(fast_istreambuf& sb, bool force_reset)
-{
-
-  assert(sb.in_avail() != 0);
-
-  impl_->force_reset_ = force_reset;
-  return impl_->decode_segment(sb)->cref();
-}
-*/
 
 message_cref 
 decoder::decode(const char*& first, const char* last, bool force_reset)

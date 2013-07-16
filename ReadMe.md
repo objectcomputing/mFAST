@@ -23,7 +23,9 @@ If you are familiar with CORBA or DDS, this process is tantamount to the proxy/s
 The following code snippet shows how to use the generated types:
 
     // the decoder setup steps are omitted
-    mfast::message_cref message = decoder.decoder(stream);
+    const char* first = buf;
+    const char* last = buf + buf_len;
+    mfast::message_cref message = decoder.decode(first, last);
     if (message.id() == MarketData_cref::the_id)
     {
         MarketData_cref data = message.cref().static_cast_as<MarketData_cref>();
@@ -52,7 +54,7 @@ to access a message in a generic way.
         { // for int32_cref, uint32_cref, int64_cref, uint64_cref, decimal_cref
           //     ascii_string_cref, unicode_string_cref, byte_vector_cref
 
-            std::cout << indenter_ << ref.name << ":" << ref << "\n";
+            std::cout << indenter_ << ref.name() << ":" << ref << "\n";
         }
 
         bool pre_visit(const group_cref& ref)
@@ -146,7 +148,7 @@ The following  are the sizes of executables compiled in MAC OS/X 10.8 with i686-
 * QuickFAST PerformanceTest : 1,317,148 bytes
 * QuickFAST GenericBuilderPerformace : 1,450,236 bytes
 
-As you can see the mFAST executables are about 30% to 40% of the QuickFAST versions; which is quite a reduction, not to say that mFAST versions do not like to other
+As you can see, the mFAST executables are about 30% to 40% of the QuickFAST versions; which is quite a reduction, not to say that mFAST versions do not link to other
 dynamic libraries as their QuickFAST counterparts.
 
 Better runtime efficiency

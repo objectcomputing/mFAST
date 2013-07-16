@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <mfast/fast_istream.h>
-#include <mfast/fast_istream_extractor.h>
+#include <mfast/decoder/fast_istream.h>
+#include <mfast/decoder/fast_istream_extractor.h>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>

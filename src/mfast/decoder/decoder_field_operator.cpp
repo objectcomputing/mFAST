@@ -17,13 +17,12 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "mfast/fast_istream.h"
-#include "mfast/decoder_presence_map.h"
 #include "mfast/codec_helper.h"
-#include "mfast/decoder_field_operator.h"
-#include "mfast/codec_helper.h"
-#include "mfast/fast_istream_extractor.h"
-#include "mfast/check_overflow.h"
+#include "mfast/decoder/fast_istream.h"
+#include "mfast/decoder/decoder_presence_map.h"
+#include "mfast/decoder/decoder_field_operator.h"
+#include "mfast/decoder/fast_istream_extractor.h"
+#include "mfast/decoder/check_overflow.h"
 namespace mfast
 {
 
