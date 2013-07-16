@@ -252,6 +252,16 @@ class make_field_mref
 
 typedef make_field_mref<field_cref> field_mref;
 
+template <typename T>
+struct mref_of;
+
+template <>
+struct mref_of<field_cref>
+{
+  typedef field_mref type;
+};
+
+
 namespace detail {
 
 template <typename T>
@@ -270,8 +280,6 @@ struct remove_const_reference<T&>
 };
 
 }
-
-
 
 namespace detail {
 

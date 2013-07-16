@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     BOOST_CHECK_EQUAL(ref.id(), 1);
     BOOST_CHECK( strcmp(ref.name(), "test_uint64") == 0);
 
-    ref = 5;
+    ref.as(5);
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.value(), 5);
 
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
       BOOST_CHECK_THROW(helper.delta_base_value_of(ref), mfast::fast_error);
     }
     {
-      ref = 4;
+      ref.as(4);
       helper.save_previous_value(ref);
       value_storage base_value = helper.delta_base_value_of(ref);
       uint64_cref base_cref(&base_value, &inst);
@@ -439,7 +439,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     ref.as("string1");
     BOOST_CHECK(ref == "string1" );
 
-    ref = "string2";
+    ref.as("string2");
     BOOST_CHECK(ref == "string2" );
 
     ref += "abc";
@@ -490,7 +490,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
       BOOST_CHECK_THROW(helper.delta_base_value_of(ref), mfast::fast_error);
     }
     {
-      ref = "4";
+      ref.as("4");
       helper.save_previous_value(ref);
       value_storage base_value = helper.delta_base_value_of(ref);
       ascii_string_cref base_cref(&base_value, &inst);
@@ -807,7 +807,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
       unicode_string_mref str = e3f1.static_cast_as<unicode_string_mref>();
       BOOST_CHECK_EQUAL(str.field_type(), field_type_unicode_string);
 
-      str = "abcdef";
+      str.as( "abcdef" );
       BOOST_CHECK(const_e3f1.present());
 
       unicode_string_cref cstr = e3f1.static_cast_as<unicode_string_cref>();

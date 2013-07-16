@@ -71,7 +71,7 @@ class group_cref
     }
 
     template <typename FieldAccesor>
-    void accept_accessor(FieldAccesor&) const;
+    void accept_accessor(FieldAccesor&);
 
   protected:
     const value_storage* field_storage(size_t index) const;
@@ -122,7 +122,7 @@ class make_group_mref
 
 
     template <typename FieldMutator>
-    void accept_mutator(FieldMutator&) const;
+    void accept_mutator(FieldMutator&);
 
     template <typename T>
     T static_cast_as() const
@@ -207,7 +207,7 @@ make_group_mref<ConstGroupRef>::ensure_valid() const
 {
   // To improve efficiency during decoding, when the top level message is resetted,
   // all subfields' storage are zero-ed instead of properly initialized. Upon the
-  // decoder visit this field, we need to check if the memory for the subfields of this
+  // encoder visit this field, we need to check if the memory for the subfields of this
   // group is allocated. If not, we need to allocate the memory for the subfields.
   this->instruction()->ensure_valid_storage(const_cast<value_storage&>(*this->storage_), this->alloc_);
 }

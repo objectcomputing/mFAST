@@ -59,9 +59,10 @@ class int_cref
     }
 
 
-    // operator T () const {
-    //   return value();
-    // }
+    bool is_initial_value() const 
+    {
+      return  present() && value() == this->instruction()->initial_value();
+    }
 
     T value() const
     {
@@ -74,7 +75,16 @@ class int_cref
     }
 
   protected:
+    friend class mfast::detail::codec_helper;
+    
     int_cref& operator = (const int_cref&);
+    
+    void save_to(value_storage& v) const
+    {
+      v.of_uint.content_ = this->storage()->of_uint.content_;
+      v.defined(true);
+      v.present(this->present());
+    }
 };
 
 
@@ -109,12 +119,17 @@ class int_mref
       : base_type(other)
     {
     }
-
-    const int_mref& operator = (T v) const
+    
+    void as (const int_cref<T>& cref) const
     {
-      value(v);
-      return *this;
+      if (cref.absent()) {
+        this->as_absent();
+      }
+      else {
+        as(cref.value());
+      }
     }
+    
 
     void as(T v) const
     {
@@ -126,19 +141,6 @@ class int_mref
       this->storage()->present(1);
       this->storage()->of_uint.content_ = this->instruction()->initial_value();
     }
-
-    // const int_mref& operator ++ () const
-    // {
-    //   ++value_ref();
-    //   return *this;
-    // }
-
-    // T operator ++(int) const
-    // {
-    //   T result = value();
-    //   ++value_ref();
-    //   return result;
-    // }
 
     T value() const
     {
@@ -180,19 +182,38 @@ class int_mref
       as(*reinterpret_cast<T*>(&v.of_uint.content_));
     }
 
-    void save_to(value_storage& v) const
-    {
-      v.of_uint.content_ = this->storage()->of_uint.content_;
-      v.defined(true);
-      v.present(this->present());
-    }
-
 };
 
 typedef int_mref<int32_t> int32_mref;
 typedef int_mref<uint32_t> uint32_mref;
 typedef int_mref<int64_t> int64_mref;
 typedef int_mref<uint64_t> uint64_mref;
+
+template <>
+struct mref_of<int32_cref>
+{
+  typedef int32_mref type;
+};
+
+template <>
+struct mref_of<uint32_cref>
+{
+  typedef uint32_mref type;
+};
+
+template <>
+struct mref_of<int64_cref>
+{
+  typedef int64_mref type;
+};
+
+template <>
+struct mref_of<uint64_cref>
+{
+  typedef uint64_mref type;
+};
+
+
 };
 
 

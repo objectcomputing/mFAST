@@ -33,7 +33,7 @@ const char usage[] =
   "  -f file     : FAST Message file (required)\n"
   "  -head n     : process only the first 'n' messages\n"
   "  -c count    : repeat the test 'count' times\n"
-  "  -r          : Toggle 'reset decoder on every message' (default false).\n"
+  "  -r          : Toggle 'reset encoder on every message' (default false).\n"
   "  -hfix n     : Skip n byte header before each message\n"
   "  -arena      : Use arena_allocator\n\n";
 
@@ -107,7 +107,7 @@ int main(int argc, const char** argv)
     mfast::allocator* alloc = &malloc_allc;
     if (use_arena)
       alloc = &arena_alloc;
-    mfast::decoder coder(*alloc);
+    mfast::decoder coder(alloc);
     const mfast::templates_description* descriptions[] = { &example::the_description };
 
     coder.include(descriptions);

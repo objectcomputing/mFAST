@@ -251,17 +251,13 @@ class string_mref
       : base_type(other)
     {
     }
-
-    string_mref& operator = (const char* s)
+    
+    void as (const string_cref<IsAscii>& s)
     {
-      this->assign(s, s+strlen(s));
-      return *this;
-    }
-
-    string_mref& operator = (const std::string& s)
-    {
-      this->assign(s.begin(), s.end());
-      return *this;
+      if (s.absent())
+        this->as_absent();
+      else
+        this->assign(s.begin(), s.end());
     }
 
     void as (const char* s) const
@@ -272,6 +268,18 @@ class string_mref
     void as (const std::string& s) const
     {
       this->assign(s.begin(), s.end());
+    }
+    
+    string_mref& operator = (const char* s)
+    {
+      this->assign(s, s+strlen(s));
+      return *this;
+    }
+    
+    string_mref& operator = (const std::string& s)
+    {
+      this->assign(s.begin(), s.end());
+      return *this;
     }
 
     void shallow_assign (const char* str) const
@@ -341,6 +349,17 @@ class string_mref
 typedef string_mref<true> ascii_string_mref;
 typedef string_mref<false> unicode_string_mref;
 
+template <>
+struct mref_of<ascii_string_cref>
+{
+  typedef ascii_string_mref type;
+};
+
+template <>
+struct mref_of<unicode_string_cref>
+{
+  typedef unicode_string_mref type;
+};
 
 }
 

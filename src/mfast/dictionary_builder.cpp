@@ -73,10 +73,15 @@ std::string qualified_name(const char* ns, const char* name)
   return result;
 }
 
-dictionary_builder::dictionary_builder(dictionary_resetter& resetter, arena_allocator* allocator)
-  : resetter_(resetter), alloc_(allocator)
+dictionary_builder::dictionary_builder(dictionary_resetter&        resetter,
+                                       template_id_map_t&          templates_map,
+                                       arena_allocator*            allocator,
+                                       dictionary_value_destroyer* value_destroyer)
+  : resetter_(resetter)
+  , alloc_(allocator)
+  , template_id_map_(templates_map)
+  , value_destroyer_(value_destroyer)
 {
-
 }
 
 void dictionary_builder::build(const templates_description* def)
@@ -333,6 +338,9 @@ void dictionary_builder::visit(const ascii_field_instruction* src_inst, void* de
                                              dest->op_context_,
                                              field_type_ascii_string,
                                              &dest->prev_storage_);
+  if (value_destroyer_) {
+    value_destroyer_->push_back(dest->prev_value_);
+  }
 }
 
 void dictionary_builder::visit(const unicode_field_instruction* src_inst, void* dest_inst)
@@ -344,6 +352,9 @@ void dictionary_builder::visit(const unicode_field_instruction* src_inst, void* 
                                              dest->op_context_,
                                              field_type_unicode_string,
                                              &dest->prev_storage_);
+  if (value_destroyer_) {
+    value_destroyer_->push_back(dest->prev_value_);
+  }
 }
 
 void dictionary_builder::visit(const decimal_field_instruction* src_inst, void* dest_inst)
@@ -390,6 +401,9 @@ void dictionary_builder::visit(const byte_vector_field_instruction* src_inst, vo
                                              dest->op_context(),
                                              field_type_byte_vector,
                                              &dest->prev_storage_);
+  if (value_destroyer_) {
+    value_destroyer_->push_back(dest->prev_value_);
+  }
 }
 
 }

@@ -46,6 +46,7 @@ operator << (std::ostream& os, const indenter& indent)
 }
 
 class message_printer
+  : public field_accessor_base
 {
   std::ostream& os_;
   indenter indent_;
@@ -61,57 +62,34 @@ class message_printer
     void visit(const PrimitiveTypeRef& ref)
     {
       os_ << indent_ << ref.name() << ": " << ref
-         << "\n";
+          << "\n";
     }
 
-    bool pre_visit(const group_cref& ref)
+    template <typename CompositeTypeRef>
+    bool pre_visit(const CompositeTypeRef& ref)
     {
       os_ << indent_ << ref.name() << ":\n";
       ++indent_;
       return true;
     }
 
-  void post_visit(const group_cref& /* ref */)
+    template <typename CompositeTypeRef>
+    void post_visit(const CompositeTypeRef& /* ref */)
     {
       --indent_;
     }
 
-    bool pre_visit(const sequence_cref& ref)
-    {
-      os_ << indent_ << ref.name() << ":\n";
-      ++indent_;
-      return true;
-    }
-
-  void post_visit(const sequence_cref& /* ref */)
-    {
-      --indent_;
-    }
-
-  bool pre_visit(std::size_t index, const sequence_element_cref& /* ref */)
+    bool pre_visit(std::size_t index, const sequence_element_cref& /* ref */)
     {
       os_ << indent_ <<  "[" << index << "]:\n";
       ++indent_;
       return true;
     }
 
-  void post_visit(std::size_t /* index */, const sequence_element_cref& /* ref */)
+    void post_visit(std::size_t /* index */, const sequence_element_cref& /* ref */)
     {
       --indent_;
     }
-
-    bool pre_visit(const message_cref& ref)
-    {
-      os_ << ref.name() << "\n";
-      ++indent_;
-      return true;
-    }
-
-    void post_visit(const message_cref&)
-    {
-      --indent_;
-    }
-
 };
 
 int main()

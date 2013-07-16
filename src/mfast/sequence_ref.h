@@ -143,7 +143,7 @@ class make_sequence_cref
     }
 
     template <typename FieldAccesor>
-    void accept_accessor(FieldAccesor&) const;
+    void accept_accessor(FieldAccesor&);
 
   protected:
     const field_instruction* subinstruction(std::size_t index) const
@@ -219,7 +219,7 @@ class make_sequence_mref
 
 
     template <typename FieldMutator>
-    void accept_mutator(FieldMutator&) const;
+    void accept_mutator(FieldMutator&);
 
     instruction_cptr instruction() const
     {

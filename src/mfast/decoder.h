@@ -19,7 +19,7 @@
 #ifndef DECODER_H_WYWT9TG7
 #define DECODER_H_WYWT9TG7
 #include "mfast/message_ref.h"
-
+#include "mfast/malloc_allocator.h"
 
 namespace mfast
 {
@@ -30,21 +30,18 @@ struct decoder_impl;
 class decoder
 {
   public:
-    /// Consturct a decoder using default memory allocator (i.e. malloc)
-    decoder();
-
-    /// Construct a decode using custom memory allocator
-    decoder(allocator& alloc);
+    /// Construct a decode using a specified memory allocator
+    decoder(allocator* alloc=  malloc_allocator::instance());
     ~decoder();
 
     /// Import templates descriptions into the decoder.
     ///
     /// Notice that this decoder object does neither copy or hold the ownership of the passed
-    /// description. The callee should ensure the lifetime of @a descriptions are longer than
+    /// description. The caller should ensure the lifetime of @a descriptions is longer than
     /// the decoder object.
     ///
     /// In addition, this memeber function should only be invoked once during the lifetime
-    /// of a decoder object. Repetitive invoking the member function would produce incorrect
+    /// of a decoder object. Repetitive invoking the member function would produce undefined
     /// behavior.
     ///
     /// @param descriptions The array of templates_description pointers to be loaded.

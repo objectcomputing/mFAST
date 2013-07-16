@@ -32,7 +32,9 @@ template <typename ConstMessageRef>
 class make_message_mref;
 
 class message_base;
-class decoder_visitor;
+struct encoder_impl;
+struct decoder_impl;
+
 class message_cref
 {
   public:
@@ -67,12 +69,12 @@ class message_cref
     const field_instruction* subinstruction(size_t index) const;
 
     template <typename FieldAccesor>
-    void accept_accessor(FieldAccesor&) const;
+    void accept_accessor(FieldAccesor&);
 
   protected:
 
 
-    friend class decoder_visitor;
+    friend struct encoder_impl;
 
     const template_instruction* instruction_;
     const value_storage* storage_;
@@ -100,7 +102,7 @@ class make_message_mref
 
 
     template <typename FieldMutator>
-    void accept_mutator(FieldMutator&) const;
+    void accept_mutator(FieldMutator&);
 };
 
 typedef make_message_mref<message_cref> message_mref;
@@ -156,8 +158,7 @@ class message_base
     const value_storage* storage_for(const message_cref& other) const;
 
     friend struct decoder_impl;
-
-    // Used by decoder to indicate this object uses arena allocator,
+    // Used by encoder to indicate this object uses arena allocator,
     // and the allocator has been resetted. All previously allocated memory
     // are invalidated. Thus memory for sub-fields needs to be re-allocated.
     void reset();

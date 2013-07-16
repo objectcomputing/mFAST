@@ -601,7 +601,7 @@ BOOST_AUTO_TEST_CASE(allocator_decode_test)
   dynamic_templates_description description(xml_content);
 
   mock_allocator alloc(true);
-  decoder coder(alloc);
+  decoder coder(&alloc);
 
   const templates_description* descriptions[] = { &description };
 

@@ -33,22 +33,55 @@ namespace mfast {
 typedef boost::container::map<uint32_t, message_base> message_map_t;
 
 struct decoder_impl
+  : field_mutator_base
 {
-
-  struct struct_context
+  template <typename MREF>
+  class mref_mixin
+    : public MREF
   {
-    decoder_presence_map pmap_;
-    decoder_presence_map* prev_pmap_;
+    public:
 
-    struct_context()
-      : prev_pmap_(0)
-    {
-    }
 
+      mref_mixin(allocator*               alloc,
+                 value_storage*           storage,
+                 typename MREF::instruction_cptr inst)
+        : MREF(alloc, storage, inst)
+      {
+      }
+      
+      template <typename T>
+      mref_mixin(T t)
+        : MREF(t)
+      {
+      }
+
+      mref_mixin()
+      {
+      }
+
+      void decode_pmap(decoder_impl* coder)
+      {
+        this->prev_pmap_ = coder->current_;
+        coder->current_ = &pmap_;
+        coder->strm_.decode(pmap_);
+      }
+
+      void restore_pmap(decoder_impl* coder)
+      {
+        if (this->prev_pmap_)
+          coder->current_ = this->prev_pmap_;
+      }
+
+    private:
+      decoder_presence_map pmap_;
+      decoder_presence_map* prev_pmap_;
   };
 
+  typedef mref_mixin<mfast::group_mref> group_ref_type;
+  typedef mref_mixin<mfast::sequence_element_mref> sequence_element_ref_type;
+  typedef mref_mixin<mfast::dynamic_mref> dynamic_ref_type;
+
   fast_istream strm_;
-  allocator* alloc_;
   dictionary_resetter resetter_;
 
   arena_allocator template_alloc_;  // template_alloc MUST be constructed before template_messages,
@@ -65,22 +98,20 @@ struct decoder_impl
   ~decoder_impl();
   void reset_messages();
   decoder_presence_map& current_pmap();
-  void decode_pmap(struct_context& context);
-  void restore_pmap(struct_context& context);
 
   template <typename SimpleMRef>
-  void visit(const SimpleMRef &mref);
+  void visit(SimpleMRef &mref);
 
-  bool pre_visit(const group_mref& mref, struct_context& context);
-  void post_visit(const group_mref& mref, struct_context& context);
-  bool pre_visit(const sequence_mref& mref);
-  void post_visit(const sequence_mref&);
-  bool pre_visit(std::size_t /* index */, const sequence_element_mref& mref, struct_context& context);
-  void post_visit(std::size_t /* index */, const sequence_element_mref& mref, struct_context& context);
-  bool pre_visit(const message_mref&, struct_context& context);
-  void post_visit(const message_mref&, struct_context& context);
-  bool pre_visit(dynamic_mref&, struct_context& context);
-  void post_visit(const dynamic_mref&, struct_context& context);
+  bool pre_visit(group_ref_type& mref);
+  void post_visit(group_ref_type& mref);
+  bool pre_visit(sequence_mref& mref);
+  void post_visit(sequence_mref&);
+  bool pre_visit(std::size_t /* index */,  sequence_element_ref_type& mref);
+  void post_visit(std::size_t /* index */, sequence_element_ref_type& mref);
+  bool pre_visit(message_mref&);
+  void post_visit(message_mref&);
+  bool pre_visit(dynamic_ref_type&);
+  void post_visit(dynamic_ref_type&);
 
   message_base*  decode_segment(fast_istreambuf& sb);
 };
@@ -114,24 +145,9 @@ decoder_impl::current_pmap()
   return *current_;
 }
 
-inline void
-decoder_impl::decode_pmap(struct_context& context)
-{
-  context.prev_pmap_ = current_;
-  current_ = &context.pmap_;
-  strm_.decode(current_pmap());
-}
-
-inline void
-decoder_impl::restore_pmap(struct_context& context)
-{
-  if (context.prev_pmap_)
-    current_ = context.prev_pmap_;
-}
-
 template <typename SimpleMRef>
 inline void
-decoder_impl::visit(const SimpleMRef& mref)
+decoder_impl::visit(SimpleMRef& mref)
 {
   debug_ << "   decoding " << mref.name() << ": pmap -> " << current_pmap() << "\n"
          << "               stream -> " << strm_ << "\n";
@@ -149,7 +165,7 @@ decoder_impl::visit(const SimpleMRef& mref)
 }
 
 inline bool
-decoder_impl::pre_visit(const group_mref& mref, struct_context& context)
+decoder_impl::pre_visit(group_ref_type& mref)
 {
   debug_ << "decoding group " << mref.name();
 
@@ -170,7 +186,7 @@ decoder_impl::pre_visit(const group_mref& mref, struct_context& context)
   }
 
   if (mref.instruction()->has_pmap_bit()) {
-    decode_pmap(context);
+    mref.decode_pmap(this);
     debug_ << "        " << mref.name() << " has group pmap -> " << current_pmap() << "\n";
   }
   mref.ensure_valid();
@@ -178,13 +194,13 @@ decoder_impl::pre_visit(const group_mref& mref, struct_context& context)
 }
 
 inline void
-decoder_impl::post_visit(const group_mref& /* mref */, struct_context& context)
+decoder_impl::post_visit(group_ref_type& mref)
 {
-  restore_pmap(context);
+  mref.restore_pmap(this);
 }
 
 inline bool
-decoder_impl::pre_visit(const sequence_mref& mref)
+decoder_impl::pre_visit(sequence_mref& mref)
 {
   debug_ << "decoding sequence " << mref.name()  << " ---\n";
 
@@ -208,31 +224,31 @@ decoder_impl::pre_visit(const sequence_mref& mref)
 }
 
 inline void
-decoder_impl::post_visit(const sequence_mref&)
+decoder_impl::post_visit(sequence_mref&)
 {
 }
 
 inline bool
-decoder_impl::pre_visit(std::size_t index, const sequence_element_mref& mref, struct_context& context)
+decoder_impl::pre_visit(std::size_t index, decoder_impl::sequence_element_ref_type& mref)
 {
   debug_ << "decoding  element[" << index << "] : has pmap bit = " <<  mref.instruction()->has_pmap_bit() << "\n";
 
   if (mref.instruction()->has_pmap_bit())
   {
-    decode_pmap(context);
+    mref.decode_pmap(this);
     debug_ << "    decoded pmap -> " <<  current_pmap() << "\n";
   }
   return true;
 }
 
 inline void
-decoder_impl::post_visit(std::size_t /* index */, const sequence_element_mref& /* mref */, struct_context& context)
+decoder_impl::post_visit(std::size_t /* index */, decoder_impl::sequence_element_ref_type& mref)
 {
-  restore_pmap(context);
+  mref.restore_pmap(this);
 }
 
 inline bool
-decoder_impl::pre_visit(const message_mref& mref, struct_context& /*context*/)
+decoder_impl::pre_visit(message_mref& mref)
 {
   mref.ensure_valid();
   debug_ << "decoding template " << mref.name()  << " ...\n";
@@ -241,16 +257,17 @@ decoder_impl::pre_visit(const message_mref& mref, struct_context& /*context*/)
 }
 
 inline void
-decoder_impl::post_visit(const message_mref&, struct_context& /*context*/)
+decoder_impl::post_visit(message_mref&)
 {
 }
 
 inline bool
-decoder_impl::pre_visit(dynamic_mref& mref, struct_context& context)
+decoder_impl::pre_visit(decoder_impl::dynamic_ref_type& mref)
 {
   debug_ << "decoding dynamic templateRef ...\n";
 
-  decode_pmap(context);
+  mref.decode_pmap(this);
+
   debug_ << "   decoded pmap -> " << current_pmap() << "\n";
 
   decoder_presence_map& pmap = current_pmap();
@@ -277,9 +294,9 @@ decoder_impl::pre_visit(dynamic_mref& mref, struct_context& context)
 }
 
 inline void
-decoder_impl::post_visit(const dynamic_mref& /* mref */, struct_context& context)
+decoder_impl::post_visit(decoder_impl::dynamic_ref_type& mref)
 {
-  restore_pmap(context);
+  mref.restore_pmap(this);
 }
 
 message_base*
@@ -287,10 +304,10 @@ decoder_impl::decode_segment(fast_istreambuf& sb)
 {
 
   strm_.reset(&sb);
-  struct_context context;
-  decode_pmap(context);
 
-  decoder_presence_map& pmap = current_pmap();
+  decoder_presence_map pmap;
+  this->current_ = &pmap;
+  strm_.decode(pmap);
 
   debug_ << "decoding segment : pmap -> " << pmap << "\n"
          << "                   entity -> " << strm_  << "\n";
@@ -328,16 +345,11 @@ decoder_impl::decode_segment(fast_istreambuf& sb)
   return message;
 }
 
-decoder::decoder()
-  : impl_(new decoder_impl)
-{
-  impl_->message_alloc_ = malloc_allocator::instance();
-}
 
-decoder::decoder(allocator& alloc)
+decoder::decoder(allocator* alloc)
   : impl_(new decoder_impl)
 {
-  impl_->message_alloc_ = &alloc;
+  impl_->message_alloc_ = alloc;
 }
 
 decoder::~decoder()
@@ -348,17 +360,15 @@ decoder::~decoder()
 void
 decoder::include(const templates_description** descriptions, std::size_t description_count)
 {
-  dictionary_builder builder(impl_->resetter_, &impl_->template_alloc_);
+  template_id_map_t templates_map;
+  dictionary_builder builder(impl_->resetter_,templates_map,  &impl_->template_alloc_);
 
   for (std::size_t i = 0; i < description_count; ++i)
     builder.build(descriptions[i]);
 
-  typedef dictionary_builder::template_id_map_t templates_map_t;
-  const templates_map_t& templates_map = builder.templates_map();
-
   // Given the template definitions, we need to create another map for
   // mapping each template id to a fully constructed message.
-  templates_map_t::const_iterator it = templates_map.begin();
+  template_id_map_t::const_iterator it = templates_map.begin();
   for (; it != templates_map.end(); ++it) {
     impl_->template_messages_.emplace(it->first, std::make_pair(impl_->message_alloc_, it->second));
   }
@@ -371,14 +381,13 @@ decoder::include(const templates_description** descriptions, std::size_t descrip
   }
 }
 
-
-message_cref 
+message_cref
 decoder::decode(const char*& first, const char* last, bool force_reset)
 {
   assert(first < last);
   fast_istreambuf sb(first, last-first);
   impl_->force_reset_ = force_reset;
-  message_cref  result = impl_->decode_segment(sb)->cref();
+  message_cref result = impl_->decode_segment(sb)->cref();
   first = sb.gptr();
   return result;
 }
