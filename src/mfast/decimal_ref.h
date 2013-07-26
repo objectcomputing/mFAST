@@ -189,10 +189,12 @@ class decimal_cref
       v.defined(true);
       v.present(this->present());
     }
-
 };
 
-
+inline bool operator == (const decimal_cref& lhs, const decimal_cref& rhs)
+{
+  return (lhs.absent() && rhs.absent()) || (lhs.mantissa() == rhs.mantissa() && lhs.exponent() && rhs.exponent());
+}
 
 class exponent_mref
   : public exponent_cref

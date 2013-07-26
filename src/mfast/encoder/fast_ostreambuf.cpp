@@ -21,7 +21,7 @@ void
 fast_ostreambuf::write_bytes_at(const char* data, std::size_t n, std::size_t offset)
 {
   assert ( (pbase_ + offset +n) <= pptr_);
-  std::copy(data, data+n, pbase_);
+  std::copy(data, data+n, pbase_+offset);
 }
 
 void 

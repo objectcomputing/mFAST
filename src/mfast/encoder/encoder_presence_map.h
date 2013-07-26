@@ -80,9 +80,16 @@ encoder_presence_map::reset()
 inline void
 encoder_presence_map::commit()
 {
-  stream_->write_bytes_at(&value_, nbytes_, offset_);
-  if (nbytes_ < maxbytes_)
-    stream_->shrink(offset_ + nbytes_, maxbytes_ - nbytes_);
+#ifdef BOOST_BIG_ENDIAN
+  const uint64_t stop_bit_mask = (0x8000000000000000ULL >> (nbytes_ * 8));
+#else
+  const uint64_t stop_bit_mask = (0x80ULL << (nbytes_ * 8));
+#endif
+  
+  value_ |= stop_bit_mask;
+  stream_->write_bytes_at(&value_, ++nbytes_, offset_);
+  // if (nbytes_ < maxbytes_)
+  //   stream_->shrink(offset_ + nbytes_, maxbytes_ - nbytes_);
 }
 
 inline void
@@ -106,6 +113,7 @@ encoder_presence_map::set_next_bit(bool v)
     offset_ += 8;
     maxbytes_ -= 8;
     reset();
+    mask_ >>= 1;
   }
 
   if (v) {

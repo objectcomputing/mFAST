@@ -14,6 +14,7 @@ add_executable (mfast_test
                 test_main.cpp
 			    field_ref_test.cpp
 			    fast_istream_test.cpp
+				fast_ostream_test.cpp
 			    decoder_operator_test.cpp
 			    arena_allocator_test.cpp
 			    decoder_test.cpp

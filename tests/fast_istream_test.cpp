@@ -18,86 +18,66 @@
 //
 #include <mfast/decoder/fast_istream.h>
 #include <mfast/decoder/fast_istream_extractor.h>
-
+#include <mfast/output.h>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "debug_allocator.h"
 #include <stdexcept>
+#include "byte_stream.h"
 
 using namespace mfast;
+
+template <typename T>
+boost::test_tools::predicate_result
+decode_integer(const byte_stream& bs, bool nullable, T result)
+{
+  fast_istreambuf sb(bs.data(), bs.size());
+  fast_istream strm(&sb);
+
+  T value;
+  bool not_null = strm.decode(value, nullable);
+
+  if (not_null &&  value == result)
+    return true;
+
+  boost::test_tools::predicate_result res( false );
+
+  if (not_null)
+    res.message() << "Got \"" << value << "\" instead.";
+  else
+    res.message() << "Got null instead.";
+  return res;
+
+}
 
 BOOST_AUTO_TEST_SUITE( test_fast_istream )
 
 
 BOOST_AUTO_TEST_CASE(int32_test)
 {
-  {
-    char data[] = "\x39\x45\xa4";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
 
-    int32_t value;
-    BOOST_CHECK(strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, 942755);
-  }
+  BOOST_CHECK(decode_integer( "\x39\x45\xa4", true, INT32_C(942755)));
+  BOOST_CHECK(decode_integer( "\x39\x45\xa3", false, INT32_C(942755)));
+  BOOST_CHECK(decode_integer( "\x46\x3a\xdd", true, INT32_C(-942755)));
+  BOOST_CHECK(decode_integer( "\x7c\x1b\x1b\x9d", false,INT32_C(-7942755)));
+  BOOST_CHECK(decode_integer( "\x00\x40\x81", false, INT32_C(8193)));
+  BOOST_CHECK(decode_integer( "\x7F\x3f\xff", false, INT32_C(-8193)));
 
-  {
-    char data[] = "\x39\x45\xa3";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
 
-    int32_t value;
-    BOOST_CHECK(strm.decode(value,false));
-    BOOST_CHECK_EQUAL(value, 942755);
-  }
+  BOOST_CHECK(decode_integer( "\x81",  true, UINT32_C(0)));
+  BOOST_CHECK(decode_integer( "\x82",  true, UINT32_C(1)));
+  BOOST_CHECK(decode_integer( "\x39\x45\xa4",  true, UINT32_C(942755)));
+  BOOST_CHECK(decode_integer( "\x80",  false, UINT32_C(0)));
+  BOOST_CHECK(decode_integer( "\x81",  false, UINT32_C(1)));
+  BOOST_CHECK(decode_integer( "\x39\x45\xa3",  false, UINT32_C(942755)));
+  BOOST_CHECK(decode_integer("\x10\x00\x00\x00\x80",  true, UINT32_C(4294967295)));
 
-  {
-    char data[] = "\x46\x3a\xdd";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
+  BOOST_CHECK(decode_integer( "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80",  true, std::numeric_limits<int64_t>::max()));
+  BOOST_CHECK(decode_integer( "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80",  true, std::numeric_limits<uint64_t>::max()));
 
-    int32_t value;
-    BOOST_CHECK(strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, -942755);
-  }
-
-  {
-    char data[] = "\x7c\x1b\x1b\x9d";
-    fast_istreambuf sb(data, 4);
-    fast_istream strm(&sb);
-
-    int32_t value;
-    BOOST_CHECK(strm.decode(value,false));
-    BOOST_CHECK_EQUAL(value, -7942755);
-  }
-
-  {
-    char data[] = "\x00\x40\x81";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-
-    int32_t value;
-    BOOST_CHECK(strm.decode(value,false));
-    BOOST_CHECK_EQUAL(value, 8193);
-  }
-
-  {
-    char data[] = "\x7F\x3f\xff";
-    fast_istreambuf sb(data, 4);
-    fast_istream strm(&sb);
-
-    int32_t value;
-    BOOST_CHECK(strm.decode(value,false));
-    BOOST_CHECK_EQUAL(value, -8193);
-  }
-
-}
-
-BOOST_AUTO_TEST_CASE(uint32_test)
-{
-  {
+  { // check decoding null
     char data[] = "\x80";
     fast_istreambuf sb(data, 3);
     fast_istream strm(&sb);
@@ -105,265 +85,105 @@ BOOST_AUTO_TEST_CASE(uint32_test)
     uint32_t value;
     BOOST_CHECK(!strm.decode(value,true));
   }
-  {
-    char data[] = "\x81";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-
-    uint32_t value;
-    BOOST_CHECK(strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, 0);
-  }
-
-  {
-    char data[] = "\x82";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-
-    uint32_t value;
-    BOOST_CHECK(strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, 1);
-  }
-
-  {
-    char data[] = "\x39\x45\xa4";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-
-    uint32_t value;
-    BOOST_CHECK(strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, 942755);
-  }
-
-  {
-    char data[] = "\x80";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-
-    uint32_t value;
-    BOOST_CHECK(strm.decode(value,false));
-    BOOST_CHECK_EQUAL(value, 0);
-
-  }
-  {
-    char data[] = "\x81";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-
-    uint32_t value;
-    BOOST_CHECK(strm.decode(value,false));
-    BOOST_CHECK_EQUAL(value, 1);
-  }
-
-
-  {
-    char data[] = "\x39\x45\xa3";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-
-    uint32_t value;
-    BOOST_CHECK(strm.decode(value,false));
-    BOOST_CHECK_EQUAL(value, 942755);
-  }
-
-  {
-    char data[] = "\x10\x00\x00\x00\x80";
-    fast_istreambuf sb(data, 5);
-    fast_istream strm(&sb);
-
-    uint32_t value;
-    BOOST_CHECK(strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, 4294967295U);
-  }
 }
 
-BOOST_AUTO_TEST_CASE(int64_test)
+boost::test_tools::predicate_result
+decode_string(const byte_stream& bs, bool nullable, const char* result, std::size_t result_len)
 {
-  {
-    char data[] = "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80";
-    fast_istreambuf sb(data, 10);
-    fast_istream strm(&sb);
+  ascii_field_instruction* instruction = 0;
 
-    int64_t value;
-    BOOST_CHECK (strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, std::numeric_limits<int64_t>::max());
-  }
+  fast_istreambuf sb(bs.data(), bs.size());
+  fast_istream strm(&sb);
+
+  const char* str;
+  uint32_t len;
+
+  bool not_null = strm.decode(str, len, nullable, instruction);
+
+  if ((str == 0 && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
+    return true;
+
+  boost::test_tools::predicate_result res( false );
+  if (not_null)
+    res.message() << "Got \"" << byte_stream(str, len) << "\" instead.";
+  else
+    res.message() << "Got null instead.";
+  return res;
 }
-
-
-BOOST_AUTO_TEST_CASE(uint64_test)
-{
-  {
-    char data[] = "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80";
-    fast_istreambuf sb(data, 10);
-    fast_istream strm(&sb);
-
-    uint64_t value;
-    BOOST_CHECK (strm.decode(value,true));
-    BOOST_CHECK_EQUAL(value, std::numeric_limits<uint64_t>::max());
-  }
-
-}
-
 
 BOOST_AUTO_TEST_CASE(ascii_string_test)
 {
-  ascii_field_instruction* instruction = 0;
-  const char* str;
+  BOOST_CHECK(decode_string( "\x80", false, "",  0));
+  BOOST_CHECK(decode_string( "\x00\x80", false, "\x0",  1));
+
+  BOOST_CHECK(decode_string( "\x80", true, 0,  0));
+  BOOST_CHECK(decode_string( "\x00\x80", true, "",  0));
+  BOOST_CHECK(decode_string( "\x00\x00\x80", true, "\x0",  1));
+
+  BOOST_CHECK(decode_string( "\x40\x40\xC0", true, "\x40\x40\xC0",  3));
+  BOOST_CHECK(decode_string( "\x40\x40\xC0", false, "\x40\x40\xC0",  3));
+
+  BOOST_CHECK_THROW(decode_string("\x00\xC0", false, 0, 0),    mfast::fast_error );
+  BOOST_CHECK_THROW(decode_string("\x00\xC0", true, 0, 0),     mfast::fast_error );
+  BOOST_CHECK_THROW(decode_string("\x00\x00\xC0", true, 0, 0), mfast::fast_error );
+}
+
+boost::test_tools::predicate_result
+decode_byte_vector(const byte_stream& bs, bool nullable, const char* result, std::size_t result_len)
+{
+
+  fast_istreambuf sb(bs.data(), bs.size());
+  fast_istream strm(&sb);
+
+  const unsigned char* str;
   uint32_t len;
-  {
-    char data[] = "\x80";
-    fast_istreambuf sb(data, 1);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK( strm.decode(str, len, false, instruction) );
-    BOOST_CHECK_EQUAL( len,             0);
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
 
-  {
-    char data[] = "\x00\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK( strm.decode(str, len, false, instruction) );
-    BOOST_CHECK_EQUAL( len,             1);
-    BOOST_CHECK_EQUAL( str[0],      '\x0');
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
+  bool not_null = strm.decode(str, len, nullable, 0);
 
-  {
-    char data[] = "\x00\xC0";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK_THROW( strm.decode(str, len, false, instruction), mfast::fast_error );
-  }
+  if ((str == 0 && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
+    return true;
 
-  {
-    char data[] = "\x80";
-    fast_istreambuf sb(data, 1);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK( !strm.decode(str, len, true, instruction) );
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
-
-  {
-    char data[] = "\x00\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK( strm.decode(str, len, true, instruction) );
-    BOOST_CHECK_EQUAL( len,             0);
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
-
-  {
-    char data[] = "\x00\xC0";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK_THROW( strm.decode(str, len, true, instruction), mfast::fast_error );
-  }
-
-  {
-    char data[] = "\x00\x00\x80";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK( strm.decode(str, len, true, instruction) );
-    BOOST_CHECK_EQUAL( len,             1);
-    BOOST_CHECK_EQUAL( str[0],      '\x0');
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
-
-  {
-    char data[] = "\x00\x00\xC0";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK_THROW( strm.decode(str, len, true, instruction), mfast::fast_error );
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
-
-  {
-    char data[] = "\x40\x40\xC0";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK( strm.decode(str, len, true, instruction) );
-
-    BOOST_CHECK_EQUAL( len,             3);
-    BOOST_CHECK_EQUAL( str,          data);
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
-  {
-    char data[] = "\x40\x40\xC0";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK( strm.decode(str, len, false, instruction) );
-    BOOST_CHECK_EQUAL( len,             3);
-    BOOST_CHECK_EQUAL( str,          data);
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
+  boost::test_tools::predicate_result res( false );
+  if (not_null)
+    res.message() << "Got \"" << byte_stream(reinterpret_cast<const char*>(str), len) << "\" instead.";
+  else
+    res.message() << "Got null instead.";
+  return res;
 }
 
 BOOST_AUTO_TEST_CASE(byte_vector_test)
 {
-  const unsigned char* str;
-  uint32_t len;
-  {
-    char data[] = "\x80";
-    fast_istreambuf sb(data, 1);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK(!strm.decode(str, len, true, 0));
-  }
-  {
-    // empty byte vector
-    char data[] = "\x80";
-    fast_istreambuf sb(data, 1);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK(strm.decode(str, len, false, 0));
-    BOOST_CHECK_EQUAL( len,             0);
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
+  BOOST_CHECK(decode_byte_vector( "\x80", true, 0,  0)); // null
+  BOOST_CHECK(decode_byte_vector( "\x80", false, "",  0)); // empty byte vector
+  BOOST_CHECK(decode_byte_vector( "\x81", true, "",  0)); // empty byte vector
 
-  }
-  {
-    // empty byte vector
-    char data[] = "\x81";
-    fast_istreambuf sb(data, 1);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK(strm.decode(str, len, true, 0));
-    BOOST_CHECK_EQUAL( len,             0);
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-  }
-  {
-    char data[] = "\x81\xC0";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK(strm.decode(str, len, false, 0));
-    BOOST_CHECK_EQUAL( len,                                   1);
-    BOOST_CHECK_EQUAL( reinterpret_cast<const char*>(str), data + 1);
-    BOOST_CHECK_EQUAL( sb.in_avail(),                       0);
-  }
-  {
-    char data[] = "\x82\xC0";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    
-    BOOST_CHECK(strm.decode(str, len, true, 0));
-    BOOST_CHECK_EQUAL( len,                                   1);
-    BOOST_CHECK_EQUAL( reinterpret_cast<const char*>(str), data + 1);
-    BOOST_CHECK_EQUAL( sb.in_avail(),                       0);
-  }
+  BOOST_CHECK(decode_byte_vector( "\x81\xC0", false, "\xC0",  1));
+  BOOST_CHECK(decode_byte_vector( "\x82\xC0", true, "\xC0",  1));
 }
 
+template <typename T>
+boost::test_tools::predicate_result
+extract_from_stream(const byte_stream& bs, const T& result)
+{
+  fast_istreambuf sb(bs.data(), bs.size());
+  fast_istream strm(&sb);
+
+  debug_allocator alloc;
+  value_storage storage;
+  T mref(&alloc, &storage, result.instruction());
+  strm >> mref;
+
+
+  if (mref == result)
+    return true;
+
+  boost::test_tools::predicate_result res( false );
+  if (mref.present())
+    res.message() << "Extract failure!\nGot \"" << mref << "\" instead.";
+  else
+    res.message() << "Extract failure!\nGot absent value instead.";
+  return res;
+}
 
 BOOST_AUTO_TEST_CASE(extractor_test)
 {
@@ -380,15 +200,9 @@ BOOST_AUTO_TEST_CASE(extractor_test)
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref mref(&alloc, &storage, &inst);
+    mref.shallow_assign("AAA");
 
-    char data[] = "\x41\x41\xC1";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-    
-    strm >> mref;
-    BOOST_CHECK_EQUAL( mref.size(), 3);
-    BOOST_CHECK( mref ==  "AAA");
-    BOOST_CHECK_EQUAL( sb.in_avail(), 0);
+    BOOST_CHECK(extract_from_stream("\x41\x41\xC1", mref));
   }
 
   {
@@ -403,125 +217,57 @@ BOOST_AUTO_TEST_CASE(extractor_test)
     decimal_mref mref(&alloc, &storage, &inst);
 
 
-    {
-      char data[] = "\x80";
-      fast_istreambuf sb(data, 1);
-      fast_istream strm(&sb);
-      
-      strm >> mref;
+    mref.as_absent();
+    BOOST_CHECK(extract_from_stream("\x80", mref));
 
-      BOOST_CHECK( mref.absent() );
-      BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-    }
-
-    {
-      char data[] = "\x85\x81";
-      fast_istreambuf sb(data, 2);
-      fast_istream strm(&sb);
-      
-      strm >> mref;
-
-      BOOST_CHECK( mref.present() );
-      BOOST_CHECK_EQUAL( mref.mantissa(), 1 );
-      BOOST_CHECK_EQUAL( mref.exponent(), 4 );
-      BOOST_CHECK_EQUAL( sb.in_avail(), 0);
-    }
-
+    mref.as(1, 4);
+    BOOST_CHECK(extract_from_stream("\x85\x81", mref));
   }
 
 }
 
-BOOST_AUTO_TEST_CASE(decoder_presence_map_test)
+// result_bits is the pmap with stop bits removed and the most signicant bit of result_bits[0] is
+// the first bit of the pmap
+boost::test_tools::predicate_result
+decode_pmap(const byte_stream& bs, const char* result_bits, std::size_t maxbits)
 {
-  {
-    char data[]= "\xC0";
-    fast_istreambuf sb(data, 1);
-    fast_istream strm(&sb);
+  fast_istreambuf sb(bs.data(), bs.size());
+  fast_istream strm(&sb);
+
+
+  decoder_presence_map pmap;
+  strm.decode(pmap);
+
+  char bits[16];
+  memset(bits, 16, 0);
+  
+  char* pos = bits;
+  
+  for (std::size_t i = 0; i < maxbits; ++i) {
+    pos[0] <<=1;
+    pos[0] |= static_cast<int>(pmap.is_next_bit_set()); 
     
-    debug_allocator alloc;
-
-    decoder_presence_map pmap;
-    strm.decode(pmap);
-
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-      BOOST_CHECK(pmap.is_next_bit_set());
-
-    for (int i =0; i < 8; ++i) {
-      BOOST_CHECK(!pmap.is_next_bit_set());
-    }
-
-
-    {
-      char data[]= "\x40\x81";
-      fast_istreambuf sb(data, 2);
-      fast_istream strm(&sb);
-
-      decoder_presence_map pmap;
-      strm.decode(pmap);
-
-      BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-        BOOST_CHECK(pmap.is_next_bit_set());
-
-      for (int i =0; i < 12; ++i) {
-        BOOST_CHECK(!pmap.is_next_bit_set());
-      }
-
-        BOOST_CHECK(pmap.is_next_bit_set());
-
-      for (int i =0; i < 7; ++i) {
-        BOOST_CHECK(!pmap.is_next_bit_set());
-      }
-    }
-
-    {
-      char buf[16];
-      // find the address in buf which aligned in the 8 bytes boundary
-
-      char* aligned_buf = reinterpret_cast<char*> (reinterpret_cast<uintptr_t>(buf + 8) & (~(uintptr_t)7));
-      char* data = aligned_buf -1;
-      data[0] = '\x40';
-      data[1] = '\x81';
-
-      fast_istreambuf sb(data, 2);
-      fast_istream strm(&sb);
-
-      decoder_presence_map pmap;
-      strm.decode(pmap);
-
-      BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-        BOOST_CHECK(pmap.is_next_bit_set());
-
-      for (int i =0; i < 12; ++i) {
-        BOOST_CHECK(!pmap.is_next_bit_set());
-      }
-
-        BOOST_CHECK(pmap.is_next_bit_set());
-
-      for (int i =0; i < 7; ++i) {
-        BOOST_CHECK(!pmap.is_next_bit_set());
-      }
-    }
-
-    {
-      char data[]= "\x40\x40\x40\x40\x40\x40\x40\x40\xC0";
-      fast_istreambuf sb(data, 9);
-      fast_istream strm(&sb);
-
-      decoder_presence_map pmap;
-      strm.decode(pmap);
-
-      BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-      for (int i = 0; i < 9; ++i) {
-          BOOST_CHECK(pmap.is_next_bit_set());
-        for (int j = 0; j < 6; ++j) {
-          BOOST_CHECK(!pmap.is_next_bit_set());
-        }
-      }
+    if ( (i % 8) == 7) {
+      pos += 1;
     }
   }
+
+  pos[0] <<= ( 8 - (maxbits%8) );
+  
+  int nbytes = (maxbits + 7)/8; // i.e. ceiling(maxbits/8)
+  if (memcmp(bits, result_bits, nbytes) == 0)
+    return true;
+  
+  boost::test_tools::predicate_result res( false );
+  res.message() << "Got \"" << byte_stream(bits, nbytes) << "\" instead.";
+  return res;
+}
+
+BOOST_AUTO_TEST_CASE(decoder_presence_map_test)
+{
+  BOOST_CHECK( decode_pmap( "\xC0", "\x80", 7) );
+  BOOST_CHECK( decode_pmap( "\x40\x81", "\x80\x04",  14 ) );
+  BOOST_CHECK( decode_pmap( "\x40\x40\x40\x40\x40\x40\x40\x40\xC0", "\x81\x02\x04\x08\x10\x20\x40\x80",  63 ) );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

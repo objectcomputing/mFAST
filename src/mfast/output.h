@@ -66,8 +66,10 @@ inline std::ostream& operator << (std::ostream& os, const unicode_string_cref& c
 inline std::ostream& operator << (std::ostream& os, const byte_vector_cref& cref)
 {
   boost::io::ios_flags_saver  ifs( os );
+  os << std::hex << std::setfill('0');
+  
   for (std::size_t i = 0 ; i < cref.size(); ++i){
-    os << (int) cref[i];
+    os << std::setw(2) <<  static_cast<unsigned>(cref[i]);
   }
   return os;
 }

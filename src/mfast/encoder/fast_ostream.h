@@ -37,7 +37,7 @@ class fast_ostream
     fast_ostreambuf* rdbuf (fast_ostreambuf* sb);
 
     template <typename IntType>
-    void encode(IntType t, bool nullable, bool is_null);
+    void encode(IntType t, bool nullable, bool is_null = false);
 
     void encode(const char* ascii,
                 uint32_t    len,
@@ -56,7 +56,7 @@ class fast_ostream
 
 
     void encode_null();
-    
+
     template <typename T>
     void save_previous_value(const T& cref) const;
 
@@ -97,14 +97,14 @@ fast_ostream::rdbuf (fast_ostreambuf* sb)
 
 namespace detail {
 
-template <typename T>  
+template <typename T>
 inline typename boost::enable_if<boost::is_signed<T>, bool>::type
 is_positive(T v)
 {
   return v >= 0;
 }
 
-template <typename T>  
+template <typename T>
 inline typename boost::enable_if<boost::is_unsigned<T>, bool>::type
 is_positive(T)
 {
@@ -141,7 +141,12 @@ void fast_ostream::encode(IntType value, bool nullable, bool is_null)
       ++value;
     }
   }
+  else if (value == 0) {
+    rdbuf()->sputc('\x80');
+    return;
+  }
 
+  bool positive = detail::is_positive(value);
   // padding_mask is used to pad highest 7 bits to 1 when t is negative after t is shift by 7
   // this ensure that t has no significat bits at the highest 7 bits after shifting
   const IntType padding_mask = (static_cast<IntType>( value > 0 ? 0 : 0xFE ) << (sizeof(IntType) -1)*8);
@@ -149,15 +154,30 @@ void fast_ostream::encode(IntType value, bool nullable, bool is_null)
 
   const unsigned max_encoded_length= sizeof(IntType)*8/7+1;
   char buffer[max_encoded_length];
-  unsigned i = max_encoded_length-1;
+  int i = max_encoded_length-1;
 
-  for (; detail::is_positive(i) && value != no_significant_bits; --i) {
+  for (; i >= 0 && value != no_significant_bits; --i) {
     buffer[i] = value & static_cast<IntType>(0x7F);
     value = (value >> 7) | padding_mask;
   }
 
-  buffer[max_encoded_length-1] &= 0x80; // stop bit
   ++i;
+
+  if (boost::is_signed<IntType>::value) {
+    if (positive) {
+      // check if the sign bit is on
+      if (buffer[i] & 0x40 ) {
+        // signed bit is on and this is positive integer, we need to pad an extra byte \x00 in the front 
+        buffer[--i] = '\x00';
+      }
+    }
+    else if ((buffer[i] & 0x40) == 0){
+      // this is negative integer and yet the sign bit is off, we need to pad an extra byte \x7F in the front
+      buffer[--i] = '\x7F';
+    }
+  }
+
+  buffer[max_encoded_length-1] |= 0x80; // stop bit
   rdbuf()->sputn(buffer+i, max_encoded_length-i);
 }
 
@@ -167,21 +187,34 @@ fast_ostream::encode(const char* ascii,
                      bool        nullable,
                      const ascii_field_instruction* /* instruction */)
 {
-  assert( ascii || !nullable );
+  assert( ascii || nullable );
 
-  if (nullable) {
-    if (ascii !=0  && len == 0) {
+  if (nullable && ascii==0) {
+    rdbuf()->sputc('\x80');
+    return;
+  }
+  
+  if (len == 0) {
+    if (nullable) {
       rdbuf()->sputc('\x00');
     }
     rdbuf()->sputc('\x80');
+    return;
   }
-  else if (len == 0) {
-    rdbuf()->sputc('\x80');
+  
+  if (len == 1 && ascii[0] == '\x00') {
+    if (nullable) {
+      rdbuf()->sputn("\x00\x00\x80", 3);
+    }
+    else {
+      rdbuf()->sputn("\x00\x80", 2);
+    }
+    return;
   }
-  else {
-    rdbuf()->sputn(ascii, len-1);
-    rdbuf()->sputc(ascii[len-1] & 0x80);
-  }
+  
+
+  rdbuf()->sputn(ascii, len-1);
+  rdbuf()->sputc(ascii[len-1] | 0x80);
 }
 
 inline void
@@ -191,7 +224,7 @@ fast_ostream::encode(const char* unicode,
                      const unicode_field_instruction* /* instruction */)
 {
   // non-nullable string cannot have a null value
-  assert( unicode || !nullable );
+  assert( unicode || nullable );
 
   encode(len, nullable, unicode == 0);
   if (unicode && len > 0) {
@@ -206,7 +239,7 @@ fast_ostream::encode(const unsigned char* bv,
                      const byte_vector_field_instruction* /* instruction */)
 {
   // non-nullable byteVector cannot have a null value
-  assert( bv || !nullable );
+  assert( bv || nullable );
 
   encode(len, nullable, bv == 0);
   if (bv && len > 0) {
@@ -236,7 +269,7 @@ fast_ostream::shrink(std::size_t offset, std::size_t nbytes)
   rdbuf()->shrink(offset, nbytes);
 }
 
-inline void 
+inline void
 fast_ostream::encode_null()
 {
   rdbuf()->sputc('\x80');

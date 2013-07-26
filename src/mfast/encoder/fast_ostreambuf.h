@@ -41,6 +41,10 @@ class fast_ostreambuf
 {
   public:
     fast_ostreambuf(char* buf, std::size_t size);
+    
+    template <std::size_t SIZE>
+    fast_ostreambuf(char (&array)[SIZE]);
+    
     void sputc(char c);
     void sputn(const char* data, std::size_t n);
     void skip(std::size_t n);
@@ -49,6 +53,7 @@ class fast_ostreambuf
     virtual void write_bytes_at(const char* data, std::size_t n, std::size_t offset);
     virtual void shrink(std::size_t offset, std::size_t nbytes);
 
+    const char* pbase() const { return pbase_; }
   protected:
     virtual void overflow(std::size_t n);
     void setp(char* pbase, char* pptr, char* epptr);
@@ -60,6 +65,14 @@ fast_ostreambuf::fast_ostreambuf(char* buf, std::size_t size)
   : pbase_(buf)
   , pptr_(buf)
   , epptr_(buf+size)
+{
+}
+
+template <std::size_t SIZE>
+fast_ostreambuf::fast_ostreambuf(char (&array)[SIZE])
+: pbase_(array)
+, pptr_(array)
+, epptr_(array+SIZE)
 {
 }
 
