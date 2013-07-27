@@ -178,6 +178,8 @@ class make_field_mref
   public:
     typedef boost::true_type is_mutable;
     typedef typename ConstFieldRef::instruction_cptr instruction_cptr;
+    typedef ConstFieldRef cref_type;
+    
     make_field_mref()
     {
     }
@@ -251,6 +253,13 @@ class make_field_mref
 };
 
 typedef make_field_mref<field_cref> field_mref;
+
+
+template <typename T>
+struct cref_of
+{
+  typedef typename T::cref_type type;
+};
 
 template <typename T>
 struct mref_of;

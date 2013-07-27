@@ -56,7 +56,11 @@ class string_cref
     {
     }
 
-    std::string value() const
+#ifdef BOOST_HAS_RVALUE_REFS
+    std::string&& value() const
+#else
+    std::string value() const  
+#endif
     {
       return std::string(this->data(), this->size());
     }

@@ -171,6 +171,14 @@ bool operator == (const vector_cref<T,NotUnicode>& lhs,
   return std::memcmp(lhs.data(), rhs.data(), lhs.size()) == 0;
 }
 
+template <typename T, bool NotUnicode>
+bool operator != (const vector_cref<T,NotUnicode>& lhs,
+                  const vector_cref<T,NotUnicode>& rhs)
+{
+  return !(lhs == rhs);
+}
+
+
 typedef vector_cref<unsigned char> byte_vector_cref;
 
 

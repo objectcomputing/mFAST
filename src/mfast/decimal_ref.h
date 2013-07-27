@@ -193,7 +193,12 @@ class decimal_cref
 
 inline bool operator == (const decimal_cref& lhs, const decimal_cref& rhs)
 {
-  return (lhs.absent() && rhs.absent()) || (lhs.mantissa() == rhs.mantissa() && lhs.exponent() && rhs.exponent());
+  return (lhs.absent() && rhs.absent()) || ( lhs.present() && rhs.present() && lhs.mantissa() == rhs.mantissa() && lhs.exponent() && rhs.exponent());
+}
+
+inline bool operator != (const decimal_cref& lhs, const decimal_cref& rhs)
+{
+  return !(lhs == rhs);
 }
 
 class exponent_mref

@@ -25,20 +25,91 @@
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstring>
-#include "debug_allocator.h"
 #include <stdexcept>
+
+#include "debug_allocator.h"
+#include "byte_stream.h"
+#include "mfast/output.h"
 
 using namespace mfast;
 
 
+enum pmap_status_enum_t { NO_PMAP_BIT, HAS_PMAP_BIT };
+
+enum prev_value_status_enum_t { CHANGE_PREVIOUS_VALUE, PRESERVE_PREVIOUS_VALUE };
+
+template <typename MREF>
+boost::test_tools::predicate_result
+decode_mref(const byte_stream&       input_stream,
+            pmap_status_enum_t       pmap_status,
+            const MREF&              expected,
+            prev_value_status_enum_t prev_status)
+{
+  fast_istreambuf sb(input_stream.data(), input_stream.size());
+  fast_istream strm(&sb);
+  decoder_presence_map pmap;
+
+  strm.decode(pmap);
+  uint64_t old_mask = pmap.mask();
+
+  malloc_allocator allocator;
+  value_storage storage;
+  typename MREF::instruction_cptr instruction = expected.instruction();
+  instruction->construct_value(storage, &allocator);
+
+
+  value_storage old_prev_storage = instruction->prev_value();
+  typename MREF::cref_type old_prev( &old_prev_storage, instruction);
+
+  MREF ref(&allocator, &storage, instruction);
+
+  decoder_operators[instruction->field_operator()]->decode(ref, strm, pmap);
+
+  bool pmap_check_successful = false;
+
+  if (pmap_status == NO_PMAP_BIT) {
+    pmap_check_successful = (old_mask == pmap.mask());
+  }
+  else {  // pmap_status == HAS_PMAP_BIT
+    pmap_check_successful = ((old_mask >> 1) == pmap.mask());
+  }
+
+  boost::test_tools::predicate_result res( false );
+
+  typename MREF::cref_type prev( &instruction->prev_value(), instruction);
+
+  if (!pmap_check_successful) {
+    res.message() << "pmap consume bit error.";
+  }
+  else if (expected  != ref) {
+    res.message()<< "decoded value " << ref << " does not match expected";
+  }
+  else if (prev_status == PRESERVE_PREVIOUS_VALUE) {
+    if (!old_prev_storage.is_defined()) {
+      if (instruction->prev_value().is_defined()) {
+        res.message() << "previous value changed after decoding";
+      }
+    }
+    else if (!instruction->prev_value().is_defined()) {
+      res.message() << "previous value not defined after decoding";
+    }
+    else if (old_prev != prev) {
+      res.message() << "previous value changed after decoding";
+    }
+  }
+  else if (prev != ref) {
+    res.message() << "previous value is not properly set after decoding";
+  }
+
+  res = res.has_empty_message();
+
+  instruction->destruct_value(storage, &allocator);
+  return res;
+}
 
 BOOST_AUTO_TEST_SUITE( test_decoder_operator )
 
 
-bool str_equal(const char* lhs, const char* rhs)
-{
-  return std::strcmp(lhs, rhs) ==0;
-}
 
 BOOST_AUTO_TEST_CASE(operator_none_test)
 {
@@ -58,28 +129,10 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
     // nullable representation and the NULL is used to represent absence of a
     // value. It will not occupy any bits in the presence map.
 
-    uint64_mref ref(&allocator, &storage, &inst);
+    uint64_mref result(&allocator, &storage, &inst);
 
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we don't consume any bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
-    BOOST_CHECK(ref.absent());
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    result.as_absent();
+    BOOST_CHECK( decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
   {
     uint64_field_instruction inst(operator_none,
@@ -94,30 +147,9 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
     // nullable representation and the NULL is used to represent absence of a
     // value. It will not occupy any bits in the presence map.
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we don't consume any bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK_EQUAL(prev.value(), 0);
-    BOOST_CHECK(prev.present());
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(0);
+    BOOST_CHECK( decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 }
 
@@ -140,59 +172,16 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(UINT64_MAX);
 
-    {
-      // testing when the presence bit is set
-      char data[] = "\xC0\x80";
-      fast_istreambuf sb(data, 2);
-      fast_istream strm(&sb);
-      decoder_presence_map pmap;
+    // testing when the presence bit is set
+    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
-      strm.decode(pmap);
-      BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-      uint64_t old_mask = pmap.mask();
+    // testing when the presence bit is not set
 
-      decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-      // make sure we consume 1 bit in presence map
-      BOOST_CHECK_EQUAL(old_mask >> 1,     pmap.mask());
-
-      BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
-      BOOST_CHECK_EQUAL(sb.in_avail(),      1);
-
-      uint64_cref prev(&inst.prev_value(), &inst);
-      // check the previous value is properly set
-      BOOST_CHECK(inst.prev_value().is_defined());
-      BOOST_CHECK(prev.present());
-      BOOST_CHECK_EQUAL(prev.value(), UINT64_MAX);
-    }
-
-    {
-      // testing when the presence bit is not set
-      char data[] = "\x80\x80";
-      fast_istreambuf sb(data, 2);
-      fast_istream strm(&sb);
-      decoder_presence_map pmap;
-
-      strm.decode(pmap);
-      BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-      uint64_t old_mask = pmap.mask();
-
-      decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-      // make sure we consume 1 bit in presence map
-      BOOST_CHECK_EQUAL(old_mask >> 1, pmap.mask());
-
-      BOOST_CHECK(ref.absent());
-      BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-      uint64_cref prev(&inst.prev_value(), &inst);
-      // check the previous value is properly set
-      BOOST_CHECK(inst.prev_value().is_defined());
-      BOOST_CHECK(prev.absent());
-    }
-
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
   {
     // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
@@ -206,33 +195,11 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
+    uint64_mref result(&allocator, &storage, &inst);
+    BOOST_CHECK(!result.optional());
 
-    BOOST_CHECK(!ref.optional());
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we don't consume any bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
-    BOOST_CHECK_EQUAL(sb.in_avail(),      1);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), UINT64_MAX);
+    result.as(UINT64_MAX);
+    BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 }
 
@@ -252,33 +219,9 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-    // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
-
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     0);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 0);
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(0);
+    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -291,33 +234,10 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
+    uint64_mref result(&allocator, &storage, &inst);
 
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-    // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    // value is not present in the stream, the value is set to initial value
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
-    BOOST_CHECK_EQUAL(sb.in_avail(),      1);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), UINT64_MAX);
+    result.as(UINT64_MAX);
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -330,34 +250,14 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
+    uint64_mref result(&allocator, &storage, &inst);
 
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-
+    result.as_absent();
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous
     // value  is left unchanged.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    // value is not present in the stream, the value is set to initial value
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(!inst.prev_value().is_defined());
+    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
   }
 
   {
@@ -370,34 +270,12 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
 
     // The default operator specifies that the value of a field is either present in the stream or it will be the initial value.
 
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    // value is not present in the stream, the value is set to initial value
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
-    BOOST_CHECK_EQUAL(sb.in_avail(),      1);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), UINT64_MAX);
+    result.as(UINT64_MAX);
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -409,30 +287,13 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
+    uint64_mref result(&allocator, &storage, &inst);
 
     // If the field has optional presence and no initial value, the field is considered absent when there is no value in the stream.
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
 
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+
   }
 }
 
@@ -451,33 +312,11 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(0);
+    
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
-
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     0);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 0);
+    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -489,67 +328,29 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
                                   nullable<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
-
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(UINT64_MAX);
+    
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
-    BOOST_CHECK_EQUAL(sb.in_avail(),      1);
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), UINT64_MAX);
-
     /// set previous value to a different value
     prev.as(5);
-
-    old_mask = pmap.mask();
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
+    result.as(5);
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     5);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 5);
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     /// set previous value to empty
-    inst.prev_value().present(false);
-
-    old_mask = pmap.mask();
-
-
-    // When the value is not present in the stream there are three cases depending on the state of the previous value:
-    // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
-    BOOST_CHECK_THROW(decoder_operators[inst.field_operator()]->decode(ref, strm, pmap), mfast::fast_error);
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
+    inst.prev_value().present(false);    // // When the value is not present in the stream there are three cases depending on the state of the previous value:
+    // // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
+    
+    BOOST_CHECK_THROW(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error );
   }
 
   {
@@ -562,32 +363,12 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as_absent();
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -600,73 +381,31 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(UINT64_MAX);
     // Optional integer, decimal, string and byte vector fields – one bit.
+    // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
-    BOOST_CHECK_EQUAL(sb.in_avail(),      1);
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), UINT64_MAX);
-
     /// set previous value to a different value
     prev.as(5);
-
-    old_mask = pmap.mask();
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     5);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 5);
+    result.as(5);
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     /// set previous value to empty
     inst.prev_value().present(false);
-
-    old_mask = pmap.mask();
-
-
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent.
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    result.as_absent();
   }
 
   { // testing no initial value
@@ -678,33 +417,12 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-    // Optional integer, decimal, string and byte vector fields – one bit.
-    // A NULL indicates that the value is absent and the state of the previous value is set to empty
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as_absent();
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    uint64_mref prev(&allocator, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 }
 
@@ -723,33 +441,12 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(0);
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
-
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     0);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 0);
+   
+    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+  
   }
 
   {
@@ -762,66 +459,29 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(UINT64_MAX);
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
-    BOOST_CHECK_EQUAL(sb.in_avail(),      1);
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), UINT64_MAX);
-
     /// set previous value to a different value
     prev.as(5);
-
-    old_mask = pmap.mask();
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
+    
+    result.as(6);
+    // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value incremented by one. The incremented value also becomes the new previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     6);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 6);
-
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
     /// set previous value to empty
     inst.prev_value().present(false);
-
-    old_mask = pmap.mask();
-
-
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
-    BOOST_CHECK_THROW(decoder_operators[inst.field_operator()]->decode(ref, strm, pmap), mfast::fast_error);
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
+    BOOST_CHECK_THROW(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error);
   }
 
   {
@@ -834,32 +494,13 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as_absent();
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    
+    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -872,73 +513,31 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as(UINT64_MAX);
     // Optional integer, decimal, string and byte vector fields – one bit.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
-    BOOST_CHECK_EQUAL(sb.in_avail(),      1);
-
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), UINT64_MAX);
 
     /// set previous value to a different value
     prev.as(5);
-
-    old_mask = pmap.mask();
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value incremented by one. The incremented value also becomes the new previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     6);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 6);
+    
+    result.as(6);
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     /// set previous value to empty
-    inst.prev_value().present(false);
-
-    old_mask = pmap.mask();
-
-
+    prev.as_absent();
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent.
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   { // testing no initial value
@@ -950,33 +549,15 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
+    result.as_absent();
     // Optional integer, decimal, string and byte vector fields – one bit.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  consume 1 bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >>1, pmap.mask());
-
-
+    
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    uint64_mref prev(&allocator, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+ 
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 }
 
@@ -995,36 +576,15 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x82";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
     // Mandatory integer, decimal, string and byte vector fields – no bit.
-
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     7);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 7);
+    result.as(7);
+    BOOST_CHECK(decode_mref("\xC0\x82", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -1036,36 +596,16 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x82";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    uint64_mref result(&allocator, &storage, &inst);
     // Mandatory integer, decimal, string and byte vector fields – no bit.
-
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     2);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 2);  // TODO: MSVC Error
+    
+    result.as(2);
+    BOOST_CHECK(decode_mref("\xC0\x82", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -1078,37 +618,18 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x82";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-
+    uint64_mref result(&allocator, &storage, &inst);
     //Optional integer, decimal, string and byte vector fields – no bit.
     // The delta appears in the stream in a nullable representation. A NULL indicates that the delta is absent.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.value(),     6);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
+    
+    result.as(6);
+    BOOST_CHECK(decode_mref("\xC0\x82", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.value(), 6);
   }
 
   {
@@ -1121,32 +642,15 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     inst.construct_value(storage, &allocator);
 
 
-    uint64_mref ref(&allocator, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-
+    uint64_mref result(&allocator, &storage, &inst);
     //Optional integer, decimal, string and byte vector fields – no bit.
     // The delta appears in the stream in a nullable representation. A NULL indicates that the delta is absent.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
+    
     //  If the field has optional presence, the delta value can be NULL. In that case the value of the field is considered absent.
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    uint64_cref prev(&inst.prev_value(), &inst);
-    // Note that the previous value is not set to empty but is left untouched if the value is absent.
-    BOOST_CHECK(!inst.prev_value().is_defined());
+    
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
 }
@@ -1165,38 +669,15 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
                                    nullable_decimal(12,1)); //  initial
 
     inst.construct_value(storage, &allocator);
-    decimal_mref ref(&allocator, &storage, &inst);
-    char data[] = "\xC0\x82\x83";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    
+    decimal_mref result(&allocator, &storage, &inst);
     // Mandatory integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 2);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
-    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.mantissa(), 15); // 12 (base) + 3 (delta)
-    BOOST_CHECK_EQUAL(ref.exponent(),  3); // 1 (base) + 2 (delta)
-
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    decimal_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.mantissa(), 15); // 12 (base) + 3 (delta)
-    BOOST_CHECK_EQUAL(prev.exponent(),  3); // 1 (base) + 2 (delta)
-
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used. 
+    result.as(15,3); // 15 = 12 (base) + 3 (delta), 3= 1 (base) + 2 (delta)
+    BOOST_CHECK(decode_mref("\xC0\x82\x83", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
   {
     decimal_field_instruction inst(operator_delta,
@@ -1206,38 +687,14 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
                                    0); // no initial value
 
     inst.construct_value(storage, &allocator);
-    decimal_mref ref(&allocator, &storage, &inst);
-    char data[] = "\xC0\x82\x83";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    decimal_mref result(&allocator, &storage, &inst);
     // Mandatory integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 2);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
-    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_EQUAL(ref.mantissa(),  3); // 0 (base) + 3 (delta) // TODO: MSVC Error
-    BOOST_CHECK_EQUAL(ref.exponent(),  2); // 0 (base) + 2 (delta)
-
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    decimal_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_EQUAL(prev.mantissa(), 3);  // TODO: MSVC Error
-    BOOST_CHECK_EQUAL(prev.exponent(), 2);
-
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used. 
+    result.as(3,2); // 3 =  0 (base) + 3 (delta), 2 = 0 (base) + 2 (delta)
+    BOOST_CHECK(decode_mref("\xC0\x82\x83", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   {
@@ -1248,30 +705,14 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
                                    0); // no initial value
 
     inst.construct_value(storage, &allocator);
-    decimal_mref ref(&allocator, &storage, &inst);
-    char data[] = "\xC0\x80\x83";
-    fast_istreambuf sb(data, 3);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    decimal_mref result(&allocator, &storage, &inst);
     // Optional integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 2);
-    uint64_t old_mask = pmap.mask();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
-    BOOST_CHECK(ref.absent());
-
-
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    decimal_cref prev(&inst.prev_value(), &inst);
-    // Note that the previous value is not set to empty but is left untouched if the value is absent.
-    BOOST_CHECK(!inst.prev_value().is_defined());
+    
+    // the field is obtained by combining the delta value with a base value.
+    // The base value depends on the state of the previous value in the following way:
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used. 
+    result.as_absent(); 
+    BOOST_CHECK(decode_mref("\xC0\x80\x83", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
   }
 }
 
@@ -1293,36 +734,14 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x86\x76\x61\x6C\x75\xE5";
-    fast_istreambuf sb(data, 7);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Mandatory integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 6);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("initial_value"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    ascii_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("initial_value"));
+    result.as("initial_value");
+    BOOST_CHECK(decode_mref("\xC0\x86\x76\x61\x6C\x75\xE5", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1338,24 +757,13 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x86\x76\x61\x6C\x75\xE5";
-    fast_istreambuf sb(data, 7);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Mandatory integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 6);
-    uint64_t old_mask = pmap.mask();
-
-
-    BOOST_CHECK_THROW(decoder_operators[inst.field_operator()]->decode(ref, strm, pmap),
-                      mfast::fast_error);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
+    
+    // the field is obtained by combining the delta value with a base value.
+    // The base value depends on the state of the previous value in the following way:
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
+    BOOST_CHECK_THROW(decode_mref("\xC0\x86\x76\x61\x6C\x75\xE5", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error);
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1373,36 +781,14 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Optional integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
     // If the field has optional presence, the delta value can be NULL.
     // In that case the value of the field is considered absent.
-    BOOST_CHECK(ref.absent());
-
-    ascii_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-
-    // Optional integer, decimal, string and byte vector fields – no bit.
-    // The delta appears in the stream in a nullable representation.
-    // A NULL indicates that the delta is absent.
-    // Note that the previous value is not set to empty but is left untouched if the value is absent.
-    BOOST_CHECK(!inst.prev_value().is_defined());
+     // Note that the previous value is not set to empty but is left untouched if the value is absent.
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1419,36 +805,15 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x83\x41\x42\x43\xC4";
-    fast_istreambuf sb(data, 6);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Optional integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 5);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("initial_striABCD"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    ascii_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("initial_striABCD"));
+    
+    result.as("initial_striABCD");
+    BOOST_CHECK(decode_mref("\xC0\x83\x41\x42\x43\xC4", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1472,37 +837,16 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 
     inst.construct_value(storage, &alloc);
 
-    unicode_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x86\x85\x76\x61\x6C\x75\x65";
-    fast_istreambuf sb(data, 8);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    unicode_string_mref result(&alloc, &storage, &inst);
     // Mandatory integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 7);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("initial_value"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    unicode_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("initial_value"));
-
+    
+    result.as("initial_value");
+    BOOST_CHECK(decode_mref("\xC0\x86\x85\x76\x61\x6C\x75\x65", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+  
     inst.destruct_value(storage, &alloc);
   }
 
@@ -1517,25 +861,17 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 
     inst.construct_value(storage, &alloc);
 
-    unicode_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x86\x85\x76\x61\x6C\x75\x65";
-    fast_istreambuf sb(data, 8);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    unicode_string_mref result(&alloc, &storage, &inst);
     // Mandatory integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 7);
-    uint64_t old_mask = pmap.mask();
-
-
-    BOOST_CHECK_THROW(decoder_operators[inst.field_operator()]->decode(ref, strm, pmap),
-                      mfast::fast_error);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
+    // the field is obtained by combining the delta value with a base value.
+    // The base value depends on the state of the previous value in the following way:
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
+    
+    // result.as("initial_value");
+    BOOST_CHECK_THROW(decode_mref("\xC0\x86\x85\x76\x61\x6C\x75\x65", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE),
+                      mfast::fast_error );
+    
     inst.destruct_value(storage, &alloc);
   }
 
@@ -1552,37 +888,18 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 
     inst.construct_value(storage, &alloc);
 
-    unicode_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
-    // Optional integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
-    // If the field has optional presence, the delta value can be NULL.
-    // In that case the value of the field is considered absent.
-    BOOST_CHECK(ref.absent());
-
-    unicode_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-
+    unicode_string_mref result(&alloc, &storage, &inst);
+    // Mandatory integer, decimal, string and byte vector fields – no bit.
+    
     // Optional integer, decimal, string and byte vector fields – no bit.
     // The delta appears in the stream in a nullable representation.
     // A NULL indicates that the delta is absent.
     // Note that the previous value is not set to empty but is left untouched if the value is absent.
-    BOOST_CHECK(!inst.prev_value().is_defined());
-
+    
+    
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
+    
     inst.destruct_value(storage, &alloc);
   }
   { // testing optional field with positive substraction in the stream
@@ -1598,36 +915,15 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
 
     inst.construct_value(storage, &alloc);
 
-    unicode_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x83\x84\x41\x42\x43\x44";
-    fast_istreambuf sb(data, 7);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    unicode_string_mref result(&alloc, &storage, &inst);
     // Optional integer, decimal, string and byte vector fields – no bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 6);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we  don't consume bit in presence map
-    BOOST_CHECK_EQUAL(old_mask, pmap.mask());
-
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("initial_striABCD"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    unicode_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("initial_striABCD"));
+    
+    result.as("initial_striABCD");
+    BOOST_CHECK(decode_mref("\xC0\x83\x84\x41\x42\x43\x44", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1651,36 +947,14 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x76\x61\x6C\x75\xE5";
-    fast_istreambuf sb(data, 6);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Mandatory string and byte vector fields – one bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 5);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we consume one bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >> 1, pmap.mask());
-
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("initial_svalue"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    ascii_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("initial_svalue"));
+    result.as("initial_svalue");
+    BOOST_CHECK(decode_mref("\xC0\x76\x61\x6C\x75\xE5", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1698,53 +972,24 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    ref.as_initial_value();
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Mandatory string and byte vector fields – one bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap); // TODO: problem
-
-    // make sure we consume one bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >> 1, pmap.mask());
-
-    // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
-    //  undefined – the value of the field is the initial value that also becomes the new previous value..
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("initial_string"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
+    
+    // the field is obtained by combining the delta value with a base value.
+    // The base value depends on the state of the previous value in the following way:
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
+    result.as("initial_string");
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("initial_string"));
 
     // change the previous value to "ABCDE" so we can verified the case with defined previous value
     prev = "ABCDE";
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  assigned – the value of the field is the previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("ABCDE"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("ABCDE"));
-
+    result.as("ABCDE");
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    
     inst.destruct_value(storage, &alloc);
 
   }
@@ -1758,26 +1003,14 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &inst.prev_value(), &inst);
     // Mandatory string and byte vector fields – one bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
 
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  undefined – the value of the field is the initial value that also becomes the new previous value.
     // It is a dynamic error [ERR D6] if the instruction context has no initial value.
-
-    BOOST_CHECK_THROW(decoder_operators[inst.field_operator()]->decode(ref, strm, pmap), mfast::fast_error);
-
-    // make sure we consume one bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >> 1, pmap.mask());
+    
+    BOOST_CHECK_THROW(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1795,37 +1028,16 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x76\x61\x6C\x75\xE5";
-    fast_istreambuf sb(data, 6);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Optional string and byte vector fields – one bit.
     // The tail value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty.
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 5);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we consume one bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >> 1, pmap.mask());
-
+    
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("initial_svalue"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    ascii_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("initial_svalue"));
+    result.as("initial_svalue");
+    BOOST_CHECK(decode_mref("\xC0\x76\x61\x6C\x75\xE5", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1843,32 +1055,16 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\xC0\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Optional string and byte vector fields – one bit.
     // The tail value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty.
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we consume one bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >> 1, pmap.mask());
-
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 0);
-
-    ascii_string_cref prev(&inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    
+    // the field is obtained by combining the delta value with a base value.
+    // The base value depends on the state of the previous value in the following way:
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1886,62 +1082,31 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Optional string and byte vector fields – one bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we consume one bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >> 1, pmap.mask());
-
+    // The tail value appears in the stream in a nullable representation.
+    // A NULL indicates that the value is absent and the state of the previous value is set to empty.
+    
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  undefined – the value of the field is the initial value that also becomes the new previous value..
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("initial_string"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
+    
+    result.as("initial_string");
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("initial_string"));
-
     // change the previous value to "ABCDE" so we can verified the case with defined previous value
     prev = "ABCDE";
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  assigned – the value of the field is the previous value.
-    BOOST_CHECK(ref.present());
-    BOOST_CHECK_PREDICATE(str_equal, (ref.c_str())("ABCDE"));
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.present());
-    BOOST_CHECK_PREDICATE(str_equal, (prev.c_str())("ABCDE"));
+    result.as("ABCDE");
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     prev.as_absent();
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way:
     // empty – the value of the field is empty. If the field is optional the value is considered absent.
-    BOOST_CHECK(ref.absent());
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
-
-
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    
     inst.destruct_value(storage, &alloc);
 
   }
@@ -1956,34 +1121,17 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.construct_value(storage, &alloc);
 
-    ascii_string_mref ref(&alloc, &storage, &inst);
-
-    char data[] = "\x80\x80";
-    fast_istreambuf sb(data, 2);
-    fast_istream strm(&sb);
-    decoder_presence_map pmap;
+    ascii_string_mref result(&alloc, &storage, &inst);
     // Optional string and byte vector fields – one bit.
-
-    strm.decode(pmap);
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-    uint64_t old_mask = pmap.mask();
-
-
-    decoder_operators[inst.field_operator()]->decode(ref, strm, pmap);
-
-    // make sure we consume one bit in presence map
-    BOOST_CHECK_EQUAL(old_mask >> 1, pmap.mask());
-
+    // The tail value appears in the stream in a nullable representation.
+    // A NULL indicates that the value is absent and the state of the previous value is set to empty.
+    
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  undefined – the value of the field is the initial value that also becomes the new previous value.
     // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
-    BOOST_CHECK(ref.absent());
-    BOOST_CHECK_EQUAL(sb.in_avail(), 1);
-
-    ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
-    // check the previous value is properly set
-    BOOST_CHECK(inst.prev_value().is_defined());
-    BOOST_CHECK(prev.absent());
+    
+    result.as_absent();
+    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 }
 BOOST_AUTO_TEST_SUITE_END()

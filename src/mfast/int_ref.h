@@ -42,8 +42,8 @@ class int_cref
     {
     }
 
-    int_cref(const value_storage*   storage,
-             instruction_cptr instruction)
+    int_cref(const value_storage* storage,
+             instruction_cptr     instruction)
       : field_cref(storage, instruction)
     {
     }
@@ -58,10 +58,9 @@ class int_cref
       return instruction_->id();
     }
 
-
-    bool is_initial_value() const 
+    bool is_initial_value() const
     {
-      return  present() && value() == this->instruction()->initial_value();
+      return present() && value() == this->instruction()->initial_value();
     }
 
     T value() const
@@ -76,17 +75,30 @@ class int_cref
 
   protected:
     friend class mfast::detail::codec_helper;
-    
+
     int_cref& operator = (const int_cref&);
-    
+
     void save_to(value_storage& v) const
     {
       v.of_uint.content_ = this->storage()->of_uint.content_;
       v.defined(true);
       v.present(this->present());
     }
+
 };
 
+template <typename T>
+inline bool operator == (const int_cref<T>& lhs, const int_cref<T>& rhs)
+{
+  return (lhs.absent() && rhs.absent()) || 
+     (lhs.present() && rhs.present() && lhs.value() == rhs.value());
+}
+
+template <typename T>
+inline bool operator != (const int_cref<T>& lhs, const int_cref<T>& rhs)
+{
+  return !(lhs == rhs);
+}
 
 typedef int_cref<int32_t> int32_cref;
 typedef int_cref<uint32_t> uint32_cref;
@@ -108,8 +120,8 @@ class int_mref
     {
     }
 
-    int_mref(allocator*               alloc,
-             value_storage*         storage,
+    int_mref(allocator*       alloc,
+             value_storage*   storage,
              instruction_cptr instruction)
       : base_type(alloc, storage, instruction)
     {
@@ -119,7 +131,7 @@ class int_mref
       : base_type(other)
     {
     }
-    
+
     void as (const int_cref<T>& cref) const
     {
       if (cref.absent()) {
@@ -129,7 +141,6 @@ class int_mref
         as(cref.value());
       }
     }
-    
 
     void as(T v) const
     {
@@ -188,6 +199,8 @@ typedef int_mref<int32_t> int32_mref;
 typedef int_mref<uint32_t> uint32_mref;
 typedef int_mref<int64_t> int64_mref;
 typedef int_mref<uint64_t> uint64_mref;
+
+
 
 template <>
 struct mref_of<int32_cref>
