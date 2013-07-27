@@ -51,6 +51,11 @@ inline bool operator == (const byte_stream& lhs, const byte_stream& rhs)
   return lhs.size() == rhs.size() && memcmp(lhs.data(), rhs.data(), lhs.size()) == 0;
 }
 
+inline bool operator != (const byte_stream& lhs, const byte_stream& rhs)
+{
+  return !(lhs == rhs);
+}
+
 inline std::ostream& operator << (std::ostream& os, const byte_stream& bs )
 {
   boost::io::ios_flags_saver ifs( os );

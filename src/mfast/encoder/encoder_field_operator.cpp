@@ -210,9 +210,8 @@ class constant_operator
 
       if (cref.optional()) {
         pmap.set_next_bit(cref.present());
-        if (cref.present())
-          stream.save_previous_value(cref);
       }
+      stream.save_previous_value(cref);
     }
 
     virtual void encode(const int32_cref&     cref,
@@ -293,8 +292,9 @@ class copy_or_increment_operator_impl
         // that also becomes the new previous value.
         // If the field has optional presence and no initial value, the field is considered
         // absent and the state of the previous value is changed to empty.
-        if (cref.is_initial_value() || cref.absent())
-        {
+        if ((cref.has_initial_value() && cref.is_initial_value()) ||
+            (!cref.has_initial_value() && cref.absent()) ) {
+
           pmap.set_next_bit(false);
           return;
         }
@@ -305,6 +305,14 @@ class copy_or_increment_operator_impl
         if (cref.absent()) {
           pmap.set_next_bit(false);
           return;
+        }
+        else if (!cref.optional()) {
+          // It is a dynamic error [ERR D6] if the field is mandatory.
+          BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
+
+          // We need to handle this case because the previous value may have been
+          // modified by another instruction with the same key and that intruction
+          // has optional presence.
         }
       }
       else if ( Operation() (cref, previous) ) {
@@ -325,7 +333,7 @@ struct is_same
   {
     return v.absent() == prev.is_empty() && v.value() == reinterpret_cast<const T&>(prev.of_uint.content_);
   }
-  
+
   bool operator()(const exponent_cref& v, const value_storage& prev) const
   {
     return v.absent() == prev.is_empty() && v.value() == prev.of_decimal.exponent_;
@@ -338,17 +346,17 @@ struct is_same
 
   bool operator() (const string_cref<false>& v, const value_storage& prev) const
   {
-     return v.size() == prev.of_array.len_ && memcmp(v.data(),prev.of_array.content_, v.size()) == 0; return v.size() == prev.of_array.len_ && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
+    return v.size() == prev.of_array.len_-1 && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
   }
-  
+
   bool operator() (const string_cref<true>& v, const value_storage& prev) const
   {
-     return v.size() == prev.of_array.len_ && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
+    return v.size() == prev.of_array.len_-1 && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
   }
-  
+
   bool operator() (const byte_vector_cref& v, const value_storage& prev) const
   {
-    return v.size() == prev.of_array.len_ && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
+    return v.size() == prev.of_array.len_-1 && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
   }
 
 };
@@ -478,15 +486,13 @@ class default_operator
       // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
       // Optional integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream in a nullable representation.
 
-      value_storage previous = previous_value_of(cref);
-      stream.save_previous_value(cref);
-
       if (cref.has_initial_value())
       {
         //  The default operator specifies that the value of a field is either present in the stream
         //  or it will be the initial value.
         if (cref.is_initial_value()) {
           pmap.set_next_bit(false);
+          stream.save_previous_value(cref);
           return;
         }
       }
@@ -494,17 +500,23 @@ class default_operator
       {
         // If the field has optional presence and no initial value, the field is considered absent
         // when there is no value in the stream.
+
         pmap.set_next_bit(false);
+        stream.save_previous_value(cref);
+
         return;
       }
 
+      // the instruction has initial value when we get here
+
       pmap.set_next_bit(true);
-      if (is_same()(cref, previous)) {
+      if ( cref.absent() ) {
         //  A NULL indicates that the value is absent and the state of the previous value is left unchanged.
         stream.encode_null();
       }
       else {
         stream << cref;
+        stream.save_previous_value(cref);
       }
     }
 
@@ -626,8 +638,12 @@ class delta_operator
       delta_len = common_prefix_delta_len;
     }
     else {
-      substraction_len = common_prefix_positions.second - prev_cref.end();
-      delta_iterator = common_suffix_positions.first.base();
+      // Characters are removed from the front when the subtraction length is negative.
+      // The subtraction length uses an excess-1 encoding: if the value is negative when decoding,
+      // it is incremented by one to get the number of characters to subtract. This makes it possible
+      // to encode negative zero as -1,
+      substraction_len = ~(prev_cref.rend() - common_suffix_positions.second);
+      delta_iterator = cref.begin();
       delta_len = common_suffix_delta_len;
     }
 
@@ -735,17 +751,27 @@ class tail_operator
 
       value_storage& prev = previous_value_of(cref);
 
-      if (cref.absent()) {
-        if (!prev.is_defined() || prev.is_empty()) {
+      // if (cref.absent()) {
+      //   if (!prev.is_defined() || prev.is_empty()) {
+      //     pmap.set_next_bit(false);
+      //   }
+      //   else {
+      //     pmap.set_next_bit(true);
+      //     stream.encode_null();
+      //   }
+      // }
+      // else
+      if (is_same()(cref, tail_base_value_of(cref))) {
+        pmap.set_next_bit(false);
+      }
+      else if (cref.absent()) {
+        if (prev.is_defined() && prev.is_empty()) {
           pmap.set_next_bit(false);
         }
         else {
           pmap.set_next_bit(true);
           stream.encode_null();
         }
-      }
-      else if (is_same()(cref, prev)) {
-        pmap.set_next_bit(false);
       }
       else {
         pmap.set_next_bit(true);

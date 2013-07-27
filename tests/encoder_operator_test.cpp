@@ -18,9 +18,9 @@
 //
 #include <mfast/codec_helper.h>
 #include <mfast/int_ref.h>
-#include <mfast/decoder/fast_istream.h>
-#include <mfast/decoder/decoder_field_operator.h>
-
+#include <mfast/encoder/fast_ostream.h>
+#include <mfast/encoder/encoder_field_operator.h>
+#include <mfast/encoder/encoder_presence_map.h>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
@@ -34,82 +34,64 @@
 using namespace mfast;
 
 
-enum pmap_status_enum_t { NO_PMAP_BIT, HAS_PMAP_BIT };
 
 enum prev_value_status_enum_t { CHANGE_PREVIOUS_VALUE, PRESERVE_PREVIOUS_VALUE };
 
 template <typename MREF>
 boost::test_tools::predicate_result
-decode_mref(const byte_stream&       input_stream,
-            pmap_status_enum_t       pmap_status,
-            const MREF&              expected,
+encode_mref(const byte_stream&       result_stream,
+            const MREF&              value,
             prev_value_status_enum_t prev_status)
 {
-  fast_istreambuf sb(input_stream.data(), input_stream.size());
-  fast_istream strm(&sb);
-  decoder_presence_map pmap;
-
-  strm.decode(pmap);
-  uint64_t old_mask = pmap.mask();
-
-  malloc_allocator allocator;
-  value_storage storage;
-  typename MREF::instruction_cptr instruction = expected.instruction();
-  instruction->construct_value(storage, &allocator);
-
+  char buffer[32];
+  
+  debug_allocator alloc;
+  fast_ostreambuf sb(buffer);
+  fast_ostream strm(&alloc);
+  strm.rdbuf(&sb);
+  
+  encoder_presence_map pmap;
+  pmap.init(&strm, 7);
+  
+  typename MREF::instruction_cptr instruction = value.instruction();
 
   value_storage old_prev_storage = instruction->prev_value();
   typename MREF::cref_type old_prev( &old_prev_storage, instruction);
 
-  MREF ref(&allocator, &storage, instruction);
 
-  decoder_operators[instruction->field_operator()]->decode(ref, strm, pmap);
-
-  bool pmap_check_successful = false;
-
-  if (pmap_status == NO_PMAP_BIT) {
-    pmap_check_successful = (old_mask == pmap.mask());
-  }
-  else {  // pmap_status == HAS_PMAP_BIT
-    pmap_check_successful = ((old_mask >> 1) == pmap.mask());
-  }
-
+  encoder_operators[instruction->field_operator()]->encode(value, strm, pmap);
+  pmap.commit();
+ 
   boost::test_tools::predicate_result res( false );
 
   typename MREF::cref_type prev( &instruction->prev_value(), instruction);
 
-  if (!pmap_check_successful) {
-    res.message() << "pmap consume bit error.";
-  }
-  else if (expected  != ref) {
-    res.message()<< "decoded value " << ref << " does not match expected";
+  if (result_stream  != byte_stream(sb) ) {
+    res.message()<< "encoded byte string \"" << byte_stream(sb) << "\" does not match expected";
   }
   else if (prev_status == PRESERVE_PREVIOUS_VALUE) {
     if (!old_prev_storage.is_defined()) {
       if (instruction->prev_value().is_defined()) {
-        res.message() << "previous value changed after decoding";
+        res.message() << "previous value changed after encoding";
       }
     }
     else if (!instruction->prev_value().is_defined()) {
-      res.message() << "previous value not defined after decoding";
+      res.message() << "previous value not defined after encoding";
     }
     else if (old_prev != prev) {
-      res.message() << "previous value changed after decoding";
+      res.message() << "previous value changed after encoding";
     }
   }
-  else if (prev != ref) {
-    res.message() << "previous value is not properly set after decoding";
+  else if (prev != value) {
+    res.message() << "previous value is not properly set after encoding";
   }
 
   res = res.has_empty_message();
 
-  instruction->destruct_value(storage, &allocator);
   return res;
 }
 
-BOOST_AUTO_TEST_SUITE( test_decoder_operator )
-
-
+BOOST_AUTO_TEST_SUITE( test_encoder_operator )
 
 BOOST_AUTO_TEST_CASE(operator_none_test)
 {
@@ -132,7 +114,7 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
     uint64_mref result(&allocator, &storage, &inst);
 
     result.as_absent();
-    BOOST_CHECK( decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK( encode_mref("\x80\x80", result, CHANGE_PREVIOUS_VALUE) );
   }
   {
     uint64_field_instruction inst(operator_none,
@@ -149,7 +131,7 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
 
     uint64_mref result(&allocator, &storage, &inst);
     result.as(0);
-    BOOST_CHECK( decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK( encode_mref("\x80\x80", result, CHANGE_PREVIOUS_VALUE) );
   }
 }
 
@@ -176,12 +158,12 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
     result.as(UINT64_MAX);
 
     // testing when the presence bit is set
-    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0",result, CHANGE_PREVIOUS_VALUE) );
 
     // testing when the presence bit is not set
 
     result.as_absent();
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80", result, CHANGE_PREVIOUS_VALUE) );
   }
   {
     // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
@@ -199,7 +181,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
     BOOST_CHECK(!result.optional());
 
     result.as(UINT64_MAX);
-    BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80", result, CHANGE_PREVIOUS_VALUE) );
   }
 }
 
@@ -218,11 +200,12 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
                                   nullable<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
-    
+
     uint64_mref result(&allocator, &storage, &inst);
+    
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
     result.as(0);
-    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -236,9 +219,10 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 
 
     uint64_mref result(&allocator, &storage, &inst);
+    // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
 
     result.as(UINT64_MAX);
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -258,7 +242,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous
     // value  is left unchanged.
-    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x80",  result,  PRESERVE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -273,10 +257,12 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
 
     uint64_mref result(&allocator, &storage, &inst);
 
+    // Optional integer, decimal, string and byte vector fields – one bit.
+    
     // The default operator specifies that the value of a field is either present in the stream or it will be the initial value.
 
     result.as(UINT64_MAX);
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -293,7 +279,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
     // If the field has optional presence and no initial value, the field is considered absent when there is no value in the stream.
 
     result.as_absent();
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
   }
 }
@@ -317,7 +303,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     result.as(0);
     
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
-    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -336,7 +322,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
     /// set previous value to a different value
@@ -345,13 +331,13 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value.
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     /// set previous value to empty
     inst.prev_value().present(false);    // // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
     
-    BOOST_CHECK_THROW(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error );
+    BOOST_CHECK_THROW(encode_mref("\x80", result, CHANGE_PREVIOUS_VALUE), mfast::fast_error );
   }
 
   {
@@ -369,7 +355,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
-    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -390,7 +376,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
@@ -400,7 +386,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value.
     result.as(5);
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     /// set previous value to empty
     inst.prev_value().present(false);
@@ -423,7 +409,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
     
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 }
 
@@ -446,7 +432,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     result.as(0);
     // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
    
-    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   
   }
 
@@ -466,7 +452,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
     /// set previous value to a different value
@@ -477,12 +463,12 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * assigned – the value of the field is the previous value incremented by one. The incremented value also becomes the new previous value.
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
     /// set previous value to empty
     inst.prev_value().present(false);
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
-    BOOST_CHECK_THROW(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error);
+    BOOST_CHECK_THROW(encode_mref("\x80\x80", result, CHANGE_PREVIOUS_VALUE), mfast::fast_error);
   }
 
   {
@@ -501,7 +487,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
     
-    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -521,7 +507,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – the value of the field is the initial value that also becomes the new previous value.
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
     
     uint64_mref prev(&allocator, &inst.prev_value(), &inst);
 
@@ -531,14 +517,14 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     // * assigned – the value of the field is the previous value incremented by one. The incremented value also becomes the new previous value.
     
     result.as(6);
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     /// set previous value to empty
     prev.as_absent();
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent.
     result.as_absent();
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   { // testing no initial value
@@ -558,7 +544,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
  
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 }
 
@@ -585,7 +571,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     result.as(7);
-    BOOST_CHECK(decode_mref("\xC0\x82", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x82",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -606,7 +592,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     
     result.as(2);
-    BOOST_CHECK(decode_mref("\xC0\x82", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x82",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -629,7 +615,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     
     result.as(6);
-    BOOST_CHECK(decode_mref("\xC0\x82", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x82",  result,  CHANGE_PREVIOUS_VALUE ) );
 
   }
 
@@ -651,7 +637,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
     //  If the field has optional presence, the delta value can be NULL. In that case the value of the field is considered absent.
     
     result.as_absent();
-    BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
 }
@@ -678,7 +664,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used. 
     result.as(15,3); // 15 = 12 (base) + 3 (delta), 3= 1 (base) + 2 (delta)
-    BOOST_CHECK(decode_mref("\xC0\x82\x83", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x82\x83",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
   {
     decimal_field_instruction inst(operator_delta,
@@ -695,7 +681,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used. 
     result.as(3,2); // 3 =  0 (base) + 3 (delta), 2 = 0 (base) + 2 (delta)
-    BOOST_CHECK(decode_mref("\xC0\x82\x83", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x82\x83",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 
   {
@@ -713,7 +699,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used. 
     result.as_absent(); 
-    BOOST_CHECK(decode_mref("\xC0\x80\x83", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x80",  result,  PRESERVE_PREVIOUS_VALUE ) );
   }
 }
 
@@ -741,12 +727,37 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    result.as("initial_value");
-    BOOST_CHECK(decode_mref("\xC0\x86\x76\x61\x6C\x75\xE5", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    result.as_initial_value();
+    BOOST_CHECK(encode_mref("\x80\x80\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
   }
   
+  { // testing mandatory field with initial value
+    const char* default_value = "initial_string";
+    const uint32_t default_len = strlen(default_value);
+    ascii_field_instruction inst(operator_delta,
+                                 presence_mandatory,
+                                 1,
+                                 "test_ascii","",
+                                 0,
+                                 default_value,
+                                 default_len);
+
+    inst.construct_value(storage, &alloc);
+
+    ascii_string_mref result(&alloc, &storage, &inst);
+    // Mandatory integer, decimal, string and byte vector fields – no bit.
+    
+    // the field is obtained by combining the delta value with a base value.
+    // The base value depends on the state of the previous value in the following way:
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
+    result.as("initial_value");
+    BOOST_CHECK(encode_mref("\x80\x86\x76\x61\x6C\x75\xE5", result, CHANGE_PREVIOUS_VALUE) );
+
+    inst.destruct_value(storage, &alloc);
+  }  
+
   { // testing mandatory field without initial value
 
     ascii_field_instruction inst(operator_delta,
@@ -764,29 +775,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     result.as("ABCD");
-    BOOST_CHECK(decode_mref("\x80\x80\x41\x42\x43\xC4", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
-
-    inst.destruct_value(storage, &alloc);
-  }
-
-  { // testing mandatory field without initial value
-    // const char* default_value = "initial_string";
-
-    ascii_field_instruction inst(operator_delta,
-                                 presence_mandatory,
-                                 1,
-                                 "test_ascii","",
-                                 0);
-
-    inst.construct_value(storage, &alloc);
-
-    ascii_string_mref result(&alloc, &storage, &inst);
-    // Mandatory integer, decimal, string and byte vector fields – no bit.
-    
-    // the field is obtained by combining the delta value with a base value.
-    // The base value depends on the state of the previous value in the following way:
-    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    BOOST_CHECK_THROW(decode_mref("\xC0\x86\x76\x61\x6C\x75\xE5", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error);
+    BOOST_CHECK(encode_mref("\x80\x80\x41\x42\x43\xC4", result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -811,7 +800,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
     // In that case the value of the field is considered absent.
      // Note that the previous value is not set to empty but is left untouched if the value is absent.
     result.as_absent();
-    BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x80",  result,  PRESERVE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -836,7 +825,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     
     result.as("initial_striABCD");
-    BOOST_CHECK(decode_mref("\xC0\x83\x41\x42\x43\xC4", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x83\x41\x42\x43\xC4",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -862,7 +851,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     
     result.as("ABCD_string");
-    BOOST_CHECK(decode_mref("\x80\xF8\x41\x42\x43\xC4", NO_PMAP_BIT,  result,  CHANGE_PREVIOUS_VALUE ) );
+    BOOST_CHECK(encode_mref("\x80\xF8\x41\x42\x43\xC4",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -893,11 +882,13 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     
-    result.as("initial_value");
-    BOOST_CHECK(decode_mref("\xC0\x86\x85\x76\x61\x6C\x75\x65", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    result.as_initial_value();
+    BOOST_CHECK(encode_mref("\x80\x80\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   
     inst.destruct_value(storage, &alloc);
   }
+  
+
 
   { // testing mandatory field without initial value
     //const char* default_value = "initial_string";
@@ -917,9 +908,9 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     
-    // result.as("initial_value");
-    BOOST_CHECK_THROW(decode_mref("\xC0\x86\x85\x76\x61\x6C\x75\x65", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE),
-                      mfast::fast_error );
+    result.as("ABCD");
+    BOOST_CHECK(encode_mref("\x80\x80\x84\x41\x42\x43\x44", result, CHANGE_PREVIOUS_VALUE) );
+   
     
     inst.destruct_value(storage, &alloc);
   }
@@ -945,9 +936,9 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
     // A NULL indicates that the delta is absent.
     // Note that the previous value is not set to empty but is left untouched if the value is absent.
     
-    
+    // A NULL delta is represented as a NULL subtraction length. The string part is present in the stream iff the subtraction length is not NULL.
     result.as_absent();
-    BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x80",  result,  PRESERVE_PREVIOUS_VALUE ) );
     
     inst.destruct_value(storage, &alloc);
   }
@@ -972,7 +963,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     
     result.as("initial_striABCD");
-    BOOST_CHECK(decode_mref("\xC0\x83\x84\x41\x42\x43\x44", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80\x83\x84\x41\x42\x43\x44",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1003,7 +994,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     result.as("initial_svalue");
-    BOOST_CHECK(decode_mref("\xC0\x76\x61\x6C\x75\xE5", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x76\x61\x6C\x75\xE5",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1028,7 +1019,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     result.as("initial_string");
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
 
@@ -1037,33 +1028,11 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  assigned – the value of the field is the previous value.
     result.as("ABCDE");
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
     
     inst.destruct_value(storage, &alloc);
 
   }
-  { // testing mandatory field without initial value while tail value not in the stream
-
-    ascii_field_instruction inst(operator_tail,
-                                 presence_mandatory,
-                                 1,
-                                 "test_ascii","",
-                                 0);
-
-    inst.construct_value(storage, &alloc);
-
-    ascii_string_mref result(&alloc, &inst.prev_value(), &inst);
-    // Mandatory string and byte vector fields – one bit.
-
-    // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
-    //  undefined – the value of the field is the initial value that also becomes the new previous value.
-    // It is a dynamic error [ERR D6] if the instruction context has no initial value.
-    
-    BOOST_CHECK_THROW(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error );
-
-    inst.destruct_value(storage, &alloc);
-  }
-
   { // testing optional field with initial value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
@@ -1086,7 +1055,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     result.as("initial_svalue");
-    BOOST_CHECK(decode_mref("\xC0\x76\x61\x6C\x75\xE5", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x76\x61\x6C\x75\xE5",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1113,7 +1082,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     result.as_absent();
-    BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\xC0\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1140,7 +1109,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     //  undefined – the value of the field is the initial value that also becomes the new previous value..
     
     result.as("initial_string");
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
     // change the previous value to "ABCDE" so we can verified the case with defined previous value
@@ -1148,13 +1117,13 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  assigned – the value of the field is the previous value.
     result.as("ABCDE");
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     prev.as_absent();
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way:
     // empty – the value of the field is empty. If the field is optional the value is considered absent.
     result.as_absent();
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
     
     inst.destruct_value(storage, &alloc);
 
@@ -1180,7 +1149,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
     
     result.as_absent();
-    BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    BOOST_CHECK(encode_mref("\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
 }
 BOOST_AUTO_TEST_SUITE_END()
