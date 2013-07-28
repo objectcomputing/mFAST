@@ -1054,6 +1054,15 @@ class templates_description
     {
       return instructions_[i];
     }
+    
+    const template_instruction* instruction_with_id(uint32_t id) const
+    {
+      for (uint32_t i = 0; i <  instructions_count_; ++i) {
+        if (instruction(i)->id() == id)
+          return instruction(i);
+      }
+      return 0;
+    }
 
     uint32_t instructions_count() const
     {

@@ -33,7 +33,7 @@ class encoder
 {
   public:
     /// Consturct a encoder using default memory allocator (i.e. malloc)
-    encoder(allocator* alloc);
+    encoder(allocator* alloc = malloc_allocator::instance());
 
     ~encoder();
 
@@ -57,6 +57,7 @@ class encoder
       include(descriptions, N);
     }
 
+    const template_instruction* template_with_id(uint32_t id);
     /// Encode a  message into FAST byte stream.
     ///
     /// @param[in] message The message to be encoded.

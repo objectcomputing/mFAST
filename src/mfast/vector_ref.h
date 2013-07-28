@@ -21,6 +21,7 @@
 #include <cassert>
 #include <iterator>
 #include <cstring>
+#include <vector>
 #include "mfast/field_ref.h"
 #include "mfast/allocator.h"
 namespace mfast {
@@ -218,7 +219,7 @@ class make_vector_mref
       copy_from(this->instruction()->default_value());
     }
     
-    void as (const ConstVectorRef& cref)
+    void as (const ConstVectorRef& cref) const
     {
       if (cref.absent()) {
         this->as_absent();
@@ -226,6 +227,17 @@ class make_vector_mref
       else {
         assign(cref.begin(), cref.end());
       }
+    }
+    
+    void as (const std::vector<unsigned char>& value) const
+    {
+      assign(value.begin(), value.end());
+    }
+    
+    template <int SIZE>
+    void as (unsigned char (&array)[SIZE]) const
+    {
+      assign(array, array+SIZE);
     }
 
     value_type* data() const
@@ -323,10 +335,10 @@ class make_vector_mref
                  const value_type* addr, size_t count2 ) const;
 
   protected:
-    explicit make_vector_mref(const field_mref& other)
-      : base_type(other)
-    {
-    }
+    // explicit make_vector_mref(const field_mref& other)
+    //   : base_type(other)
+    // {
+    // }
 
     friend class mfast::detail::codec_helper;
     void copy_from(const value_storage& v) const

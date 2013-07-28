@@ -232,6 +232,7 @@ encoder_impl::post_visit(message_cref&)
 inline bool
 encoder_impl::pre_visit(encoder_impl::dynamic_ref_type& cref)
 {
+  cref.setup_pmap(this);
   cref.instruction_ = encode_segment_preemble(cref.instruction()->id(), false); 
   return true;
 }
@@ -308,6 +309,9 @@ encoder::include(const templates_description** descriptions, std::size_t descrip
   for (std::size_t i = 0; i < description_count; ++i)
     builder.build(descriptions[i]);
 
+  if (impl_->templates_map_.size() ==1 ) {
+    impl_->active_message_id_ = impl_->templates_map_.begin()->first;
+  }
 }
 
 std::size_t
@@ -333,11 +337,16 @@ encoder::encode(const message_cref& message,
   buffer.resize(sb.length());
 }
 
-// void
-// encoder::debug_log(std::ostream* log)
-// {
-//   impl_->debug_.set(log);
-// }
-
+const template_instruction* 
+encoder::template_with_id(uint32_t id)
+{
+  template_instruction* instruction =0;
+  template_id_map_t::iterator itr = impl_->templates_map_.find(id);
+  
+  if (itr != impl_->templates_map_.end()) {
+    instruction = itr->second;
+  }
+  return instruction;
+}
 
 }

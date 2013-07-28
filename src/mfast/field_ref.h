@@ -179,7 +179,7 @@ class make_field_mref
     typedef boost::true_type is_mutable;
     typedef typename ConstFieldRef::instruction_cptr instruction_cptr;
     typedef ConstFieldRef cref_type;
-    
+
     make_field_mref()
     {
     }
@@ -198,12 +198,12 @@ class make_field_mref
     {
     }
 
-    make_field_mref(value_storage* storage,
-                    allocator*     alloc)
-      : ConstFieldRef(storage)
-      , alloc_(alloc)
-    {
-    }
+    // make_field_mref(value_storage* storage,
+    //                 allocator*     alloc)
+    //   : ConstFieldRef(storage)
+    //   , alloc_(alloc)
+    // {
+    // }
 
     template <typename T>
     typename boost::enable_if<typename T::is_mutable, T>::type
@@ -252,8 +252,6 @@ class make_field_mref
     friend T dynamic_field_cast(const make_field_mref<ConstFieldRef>&);
 };
 
-typedef make_field_mref<field_cref> field_mref;
-
 
 template <typename T>
 struct cref_of
@@ -264,11 +262,7 @@ struct cref_of
 template <typename T>
 struct mref_of;
 
-template <>
-struct mref_of<field_cref>
-{
-  typedef field_mref type;
-};
+
 
 
 namespace detail {
@@ -306,19 +300,6 @@ field_ref_with_id(const value_storage*        storage,
   return field_cref();
 }
 
-inline field_mref
-field_ref_with_id(value_storage*              storage,
-                  const group_content_helper* helper,
-                  allocator*                  alloc,
-                  uint32_t                    id)
-{
-  if (helper) {
-    int index = helper->find_subinstruction_index_by_id(id);
-    if (index >= 0)
-      return field_mref(alloc, &storage[index], helper->subinstructions_[index]);
-  }
-  return field_mref();
-}
 
 inline field_cref
 field_ref_with_name(const value_storage*        storage,
@@ -333,19 +314,6 @@ field_ref_with_name(const value_storage*        storage,
   return field_cref();
 }
 
-inline field_mref
-field_ref_with_name(value_storage*              storage,
-                    const group_content_helper* helper,
-                    allocator*                  alloc,
-                    const char*                 name)
-{
-  if (helper) {
-    int index = helper->find_subinstruction_index_by_name(name);
-    if (index >= 0)
-      return field_mref(alloc, &storage[index], helper->subinstructions_[index]);
-  }
-  return field_mref();
-}
 
 }
 

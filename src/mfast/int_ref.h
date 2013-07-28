@@ -160,10 +160,10 @@ class int_mref
 
   protected:
 
-    explicit int_mref(const field_mref& other)
-      : base_type(other)
-    {
-    }
+    // explicit int_mref(const field_mref& other)
+    //   : base_type(other)
+    // {
+    // }
 
     void value(T& v) const
     {

@@ -21,6 +21,7 @@
 
 #include "mfast/field_instruction.h"
 #include "mfast/field_ref.h"
+#include "mfast/field_mref.h"
 #include <cassert>
 
 namespace mfast {

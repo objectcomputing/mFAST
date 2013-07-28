@@ -341,13 +341,6 @@ class string_mref
     {
       return this->append(c);
     }
-
-  protected:
-    explicit string_mref(const field_mref& other)
-      : base_type(other)
-    {
-    }
-
 };
 
 typedef string_mref<true> ascii_string_mref;

@@ -39,6 +39,7 @@ class dynamic_cref
 {
   public:
     typedef const templateref_instruction* instruction_cptr;
+    typedef boost::false_type is_mutable;
 
     dynamic_cref(const value_storage* storage,
                  instruction_cptr)
@@ -98,6 +99,8 @@ class dynamic_mref
   : public dynamic_cref
 {
   public:
+    typedef boost::true_type is_mutable;
+    
     dynamic_mref(allocator*                     alloc,
                  value_storage*                 storage,
                  dynamic_cref::instruction_cptr inst)
@@ -110,7 +113,13 @@ class dynamic_mref
     MESSAGE_MREF as() const
     {
       set_instruction(MESSAGE_MREF::the_instruction, true);
-      return MESSAGE_MREF(alloc_, storage_);
+      return MESSAGE_MREF(alloc_, storage());
+    }
+    
+    message_mref rebind(const template_instruction* inst) const
+    {
+      set_instruction(inst, true);
+      return message_mref(alloc_, storage(), inst);
     }
 
     template <typename T>
@@ -145,7 +154,7 @@ class dynamic_mref
       return T(storage_, dynamic_cast<typename T::instruction_cptr>(instruction_));
     }
 
-    void set_instruction(const template_instruction* inst, bool construct_subfields)
+    void set_instruction(const template_instruction* inst, bool construct_subfields = true) const
     {
       if (inst == this->instruction_)
         return;
@@ -155,11 +164,11 @@ class dynamic_mref
       }
       inst->construct_value(*storage(), 0, alloc_, construct_subfields);
       storage()->of_templateref.of_instruction.instruction_ = inst;
-      instruction_ = inst;
+      const_cast<const template_instruction*&>(instruction_) = inst;
     }
 
   private:
-    value_storage* storage()
+    value_storage* storage() const
     {
       return const_cast<value_storage*>(storage_);
     }

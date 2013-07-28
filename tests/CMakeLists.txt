@@ -19,6 +19,7 @@ add_executable (mfast_test
 				encoder_operator_test.cpp
 			    arena_allocator_test.cpp
 			    decoder_test.cpp
+				encoder_test.cpp
 				value_storage_test.cpp
 			    ${FASTTYPEGEN_test_types_OUTPUTS})
 

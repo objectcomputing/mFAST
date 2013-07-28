@@ -44,7 +44,7 @@ class message_cref
     typedef const template_instruction* instruction_cptr;
 
     message_cref(const value_storage* storage,
-                 instruction_cptr       instruction);
+                 instruction_cptr     instruction);
 
     uint32_t id() const;
 
@@ -96,7 +96,7 @@ class make_message_mref
     typedef typename base_type::instruction_cptr instruction_cptr;
 
     make_message_mref(allocator*       alloc,
-                      value_storage* storage,
+                      value_storage*   storage,
                       instruction_cptr instruction);
 
 
@@ -133,6 +133,9 @@ class message_base
       other.instruction_ = 0;
     }
 
+    void rebind(allocator*                  alloc,
+                const template_instruction* instruction);
+
     message_base& operator = (BOOST_RV_REF(message_base)other)
     {
       // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
@@ -148,6 +151,7 @@ class message_base
     }
 
     message_mref ref();
+    message_mref mref();
     message_cref ref() const;
     message_cref cref() const;
 
@@ -175,7 +179,7 @@ class message_base
 ////////////////////////////
 
 inline
-message_cref::message_cref(const value_storage*      storage,
+message_cref::message_cref(const value_storage*        storage,
                            const template_instruction* instruction)
   : instruction_(instruction)
   , storage_(storage)
@@ -251,13 +255,12 @@ message_cref::subinstruction(size_t index) const
   return instruction()->subinstruction(index);
 }
 
-
 ///////////////////////////////////////////////////////
 
 template <typename ConstMessageRef>
 inline
-make_message_mref<ConstMessageRef>::make_message_mref(allocator*                                           alloc,
-                                                      value_storage*                                     storage,
+make_message_mref<ConstMessageRef>::make_message_mref(allocator*                                                    alloc,
+                                                      value_storage*                                                storage,
                                                       typename make_message_mref<ConstMessageRef>::instruction_cptr instruction)
   : base_type(alloc, storage, instruction)
 {
@@ -271,7 +274,8 @@ message_base::message_base(allocator*                  alloc,
   : alloc_(alloc)
   , instruction_(instruction)
 {
-  instruction_->construct_value(my_storage_, 0, alloc_);
+  if (instruction_)
+    instruction_->construct_value(my_storage_, 0, alloc_);
 }
 
 inline
@@ -289,6 +293,21 @@ message_base::~message_base()
     this->instruction()->destruct_value(my_storage_, alloc_);
 }
 
+inline void
+message_base::rebind(allocator*                  alloc,
+                     const template_instruction* instruction)
+{
+  if (this->instruction() == instruction)
+    return;
+  
+  if (this->instruction())
+    this->instruction()->destruct_value(my_storage_, alloc_);
+  
+  alloc_ = alloc;
+  instruction_ = instruction;
+  instruction_->construct_value(my_storage_, 0, alloc_);  
+}
+
 inline const template_instruction*
 message_base::instruction() const
 {
@@ -304,9 +323,14 @@ message_base::message_base(const message_cref& other,
   this->instruction()->copy_construct_value(my_storage_, 0, alloc, other.storage_);
 }
 
-
 inline message_mref
 message_base::ref()
+{
+  return message_mref(alloc_, &my_storage_, instruction_);
+}
+
+inline message_mref
+message_base::mref()
 {
   return message_mref(alloc_, &my_storage_, instruction_);
 }
