@@ -5,41 +5,59 @@
 #include "mfast/int_ref.h"
 #include "mfast/decimal_ref.h"
 #include "mfast/string_ref.h"
-
+#include <boost/exception/all.hpp>
 namespace mfast
 {
+
+struct tag_input_type;
+struct tag_output_type;
+typedef boost::error_info<tag_input_type,std::string> input_type_info;
+typedef boost::error_info<tag_output_type,std::string> output_type_info;
+
+class incompatible_type_conversion_error
+  : public virtual boost::exception, public virtual std::exception
+{
+  public:
+    incompatible_type_conversion_error(const char* input_type_name,
+                                       const char* output_type_name)
+    {
+      *this << input_type_info(input_type_name)
+            << output_type_info(output_type_name);
+    }
+
+};
+
 class field_mref
-  : public make_field_mref<field_cref>
+  : public field_mref_base
 {
   public:
     field_mref()
     {
     }
 
-    field_mref(allocator*       alloc,
+    field_mref(allocator_type*  alloc,
                value_storage*   storage,
                instruction_cptr instruction)
-      : make_field_mref<field_cref>(alloc, storage, instruction)
+      : field_mref_base(alloc, storage, instruction)
     {
     }
 
     field_mref(const make_field_mref<field_cref> &other)
-      : make_field_mref<field_cref>(other)
+      : field_mref_base(other)
     {
     }
 
-
     template <typename T>
     void as(T t);
-    
+
     void as(const char*);
-    
+
     void as(const decimal&);
-    
+
     template <int SIZE>
-    void as(unsigned char (&value)[SIZE]) ;
-    
-    void as(const std::vector<unsigned char>& value) ;
+    void as(unsigned char (&value)[SIZE]);
+
+    void as(const std::vector<unsigned char>& value);
 };
 
 template <>
@@ -54,19 +72,19 @@ void field_mref::as(T value)
   switch (this->instruction()->field_type())
   {
   case field_type_int32:
-    this->static_cast_as<int32_mref>().as(value);
+    static_cast<int32_mref>(*this).as(value);
     break;
   case field_type_uint32:
-    this->static_cast_as<uint32_mref>().as(value);
+    static_cast<uint32_mref>(*this).as(value);
     break;
   case field_type_int64:
-    this->static_cast_as<int64_mref>().as(value);
+    static_cast<int64_mref>(*this).as(value);
     break;
   case field_type_uint64:
-    this->static_cast_as<uint64_mref>().as(value);
+    static_cast<uint64_mref>(*this).as(value);
     break;
   default:
-    throw std::bad_cast();
+    BOOST_THROW_EXCEPTION(incompatible_type_conversion_error(typeid(value).name(), this->instruction()->field_type_name()));
   }
 }
 
@@ -75,39 +93,39 @@ inline void field_mref::as(const char* value)
   switch (this->instruction()->field_type())
   {
   case field_type_ascii_string:
-    this->static_cast_as<ascii_string_mref>().as(value);
+    static_cast<ascii_string_mref>(*this).as(value);
     break;
   case field_type_unicode_string:
-    this->static_cast_as<unicode_string_mref>().as(value);
+    static_cast<unicode_string_mref>(*this).as(value);
     break;
   default:
-    throw std::bad_cast();
-  }  
+    BOOST_THROW_EXCEPTION(incompatible_type_conversion_error("const char*", this->instruction()->field_type_name()));
+  }
 }
 
 inline void field_mref::as(const decimal& value)
 {
-  if (this->instruction()->field_type() == field_type_decimal) 
-    this->static_cast_as<decimal_mref>().as(value);
+  if (this->instruction()->field_type() == field_type_decimal)
+    static_cast<decimal_mref>(*this).as(value);
   else
-    throw std::bad_cast();
+    BOOST_THROW_EXCEPTION(incompatible_type_conversion_error("decimal", this->instruction()->field_type_name()));
 }
 
-template <int SIZE>  
+template <int SIZE>
 void field_mref::as(unsigned char (&value)[SIZE])
 {
-  if (this->instruction()->field_type() == field_type_byte_vector) 
-    this->static_cast_as<byte_vector_mref>().as(value);
-  else 
-    throw std::bad_cast();    
+  if (this->instruction()->field_type() == field_type_byte_vector)
+    static_cast<byte_vector_mref>(*this).as(value);
+  else
+    BOOST_THROW_EXCEPTION(incompatible_type_conversion_error("unsigned char array", this->instruction()->field_type_name()));
 }
 
 inline void field_mref::as(const std::vector<unsigned char>& value)
 {
-  if (this->instruction()->field_type() == field_type_byte_vector) 
-    this->static_cast_as<byte_vector_mref>().as(value);
-  else 
-    throw std::bad_cast();
+  if (this->instruction()->field_type() == field_type_byte_vector)
+    static_cast<byte_vector_mref>(*this).as(value);
+  else
+    BOOST_THROW_EXCEPTION(incompatible_type_conversion_error("std::vector<unsigned char>", this->instruction()->field_type_name()));
 }
 
 namespace detail {

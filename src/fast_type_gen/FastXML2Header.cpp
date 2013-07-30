@@ -116,7 +116,8 @@ bool FastXML2Header::VisitEnterTemplate (const XMLElement & element,
                << indent << "    typedef const instruction_type* instruction_cptr;\n"
                << indent << "    " << name_attr << "_cref(\n"
                << indent << "      const mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr            instruction=&the_instruction);\n\n";
+               << indent << "      instruction_cptr            instruction=&the_instruction);\n\n"
+               << indent << "    explicit " << name_attr << "_cref(const mfast::field_cref& other);\n\n";
 
   header_mref_ << "\n"
                << indent << "typedef mfast::make_message_mref<" << name_attr << "_cref> " << name_attr << "_mref_base;\n"
@@ -127,7 +128,9 @@ bool FastXML2Header::VisitEnterTemplate (const XMLElement & element,
                << indent << "    " << name_attr << "_mref(\n"
                << indent << "      mfast::allocator*     alloc,\n"
                << indent << "      mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr      instruction=&the_instruction);\n\n";
+               << indent << "      instruction_cptr      instruction=&the_instruction);\n\n"
+               << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
+
   cref_scope_ << name_attr << "_cref::";
   header_cref_.inc_indent(2);
   header_mref_.inc_indent(2);
@@ -204,7 +207,9 @@ bool FastXML2Header::VisitEnterGroup (const XMLElement & /* element */,
                << indent << "    typedef const instruction_type* instruction_cptr;\n"
                << indent << "    " << name_attr << "_cref(\n"
                << indent << "      const mfast::value_storage*   storage,\n"
-               << indent << "      instruction_cptr                   instruction);\n\n";
+               << indent << "      instruction_cptr              instruction);\n\n"
+               << indent << "    explicit " << name_attr << "_cref(const mfast::field_cref& other);\n\n";
+
 
   header_mref_ << "\n"
                << indent << "typedef mfast::make_group_mref<" << cref_scope_.str() << name_attr << "_cref> " << name_attr << "_mref_base;\n"
@@ -213,9 +218,11 @@ bool FastXML2Header::VisitEnterGroup (const XMLElement & /* element */,
                << indent << "{\n"
                << indent << "  public:\n"
                << indent << "    " << name_attr << "_mref(\n"
-               << indent << "      mfast::allocator*               alloc,\n"
+               << indent << "      mfast::allocator*             alloc,\n"
                << indent << "      mfast::value_storage*         storage,\n"
-               << indent << "      instruction_cptr                   instruction\n";
+               << indent << "      instruction_cptr              instruction\n\n"
+               << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
+
   cref_scope_ << name_attr << "_cref::";
   header_cref_.inc_indent(2);
   header_mref_.inc_indent(2);
@@ -241,7 +248,7 @@ bool FastXML2Header::VisitExitGroup (const XMLElement   & /* element */,
 
 bool FastXML2Header::VisitEnterSequence (const XMLElement   & /* element */,
                                          const std::string& name_attr,
-                                         std::size_t        /* index */)
+                                         std::size_t /* index */)
 {
   std::string name = name_attr + "_element";
   header_cref_ << "\n"
@@ -254,7 +261,7 @@ bool FastXML2Header::VisitEnterSequence (const XMLElement   & /* element */,
                << indent << "    typedef const instruction_type* instruction_cptr;\n"
                << indent << "    " << name << "_cref(\n"
                << indent << "      const mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr                 instruction);\n\n";
+               << indent << "      instruction_cptr            instruction);\n\n";
 
   header_mref_ << "\n"
                << indent << "typedef mfast::make_group_mref<" << cref_scope_.str() << name << "_cref> " << name << "_mref_base;\n"
@@ -263,9 +270,10 @@ bool FastXML2Header::VisitEnterSequence (const XMLElement   & /* element */,
                << indent << "{\n"
                << indent << "  public:\n"
                << indent << "    " << name << "_mref(\n"
-               << indent << "      mfast::allocator*       alloc,\n"
+               << indent << "      mfast::allocator*     alloc,\n"
                << indent << "      mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr           instruction);\n\n";
+               << indent << "      instruction_cptr      instruction);\n\n";
+
 
   cref_scope_ << name_attr << "_cref::";
   header_cref_.inc_indent(2);

@@ -42,7 +42,12 @@ class group_cref
     {
     }
 
-    group_cref(const value_storage*   storage,
+    explicit group_cref(const field_cref& other)
+      : field_cref(other)
+    {
+    }
+
+    group_cref(const value_storage*     storage,
                const field_instruction* instruction)
       : field_cref(storage, instruction)
     {
@@ -81,6 +86,7 @@ class group_cref
       if (instruction()->optional())
         const_cast<value_storage*>(storage_)->present(true);
     }
+
   private:
     group_cref& operator= (const group_cref&);
 };
@@ -107,15 +113,20 @@ class make_group_mref
 
     template <typename Instruction>
     make_group_mref(allocator*         alloc,
-                    value_storage*   storage,
+                    value_storage*     storage,
                     const Instruction* instruction)
       : base_type(alloc, storage, instruction)
     {
     }
 
     make_group_mref(value_storage* storage,
-                    allocator*       alloc)
+                    allocator*     alloc)
       : base_type(storage, alloc)
+    {
+    }
+
+    explicit make_group_mref(const field_mref_base& other)
+      : base_type(other)
     {
     }
 
@@ -125,21 +136,9 @@ class make_group_mref
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&);
 
-    template <typename T>
-    T static_cast_as() const
-    {
-      return T(this->alloc_, this->storage (), static_cast<typename T::instruction_cptr>(this->instruction()));
-    }
-
-    template <typename T>
-    T dynamic_cast_as() const
-    {
-      return T(this->alloc_, this->storage (), dynamic_cast<typename T::instruction_cptr>(this->instruction()));
-    }
-
-
   protected:
     value_storage* field_storage(size_t index) const;
+
   private:
     make_group_mref& operator= (const make_group_mref&);
     friend class field_mutator_adaptor_base;

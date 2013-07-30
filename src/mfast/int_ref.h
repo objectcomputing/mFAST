@@ -53,6 +53,11 @@ class int_cref
     {
     }
 
+    explicit int_cref(const field_cref& other)
+      : field_cref(other)
+    {
+    }
+
     uint32_t id() const
     {
       return instruction_->id();
@@ -90,8 +95,8 @@ class int_cref
 template <typename T>
 inline bool operator == (const int_cref<T>& lhs, const int_cref<T>& rhs)
 {
-  return (lhs.absent() && rhs.absent()) || 
-     (lhs.present() && rhs.present() && lhs.value() == rhs.value());
+  return (lhs.absent() && rhs.absent()) ||
+         (lhs.present() && rhs.present() && lhs.value() == rhs.value());
 }
 
 template <typename T>
@@ -128,6 +133,11 @@ class int_mref
     }
 
     int_mref(const int_mref& other)
+      : base_type(other)
+    {
+    }
+
+    explicit int_mref(const field_mref_base& other)
       : base_type(other)
     {
     }

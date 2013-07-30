@@ -36,7 +36,7 @@ class field_storage_helper;
 }
 
 class field_cref;
-
+class message_cref;
 
 class field_cref
 {
@@ -109,18 +109,6 @@ class field_cref
       return instruction_;
     }
 
-    template <typename T>
-    T static_cast_as() const
-    {
-      return T(storage_, static_cast<typename T::instruction_cptr>(instruction_));
-    }
-
-    template <typename T>
-    T dynamic_cast_as() const
-    {
-      return T(storage_, dynamic_cast<typename T::instruction_cptr>(instruction_));
-    }
-
   protected:
 
     field_cref& operator = (const field_cref&);
@@ -135,7 +123,8 @@ class field_cref
     const value_storage* storage_;
 
     friend class mfast::detail::field_storage_helper;
-
+    friend class message_cref;
+    friend class dynamic_cref;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -179,12 +168,13 @@ class make_field_mref
     typedef boost::true_type is_mutable;
     typedef typename ConstFieldRef::instruction_cptr instruction_cptr;
     typedef ConstFieldRef cref_type;
+    typedef mfast::allocator allocator_type;
 
     make_field_mref()
     {
     }
 
-    make_field_mref(allocator*       alloc,
+    make_field_mref(allocator_type*  alloc,
                     value_storage*   storage,
                     instruction_cptr instruction)
       : ConstFieldRef(storage, instruction)
@@ -198,39 +188,9 @@ class make_field_mref
     {
     }
 
-    // make_field_mref(value_storage* storage,
-    //                 allocator*     alloc)
-    //   : ConstFieldRef(storage)
-    //   , alloc_(alloc)
-    // {
-    // }
-
-    template <typename T>
-    typename boost::enable_if<typename T::is_mutable, T>::type
-    static_cast_as() const
+    allocator_type* allocator() const
     {
-      return T(alloc_, storage (), static_cast<typename T::instruction_cptr>(this->instruction()));
-    }
-
-    template <typename T>
-    typename boost::enable_if<typename T::is_mutable, T>::type
-    dynamic_cast_as() const
-    {
-      return T(alloc_, storage (), dynamic_cast<typename T::instruction_cptr>(this->instruction()));
-    }
-
-    template <typename T>
-    typename boost::disable_if<typename T::is_mutable, T>::type
-    static_cast_as() const
-    {
-      return T(storage (), static_cast<typename T::instruction_cptr>(this->instruction()));
-    }
-
-    template <typename T>
-    typename boost::disable_if<typename T::is_mutable, T>::type
-    dynamic_cast_as() const
-    {
-      return T(storage (), dynamic_cast<typename T::instruction_cptr>(this->instruction()));
+      return alloc_;
     }
 
   protected:
@@ -239,19 +199,17 @@ class make_field_mref
       return const_cast<value_storage*>(this->storage_);
     }
 
-    allocator* alloc_;
+    allocator_type* alloc_;
 
     friend class detail::make_field_mref_base< make_field_mref<ConstFieldRef>,
                                                typename ConstFieldRef::canbe_optional >;
     friend class field_mutator_adaptor_base;
 
-    template<typename T>
-    friend T static_field_cast(const make_field_mref<ConstFieldRef>&);
-
-    template<typename T>
-    friend T dynamic_field_cast(const make_field_mref<ConstFieldRef>&);
+    template <typename T>
+    friend class make_field_mref;
 };
 
+typedef make_field_mref<field_cref> field_mref_base;
 
 template <typename T>
 struct cref_of
@@ -300,7 +258,6 @@ field_ref_with_id(const value_storage*        storage,
   return field_cref();
 }
 
-
 inline field_cref
 field_ref_with_name(const value_storage*        storage,
                     const group_content_helper* helper,
@@ -313,7 +270,6 @@ field_ref_with_name(const value_storage*        storage,
   }
   return field_cref();
 }
-
 
 }
 

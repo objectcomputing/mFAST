@@ -196,6 +196,8 @@ class field_instruction
       return static_cast<operator_enum_t>(operator_id_);
     }
 
+    const char* field_type_name() const;
+
     field_instruction(operator_enum_t operator_id,
                       int             field_type,
                       presence_enum_t optional,
@@ -745,8 +747,8 @@ struct group_content_helper
     }
     return false;
   }
-  
-  std::size_t pmap_size() const 
+
+  std::size_t pmap_size() const
   {
     std::size_t n = 0;
     for (uint32_t i = 0; i < subinstructions_count_; ++i) {
@@ -1054,7 +1056,7 @@ class templates_description
     {
       return instructions_[i];
     }
-    
+
     const template_instruction* instruction_with_id(uint32_t id) const
     {
       for (uint32_t i = 0; i <  instructions_count_; ++i) {

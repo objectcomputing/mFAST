@@ -25,6 +25,7 @@
 #include "mfast/allocator.h"
 #include "mfast/field_ref.h"
 #include "mfast/group_ref.h"
+// #include "mfast/dynamic_ref.h"
 namespace mfast {
 
 // forwared declaration;
@@ -45,6 +46,10 @@ class message_cref
 
     message_cref(const value_storage* storage,
                  instruction_cptr     instruction);
+
+
+    // explicit message_cref(const dynamic_cref& cref);
+    explicit message_cref(const field_cref& cref);
 
     uint32_t id() const;
 
@@ -100,6 +105,7 @@ class make_message_mref
                       instruction_cptr instruction);
 
 
+    explicit make_message_mref(const field_mref_base& other);
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&);
@@ -172,6 +178,8 @@ class message_base
     allocator*                  alloc_;
     const template_instruction* instruction_;
     value_storage my_storage_;
+
+    const template_instruction* resolove_instruction(const template_instruction* inst);
 };
 
 
@@ -184,6 +192,31 @@ message_cref::message_cref(const value_storage*        storage,
   : instruction_(instruction)
   , storage_(storage)
 {
+}
+
+// inline
+// message_cref::message_cref(const dynamic_cref& cref)
+//   : instruction_(static_cast<const template_instruction*>(cref.instruction_))
+//   , storage_(cref.storage_)
+// {
+// }
+
+inline
+message_cref::message_cref(const field_cref& cref)
+  : instruction_(static_cast<const template_instruction*>(cref.instruction_))
+  , storage_(cref.storage_)
+{
+  switch (cref.instruction_->field_type())
+  {
+  case field_type_template:
+    instruction_ = static_cast<const template_instruction*> (cref.instruction_);
+    break;
+  case field_type_templateref:
+    instruction_ = static_cast<const template_instruction*> (cref.storage_->of_templateref.of_instruction.instruction_);
+    break;
+  default:
+    instruction_ =0;
+  }
 }
 
 inline size_t
@@ -266,6 +299,13 @@ make_message_mref<ConstMessageRef>::make_message_mref(allocator*                
 {
 }
 
+template <typename ConstMessageRef>
+inline
+make_message_mref<ConstMessageRef>::make_message_mref(const field_mref_base& other)
+  : base_type(other)
+{
+}
+
 ///////////////////////////////////////////////////////
 
 inline
@@ -299,13 +339,13 @@ message_base::rebind(allocator*                  alloc,
 {
   if (this->instruction() == instruction)
     return;
-  
+
   if (this->instruction())
     this->instruction()->destruct_value(my_storage_, alloc_);
-  
+
   alloc_ = alloc;
   instruction_ = instruction;
-  instruction_->construct_value(my_storage_, 0, alloc_);  
+  instruction_->construct_value(my_storage_, 0, alloc_);
 }
 
 inline const template_instruction*

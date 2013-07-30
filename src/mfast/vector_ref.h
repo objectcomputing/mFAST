@@ -63,6 +63,11 @@ class vector_cref
     {
     }
 
+    explicit vector_cref(const field_cref& other)
+      : field_cref(other)
+    {
+    }
+
     uint32_t id() const
     {
       return instruction_->id();
@@ -90,7 +95,7 @@ class vector_cref
     {
       return size();
     }
-    
+
     bool is_initial_value() const
     {
       return *this == vector_cref<T,NotUnicode>(&this->instruction()->default_value(), instruction());
@@ -105,15 +110,17 @@ class vector_cref
     {
       return data() + size();
     }
-    
-    const_reverse_iterator rbegin() const {
+
+    const_reverse_iterator rbegin() const
+    {
       return const_reverse_iterator(end());
     }
-    
-    const_reverse_iterator rend() const {
+
+    const_reverse_iterator rend() const
+    {
       return const_reverse_iterator(begin());
     }
-    
+
     const_iterator cbegin() const
     {
       return data();
@@ -123,12 +130,14 @@ class vector_cref
     {
       return data() + size();
     }
-    
-    const_reverse_iterator crbegin() const {
+
+    const_reverse_iterator crbegin() const
+    {
       return const_reverse_iterator(cend());
     }
-    
-    const_reverse_iterator crend() const {
+
+    const_reverse_iterator crend() const
+    {
       return const_reverse_iterator(cbegin());
     }
 
@@ -144,13 +153,9 @@ class vector_cref
     }
 
   protected:
-    explicit vector_cref(const field_cref& other)
-      : field_cref(other)
-    {
-    }
-    
+
     friend class mfast::detail::codec_helper;
-    
+
     void save_to(value_storage& v) const
     {
       v.of_array.content_ = this->storage()->of_array.content_;
@@ -179,7 +184,6 @@ bool operator != (const vector_cref<T,NotUnicode>& lhs,
   return !(lhs == rhs);
 }
 
-
 typedef vector_cref<unsigned char> byte_vector_cref;
 
 
@@ -197,7 +201,7 @@ class make_vector_mref
     typedef value_type* iterator;
     typedef typename ConstVectorRef::instruction_cptr instruction_cptr;
     typedef std::reverse_iterator<iterator> reverse_iterator;
-    
+
     make_vector_mref()
     {
     }
@@ -214,11 +218,16 @@ class make_vector_mref
     {
     }
 
+    explicit make_vector_mref(const field_mref_base& other)
+      : base_type(other)
+    {
+    }
+
     void as_initial_value() const
     {
       copy_from(this->instruction()->default_value());
     }
-    
+
     void as (const ConstVectorRef& cref) const
     {
       if (cref.absent()) {
@@ -228,12 +237,12 @@ class make_vector_mref
         assign(cref.begin(), cref.end());
       }
     }
-    
+
     void as (const std::vector<unsigned char>& value) const
     {
       assign(value.begin(), value.end());
     }
-    
+
     template <int SIZE>
     void as (unsigned char (&array)[SIZE]) const
     {
@@ -254,12 +263,14 @@ class make_vector_mref
     {
       return data() + this->size();
     }
-    
-    reverse_iterator rbegin() const {
+
+    reverse_iterator rbegin() const
+    {
       return reverse_iterator(end());
     }
-    
-    reverse_iterator rend() const {
+
+    reverse_iterator rend() const
+    {
       return reverse_iterator(begin());
     }
 
@@ -349,8 +360,6 @@ class make_vector_mref
                      ptr+ v.array_length());
       }
     }
-
-
 
   private:
     make_vector_mref& operator = (const make_vector_mref&);

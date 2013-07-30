@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
-  uint32_cref field1 = f1.static_cast_as<uint32_cref>();
+  uint32_cref field1(f1);
   BOOST_CHECK_EQUAL(field1.value(),                  1);
 
   field_cref f2 = msg.const_field(1);
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   BOOST_CHECK_EQUAL(f2.field_type(), field_type_uint32);
   BOOST_CHECK_EQUAL(f2.optional(),               false);
 
-  uint32_cref field2 = f2.static_cast_as<uint32_cref>();
+  uint32_cref field2(f2);
   BOOST_CHECK_EQUAL(field2.value(),                  2);
 
   field_cref f3 = msg.const_field(2);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   BOOST_CHECK_EQUAL(f3.field_type(), field_type_uint32);
   BOOST_CHECK_EQUAL(f3.optional(),               false);
 
-  uint32_cref field3 = f3.static_cast_as<uint32_cref>();
+  uint32_cref field3(f3);
   BOOST_CHECK_EQUAL(field3.value(),                  3);
 }
 
@@ -134,14 +134,14 @@ BOOST_AUTO_TEST_CASE(group_test)
   BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
-  uint32_cref field1 = f1.static_cast_as<uint32_cref>();
+  uint32_cref field1(f1);
   BOOST_CHECK_EQUAL(field1.value(),                 1);
 
   field_cref f2 = msg.const_field(1);
   BOOST_CHECK_EQUAL(f2.field_type(), field_type_group);
   BOOST_CHECK_EQUAL(f2.optional(),               true);
 
-  group_cref field2 = f2.static_cast_as<group_cref>();
+  group_cref field2(f2);
   BOOST_CHECK_EQUAL(field2.fields_count(),          2);
   {
     field_cref sub_f0 = field2.const_field(0);
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(group_test)
     BOOST_CHECK_EQUAL(sub_f0.field_type(), field_type_uint32);
     BOOST_CHECK_EQUAL(sub_f0.optional(),               false);
 
-    uint32_cref sf0 = sub_f0.static_cast_as<uint32_cref>();
+    uint32_cref sf0(sub_f0);
     BOOST_CHECK_EQUAL(sf0.value(),                         2);
 
     field_cref sub_f1 = field2.const_field(1);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(group_test)
     BOOST_CHECK_EQUAL(sub_f1.field_type(), field_type_uint32);
     BOOST_CHECK_EQUAL(sub_f1.optional(),               false);
 
-    uint32_cref sf1 = sub_f1.static_cast_as<uint32_cref>();
+    uint32_cref sf1(sub_f1);
     BOOST_CHECK_EQUAL(sf1.value(),                         3);
   }
 }
@@ -206,14 +206,14 @@ BOOST_AUTO_TEST_CASE(sequence_test)
   BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
-  uint32_cref field1 = f1.static_cast_as<uint32_cref>();
+  uint32_cref field1(f1);
   BOOST_CHECK_EQUAL(field1.value(),                    1);
 
   field_cref f2 = msg.const_field(1);
   BOOST_CHECK_EQUAL(f2.field_type(), field_type_sequence);
   BOOST_CHECK_EQUAL(f2.optional(),                  true);
 
-  sequence_cref seq_field = f2.static_cast_as<sequence_cref>();
+  sequence_cref seq_field(f2);
   BOOST_CHECK_EQUAL(seq_field.size(),                  2);
 
   {
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(sequence_test)
       BOOST_CHECK_EQUAL(sub_f0.field_type(), field_type_uint32);
       BOOST_CHECK_EQUAL(sub_f0.optional(),               false);
 
-      uint32_cref sf0 = sub_f0.static_cast_as<uint32_cref>();
+      uint32_cref sf0(sub_f0);
       BOOST_CHECK_EQUAL(sf0.value(),                         2);
 
       field_cref sub_f1 = elem0.const_field(1);
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(sequence_test)
       BOOST_CHECK_EQUAL(sub_f1.field_type(), field_type_uint32);
       BOOST_CHECK_EQUAL(sub_f1.optional(),               false);
 
-      uint32_cref sf1 = sub_f1.static_cast_as<uint32_cref>();
+      uint32_cref sf1(sub_f1);
       BOOST_CHECK_EQUAL(sf1.value(),                         3);
     }
 
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(sequence_test)
       BOOST_CHECK_EQUAL(sub_f0.field_type(), field_type_uint32);
       BOOST_CHECK_EQUAL(sub_f0.optional(),               false);
 
-      uint32_cref sf0 = sub_f0.static_cast_as<uint32_cref>();
+      uint32_cref sf0(sub_f0);
       BOOST_CHECK_EQUAL(sf0.value(),                         0);
 
       field_cref sub_f1 = elem1.const_field(1);
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(sequence_test)
       BOOST_CHECK_EQUAL(sub_f1.field_type(), field_type_uint32);
       BOOST_CHECK_EQUAL(sub_f1.optional(),               false);
 
-      uint32_cref sf1 = sub_f1.static_cast_as<uint32_cref>();
+      uint32_cref sf1(sub_f1);
       BOOST_CHECK_EQUAL(sf1.value(),                         1);
     }
   }
@@ -302,13 +302,13 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
   BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
-  uint32_cref field1 = f1.static_cast_as<uint32_cref>();
+  uint32_cref field1(f1);
   BOOST_CHECK_EQUAL(field1.value(),                    1);
 
   field_cref f2 = msg.const_field(1);
   BOOST_CHECK_EQUAL(f2.field_type(), field_type_template);
 
-  message_cref field2 = f2.static_cast_as<message_cref>();
+  message_cref field2(f2);
   BOOST_CHECK_EQUAL(field2.fields_count(),             2);
   {
     field_cref sub_f0 = field2.const_field(0);
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
     BOOST_CHECK_EQUAL(sub_f0.field_type(), field_type_uint32);
     BOOST_CHECK_EQUAL(sub_f0.optional(),               false);
 
-    uint32_cref sf0 = sub_f0.static_cast_as<uint32_cref>();
+    uint32_cref sf0(sub_f0);
     BOOST_CHECK_EQUAL(sf0.value(),                         2);
 
     field_cref sub_f1 = field2.const_field(1);
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
     BOOST_CHECK_EQUAL(sub_f1.field_type(), field_type_uint32);
     BOOST_CHECK_EQUAL(sub_f1.optional(),               false);
 
-    uint32_cref sf1 = sub_f1.static_cast_as<uint32_cref>();
+    uint32_cref sf1(sub_f1);
     BOOST_CHECK_EQUAL(sf1.value(),                         3);
   }
 }
@@ -371,13 +371,14 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
   BOOST_CHECK_EQUAL(f1.optional(),               false);
 
 
-  uint32_cref field1 = f1.static_cast_as<uint32_cref>();
+  uint32_cref field1(f1);
   BOOST_CHECK_EQUAL(field1.value(),                       1);
 
   field_cref f2 = msg.const_field(1);
   BOOST_CHECK_EQUAL(f2.field_type(), field_type_templateref);
 
-  message_cref field2 = f2.static_cast_as<dynamic_cref>().static_cast_as<message_cref>();
+  message_cref field2 =static_cast<message_cref>(f2); 
+  
   BOOST_CHECK_EQUAL(field2.fields_count(),                2);
   {
     field_cref sub_f0 = field2.const_field(0);
@@ -386,7 +387,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
     BOOST_CHECK_EQUAL(sub_f0.field_type(), field_type_uint32);
     BOOST_CHECK_EQUAL(sub_f0.optional(),               false);
 
-    uint32_cref sf0 = sub_f0.static_cast_as<uint32_cref>();
+    uint32_cref sf0(sub_f0);
     BOOST_CHECK_EQUAL(sf0.value(),                         2);
 
     field_cref sub_f1 = field2.const_field(1);
@@ -394,7 +395,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
     BOOST_CHECK_EQUAL(sub_f1.field_type(), field_type_uint32);
     BOOST_CHECK_EQUAL(sub_f1.optional(),               false);
 
-    uint32_cref sf1 = sub_f1.static_cast_as<uint32_cref>();
+    uint32_cref sf1(sub_f1);
     BOOST_CHECK_EQUAL(sf1.value(),                         3);
   }
 }
@@ -436,26 +437,26 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
     message_cref msg2 = coder.decode(first, last);
     // msg2 should have the same value of meg1
 
-    uint32_cref field1 = msg2.const_field(0).static_cast_as<uint32_cref>();
+    uint32_cref field1(msg2.const_field(0));
     BOOST_CHECK_EQUAL(field1.value(), 1);
 
-    uint32_cref field2 = msg2.const_field(1).static_cast_as<uint32_cref>();
+    uint32_cref field2(msg2.const_field(1));
     BOOST_CHECK_EQUAL(field2.value(), 2);
 
-    uint32_cref field3 = msg2.const_field(2).static_cast_as<uint32_cref>();
+    uint32_cref field3(msg2.const_field(2));
     BOOST_CHECK_EQUAL(field3.value(), 3);
   }
   {
     message_cref msg3 = coder.decode(first, last, true);
     // decoding with reset, all values should be defualts
 
-    uint32_cref field1 = msg3.const_field(0).static_cast_as<uint32_cref>();
+    uint32_cref field1(msg3.const_field(0));
     BOOST_CHECK_EQUAL(field1.value(), 11);
 
-    uint32_cref field2 = msg3.const_field(1).static_cast_as<uint32_cref>();
+    uint32_cref field2(msg3.const_field(1));
     BOOST_CHECK_EQUAL(field2.value(), 12);
 
-    uint32_cref field3 = msg3.const_field(2).static_cast_as<uint32_cref>();
+    uint32_cref field3(msg3.const_field(2));
     BOOST_CHECK_EQUAL(field3.value(), 13);
   }
 }
@@ -498,13 +499,13 @@ BOOST_AUTO_TEST_CASE(auto_reset_test)
     message_cref msg2 = coder.decode(first, last, true);
     // decoding with reset, all values should be defualts
 
-    uint32_cref field1 = msg2.const_field(0).static_cast_as<uint32_cref>();
+    uint32_cref field1(msg2.const_field(0));
     BOOST_CHECK_EQUAL(field1.value(), 11);
 
-    uint32_cref field2 = msg2.const_field(1).static_cast_as<uint32_cref>();
+    uint32_cref field2(msg2.const_field(1));
     BOOST_CHECK_EQUAL(field2.value(), 12);
 
-    uint32_cref field3 = msg2.const_field(2).static_cast_as<uint32_cref>();
+    uint32_cref field3(msg2.const_field(2));
     BOOST_CHECK_EQUAL(field3.value(), 13);
   }
 }
@@ -618,14 +619,14 @@ BOOST_AUTO_TEST_CASE(allocator_decode_test)
     BOOST_CHECK_EQUAL(alloc.deallocate_called_count_, 0);
     BOOST_CHECK_EQUAL(alloc.reset_called_count_,      1);
 
-    ascii_string_cref field1 = msg1.const_field(0).static_cast_as<ascii_string_cref>();
+    ascii_string_cref field1(msg1.const_field(0));
     BOOST_CHECK_PREDICATE(str_equal, (field1.c_str())("A"));
 
-    sequence_cref field2 = msg1.const_field(1).static_cast_as<sequence_cref>();
+    sequence_cref field2(msg1.const_field(1));
     BOOST_CHECK_EQUAL(field2.size(), 1);
 
-    BOOST_CHECK_PREDICATE(str_equal, (field2[0].const_field(0).static_cast_as<ascii_string_cref>().c_str())("B"));
-    BOOST_CHECK_PREDICATE(str_equal, (field2[0].const_field(1).static_cast_as<ascii_string_cref>().c_str())("C"));
+    BOOST_CHECK_PREDICATE(str_equal, (ascii_string_cref(field2[0].const_field(0)).c_str())("B"));
+    BOOST_CHECK_PREDICATE(str_equal, (ascii_string_cref(field2[0].const_field(1)).c_str())("C"));
   }
 
   {
@@ -635,17 +636,17 @@ BOOST_AUTO_TEST_CASE(allocator_decode_test)
     BOOST_CHECK_EQUAL(alloc.deallocate_called_count_,  0);
     BOOST_CHECK_EQUAL(alloc.reset_called_count_,       2);
 
-    ascii_string_cref field1 = msg2.const_field(0).static_cast_as<ascii_string_cref>();
+    ascii_string_cref field1(msg2.const_field(0));
     BOOST_CHECK_PREDICATE(str_equal, (field1.c_str())("Q"));
 
-    sequence_cref field2 = msg2.const_field(1).static_cast_as<sequence_cref>();
+    sequence_cref field2(msg2.const_field(1));
     BOOST_CHECK_EQUAL(field2.size(), 2);
 
-    BOOST_CHECK_PREDICATE(str_equal, (field2[0].const_field(0).static_cast_as<ascii_string_cref>().c_str())("R"));
-    BOOST_CHECK_PREDICATE(str_equal, (field2[0].const_field(1).static_cast_as<ascii_string_cref>().c_str())("S"));
+    BOOST_CHECK_PREDICATE(str_equal, (ascii_string_cref(field2[0].const_field(0)).c_str())("R"));
+    BOOST_CHECK_PREDICATE(str_equal, (ascii_string_cref(field2[0].const_field(1)).c_str())("S"));
 
-    BOOST_CHECK_PREDICATE(str_equal, (field2[1].const_field(0).static_cast_as<ascii_string_cref>().c_str())("P"));
-    BOOST_CHECK_PREDICATE(str_equal, (field2[1].const_field(1).static_cast_as<ascii_string_cref>().c_str())("Q"));
+    BOOST_CHECK_PREDICATE(str_equal, (ascii_string_cref(field2[1].const_field(0)).c_str())("P"));
+    BOOST_CHECK_PREDICATE(str_equal, (ascii_string_cref(field2[1].const_field(1)).c_str())("Q"));
   }
 }
 

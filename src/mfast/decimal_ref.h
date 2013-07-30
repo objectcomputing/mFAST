@@ -51,7 +51,7 @@ class exponent_cref
     {
     }
 
-    exponent_cref(const value_storage*           storage,
+    exponent_cref(const value_storage*     storage,
                   const field_instruction* instruction)
       : field_cref(storage, instruction)
     {
@@ -66,8 +66,8 @@ class exponent_cref
     {
       return static_cast<instruction_cptr>(instruction_);
     }
-    
-    bool is_initial_value() const 
+
+    bool is_initial_value() const
     {
       return present() && value() == this->instruction()->exponent_initial_value();
     }
@@ -88,13 +88,14 @@ class exponent_cref
   private:
 
     friend class mfast::detail::codec_helper;
-    
+
     void save_to(value_storage& v) const
     {
       v.of_decimal.exponent_ = value();
       v.defined(true);
       v.present(this->present());
     }
+
 };
 
 
@@ -120,6 +121,11 @@ class decimal_cref
     {
     }
 
+    explicit decimal_cref(const field_cref& other)
+      : field_cref(other)
+    {
+    }
+
     uint32_t id() const
     {
       return instruction_->id();
@@ -134,15 +140,14 @@ class decimal_cref
     {
       return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
     }
-    
-    bool is_initial_value() const 
+
+    bool is_initial_value() const
     {
-       return present() &&
-              mantissa() == instruction()->mantissa_initial_value() && 
-              exponent() == instruction()->exponent_initial_value();
-      
+      return present() &&
+             mantissa() == instruction()->mantissa_initial_value() &&
+             exponent() == instruction()->exponent_initial_value();
+
     }
-    
 
     decimal value() const
     {
@@ -178,7 +183,7 @@ class decimal_cref
     {
       return int64_cref(this->storage(), this->instruction()->mantissa_instruction());
     }
-    
+
   private:
     friend class mfast::detail::codec_helper;
 
@@ -189,6 +194,7 @@ class decimal_cref
       v.defined(true);
       v.present(this->present());
     }
+
 };
 
 inline bool operator == (const decimal_cref& lhs, const decimal_cref& rhs)
@@ -289,7 +295,7 @@ class decimal_mref
     {
     }
 
-    decimal_mref(allocator*       alloc,
+    decimal_mref(allocator_type*  alloc,
                  value_storage*   storage,
                  instruction_cptr instruction)
       : base_type(alloc, storage, instruction)
@@ -300,7 +306,12 @@ class decimal_mref
       : base_type(other)
     {
     }
-    
+
+    explicit decimal_mref(const field_mref_base& other)
+      : base_type(other)
+    {
+    }
+
     void as (const decimal_cref& cref) const
     {
       if (cref.absent()) {
@@ -310,7 +321,6 @@ class decimal_mref
         as(cref.mantissa(), cref.exponent());
       }
     }
-    
 
     int64_t mantissa() const
     {

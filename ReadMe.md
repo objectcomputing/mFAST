@@ -1,11 +1,11 @@
 Introduction
 ============
 
-mFast is an open source C++ implementation of FAST decoder. The FAST protocol (FIX Adapted for STreaming) is a technology standard developed
+mFast is an open source C++ implementation of FAST encoder. The FAST protocol (FIX Adapted for STreaming) is a technology standard developed
 by FIX Protocol Ltd., specifically aimed at optimizing data representation on the network. It is used to support high-throughput, low latency
 data communications between financial institutions.
 
-mFAST was designed from the ground to provide an easy to use and yet efficient FAST decoder. Based on my initial experience to
+mFAST was designed from the ground to provide an easy to use and yet efficient FAST encoder. Based on my initial experience to
 QuickFAST[www.quickfast.org], I saw there were some room for improvement. However,  the
 improvement couldn't be achieved without an architectural redesign. Therefore, I took it as a personal project and
 worked on it mostly at night and weekends. After two and a half months of development, I am proudly to present this work.
@@ -22,13 +22,13 @@ If you are familiar with CORBA or DDS, this process is tantamount to the proxy/s
 
 The following code snippet shows how to use the generated types:
 
-    // the decoder setup steps are omitted
+    // the encoder setup steps are omitted
     const char* first = buf;
     const char* last = buf + buf_len;
-    mfast::message_cref message = decoder.decode(first, last);
+    mfast::message_cref message = encoder.decode(first, last);
     if (message.id() == MarketData_cref::the_id)
     {
-        MarketData_cref data = message.cref().static_cast_as<MarketData_cref>();
+        MarketData_cref data = static_cast<MarketData_cref>(message.cref());
         std::string versionID = data.get_ApplVerID();
         uint32_t seq_no = data.get_MsgSeqNum().value();
 
@@ -105,19 +105,19 @@ to access a message in a generic way.
     //////////////////////////////////////////
     // This is how the above visitor is used
     //////////////////////////////////////////
-    message_cref message = decoder.decoder(stream);
+    message_cref message = encoder.encoder(stream);
     message_printer printer;
     message.accept_accessor(printer);
 
 Lower external dependencies
 ---------------------------------------
-Beside C++ standard library, the core mFAST decoder uses header only boost library to provide platform
+Beside C++ standard library, the core mFAST encoder uses header only boost library to provide platform
 portability. In addition, it uses TinyXML2 for XML parsing. However, TinyXML2 has only one source and one header file and it is
 statically linked to mFAST applications.
 
 Smaller memory footprint
 -----------------------------------
-The core of mFAST is an unique and very compact application type system. The decoder is designed as a visitor for writing values
+The core of mFAST is an unique and very compact application type system. The encoder is designed as a visitor for writing values
 to an instance of application type. This design makes the system very modular in terms of functionality. Even though mFAST does
 not have the encoder yet. It would be implemented as another visitor for the message types and won't be linked to the executable unless
 used.
@@ -125,13 +125,13 @@ used.
 To see how small mFAST application is compared to that of QuickFAST. I implemented two test programs for decode a FAST data stream
 in a file using mFAST. One of them
 (named fixed_template_test) used  mFAST type generator to produces application types on a sample FAST specification and then used
-the generated type to drive the decoder. The second test program (generic_template_test) directly parsed a FAST specification and
-used the parsed information to drive the decoder without the extra code generation step.
+the generated type to drive the encoder. The second test program (generic_template_test) directly parsed a FAST specification and
+used the parsed information to drive the encoder without the extra code generation step.
 
 On the QuickFAST side, I used the PerformanceTest located in the QuickFAST example directory for comparison.
 Like mFAST generic_template_test, the QuickFAST PerformanceTest program parsed a FAST specification on the fly and decoded an input data
 stream from a file. However, it did not assemble the decoded messages. Instead, it notified the application via a callback object. Whenever
-there's a new data field is processed, the QuickFAST decoder invoked the callback object to provide the name of the data field and the decoded value.
+there's a new data field is processed, the QuickFAST encoder invoked the callback object to provide the name of the data field and the decoded value.
 
 QuickFAST also have a GenericMessageBuilder class which actually build an entire message. In order to provide a functional equivalent program
 to our mFAST counterparts (because both fixed_template_test and generic_template_test actually build entire messages), I modified the original PerformanceTest
@@ -169,7 +169,7 @@ than mFAST.
 
 Conclusion
 =============
-Even though mFAST is only a decoder at current stage, it already provides better usability, smaller
+Even though mFAST is only a encoder at current stage, it already provides better usability, smaller
 memory footprint and superior runtime efficiency than QuickFAST. However there are still some
 area that needs to be done :
 

@@ -38,6 +38,27 @@ field_instruction::copy_value(const value_storage& src,
   dest.of_array.capacity_ = 0;
 }
 
+const char*
+field_instruction::field_type_name() const
+{
+  static const char* names [] = {
+    "field_type_int32",
+    "field_type_uint32",
+    "field_type_int64",
+    "field_type_uint64",
+    "field_type_decimal",
+    "field_type_exponent",
+    "field_type_ascii_string",
+    "field_type_unicode_string",
+    "field_type_byte_vector",
+    "field_type_group",
+    "field_type_sequence",
+    "field_type_templateref",
+    "field_type_template"
+  };
+  return names[this->field_type()];
+}
+
 //////////////////////////////////////////////////////
 
 void integer_field_instruction_base::construct_value(value_storage& storage,

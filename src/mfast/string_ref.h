@@ -56,10 +56,15 @@ class string_cref
     {
     }
 
+    explicit string_cref(const field_cref& other)
+      : vector_cref<char, IsAscii>(other)
+    {
+    }
+
 #ifdef BOOST_HAS_RVALUE_REFS
     std::string&& value() const
 #else
-    std::string value() const  
+    std::string value() const
 #endif
     {
       return std::string(this->data(), this->size());
@@ -255,7 +260,12 @@ class string_mref
       : base_type(other)
     {
     }
-    
+
+    explicit string_mref(const field_mref_base& other)
+      : base_type(other)
+    {
+    }
+
     void as (const string_cref<IsAscii>& s)
     {
       if (s.absent())
@@ -273,13 +283,13 @@ class string_mref
     {
       this->assign(s.begin(), s.end());
     }
-    
+
     string_mref& operator = (const char* s)
     {
       this->assign(s, s+strlen(s));
       return *this;
     }
-    
+
     string_mref& operator = (const std::string& s)
     {
       this->assign(s.begin(), s.end());
@@ -341,6 +351,7 @@ class string_mref
     {
       return this->append(c);
     }
+
 };
 
 typedef string_mref<true> ascii_string_mref;

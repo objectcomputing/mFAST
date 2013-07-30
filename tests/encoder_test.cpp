@@ -126,9 +126,10 @@ BOOST_AUTO_TEST_CASE(group_test)
 
   test_case.set_template_id(0);
   message_mref msg = test_case.message();
+  
 
   msg.mutable_field(0).as(1);
-  group_mref grp = msg.mutable_field(1).static_cast_as<group_mref>();
+  group_mref grp(msg.mutable_field(1));
   grp.mutable_field(0).as(2);
   grp.mutable_field(1).as(3);
 
@@ -153,7 +154,7 @@ BOOST_AUTO_TEST_CASE(sequence_test)
   test_case.set_template_id(0);
   message_mref msg = test_case.message();
   msg.mutable_field(0).as(1);
-  sequence_mref seq = msg.mutable_field(1).static_cast_as<sequence_mref>();
+  sequence_mref seq(msg.mutable_field(1));
   seq.resize(2);
   seq[0].mutable_field(0).as(2);
   seq[0].mutable_field(1).as(3);
@@ -188,7 +189,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
   message_mref msg = test_case.message();
   msg.mutable_field(0).as(1);
 
-  message_mref nested = msg.mutable_field(1).dynamic_cast_as<message_mref>();
+  message_mref nested(msg.mutable_field(1));
   nested.mutable_field(0).as(2);
   nested.mutable_field(1).as(3);
 
@@ -217,10 +218,10 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
   message_mref msg = test_case.message();
   msg.mutable_field(0).as(1);
 
-  message_mref nested =  msg.mutable_field(1).static_cast_as<dynamic_mref>().rebind(test_case.template_with_id(1));
+  message_mref nested = dynamic_mref(msg.mutable_field(1)).rebind(test_case.template_with_id(1));
   nested.mutable_field(0).as(2);
   nested.mutable_field(1).as(3);
-
+  
   BOOST_CHECK(test_case.assert_result(
                 "\xE0\x82\x81\xF0\x81\x82\x83"
                 ));

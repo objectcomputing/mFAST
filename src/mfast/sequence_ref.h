@@ -68,18 +68,6 @@ class sequence_element_cref
       return instruction_;
     }
 
-    template <typename T>
-    T static_cast_as() const
-    {
-      return T(storage_, static_cast<typename T::instruction_cptr>(instruction_));
-    }
-
-    template <typename T>
-    T dynamic_cast_as() const
-    {
-      return T(storage_, dynamic_cast<typename T::instruction_cptr>(instruction_));
-    }
-
   protected:
     sequence_element_cref& operator= (const sequence_element_cref&);
     const value_storage* field_storage(size_t index) const;
@@ -110,6 +98,11 @@ class make_sequence_cref
     make_sequence_cref(const value_storage* storage,
                        instruction_cptr     instruction)
       : field_cref(storage, instruction)
+    {
+    }
+
+    explicit make_sequence_cref(const field_cref& other)
+      : field_cref(other)
     {
     }
 
@@ -202,6 +195,11 @@ class make_sequence_mref
     make_sequence_mref(value_storage* storage,
                        allocator*     alloc)
       : base_type(storage,alloc)
+    {
+    }
+
+    explicit make_sequence_mref(const field_mref_base& other)
+      : base_type(other)
     {
     }
 
