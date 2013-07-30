@@ -26,7 +26,6 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/message_ref.h"
 #include "mfast/dynamic_message_ref.h"
-#include "mfast/field_storage_helper.h"
 
 namespace mfast {
 

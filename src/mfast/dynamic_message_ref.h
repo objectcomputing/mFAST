@@ -131,12 +131,11 @@ class dynamic_message_mref
       const_cast<const field_instruction*&>(instruction_) = inst;
     }
 
-  private:
     value_storage* storage() const
     {
       return const_cast<value_storage*>(storage_);
     }
-
+  private:
     allocator_type*       alloc_;
 };
 

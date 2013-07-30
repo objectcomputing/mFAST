@@ -110,14 +110,13 @@ class field_cref
     }
 
   protected:
-
-    field_cref& operator = (const field_cref&);
-
-
+    
     const value_storage* storage () const
     {
       return storage_;
     }
+
+    field_cref& operator = (const field_cref&);
 
     const field_instruction* instruction_;
     const value_storage* storage_;
@@ -192,8 +191,10 @@ class make_field_mref
     {
       return alloc_;
     }
-
+    
+ 
   protected:
+
     value_storage* storage () const
     {
       return const_cast<value_storage*>(this->storage_);
@@ -221,25 +222,43 @@ template <typename T>
 struct mref_of;
 
 
-
-
 namespace detail {
 
-template <typename T>
-struct remove_const_reference;
-
-template <typename T>
-struct remove_const_reference<const T&>
+class field_storage_helper
 {
-  typedef T type;
+  public:
+    static value_storage& storage_of(const field_cref& ref)
+    {
+      return *const_cast<value_storage*>(ref.storage());
+    }
+
+    static value_storage* storage_ptr_of(const field_cref& ref)
+    {
+      return const_cast<value_storage*>(ref.storage());
+    }
 };
 
-template <typename T>
-struct remove_const_reference<T&>
-{
-  typedef T type;
-};
+}
 
+
+template <typename T1, typename T2>
+typename boost::disable_if<typename T1::is_mutable, T1>::type
+dynamic_cast_as(const T2& ref) 
+{
+  typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
+  if (instruction == 0)
+    throw std::bad_cast();
+  return T1(detail::field_storage_helper::storage_ptr_of(ref), instruction);
+}
+
+template <typename T1, typename T2>
+typename boost::enable_if<typename T1::is_mutable, T1>::type
+dynamic_cast_as(const T2& ref)
+{
+  typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
+  if (instruction == 0)
+    throw std::bad_cast();
+  return T1(ref.allocator(), detail::field_storage_helper::storage_ptr_of(ref), instruction);
 }
 
 namespace detail {

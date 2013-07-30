@@ -19,7 +19,6 @@
 #ifndef CODEC_HELPER_H_QI11HSL8
 #define CODEC_HELPER_H_QI11HSL8
 
-#include "field_storage_helper.h"
 #include "string_ref.h"
 #include "exceptions.h"
 #include <boost/type_traits.hpp>
