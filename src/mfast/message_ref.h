@@ -48,7 +48,6 @@ class message_cref
                  instruction_cptr     instruction);
 
 
-    // explicit message_cref(const dynamic_cref& cref);
     explicit message_cref(const field_cref& cref);
 
     uint32_t id() const;
@@ -74,8 +73,9 @@ class message_cref
     const field_instruction* subinstruction(size_t index) const;
 
     template <typename FieldAccesor>
-    void accept_accessor(FieldAccesor&);
+    void accept_accessor(FieldAccesor&) const;
 
+    const value_storage* storage() const;
   protected:
 
 
@@ -108,7 +108,7 @@ class make_message_mref
     explicit make_message_mref(const field_mref_base& other);
 
     template <typename FieldMutator>
-    void accept_mutator(FieldMutator&);
+    void accept_mutator(FieldMutator&) const;
 };
 
 typedef make_message_mref<message_cref> message_mref;
@@ -286,6 +286,13 @@ inline const field_instruction*
 message_cref::subinstruction(size_t index) const
 {
   return instruction()->subinstruction(index);
+}
+
+
+inline const value_storage* 
+message_cref::storage() const
+{
+  return storage_;
 }
 
 ///////////////////////////////////////////////////////

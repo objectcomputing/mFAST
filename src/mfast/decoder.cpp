@@ -108,8 +108,8 @@ struct decoder_impl
   void post_visit(sequence_mref&);
   bool pre_visit(std::size_t /* index */,  sequence_element_ref_type& mref);
   void post_visit(std::size_t /* index */, sequence_element_ref_type& mref);
-  bool pre_visit(message_mref&);
-  void post_visit(message_mref&);
+  bool pre_visit(const message_mref&);
+  void post_visit(const message_mref&);
   bool pre_visit(dynamic_ref_type&);
   void post_visit(dynamic_ref_type&);
 
@@ -248,7 +248,7 @@ decoder_impl::post_visit(std::size_t /* index */, decoder_impl::sequence_element
 }
 
 inline bool
-decoder_impl::pre_visit(message_mref& mref)
+decoder_impl::pre_visit(const message_mref& mref)
 {
   mref.ensure_valid();
   debug_ << "decoding template " << mref.name()  << " ...\n";
@@ -257,7 +257,7 @@ decoder_impl::pre_visit(message_mref& mref)
 }
 
 inline void
-decoder_impl::post_visit(message_mref&)
+decoder_impl::post_visit(const message_mref&)
 {
 }
 

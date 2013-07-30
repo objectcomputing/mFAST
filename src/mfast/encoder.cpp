@@ -109,8 +109,8 @@ struct encoder_impl
   void post_visit(sequence_cref&);
   bool pre_visit(std::size_t /* index */,  sequence_element_ref_type& cref);
   void post_visit(std::size_t /* index */, sequence_element_ref_type& cref);
-  bool pre_visit(message_cref&);
-  void post_visit(message_cref&);
+  bool pre_visit(const message_cref&);
+  void post_visit(const message_cref&);
   bool pre_visit(dynamic_ref_type&);
   void post_visit(dynamic_ref_type&);
 
@@ -218,13 +218,13 @@ encoder_impl::post_visit(std::size_t /* index */, encoder_impl::sequence_element
 }
 
 inline bool
-encoder_impl::pre_visit(message_cref&)
+encoder_impl::pre_visit(const message_cref&)
 {
   return true;
 }
 
 inline void
-encoder_impl::post_visit(message_cref&)
+encoder_impl::post_visit(const message_cref&)
 {
 }
 

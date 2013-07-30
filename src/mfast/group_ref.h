@@ -77,7 +77,7 @@ class group_cref
     }
 
     template <typename FieldAccesor>
-    void accept_accessor(FieldAccesor&);
+    void accept_accessor(FieldAccesor&) const;
 
   protected:
     const value_storage* field_storage(size_t index) const;
@@ -134,7 +134,7 @@ class make_group_mref
 
 
     template <typename FieldMutator>
-    void accept_mutator(FieldMutator&);
+    void accept_mutator(FieldMutator&) const;
 
   protected:
     value_storage* field_storage(size_t index) const;
