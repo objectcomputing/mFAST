@@ -25,7 +25,7 @@
 #include "mfast/group_ref.h"
 #include "mfast/sequence_ref.h"
 #include "mfast/message_ref.h"
-#include "mfast/dynamic_ref.h"
+#include "mfast/dynamic_message_ref.h"
 #include "mfast/field_storage_helper.h"
 
 namespace mfast {
@@ -37,8 +37,8 @@ struct field_accessor_base
   typedef mfast::sequence_cref sequence_ref_type;
   typedef mfast::sequence_element_cref sequence_element_ref_type;
   typedef mfast::message_cref message_ref_type;
-  typedef mfast::dynamic_cref dynamic_ref_type;
-  
+  typedef mfast::dynamic_message_cref dynamic_message_ref_type;
+
 };
 
 template <class FieldAccessor>
@@ -53,12 +53,12 @@ class field_accessor_adaptor
   }
 
   public:
-    
+
     typedef typename FieldAccessor::group_ref_type group_ref_type;
     typedef typename FieldAccessor::sequence_ref_type sequence_ref_type;
     typedef typename FieldAccessor::sequence_element_ref_type sequence_element_ref_type;
     typedef typename FieldAccessor::message_ref_type message_ref_type;
-    typedef typename FieldAccessor::dynamic_ref_type dynamic_ref_type;
+    typedef typename FieldAccessor::dynamic_message_ref_type dynamic_message_ref_type;
 
     field_accessor_adaptor(FieldAccessor& accssor)
       : accssor_(accssor)
@@ -165,19 +165,19 @@ class field_accessor_adaptor
     }
 
     virtual void visit(const templateref_instruction* inst, void* storage)
-    {      
+    {
       value_storage* v = static_cast<value_storage*>(storage);
-      dynamic_ref_type dyn_cref(v, inst);
+      dynamic_message_ref_type dyn_cref(v, inst);
       if (accssor_.pre_visit(dyn_cref)) {
         mfast::message_cref ref(v, dyn_cref.instruction());
-        
+
         for (std::size_t i = 0; i < ref.fields_count(); ++i) {
           field_cref r(ref.const_field(i));
           if (r.present()) {
             r.instruction()->accept(*this, &storage_of(r));
           }
         }
-        
+
         accssor_.post_visit(dyn_cref);
       }
     }
@@ -191,7 +191,7 @@ struct field_mutator_base
   typedef mfast::sequence_mref sequence_ref_type;
   typedef mfast::sequence_element_mref sequence_element_ref_type;
   typedef mfast::message_mref message_ref_type;
-  typedef mfast::dynamic_mref dynamic_ref_type;
+  typedef mfast::dynamic_message_mref dynamic_message_ref_type;
 };
 
 
@@ -232,12 +232,12 @@ class field_mutator_adaptor
   FieldMutator& mutator_;
 
   public:
-    
+
     typedef typename FieldMutator::group_ref_type group_ref_type;
     typedef typename FieldMutator::sequence_ref_type sequence_ref_type;
     typedef typename FieldMutator::sequence_element_ref_type sequence_element_ref_type;
     typedef typename FieldMutator::message_ref_type message_ref_type;
-    typedef typename FieldMutator::dynamic_ref_type dynamic_ref_type;
+    typedef typename FieldMutator::dynamic_message_ref_type dynamic_message_ref_type;
 
     field_mutator_adaptor(FieldMutator& mutator, allocator* alloc)
       : alloc_(alloc)
@@ -342,7 +342,7 @@ class field_mutator_adaptor
     virtual void visit(const templateref_instruction* inst, void* storage)
     {
       value_storage* v = static_cast<value_storage*>(storage);
-      dynamic_ref_type dyn_mref(alloc_, v, inst);
+      dynamic_message_ref_type dyn_mref(alloc_, v, inst);
       if (mutator_.pre_visit(dyn_mref)) {
         message_mref mref(alloc_, v, v->of_templateref.of_instruction.instruction_);
         for (std::size_t i = 0; i < mref.fields_count(); ++i) {

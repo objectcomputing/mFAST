@@ -362,8 +362,8 @@ bool FastXML2Header::VisitTemplateRef(const XMLElement & element, const std::str
     header_mref_ << indent << qulified_name << "_mref set_" << name_attr << "() const;\n";
   }
   else {
-    header_cref_ << indent << "dynamic_cref get_dynamic_ref" << index << "() const;\n";
-    header_mref_ << indent << "dynamic_mref set_dynamic_ref" << index << "() const;\n";
+    header_cref_ << indent << "dynamic_message_cref get_dynamic_message" << index << "() const;\n";
+    header_mref_ << indent << "dynamic_message_mref set_dynamic_message" << index << "() const;\n";
   }
   return true;
 }

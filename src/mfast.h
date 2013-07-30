@@ -25,7 +25,7 @@
 #include <mfast/string_ref.h>
 #include <mfast/sequence_ref.h>
 #include <mfast/message_ref.h>
-#include <mfast/dynamic_ref.h>
+#include <mfast/dynamic_message_ref.h>
 #include <mfast/malloc_allocator.h>
 #include <mfast/field_visitor.h>
 #include <mfast/arena_allocator.h>

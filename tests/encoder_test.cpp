@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
   message_mref msg = test_case.message();
   msg.mutable_field(0).as(1);
 
-  message_mref nested = dynamic_mref(msg.mutable_field(1)).rebind(test_case.template_with_id(1));
+  message_mref nested = dynamic_message_mref(msg.mutable_field(1)).rebind(test_case.template_with_id(1));
   nested.mutable_field(0).as(2);
   nested.mutable_field(1).as(3);
   

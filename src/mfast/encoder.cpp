@@ -81,7 +81,7 @@ struct encoder_impl
 
   typedef cref_mixin<mfast::group_cref> group_ref_type;
   typedef cref_mixin<mfast::sequence_element_cref> sequence_element_ref_type;
-  typedef cref_mixin<mfast::dynamic_cref> dynamic_ref_type;
+  typedef cref_mixin<mfast::dynamic_message_cref> dynamic_message_ref_type;
 
 
   fast_ostream strm_;
@@ -111,8 +111,8 @@ struct encoder_impl
   void post_visit(std::size_t /* index */, sequence_element_ref_type& cref);
   bool pre_visit(const message_cref&);
   void post_visit(const message_cref&);
-  bool pre_visit(dynamic_ref_type&);
-  void post_visit(dynamic_ref_type&);
+  bool pre_visit(dynamic_message_ref_type&);
+  void post_visit(dynamic_message_ref_type&);
 
   template_instruction*  encode_segment_preemble(uint32_t template_id, bool force_reset);
   void encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool force_reset);
@@ -122,7 +122,7 @@ inline
 encoder_impl::encoder_impl(allocator* alloc)
   : strm_(alloc)
   , value_destroyer_(alloc)
-  , active_message_id_(-1)  
+  , active_message_id_(-1)
 {
 }
 
@@ -185,7 +185,7 @@ encoder_impl::pre_visit(sequence_cref& cref)
   value_storage storage;
 
   uint32_mref length_mref(0, &storage, length_instruction);
-  
+
   if (cref.present())
     length_mref.as(cref.size());
   else
@@ -228,41 +228,39 @@ encoder_impl::post_visit(const message_cref&)
 {
 }
 
-
 inline bool
-encoder_impl::pre_visit(encoder_impl::dynamic_ref_type& cref)
+encoder_impl::pre_visit(encoder_impl::dynamic_message_ref_type& cref)
 {
   cref.setup_pmap(this);
-  cref.instruction_ = encode_segment_preemble(cref.instruction()->id(), false); 
+  cref.instruction_ = encode_segment_preemble(cref.instruction()->id(), false);
   return true;
 }
 
 inline void
-encoder_impl::post_visit(encoder_impl::dynamic_ref_type& cref)
+encoder_impl::post_visit(encoder_impl::dynamic_message_ref_type& cref)
 {
   cref.commit_pmap(this);
 }
 
-
-template_instruction* 
+template_instruction*
 encoder_impl::encode_segment_preemble(uint32_t template_id, bool force_reset)
 {
   template_instruction* instruction;
   template_id_map_t::iterator itr = templates_map_.find(template_id);
-  
+
   if (itr != templates_map_.end()) {
     instruction = itr->second;
   }
   else {
     BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id));
   }
-  
+
   if ( force_reset ||  instruction->has_reset_attribute())
     resetter_.reset();
-  
+
   bool need_encode_template_id = (active_message_id_ != template_id);
   current_pmap().set_next_bit(need_encode_template_id);
-  
+
   if (need_encode_template_id)
   {
     active_message_id_ = template_id;
@@ -275,16 +273,16 @@ void
 encoder_impl::encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool force_reset)
 {
   this->strm_.rdbuf(&sb);
-  
+
   encoder_presence_map pmap;
   this->current_ = &pmap;
   pmap.init(&this->strm_, cref.instruction()->pmap_size());
-  
+
   template_instruction* instruction = encode_segment_preemble(cref.id(), force_reset);
-  
-  message_cref message(cref.storage_, instruction); 
+
+  message_cref message(cref.storage_, instruction);
   message.accept_accessor(*this);
-  
+
   pmap.commit();
 }
 
@@ -337,12 +335,12 @@ encoder::encode(const message_cref& message,
   buffer.resize(sb.length());
 }
 
-const template_instruction* 
+const template_instruction*
 encoder::template_with_id(uint32_t id)
 {
   template_instruction* instruction =0;
   template_id_map_t::iterator itr = impl_->templates_map_.find(id);
-  
+
   if (itr != impl_->templates_map_.end()) {
     instruction = itr->second;
   }

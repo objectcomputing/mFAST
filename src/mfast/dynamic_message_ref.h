@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef DYNAMIC_REF_H_X549MWYP
-#define DYNAMIC_REF_H_X549MWYP
+#ifndef DYNAMIC_MESSAGE_REF_H_X549MWYP
+#define DYNAMIC_MESSAGE_REF_H_X549MWYP
 
 #include "mfast/field_instruction.h"
 #include "mfast/field_ref.h"
@@ -27,31 +27,31 @@
 namespace mfast
 {
 
-class null_dynamic_ref
+class null_dynamic_message_ref
   : public virtual boost::exception, public virtual std::exception
 {
   public:
-    null_dynamic_ref()
+    null_dynamic_message_ref()
     {
     }
 
 };
 
 struct encoder_impl;
-class dynamic_cref
+class dynamic_message_cref
   : public field_cref
 {
   public:
     typedef const templateref_instruction* instruction_cptr;
     typedef boost::false_type is_mutable;
 
-    dynamic_cref(const value_storage* storage,
-                 instruction_cptr)
+    dynamic_message_cref(const value_storage* storage,
+                         instruction_cptr)
       : field_cref(storage, storage->of_templateref.of_instruction.instruction_)
     {
     }
 
-    explicit dynamic_cref(const field_cref& other)
+    explicit dynamic_message_cref(const field_cref& other)
       : field_cref(other.storage_, other.storage_->of_templateref.of_instruction.instruction_)
     {
     }
@@ -74,7 +74,7 @@ class dynamic_cref
     const template_instruction* instruction() const
     {
       if (instruction_ == 0) {
-        BOOST_THROW_EXCEPTION(null_dynamic_ref());
+        BOOST_THROW_EXCEPTION(null_dynamic_message_ref());
       }
       return static_cast<const template_instruction*>(instruction_);
     }
@@ -84,23 +84,23 @@ class dynamic_cref
     friend struct encoder_impl;
 };
 
-class dynamic_mref
-  : public dynamic_cref
+class dynamic_message_mref
+  : public dynamic_message_cref
 {
   public:
     typedef boost::true_type is_mutable;
     typedef mfast::allocator allocator_type;
 
-    dynamic_mref(allocator_type*                alloc,
-                 value_storage*                 storage,
-                 dynamic_cref::instruction_cptr inst)
-      : dynamic_cref(storage, inst)
+    dynamic_message_mref(allocator_type*                        alloc,
+                         value_storage*                         storage,
+                         dynamic_message_cref::instruction_cptr inst)
+      : dynamic_message_cref(storage, inst)
       , alloc_(alloc)
     {
     }
 
-    dynamic_mref(const field_mref_base& other)
-      : dynamic_cref(other)
+    dynamic_message_mref(const field_mref_base& other)
+      : dynamic_message_cref(other)
       , alloc_(other.allocator())
     {
     }
@@ -143,4 +143,4 @@ class dynamic_mref
 }
 
 
-#endif /* end of include guard: DYNAMIC_REF_H_X549MWYP */
+#endif /* end of include guard: DYNAMIC_MESSAGE_REF_H_X549MWYP */

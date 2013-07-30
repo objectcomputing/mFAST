@@ -25,7 +25,7 @@
 #include "mfast/allocator.h"
 #include "mfast/field_ref.h"
 #include "mfast/group_ref.h"
-// #include "mfast/dynamic_ref.h"
+// #include "mfast/dynamic_message_ref.h"
 namespace mfast {
 
 // forwared declaration;
@@ -195,7 +195,7 @@ message_cref::message_cref(const value_storage*        storage,
 }
 
 // inline
-// message_cref::message_cref(const dynamic_cref& cref)
+// message_cref::message_cref(const dynamic_message_cref& cref)
 //   : instruction_(static_cast<const template_instruction*>(cref.instruction_))
 //   , storage_(cref.storage_)
 // {

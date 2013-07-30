@@ -124,7 +124,7 @@ class field_cref
 
     friend class mfast::detail::field_storage_helper;
     friend class message_cref;
-    friend class dynamic_cref;
+    friend class dynamic_message_cref;
 };
 
 //////////////////////////////////////////////////////////////////

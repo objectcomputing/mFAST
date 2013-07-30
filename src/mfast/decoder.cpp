@@ -42,13 +42,13 @@ struct decoder_impl
     public:
 
 
-      mref_mixin(allocator*               alloc,
-                 value_storage*           storage,
+      mref_mixin(allocator*                      alloc,
+                 value_storage*                  storage,
                  typename MREF::instruction_cptr inst)
         : MREF(alloc, storage, inst)
       {
       }
-      
+
       template <typename T>
       mref_mixin(T t)
         : MREF(t)
@@ -79,7 +79,7 @@ struct decoder_impl
 
   typedef mref_mixin<mfast::group_mref> group_ref_type;
   typedef mref_mixin<mfast::sequence_element_mref> sequence_element_ref_type;
-  typedef mref_mixin<mfast::dynamic_mref> dynamic_ref_type;
+  typedef mref_mixin<mfast::dynamic_message_mref> dynamic_message_ref_type;
 
   fast_istream strm_;
   dictionary_resetter resetter_;
@@ -110,8 +110,8 @@ struct decoder_impl
   void post_visit(std::size_t /* index */, sequence_element_ref_type& mref);
   bool pre_visit(const message_mref&);
   void post_visit(const message_mref&);
-  bool pre_visit(dynamic_ref_type&);
-  void post_visit(dynamic_ref_type&);
+  bool pre_visit(dynamic_message_ref_type&);
+  void post_visit(dynamic_message_ref_type&);
 
   message_base*  decode_segment(fast_istreambuf& sb);
 };
@@ -262,7 +262,7 @@ decoder_impl::post_visit(const message_mref&)
 }
 
 inline bool
-decoder_impl::pre_visit(decoder_impl::dynamic_ref_type& mref)
+decoder_impl::pre_visit(decoder_impl::dynamic_message_ref_type& mref)
 {
   debug_ << "decoding dynamic templateRef ...\n";
 
@@ -294,7 +294,7 @@ decoder_impl::pre_visit(decoder_impl::dynamic_ref_type& mref)
 }
 
 inline void
-decoder_impl::post_visit(decoder_impl::dynamic_ref_type& mref)
+decoder_impl::post_visit(decoder_impl::dynamic_message_ref_type& mref)
 {
   mref.restore_pmap(this);
 }
@@ -344,7 +344,6 @@ decoder_impl::decode_segment(fast_istreambuf& sb)
   message->ref().accept_mutator(*this);
   return message;
 }
-
 
 decoder::decoder(allocator* alloc)
   : impl_(new decoder_impl)
