@@ -40,8 +40,6 @@ struct decoder_impl
     : public MREF
   {
     public:
-
-
       mref_mixin(allocator*                      alloc,
                  value_storage*                  storage,
                  typename MREF::instruction_cptr inst)
@@ -78,8 +76,20 @@ struct decoder_impl
   };
 
   typedef mref_mixin<mfast::group_mref> group_ref_type;
-  typedef mref_mixin<mfast::sequence_element_mref> sequence_element_ref_type;
   typedef mref_mixin<mfast::dynamic_message_mref> dynamic_message_ref_type;
+  class sequence_element_ref_type
+    : public mref_mixin<mfast::sequence_element_mref>
+  {
+    public:
+      sequence_element_ref_type(const mfast::sequence_element_mref& r)
+        : mref_mixin<mfast::sequence_element_mref>(r)
+      {
+      }
+      
+      std::size_t index;
+  };
+
+
 
   fast_istream strm_;
   dictionary_resetter resetter_;
@@ -106,8 +116,9 @@ struct decoder_impl
   void post_visit(group_ref_type& mref);
   bool pre_visit(sequence_mref& mref);
   void post_visit(sequence_mref&);
-  bool pre_visit(std::size_t /* index */,  sequence_element_ref_type& mref);
-  void post_visit(std::size_t /* index */, sequence_element_ref_type& mref);
+
+  bool pre_visit(sequence_element_ref_type& mref);
+  void post_visit(sequence_element_ref_type& mref);
   bool pre_visit(const message_mref&);
   void post_visit(const message_mref&);
   bool pre_visit(dynamic_message_ref_type&);
@@ -229,9 +240,9 @@ decoder_impl::post_visit(sequence_mref&)
 }
 
 inline bool
-decoder_impl::pre_visit(std::size_t index, decoder_impl::sequence_element_ref_type& mref)
+decoder_impl::pre_visit(decoder_impl::sequence_element_ref_type& mref)
 {
-  debug_ << "decoding  element[" << index << "] : has pmap bit = " <<  mref.instruction()->has_pmap_bit() << "\n";
+  debug_ << "decoding  element[" << mref.index << "] : has pmap bit = " <<  mref.instruction()->has_pmap_bit() << "\n";
 
   if (mref.instruction()->has_pmap_bit())
   {
@@ -242,7 +253,8 @@ decoder_impl::pre_visit(std::size_t index, decoder_impl::sequence_element_ref_ty
 }
 
 inline void
-decoder_impl::post_visit(std::size_t /* index */, decoder_impl::sequence_element_ref_type& mref)
+decoder_impl::post_visit( //std::size_t /* index */,
+  decoder_impl::sequence_element_ref_type& mref)
 {
   mref.restore_pmap(this);
 }

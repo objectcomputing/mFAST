@@ -37,6 +37,7 @@ struct encoder_impl;
 struct decoder_impl;
 
 class message_cref
+  : private detail::field_storage_helper
 {
   public:
 
@@ -88,6 +89,7 @@ class message_cref
 
     // const value_storage* storage_for(const message_cref& other) const;
     friend class message_base;
+    friend class field_storage_helper;
 };
 
 template <typename ConstMessageRef>
@@ -203,16 +205,16 @@ message_cref::message_cref(const value_storage*        storage,
 
 inline
 message_cref::message_cref(const field_cref& cref)
-  : instruction_(static_cast<const template_instruction*>(cref.instruction_))
-  , storage_(cref.storage_)
+  : instruction_(static_cast<const template_instruction*>(cref.instruction()))
+  , storage_(storage_ptr_of(cref))
 {
-  switch (cref.instruction_->field_type())
+  switch (cref.instruction()->field_type())
   {
   case field_type_template:
-    instruction_ = static_cast<const template_instruction*> (cref.instruction_);
+    instruction_ = static_cast<const template_instruction*> (cref.instruction());
     break;
   case field_type_templateref:
-    instruction_ = static_cast<const template_instruction*> (cref.storage_->of_templateref.of_instruction.instruction_);
+    instruction_ = static_cast<const template_instruction*> (storage_of(cref).of_templateref.of_instruction.instruction_);
     break;
   default:
     instruction_ =0;

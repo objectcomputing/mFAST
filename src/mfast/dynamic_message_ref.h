@@ -40,6 +40,7 @@ class null_dynamic_message_ref
 struct encoder_impl;
 class dynamic_message_cref
   : public field_cref
+  , private detail::field_storage_helper
 {
   public:
     typedef const templateref_instruction* instruction_cptr;
@@ -52,7 +53,7 @@ class dynamic_message_cref
     }
 
     explicit dynamic_message_cref(const field_cref& other)
-      : field_cref(other.storage_, other.storage_->of_templateref.of_instruction.instruction_)
+      : field_cref(storage_ptr_of(other), storage_of(other).of_templateref.of_instruction.instruction_)
     {
     }
 
@@ -131,11 +132,14 @@ class dynamic_message_mref
       const_cast<const field_instruction*&>(instruction_) = inst;
     }
 
+
+  private:
     value_storage* storage() const
     {
       return const_cast<value_storage*>(storage_);
     }
-  private:
+    
+    friend class detail::field_storage_helper;
     allocator_type*       alloc_;
 };
 

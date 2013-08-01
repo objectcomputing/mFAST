@@ -50,8 +50,22 @@ class message_printer
 {
   std::ostream& os_;
   indenter indent_;
+  
+
 
   public:
+    
+    class  sequence_element_ref_type
+      : public sequence_element_cref
+    {
+    public:
+      sequence_element_ref_type(const sequence_element_cref& other)
+        : sequence_element_cref(other)
+      {
+      }
+    
+      std::size_t index;
+    };
 
     message_printer(std::ostream& os)
       : os_(os)
@@ -79,17 +93,13 @@ class message_printer
       --indent_;
     }
 
-    bool pre_visit(std::size_t index, const sequence_element_cref& /* ref */)
+    bool pre_visit(const sequence_element_ref_type&  ref)
     {
-      os_ << indent_ <<  "[" << index << "]:\n";
+      os_ << indent_ <<  "[" << ref.index << "]:\n";
       ++indent_;
       return true;
     }
 
-    void post_visit(std::size_t /* index */, const sequence_element_cref& /* ref */)
-    {
-      --indent_;
-    }
 };
 
 int main()

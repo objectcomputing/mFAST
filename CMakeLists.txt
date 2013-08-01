@@ -36,7 +36,7 @@ endif()
 ## Setting up Boost Library
 ################################
 
-find_package( Boost 1.53.0 REQUIRED unit_test_framework system filesystem)
+find_package( Boost 1.54.0 REQUIRED unit_test_framework system filesystem)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
@@ -47,9 +47,6 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 # Initialize CXXFLAGS.
 if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
 	set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
-	# set(CMAKE_CXX_FLAGS_DEBUG          "-O0 -g")
-	# set(CMAKE_CXX_FLAGS_RELEASE        "-O3 -DNDEBUG")
-	# set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 elseif (MSVC)
 	add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
 endif()

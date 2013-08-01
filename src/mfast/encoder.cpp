@@ -107,8 +107,8 @@ struct encoder_impl
   void post_visit(group_ref_type& cref);
   bool pre_visit(sequence_cref& cref);
   void post_visit(sequence_cref&);
-  bool pre_visit(std::size_t /* index */,  sequence_element_ref_type& cref);
-  void post_visit(std::size_t /* index */, sequence_element_ref_type& cref);
+  bool pre_visit(sequence_element_ref_type& cref);
+  void post_visit(sequence_element_ref_type& cref);
   bool pre_visit(const message_cref&);
   void post_visit(const message_cref&);
   bool pre_visit(dynamic_message_ref_type&);
@@ -202,7 +202,7 @@ encoder_impl::post_visit(sequence_cref&)
 }
 
 inline bool
-encoder_impl::pre_visit(std::size_t /* index */, encoder_impl::sequence_element_ref_type& cref)
+encoder_impl::pre_visit(encoder_impl::sequence_element_ref_type& cref)
 {
   if (cref.instruction()->has_pmap_bit())
   {
@@ -212,7 +212,7 @@ encoder_impl::pre_visit(std::size_t /* index */, encoder_impl::sequence_element_
 }
 
 inline void
-encoder_impl::post_visit(std::size_t /* index */, encoder_impl::sequence_element_ref_type& cref)
+encoder_impl::post_visit(encoder_impl::sequence_element_ref_type& cref)
 {
   cref.commit_pmap(this);
 }

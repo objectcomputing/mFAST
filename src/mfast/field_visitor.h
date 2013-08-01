@@ -26,9 +26,30 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/message_ref.h"
 #include "mfast/dynamic_message_ref.h"
+#include <boost/tti/tti.hpp>
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 
 namespace mfast {
 
+namespace detail {
+
+BOOST_TTI_HAS_MEMBER_DATA(index);
+
+template <typename Ref>
+typename boost::enable_if<has_member_data_index<Ref,std::size_t> >::type
+set_index(Ref ref, std::size_t index)
+{
+  ref.index = index;
+}
+
+template <typename Ref>
+typename boost::disable_if<has_member_data_index<Ref,std::size_t> >::type
+set_index(Ref, std::size_t)
+{
+}
+
+}
 
 struct field_accessor_base
 {
@@ -43,13 +64,9 @@ struct field_accessor_base
 template <class FieldAccessor>
 class field_accessor_adaptor
   : public field_instruction_visitor
+  , private detail::field_storage_helper
 {
   FieldAccessor& accssor_;
-
-  value_storage& storage_of(const field_cref& ref)
-  {
-    return detail::field_storage_helper::storage_of(ref);
-  }
 
   public:
 
@@ -65,15 +82,21 @@ class field_accessor_adaptor
     }
 
     template <typename RefType>
+    void visit_subfields(RefType& ref)
+    {
+      for (std::size_t i = 0; i < ref.fields_count(); ++i) {
+        field_cref r(ref.const_field(i));
+        if (r.present()) {
+          r.instruction()->accept(*this, storage_ptr_of(r));
+        }
+      }
+    }
+
+    template <typename RefType>
     void visit(RefType& ref)
     {
       if (accssor_.pre_visit(ref)) {
-        for (std::size_t i = 0; i < ref.fields_count(); ++i) {
-          field_cref r(ref.const_field(i));
-          if (r.present()) {
-            r.instruction()->accept(*this, &storage_of(r));
-          }
-        }
+        visit_subfields(ref);
         accssor_.post_visit(ref);
       }
     }
@@ -83,15 +106,8 @@ class field_accessor_adaptor
       if (accssor_.pre_visit(ref)) {
         for (std::size_t j = 0; j < ref.size(); ++j) {
           sequence_element_ref_type element(ref[j]);
-          if (accssor_.pre_visit(j, element)) {
-            for (std::size_t i = 0; i < ref.fields_count(); ++i) {
-              field_cref r(element.const_field(i));
-              if (r.present()) {
-                r.instruction()->accept(*this, &storage_of(r));
-              }
-            }
-            accssor_.post_visit(j, element);
-          }
+          detail::set_index(element,j);
+          this->visit(element);
         }
         accssor_.post_visit(ref);
       }
@@ -163,22 +179,30 @@ class field_accessor_adaptor
       this->visit(ref);
     }
 
+    void visit_dynamic_message(dynamic_message_ref_type& dyn_cref,
+                               boost::false_type)
+    {
+      if (accssor_.pre_visit(dyn_cref)) {
+        message_cref ref(dyn_cref);
+        visit_subfields(ref);
+        accssor_.post_visit(dyn_cref);
+      }
+    }
+
+    void visit_dynamic_message(dynamic_message_ref_type& dyn_cref,
+                               boost::true_type)
+    {
+      message_cref ref(dyn_cref);
+      this->visit(ref);
+    }
+
     virtual void visit(const templateref_instruction* inst, void* storage)
     {
       value_storage* v = static_cast<value_storage*>(storage);
       dynamic_message_ref_type dyn_cref(v, inst);
-      if (accssor_.pre_visit(dyn_cref)) {
-        mfast::message_cref ref(v, dyn_cref.instruction());
-
-        for (std::size_t i = 0; i < ref.fields_count(); ++i) {
-          field_cref r(ref.const_field(i));
-          if (r.present()) {
-            r.instruction()->accept(*this, &storage_of(r));
-          }
-        }
-
-        accssor_.post_visit(dyn_cref);
-      }
+      typedef typename boost::is_base_of<message_cref, dynamic_message_ref_type> is_derived_from_message_cref;
+      visit_dynamic_message(dyn_cref,
+                            is_derived_from_message_cref() );
     }
 
 };
@@ -194,37 +218,9 @@ struct field_mutator_base
 };
 
 
-class field_mutator_adaptor_base
-  : public field_instruction_visitor
-{
-  protected:
-    value_storage* field_storage(const group_mref& ref, std::size_t i)
-    {
-      return ref.field_storage(i);
-    }
-
-    value_storage* field_storage(const message_mref& ref, std::size_t i)
-    {
-      return ref.field_storage(i);
-    }
-
-    value_storage* field_storage(const field_mref& ref)
-    {
-      return ref.storage();
-    }
-
-    allocator* field_allocator(const message_mref& ref)
-    {
-      return ref.alloc_;
-    }
-
-};
-
-
-
 template <class FieldMutator>
 class field_mutator_adaptor
-  : public field_mutator_adaptor_base
+  : public field_instruction_visitor
   , private detail::field_storage_helper
 {
   allocator* alloc_;
@@ -245,12 +241,18 @@ class field_mutator_adaptor
     }
 
     template <typename RefType>
+    void visit_subfields(RefType& ref)
+    {
+      for (std::size_t i = 0; i < ref.fields_count(); ++i) {
+        ref.subinstruction(i)->accept(*this, this->field_storage(ref, i));
+      }
+    }
+
+    template <typename RefType>
     void visit(RefType& ref)
     {
       if (mutator_.pre_visit(ref)) {
-        for (std::size_t i = 0; i < ref.fields_count(); ++i) {
-          ref.subinstruction(i)->accept(*this, field_storage(ref, i));
-        }
+        visit_subfields(ref);
         mutator_.post_visit(ref);
       }
     }
@@ -260,13 +262,8 @@ class field_mutator_adaptor
       if (mutator_.pre_visit(ref)) {
         for (std::size_t j = 0; j < ref.size(); ++j) {
           sequence_element_ref_type element(ref[j]);
-          if (mutator_.pre_visit(j, element)) {
-            for (std::size_t i = 0; i < ref.fields_count(); ++i) {
-              field_mref r(element.mutable_field(i));
-              r.instruction()->accept(*this, field_storage(r));
-            }
-            mutator_.post_visit(j, element);
-          }
+          detail::set_index(element,j);
+          this->visit(element);
         }
         mutator_.post_visit(ref);
       }
@@ -344,9 +341,7 @@ class field_mutator_adaptor
       dynamic_message_ref_type dyn_mref(alloc_, v, inst);
       if (mutator_.pre_visit(dyn_mref)) {
         message_mref mref(alloc_, v, v->of_templateref.of_instruction.instruction_);
-        for (std::size_t i = 0; i < mref.fields_count(); ++i) {
-          mref.subinstruction(i)->accept(*this, field_storage(mref, i));
-        }
+        visit_subfields(mref);
         mutator_.post_visit(dyn_mref);
       }
     }

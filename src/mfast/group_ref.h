@@ -86,7 +86,6 @@ class group_cref
       if (instruction()->optional())
         const_cast<value_storage*>(storage_)->present(true);
     }
-
   private:
     group_cref& operator= (const group_cref&);
 };
@@ -137,11 +136,12 @@ class make_group_mref
     void accept_mutator(FieldMutator&) const;
 
   protected:
+    friend class detail::field_storage_helper;
+    
     value_storage* field_storage(size_t index) const;
 
   private:
     make_group_mref& operator= (const make_group_mref&);
-    friend class field_mutator_adaptor_base;
     friend struct decoder_impl;
     void ensure_valid() const;
 };

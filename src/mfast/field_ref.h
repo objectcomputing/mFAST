@@ -122,8 +122,6 @@ class field_cref
     const value_storage* storage_;
 
     friend class mfast::detail::field_storage_helper;
-    friend class message_cref;
-    friend class dynamic_message_cref;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -204,7 +202,7 @@ class make_field_mref
 
     friend class detail::make_field_mref_base< make_field_mref<ConstFieldRef>,
                                                typename ConstFieldRef::canbe_optional >;
-    friend class field_mutator_adaptor_base;
+    friend class detail::field_storage_helper;
 
     template <typename T>
     friend class make_field_mref;
@@ -227,14 +225,22 @@ namespace detail {
 class field_storage_helper
 {
   public:
-    static value_storage& storage_of(const field_cref& ref)
+    template <typename Ref>
+    static value_storage& storage_of(const Ref& ref)
     {
       return *const_cast<value_storage*>(ref.storage());
     }
-
-    static value_storage* storage_ptr_of(const field_cref& ref)
+    
+    template <typename Ref>
+    static value_storage* storage_ptr_of(const Ref& ref)
     {
       return const_cast<value_storage*>(ref.storage());
+    }
+    
+    template <typename Ref>
+    value_storage* field_storage(const Ref& ref, std::size_t i)
+    {
+      return ref.field_storage(i);
     }
 };
 

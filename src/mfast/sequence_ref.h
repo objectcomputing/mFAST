@@ -67,17 +67,19 @@ class sequence_element_cref
     {
       return instruction_;
     }
-
-  protected:
-    sequence_element_cref& operator= (const sequence_element_cref&);
-    const value_storage* field_storage(size_t index) const;
+    
     const field_instruction* subinstruction(size_t index) const
     {
       return instruction()->subinstruction(index);
     }
+    
+  protected:
+    sequence_element_cref& operator= (const sequence_element_cref&);
+    const value_storage* field_storage(size_t index) const;
 
     const sequence_field_instruction* instruction_;
     const value_storage* storage_;
+    friend class field_storage_helper;
 };
 
 typedef make_group_mref<sequence_element_cref> sequence_element_mref;
