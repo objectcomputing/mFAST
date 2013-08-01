@@ -24,14 +24,16 @@
 #include "arena_allocator.h"
 namespace mfast
 {
-  class dynamic_templates_description
-    : public templates_description
-  {
+class dynamic_templates_description
+  : public templates_description
+{
   public:
     dynamic_templates_description(const char* xml_content);
+
   private:
     arena_allocator alloc_;
-  };
+};
+
 }
 
 #endif /* end of include guard: TEMPLATE_LOADER_H_L6DO08PL */

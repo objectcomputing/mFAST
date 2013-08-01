@@ -38,18 +38,32 @@ BOOST_TTI_HAS_MEMBER_DATA(index);
 
 template <typename Ref>
 typename boost::enable_if<has_member_data_index<Ref,std::size_t> >::type
-set_index(Ref ref, std::size_t index)
+set_index(Ref& ref, std::size_t index)
 {
   ref.index = index;
 }
 
 template <typename Ref>
 typename boost::disable_if<has_member_data_index<Ref,std::size_t> >::type
-set_index(Ref, std::size_t)
+set_index(Ref&, std::size_t)
 {
 }
 
 }
+
+template <typename T>
+class index_mixin
+  : public T
+{
+public:
+  template <typename U>
+  index_mixin(const U& elem)
+    : T(elem)
+  {
+  }
+  
+  std::size_t index;
+};
 
 struct field_accessor_base
 {
@@ -107,6 +121,17 @@ class field_accessor_adaptor
         for (std::size_t j = 0; j < ref.size(); ++j) {
           sequence_element_ref_type element(ref[j]);
           detail::set_index(element,j);
+          this->visit(element);
+        }
+        accssor_.post_visit(ref);
+      }
+    }
+    
+    void visit(const sequence_ref_type& ref)
+    {
+      if (accssor_.pre_visit(ref)) {
+        for (std::size_t j = 0; j < ref.size(); ++j) {
+          sequence_element_ref_type element(ref[j]);
           this->visit(element);
         }
         accssor_.post_visit(ref);
@@ -268,6 +293,17 @@ class field_mutator_adaptor
         mutator_.post_visit(ref);
       }
     }
+    
+    void visit(const sequence_ref_type& ref)
+    {
+      if (mutator_.pre_visit(ref)) {
+        for (std::size_t j = 0; j < ref.size(); ++j) {
+          sequence_element_ref_type element(ref[j]);
+          this->visit(element);
+        }
+        mutator_.post_visit(ref);
+      }
+    }
 
     virtual void visit(const int32_field_instruction* inst, void* storage)
     {
@@ -353,8 +389,8 @@ template <typename FieldAccessor>
 inline void
 group_cref::accept_accessor(FieldAccessor& accessor) const
 {
-  field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-  adaptor.visit(*this);
+  field_accessor_adaptor<FieldAccessor> adaptor(accessor); 
+  adaptor.visit(*reinterpret_cast<const group_cref*>(this));
 }
 
 template <typename ConstFieldRef>
@@ -363,7 +399,7 @@ inline void
 make_group_mref<ConstFieldRef>::accept_mutator(FieldMutator& mutator) const
 {
   field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
-  adaptor.visit(*reinterpret_cast<group_mref*>(this));
+  adaptor.visit(*reinterpret_cast<const group_mref*>(this));
 }
 
 template <typename ElementType>
@@ -372,7 +408,7 @@ inline void
 make_sequence_cref<ElementType>::accept_accessor(FieldAccessor& accessor) const
 {
   field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-  adaptor.visit(*reinterpret_cast<sequence_cref*>(this));
+  adaptor.visit(*reinterpret_cast<const sequence_cref*>(this));
 }
 
 template <typename ElementType>
@@ -381,7 +417,7 @@ inline void
 make_sequence_mref<ElementType>::accept_mutator(FieldMutator& mutator) const
 {
   field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
-  adaptor.visit(*reinterpret_cast<sequence_mref*>(this));
+  adaptor.visit(*reinterpret_cast<const sequence_mref*>(this));
 }
 
 template <typename FieldAccessor>

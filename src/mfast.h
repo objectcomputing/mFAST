@@ -31,4 +31,5 @@
 #include <mfast/arena_allocator.h>
 #include <mfast/encoder.h>
 #include <mfast/decoder.h>
+#include <mfast/field_comparator.h>
 #endif /* end of include guard: MFAST_H_4EMINVTV */

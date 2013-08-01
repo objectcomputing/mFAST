@@ -55,17 +55,7 @@ class message_printer
 
   public:
     
-    class  sequence_element_ref_type
-      : public sequence_element_cref
-    {
-    public:
-      sequence_element_ref_type(const sequence_element_cref& other)
-        : sequence_element_cref(other)
-      {
-      }
-    
-      std::size_t index;
-    };
+    typedef index_mixin<sequence_element_cref> sequence_element_ref_type;
 
     message_printer(std::ostream& os)
       : os_(os)

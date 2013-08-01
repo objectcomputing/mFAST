@@ -18,9 +18,9 @@ add_executable (mfast_test
 			    decoder_operator_test.cpp
 				encoder_operator_test.cpp
 			    arena_allocator_test.cpp
-			    decoder_test.cpp
-				encoder_test.cpp
+				coder_test.cpp
 				value_storage_test.cpp
+				field_comparator_test.cpp
 			    ${FASTTYPEGEN_test_types_OUTPUTS})
 
 target_link_libraries (mfast_test ${MFAST_LIBRARIES}  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})

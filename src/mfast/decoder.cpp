@@ -77,19 +77,7 @@ struct decoder_impl
 
   typedef mref_mixin<mfast::group_mref> group_ref_type;
   typedef mref_mixin<mfast::dynamic_message_mref> dynamic_message_ref_type;
-  class sequence_element_ref_type
-    : public mref_mixin<mfast::sequence_element_mref>
-  {
-    public:
-      sequence_element_ref_type(const mfast::sequence_element_mref& r)
-        : mref_mixin<mfast::sequence_element_mref>(r)
-      {
-      }
-      
-      std::size_t index;
-  };
-
-
+  typedef index_mixin<mref_mixin<mfast::sequence_element_mref> > sequence_element_ref_type;
 
   fast_istream strm_;
   dictionary_resetter resetter_;

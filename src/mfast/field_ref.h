@@ -32,8 +32,30 @@ namespace mfast {
 namespace detail {
 extern const value_storage null_storage;
 
-class field_storage_helper;
+class field_storage_helper
+{
+  public:
+    template <typename Ref>
+    static value_storage& storage_of(const Ref& ref)
+    {
+      return *const_cast<value_storage*>(ref.storage());
+    }
+    
+    template <typename Ref>
+    static value_storage* storage_ptr_of(const Ref& ref)
+    {
+      return const_cast<value_storage*>(ref.storage());
+    }
+    
+    template <typename Ref>
+    value_storage* field_storage(const Ref& ref, std::size_t i)
+    {
+      return ref.field_storage(i);
+    }
+};
+
 }
+
 
 class field_cref;
 class message_cref;
@@ -62,6 +84,13 @@ class field_cref
     field_cref(const field_cref& other)
       : instruction_(other.instruction_)
       , storage_(other.storage_)
+    {
+    }
+    
+    template <typename T>
+    explicit field_cref(const T& ref)
+      : instruction_(ref.instruction())
+      , storage_(detail::field_storage_helper::storage_ptr_of(ref))
     {
     }
 
@@ -220,31 +249,6 @@ template <typename T>
 struct mref_of;
 
 
-namespace detail {
-
-class field_storage_helper
-{
-  public:
-    template <typename Ref>
-    static value_storage& storage_of(const Ref& ref)
-    {
-      return *const_cast<value_storage*>(ref.storage());
-    }
-    
-    template <typename Ref>
-    static value_storage* storage_ptr_of(const Ref& ref)
-    {
-      return const_cast<value_storage*>(ref.storage());
-    }
-    
-    template <typename Ref>
-    value_storage* field_storage(const Ref& ref, std::size_t i)
-    {
-      return ref.field_storage(i);
-    }
-};
-
-}
 
 
 template <typename T1, typename T2>
