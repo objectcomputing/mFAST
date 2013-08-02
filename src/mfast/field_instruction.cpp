@@ -140,7 +140,7 @@ void byte_vector_field_instruction::accept(field_instruction_visitor& visitor,
 
 /////////////////////////////////////////////////////////
 
-void group_content_helper::construct_group_subfields(value_storage* subfields,
+void aggregate_instruction_base::construct_group_subfields(value_storage* subfields,
                                                      allocator*     alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
@@ -148,7 +148,7 @@ void group_content_helper::construct_group_subfields(value_storage* subfields,
   }
 }
 
-void group_content_helper::destruct_group_subfields(value_storage* subfields,
+void aggregate_instruction_base::destruct_group_subfields(value_storage* subfields,
                                                     allocator*     alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
@@ -156,7 +156,7 @@ void group_content_helper::destruct_group_subfields(value_storage* subfields,
   }
 }
 
-int group_content_helper::find_subinstruction_index_by_id(uint32_t id) const
+int aggregate_instruction_base::find_subinstruction_index_by_id(uint32_t id) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     if (this->subinstructions_[i]->id() == id)
@@ -165,7 +165,7 @@ int group_content_helper::find_subinstruction_index_by_id(uint32_t id) const
   return -1;
 }
 
-int group_content_helper::find_subinstruction_index_by_name(const char* name) const
+int aggregate_instruction_base::find_subinstruction_index_by_name(const char* name) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     if (std::strcmp(this->subinstructions_[i]->name(), name) ==0)
@@ -175,7 +175,7 @@ int group_content_helper::find_subinstruction_index_by_name(const char* name) co
 }
 
 // deep copy
-void group_content_helper::copy_group_subfields(const value_storage* src_subfields,
+void aggregate_instruction_base::copy_group_subfields(const value_storage* src_subfields,
                                                 value_storage*       dest_subfields,
                                                 allocator*           alloc) const
 {

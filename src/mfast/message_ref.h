@@ -36,6 +36,16 @@ class message_base;
 struct encoder_impl;
 struct decoder_impl;
 
+
+class unbouned_templateref_error
+  : public virtual boost::exception, public virtual std::exception
+{
+  public:
+    unbouned_templateref_error()
+    {
+    }
+};
+
 class message_cref
   : private detail::field_storage_helper
 {

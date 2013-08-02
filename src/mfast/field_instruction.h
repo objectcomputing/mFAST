@@ -691,9 +691,9 @@ class byte_vector_field_instruction
     const char* length_ns_;
 };
 
-struct group_content_helper
+struct aggregate_instruction_base
 {
-  group_content_helper(const char* dictionary,
+  aggregate_instruction_base(const char* dictionary,
                        void*       subinstructions,
                        uint32_t    subinstructions_count,
                        const char* typeref_name,
@@ -767,7 +767,7 @@ struct group_content_helper
 
 class group_field_instruction
   : public field_instruction
-  , public group_content_helper
+  , public aggregate_instruction_base
 {
   public:
 
@@ -783,7 +783,7 @@ class group_field_instruction
       : field_instruction(operator_constant, field_type_group, optional,
                           id,
                           name, ns)
-      , group_content_helper(dictionary, subinstructions,
+      , aggregate_instruction_base(dictionary, subinstructions,
                              subinstructions_count,
                              typeref_name,
                              typeref_ns)
@@ -830,7 +830,7 @@ class group_instruction_ex
 
 class sequence_field_instruction
   : public field_instruction
-  , public group_content_helper
+  , public aggregate_instruction_base
 {
   public:
     sequence_field_instruction(presence_enum_t           optional,
@@ -846,7 +846,7 @@ class sequence_field_instruction
       : field_instruction(operator_constant, field_type_sequence, optional,
                           id,
                           name, ns)
-      , group_content_helper(dictionary,
+      , aggregate_instruction_base(dictionary,
                              subinstructions,
                              subinstructions_count,
                              typeref_name,

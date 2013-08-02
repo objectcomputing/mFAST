@@ -132,7 +132,7 @@ namespace detail {
 
 inline field_mref
 field_ref_with_id(value_storage*              storage,
-                  const group_content_helper* helper,
+                  const aggregate_instruction_base* helper,
                   allocator*                  alloc,
                   uint32_t                    id)
 {
@@ -146,7 +146,7 @@ field_ref_with_id(value_storage*              storage,
 
 inline field_mref
 field_ref_with_name(value_storage*              storage,
-                    const group_content_helper* helper,
+                    const aggregate_instruction_base* helper,
                     allocator*                  alloc,
                     const char*                 name)
 {

@@ -275,7 +275,7 @@ namespace detail {
 
 inline field_cref
 field_ref_with_id(const value_storage*        storage,
-                  const group_content_helper* helper,
+                  const aggregate_instruction_base* helper,
                   uint32_t                    id)
 {
   if (helper) {
@@ -289,7 +289,7 @@ field_ref_with_id(const value_storage*        storage,
 
 inline field_cref
 field_ref_with_name(const value_storage*        storage,
-                    const group_content_helper* helper,
+                    const aggregate_instruction_base* helper,
                     const char*                 name)
 {
   if (helper) {

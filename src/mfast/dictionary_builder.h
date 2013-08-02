@@ -125,8 +125,8 @@ class dictionary_builder
     void build_template(const template_instruction*, void*);
 
     void build_group(const field_instruction*    fi,
-                     const group_content_helper* src,
-                     group_content_helper*       dest);
+                     const aggregate_instruction_base* src,
+                     aggregate_instruction_base*       dest);
 
     value_storage*
     get_dictionary_storage(const char*         key,
