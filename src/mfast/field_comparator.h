@@ -3,7 +3,6 @@
 
 #include "mfast/field_visitor.h"
 #include <stack>
-#include <iostream>
 namespace mfast
 {
 
@@ -15,7 +14,6 @@ class field_comparator
 {
   private:
     std::stack<field_cref> others_;
-
   public:
     
     typedef index_mixin<sequence_element_cref> sequence_element_ref_type;
@@ -68,11 +66,6 @@ class field_comparator
     {
     }
     
-    // used for nested static templateRef
-    // bool pre_visit(message_cref& cref)
-    // {
-    //   
-    // }
     
     bool pre_visit(const dynamic_message_cref& cref)
     {

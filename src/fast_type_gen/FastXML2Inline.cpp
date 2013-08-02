@@ -315,7 +315,7 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
          << "dynamic_message_cref\n"
          << cref_scope_.str() << "get_dynamic_ref" << index << "() const\n"
          << "{\n"
-         << "  return field_cref(field_storage(" <<  index << "), 0);\n"
+         << "  return dynamic_message_cref(this->const_field("<< index << "));\n"
          << "}\n\n";
 
 
@@ -323,7 +323,7 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
          << "dynamic_message_mref\n"
          << mref_scope_.str() << "set_dynamic_ref" << index << "() const\n"
          << "{\n"
-         << "  return dynamic_message_mref(alloc_, field_storage(" << index << "), 0 );\n"
+         << "  return dynamic_message_mref(this->mutable_field("<< index << "));\n"
          << "}\n";
   }
   return true;

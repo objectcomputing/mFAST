@@ -47,11 +47,11 @@ class field_storage_helper
       return const_cast<value_storage*>(ref.storage());
     }
     
-    template <typename Ref>
-    value_storage* field_storage(const Ref& ref, std::size_t i)
-    {
-      return ref.field_storage(i);
-    }
+    // template <typename Ref>
+   //  value_storage* field_storage(const Ref& ref, std::size_t i)
+   //  {
+   //    return ref.field_storage(i);
+   //  }
 };
 
 }

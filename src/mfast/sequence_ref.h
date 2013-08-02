@@ -22,67 +22,29 @@
 #include "mfast/field_instruction.h"
 #include "mfast/field_ref.h"
 #include "mfast/group_ref.h"
+#include "mfast/aggregate_ref.h"
 #include <cassert>
 
 
 namespace mfast {
 
+
 class sequence_element_cref
+  : public aggregate_cref
 {
   public:
-    typedef boost::false_type is_mutable;
-    typedef boost::false_type canbe_optional;
     typedef const sequence_field_instruction* instruction_cptr;
 
     sequence_element_cref(const value_storage* storage,
-                          instruction_cptr     instruction)
-      : instruction_(instruction)
-      , storage_(storage)
-    {
-    }
+                          instruction_cptr     instruction);
 
-    sequence_element_cref(const sequence_element_cref& other)
-      : instruction_(other.instruction_)
-      , storage_(other.storage_)
-    {
-    }
-
-    size_t fields_count() const
-    {
-      return instruction()->subinstructions_count_;
-    }
-
-    field_cref const_field(size_t index) const
-    {
-      return field_cref(&storage_[index],subinstruction(index));
-    }
-
-    /// return -1 if no such field is found
-    int field_index_with_id(std::size_t id) const;
-
-    /// return -1 if no such field is found
-    int field_index_with_name(const char* name) const;
-
-    const sequence_field_instruction* instruction() const
-    {
-      return instruction_;
-    }
+    sequence_element_cref(const sequence_element_cref& other);
+    instruction_cptr instruction() const;
     
-    const field_instruction* subinstruction(size_t index) const
-    {
-      return instruction()->subinstruction(index);
-    }
-    
-  protected:
-    sequence_element_cref& operator= (const sequence_element_cref&);
-    const value_storage* field_storage(size_t index) const;
-
-    const sequence_field_instruction* instruction_;
-    const value_storage* storage_;
-    friend class field_storage_helper;
+    aggregate_cref to_aggregate() const;
 };
 
-typedef make_group_mref<sequence_element_cref> sequence_element_mref;
+typedef make_aggregate_mref<sequence_element_cref> sequence_element_mref;
 
 template <typename ElementType>
 class make_sequence_cref
@@ -234,32 +196,34 @@ class make_sequence_mref
 
 };
 
-void resize_sequence(make_sequence_mref<sequence_element_mref>& seq, std::size_t n);
-void reserve_sequence(make_sequence_mref<sequence_element_mref>& seq, std::size_t n);
-
 typedef make_sequence_mref<sequence_element_mref> sequence_mref;
 
 
 //////////////////////////////////////////////////////////////
 
-inline const value_storage*
-sequence_element_cref::field_storage(size_t index) const
+inline
+sequence_element_cref::sequence_element_cref(const value_storage* storage,
+                                             sequence_element_cref::instruction_cptr     instruction)
+  : aggregate_cref(storage, instruction) 
 {
-  return &storage_[index];
 }
 
-/// return -1 if no such field is found
-inline int
-sequence_element_cref::field_index_with_id(std::size_t id) const
+inline
+sequence_element_cref::sequence_element_cref(const sequence_element_cref &other)
+  : aggregate_cref(other)
 {
-  return instruction()->find_subinstruction_index_by_id(id);
 }
 
-/// return -1 if no such field is found
-inline int
-sequence_element_cref::field_index_with_name(const char* name) const
+inline sequence_element_cref::instruction_cptr 
+sequence_element_cref::instruction() const
 {
-  return instruction()->find_subinstruction_index_by_name(name);
+  return static_cast<instruction_cptr>(aggregate_cref::instruction());
+}
+
+inline aggregate_cref 
+sequence_element_cref::to_aggregate() const
+{
+  return *this;
 }
 
 template <typename ElementType>

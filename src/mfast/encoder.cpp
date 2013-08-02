@@ -35,6 +35,7 @@ namespace mfast
 
 struct encoder_impl
   : field_accessor_base
+  , detail::field_storage_helper
 {
   template <typename CREF>
   class cref_mixin
@@ -280,7 +281,7 @@ encoder_impl::encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool
 
   template_instruction* instruction = encode_segment_preemble(cref.id(), force_reset);
 
-  message_cref message(cref.storage_, instruction);
+  message_cref message(storage_ptr_of(cref), instruction);
   message.accept_accessor(*this);
 
   pmap.commit();

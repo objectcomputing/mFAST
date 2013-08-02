@@ -68,6 +68,8 @@ class message_cref
     const char* template_ns() const;
 
     const char* name() const;
+    
+    aggregate_cref to_aggregate() const;
 
     size_t fields_count() const;
 
@@ -81,7 +83,7 @@ class message_cref
 
     const template_instruction* instruction() const;
 
-    const field_instruction* subinstruction(size_t index) const;
+    // const field_instruction* subinstruction(size_t index) const;
 
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
@@ -89,14 +91,9 @@ class message_cref
   protected:
     const value_storage* storage() const;
 
-    friend struct encoder_impl;
-
     const template_instruction* instruction_;
     const value_storage* storage_;
 
-    const value_storage* field_storage(size_t index) const;
-
-    // const value_storage* storage_for(const message_cref& other) const;
     friend class message_base;
     friend class field_storage_helper;
 };
@@ -256,43 +253,36 @@ message_cref::name() const
   return instruction_->name();
 }
 
-inline field_cref
-message_cref::const_field(size_t index) const
+inline aggregate_cref 
+message_cref::to_aggregate() const
 {
-  assert(index < fields_count());
-  return field_cref(field_storage(index),instruction_->subinstructions_[index]);
+  return aggregate_cref(storage_->of_group.content_, instruction_);
 }
 
-inline const value_storage*
-message_cref::field_storage(size_t index) const
+inline field_cref
+message_cref::const_field(std::size_t index) const
 {
-  return &storage_->of_group.content_[index];
+  return to_aggregate().const_field(index);
 }
 
 /// return -1 if no such field is found
 inline int
-message_cref::field_index_with_id(size_t id) const
+message_cref::field_index_with_id(std::size_t id) const
 {
-  return instruction_->find_subinstruction_index_by_id(id);
+  return to_aggregate().field_index_with_id(id);
 }
 
-/// return -1 if no such field is found
 inline int
 message_cref::field_index_with_name(const char* name) const
 {
-  return instruction_->find_subinstruction_index_by_name(name);
+  return to_aggregate().field_index_with_name(name);
 }
+
 
 inline const template_instruction*
 message_cref::instruction() const
 {
   return instruction_;
-}
-
-inline const field_instruction*
-message_cref::subinstruction(size_t index) const
-{
-  return instruction()->subinstruction(index);
 }
 
 inline const value_storage*

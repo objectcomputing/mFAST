@@ -57,20 +57,20 @@ BOOST_AUTO_TEST_SUITE( test_fast_ostream )
 BOOST_AUTO_TEST_CASE(int_test)
 {
 
-  BOOST_CHECK(encode_integer(942755L, true, "\x39\x45\xa4" ));
-  BOOST_CHECK(encode_integer(942755L, false, "\x39\x45\xa3"));
-  BOOST_CHECK(encode_integer(-942755L, true, "\x46\x3a\xdd"));
-  BOOST_CHECK(encode_integer(-7942755L, false, "\x7c\x1b\x1b\x9d"));
-  BOOST_CHECK(encode_integer(8193L, false, "\x00\x40\x81"));
-  BOOST_CHECK(encode_integer(-8193L, false, "\x7F\x3f\xff"));
+  BOOST_CHECK(encode_integer(INT32_C(942755), true, "\x39\x45\xa4" ));
+  BOOST_CHECK(encode_integer(INT32_C(942755), false, "\x39\x45\xa3"));
+  BOOST_CHECK(encode_integer(INT32_C(-942755), true, "\x46\x3a\xdd"));
+  BOOST_CHECK(encode_integer(INT32_C(-7942755), false, "\x7c\x1b\x1b\x9d"));
+  BOOST_CHECK(encode_integer(INT32_C(8193), false, "\x00\x40\x81"));
+  BOOST_CHECK(encode_integer(INT32_C(-8193), false, "\x7F\x3f\xff"));
 
-  BOOST_CHECK(encode_integer(0UL, true, "\x81"));
-  BOOST_CHECK(encode_integer(1UL, true, "\x82"));
-  BOOST_CHECK(encode_integer(942755UL, true, "\x39\x45\xa4"));
-  BOOST_CHECK(encode_integer(0UL, false, "\x80"));
-  BOOST_CHECK(encode_integer(1UL, false, "\x81"));
-  BOOST_CHECK(encode_integer(942755UL, false, "\x39\x45\xa3"));
-  BOOST_CHECK(encode_integer(4294967295UL, true,"\x10\x00\x00\x00\x80"));
+  BOOST_CHECK(encode_integer(UINT32_C(0), true, "\x81"));
+  BOOST_CHECK(encode_integer(UINT32_C(1), true, "\x82"));
+  BOOST_CHECK(encode_integer(UINT32_C(942755), true, "\x39\x45\xa4"));
+  BOOST_CHECK(encode_integer(UINT32_C(0), false, "\x80"));
+  BOOST_CHECK(encode_integer(UINT32_C(1), false, "\x81"));
+  BOOST_CHECK(encode_integer(UINT32_C(942755), false, "\x39\x45\xa3"));
+  BOOST_CHECK(encode_integer(UINT32_C(4294967295), true,"\x10\x00\x00\x00\x80"));
 
   BOOST_CHECK(encode_integer(std::numeric_limits<int64_t>::max(), true, "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
   BOOST_CHECK(encode_integer(std::numeric_limits<uint64_t>::max(), true, "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80"));

@@ -264,7 +264,7 @@ bool FastXML2Header::VisitEnterSequence (const XMLElement   & /* element */,
                << indent << "      instruction_cptr            instruction);\n\n";
 
   header_mref_ << "\n"
-               << indent << "typedef mfast::make_group_mref<" << cref_scope_.str() << name << "_cref> " << name << "_mref_base;\n"
+               << indent << "typedef mfast::make_aggregate_mref<" << cref_scope_.str() << name << "_cref> " << name << "_mref_base;\n"
                << indent << "class " << name << "_mref\n"
                << indent << "  : public " << name << "_mref_base\n"
                << indent << "{\n"

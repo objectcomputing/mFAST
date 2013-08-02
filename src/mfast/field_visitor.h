@@ -95,8 +95,7 @@ class field_accessor_adaptor
     {
     }
 
-    template <typename RefType>
-    void visit_subfields(RefType& ref)
+    void visit_subfields(const aggregate_cref& ref)
     {
       for (std::size_t i = 0; i < ref.fields_count(); ++i) {
         field_cref r(ref.const_field(i));
@@ -110,7 +109,7 @@ class field_accessor_adaptor
     void visit(RefType& ref)
     {
       if (accssor_.pre_visit(ref)) {
-        visit_subfields(ref);
+        visit_subfields(ref.to_aggregate());
         accssor_.post_visit(ref);
       }
     }
@@ -209,7 +208,7 @@ class field_accessor_adaptor
     {
       if (accssor_.pre_visit(dyn_cref)) {
         message_cref ref(dyn_cref);
-        visit_subfields(ref);
+        visit_subfields(ref.to_aggregate());
         accssor_.post_visit(dyn_cref);
       }
     }
@@ -265,11 +264,10 @@ class field_mutator_adaptor
     {
     }
 
-    template <typename RefType>
-    void visit_subfields(RefType& ref)
+    void visit_subfields(const aggregate_mref& ref)
     {
       for (std::size_t i = 0; i < ref.fields_count(); ++i) {
-        ref.subinstruction(i)->accept(*this, this->field_storage(ref, i));
+        ref.subinstruction(i)->accept(*this, ref.field_storage(i));
       }
     }
 
@@ -277,7 +275,7 @@ class field_mutator_adaptor
     void visit(RefType& ref)
     {
       if (mutator_.pre_visit(ref)) {
-        visit_subfields(ref);
+        visit_subfields(ref.to_aggregate());
         mutator_.post_visit(ref);
       }
     }
@@ -377,7 +375,7 @@ class field_mutator_adaptor
       dynamic_message_ref_type dyn_mref(alloc_, v, inst);
       if (mutator_.pre_visit(dyn_mref)) {
         message_mref mref(alloc_, v, v->of_templateref.of_instruction.instruction_);
-        visit_subfields(mref);
+        visit_subfields(mref.to_aggregate());
         mutator_.post_visit(dyn_mref);
       }
     }

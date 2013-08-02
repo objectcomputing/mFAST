@@ -622,8 +622,8 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     BOOST_CHECK_EQUAL(ref.present(),         false);
     BOOST_CHECK_EQUAL(ref.fields_count(),    2);
 
-    BOOST_CHECK_EQUAL(ref.subinstruction(0), &inst0);
-    BOOST_CHECK_EQUAL(ref.subinstruction(1), &inst1);
+    BOOST_CHECK_EQUAL(ref.to_aggregate().subinstruction(0), &inst0);
+    BOOST_CHECK_EQUAL(ref.to_aggregate().subinstruction(1), &inst1);
 
     field_cref f0( ref.const_field(0) );
     BOOST_CHECK(f0.absent());

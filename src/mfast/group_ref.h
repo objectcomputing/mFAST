@@ -22,6 +22,7 @@
 #include "mfast/field_instruction.h"
 #include "mfast/field_ref.h"
 #include "mfast/field_mref.h"
+#include "mfast/aggregate_ref.h"
 #include <cassert>
 
 namespace mfast {
@@ -57,6 +58,8 @@ class group_cref
     {
       return instruction()->subinstructions_count_;
     }
+    
+    aggregate_cref to_aggregate() const;
 
     field_cref const_field(size_t index) const;
 
@@ -71,16 +74,11 @@ class group_cref
       return static_cast<const group_field_instruction*>(instruction_);
     }
 
-    const field_instruction* subinstruction(size_t index) const
-    {
-      return instruction()->subinstruction(index);
-    }
 
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
   protected:
-    const value_storage* field_storage(size_t index) const;
     void as_present() const
     {
       if (instruction()->optional())
@@ -130,15 +128,11 @@ class make_group_mref
     }
 
     field_mref mutable_field(size_t index) const;
-
+    
+    aggregate_mref to_aggregate() const;
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
-
-  protected:
-    friend class detail::field_storage_helper;
-    
-    value_storage* field_storage(size_t index) const;
 
   private:
     make_group_mref& operator= (const make_group_mref&);
@@ -152,43 +146,32 @@ typedef make_group_mref<group_cref> group_mref;
 ///////////////////////////////////////////////////////////////////////////////
 
 
-inline const value_storage*
-group_cref::field_storage(size_t index) const
+inline aggregate_cref 
+group_cref::to_aggregate() const
 {
-  const value_storage* storages =
-    static_cast<const value_storage*>(storage_->of_array.content_);
-  return &storages[index];
+  return aggregate_cref(static_cast<const value_storage*>(storage_->of_array.content_), instruction());
 }
 
 inline field_cref
 group_cref::const_field(std::size_t index) const
 {
-  assert(index < fields_count());
-  return field_cref(field_storage(index),
-                    instruction()->subinstructions_[index]);
+  return to_aggregate().const_field(index);
 }
 
 /// return -1 if no such field is found
 inline int
 group_cref::field_index_with_id(std::size_t id) const
 {
-  return instruction()->find_subinstruction_index_by_id(id);
+  return to_aggregate().field_index_with_id(id);
 }
 
-/// return -1 if no such field is found
 inline int
 group_cref::field_index_with_name(const char* name) const
 {
-  return instruction()->find_subinstruction_index_by_name(name);
+  return to_aggregate().field_index_with_name(name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-template <typename ConstGroupRef>
-inline value_storage*
-make_group_mref<ConstGroupRef>::field_storage(size_t index) const
-{
-  return const_cast<value_storage*>(base_type::field_storage(index));
-}
 
 template <typename ConstGroupRef>
 inline field_mref
@@ -196,9 +179,10 @@ make_group_mref<ConstGroupRef>::mutable_field(size_t index)  const
 {
   assert(index < this->fields_count());
   this->as_present();
-  return field_mref(this->alloc_,
-                    this->field_storage(index),
-                    this->instruction()->subinstructions_[index]);
+  // return field_mref(this->alloc_,
+  //                   this->field_storage(index),
+  //                   this->instruction()->subinstructions_[index]);
+  return this->to_aggregate().mutable_field(index);
 }
 
 template <typename ConstGroupRef>
@@ -210,6 +194,14 @@ make_group_mref<ConstGroupRef>::ensure_valid() const
   // encoder visit this field, we need to check if the memory for the subfields of this
   // group is allocated. If not, we need to allocate the memory for the subfields.
   this->instruction()->ensure_valid_storage(const_cast<value_storage&>(*this->storage_), this->alloc_);
+}
+
+
+template <typename ConstGroupRef>
+inline aggregate_mref 
+make_group_mref<ConstGroupRef>::to_aggregate() const
+{
+  return aggregate_mref(this->alloc_, const_cast<value_storage*>(this->storage_->of_group.content_), this->instruction());
 }
 
 }
