@@ -458,6 +458,12 @@ class decimal_field_instruction
       , mantissa_instruction_(mantissa_instruction)
     {
     }
+    
+    /// Perform deep copy
+    virtual void copy_value(const value_storage& src,
+                            value_storage&       dest,
+                            allocator*           alloc) const;
+    
 
     int64_t mantissa_initial_value() const
     {

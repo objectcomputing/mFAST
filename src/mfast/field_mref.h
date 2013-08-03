@@ -83,6 +83,9 @@ void field_mref::as(T value)
   case field_type_uint64:
     static_cast<uint64_mref>(*this).as(value);
     break;
+  case field_type_decimal:
+    static_cast<decimal_mref>(*this).as(value);
+    break;
   default:
     BOOST_THROW_EXCEPTION(incompatible_type_conversion_error(typeid(value).name(), this->instruction()->field_type_name()));
   }
@@ -131,10 +134,10 @@ inline void field_mref::as(const std::vector<unsigned char>& value)
 namespace detail {
 
 inline field_mref
-field_ref_with_id(value_storage*              storage,
+field_ref_with_id(value_storage*                    storage,
                   const aggregate_instruction_base* helper,
-                  allocator*                  alloc,
-                  uint32_t                    id)
+                  allocator*                        alloc,
+                  uint32_t                          id)
 {
   if (helper) {
     int index = helper->find_subinstruction_index_by_id(id);
@@ -145,10 +148,10 @@ field_ref_with_id(value_storage*              storage,
 }
 
 inline field_mref
-field_ref_with_name(value_storage*              storage,
+field_ref_with_name(value_storage*                    storage,
                     const aggregate_instruction_base* helper,
-                    allocator*                  alloc,
-                    const char*                 name)
+                    allocator*                        alloc,
+                    const char*                       name)
 {
   if (helper) {
     int index = helper->find_subinstruction_index_by_name(name);

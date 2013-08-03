@@ -117,7 +117,7 @@ composite_field<CRef>::composite_field(const composite_field<CRef>::cref_type& o
   : alloc_(alloc)
   , instruction_(other.instruction())
 {
-  this->instruction()->copy_construct_value(my_storage_, 0, alloc, other.storage_);
+  this->instruction()->copy_construct_value(my_storage_, 0, alloc, storage_for(other));
 }
 
 template <typename CRef>

@@ -78,6 +78,16 @@ void decimal_field_instruction::construct_value(value_storage& storage,
   storage.of_decimal.present_ = !optional();
 }
 
+void
+decimal_field_instruction::copy_value(const value_storage& src,
+                                      value_storage&       dest,
+                                      allocator* /* alloc */) const
+{
+  dest.of_decimal.present_ =  src.of_decimal.present_;
+  dest.of_decimal.mantissa_ = src.of_decimal.mantissa_;
+  dest.of_decimal.exponent_ = src.of_decimal.exponent_;
+}
+
 void decimal_field_instruction::accept(field_instruction_visitor& visitor,
                                        void*                      context) const
 {
@@ -109,6 +119,7 @@ void string_field_instruction::copy_value(const value_storage& src,
   size_t len = src.of_array.len_;
   if (len && src.of_array.content_ != default_value_.of_array.content_) {
     dest.of_array.content_ = alloc->allocate(len);
+    memcpy(dest.of_array.content_, src.of_array.content_, len);
     dest.of_array.capacity_ = len;
   }
   else {
@@ -141,7 +152,7 @@ void byte_vector_field_instruction::accept(field_instruction_visitor& visitor,
 /////////////////////////////////////////////////////////
 
 void aggregate_instruction_base::construct_group_subfields(value_storage* subfields,
-                                                     allocator*     alloc) const
+                                                           allocator*     alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     this->subinstructions_[i]->construct_value(subfields[i], alloc);
@@ -149,7 +160,7 @@ void aggregate_instruction_base::construct_group_subfields(value_storage* subfie
 }
 
 void aggregate_instruction_base::destruct_group_subfields(value_storage* subfields,
-                                                    allocator*     alloc) const
+                                                          allocator*     alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     this->subinstructions_[i]->destruct_value(subfields[i], alloc);
@@ -176,8 +187,8 @@ int aggregate_instruction_base::find_subinstruction_index_by_name(const char* na
 
 // deep copy
 void aggregate_instruction_base::copy_group_subfields(const value_storage* src_subfields,
-                                                value_storage*       dest_subfields,
-                                                allocator*           alloc) const
+                                                      value_storage*       dest_subfields,
+                                                      allocator*           alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     this->subinstructions_[i]->copy_value(src_subfields[i], dest_subfields[i], alloc);
@@ -291,7 +302,7 @@ void sequence_field_instruction::copy_value(const value_storage& src,
                                             value_storage&       dest,
                                             allocator*           alloc) const
 {
-  std::size_t size = dest.of_array.len_;
+  std::size_t size = src.of_array.len_;
 
   if (size > 0)
     --size;
@@ -305,12 +316,12 @@ void sequence_field_instruction::copy_value(const value_storage& src,
     dest.of_array.content_ = 0;
     dest.of_array.capacity_ =  alloc->reallocate(dest.of_array.content_, 0, reserve_size)/element_size;
 
-    const value_storage* src_elements =
-      *static_cast<const value_storage**>(src.of_array.content_);
-    value_storage* dest_elements = *static_cast<value_storage**>(dest.of_array.content_);
+    const value_storage* src_elements = static_cast<const value_storage*>(src.of_array.content_);
+    value_storage* dest_elements = static_cast<value_storage*>(dest.of_array.content_);
 
     for (std::size_t i = 0; i < size; ++i ) {
-      copy_group_subfields(&src_elements[i], &dest_elements[i], alloc);
+      std::size_t j = i* this->subinstructions_count_;
+      copy_group_subfields(&src_elements[j], &dest_elements[j], alloc);
     }
   }
   else {

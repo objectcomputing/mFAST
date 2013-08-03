@@ -23,7 +23,6 @@
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include <cstring>
-#include "debug_allocator.h"
 #include <stdexcept>
 
 #include "byte_stream.h"

@@ -42,7 +42,8 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
     "<template name=\"Test\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy/></uInt32>\n"
     "<uInt32 name=\"field2\" id=\"12\"><copy/></uInt32>\n"
-    "<uInt32 name=\"field3\" id=\"13\"><copy/></uInt32>\n"
+    "<decimal name=\"field3\" id=\"13\"><copy/></decimal>\n"
+    "<string name=\"field4\" id=\"14\"><copy/></string>\n"
     "</template>\n"
     "</templates>\n";
   dynamic_templates_description description(xml_content);
@@ -56,16 +57,23 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   m1ref.mutable_field(0).as(0);
   m1ref.mutable_field(1).as(1);
   m1ref.mutable_field(2).as(2);
+  m1ref.mutable_field(3).as("abcd");
 
   m2ref.mutable_field(0).as(0);
   m2ref.mutable_field(1).as(1);
   m2ref.mutable_field(2).as(2);
+  m2ref.mutable_field(3).as("abcd");
+  
 
   BOOST_CHECK(m1ref == m2ref);
 
   m2ref.mutable_field(2).as(3);
   BOOST_CHECK(m1ref != m2ref);
-
+  
+  debug_allocator alloc2;
+  
+  message_type m3(m1.cref(), &alloc2);
+  BOOST_CHECK(m3.cref() == m1ref);
 }
 
 BOOST_AUTO_TEST_CASE(group_test)
@@ -108,6 +116,11 @@ BOOST_AUTO_TEST_CASE(group_test)
 
   m2group.mutable_field(1).as(3);
   BOOST_CHECK(m1ref != m2ref);
+  
+  debug_allocator alloc2;
+  
+  message_type m3(m1.cref(), &alloc2);
+  BOOST_CHECK(m3.cref() == m1ref);
 }
 
 BOOST_AUTO_TEST_CASE(sequence_test)
@@ -155,6 +168,12 @@ BOOST_AUTO_TEST_CASE(sequence_test)
 
   m2seq[1].mutable_field(1).as(10);
   BOOST_CHECK(m1ref != m2ref);
+  
+  debug_allocator alloc2;
+  
+  message_type m3(m1.cref(), &alloc2);
+  
+  BOOST_CHECK(m3.cref() == m1ref);
 }
 
 BOOST_AUTO_TEST_CASE(static_templateref_test)
@@ -202,6 +221,11 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
   nested2.mutable_field(1).as(3);
 
   BOOST_CHECK(m1ref == m2ref);
+  
+  debug_allocator alloc2;
+  
+  message_type m3(m1.cref(), &alloc2);
+  BOOST_CHECK(m3.cref() == m1ref);
 }
 
 BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
@@ -247,6 +271,11 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
   nested2.mutable_field(1).as(3);
 
   BOOST_CHECK(m1ref == m2ref);
+  
+  debug_allocator alloc2;
+  
+  message_type m3(m1.cref(), &alloc2);
+  BOOST_CHECK(m3.cref() == m1ref);
 }
 
 

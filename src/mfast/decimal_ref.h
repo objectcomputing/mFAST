@@ -199,7 +199,7 @@ class decimal_cref
 
 inline bool operator == (const decimal_cref& lhs, const decimal_cref& rhs)
 {
-  return (lhs.absent() && rhs.absent()) || ( lhs.present() && rhs.present() && lhs.mantissa() == rhs.mantissa() && lhs.exponent() && rhs.exponent());
+  return (lhs.absent() && rhs.absent()) || ( lhs.present() && rhs.present() && lhs.mantissa() == rhs.mantissa() && lhs.exponent() == rhs.exponent());
 }
 
 inline bool operator != (const decimal_cref& lhs, const decimal_cref& rhs)
@@ -332,7 +332,7 @@ class decimal_mref
       return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
     }
 
-    void as(int64_t mant, int8_t exp) const
+    void as(int64_t mant, int8_t exp=0) const
     {
       assert (exp <= 64 && exp >= -64);
       this->storage()->of_decimal.mantissa_ = mant;
