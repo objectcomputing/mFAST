@@ -46,7 +46,7 @@ public:
     return new_size;
   }
 
-  virtual void deallocate(void* pointer) {
+  virtual void deallocate(void* pointer, std::size_t) {
 
     BOOST_CHECK(leased_addresses_.count(pointer));
     std::free(pointer);

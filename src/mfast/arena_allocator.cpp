@@ -113,7 +113,7 @@ bool arena_allocator::reset()
   return true;
 }
 
-void  arena_allocator::deallocate(void* /* pointer */)
+void  arena_allocator::deallocate(void* /* pointer */, std::size_t)
 {
 }
 }

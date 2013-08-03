@@ -73,7 +73,7 @@ class dictionary_value_destroyer
     {
       for (std::size_t i = 0; i < impl_.size(); ++i) {
         if (impl_[i]->of_array.capacity_)
-          alloc_->deallocate(impl_[i]->of_array.content_);
+          alloc_->deallocate(impl_[i]->of_array.content_, impl_[i]->of_array.capacity_);
       }
     }
 

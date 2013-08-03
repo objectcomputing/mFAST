@@ -41,7 +41,7 @@ public:
 
   /// Release all previously allocated memory blocks
   virtual bool reset();
-  virtual void deallocate(void* pointer);
+  virtual void deallocate(void* pointer, std::size_t);
 
 
 

@@ -108,7 +108,7 @@ void string_field_instruction::destruct_value(value_storage& storage,
                                               allocator*     alloc) const
 {
   if (storage.of_array.capacity_) {
-    alloc->deallocate(storage.of_array.content_);
+    alloc->deallocate(storage.of_array.content_, storage.of_array.capacity_);
   }
 }
 
@@ -214,7 +214,7 @@ void group_field_instruction::destruct_value(value_storage& storage,
 {
   if (storage.of_group.content_) {
     destruct_group_subfields(storage.of_group.content_, alloc);
-    alloc->deallocate(storage.of_group.content_);
+    alloc->deallocate(storage.of_group.content_, this->group_content_byte_count());
   }
 }
 
@@ -294,7 +294,7 @@ void sequence_field_instruction::destruct_value(value_storage& storage,
 {
   if (storage.of_array.capacity_ && storage.array_length() > 0) {
     destruct_sequence_elements(storage, 0, storage.array_length(), alloc);
-    alloc->deallocate(storage.of_array.content_);
+    alloc->deallocate(storage.of_array.content_, this->group_content_byte_count()*storage.of_array.capacity_ );
   }
 }
 
@@ -403,7 +403,7 @@ void templateref_instruction::destruct_value(value_storage& storage,
     storage.of_templateref.of_instruction.instruction_->destruct_group_subfields(
       static_cast<value_storage*>(storage.of_templateref.content_),
       alloc);
-    alloc->deallocate(storage.of_templateref.content_);
+    alloc->deallocate(storage.of_templateref.content_, storage.of_templateref.of_instruction.instruction_->group_content_byte_count());
   }
 }
 

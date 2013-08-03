@@ -29,7 +29,7 @@ public:
 
   virtual void* allocate(std::size_t s);
   virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size);
-  virtual void deallocate(void* pointer);
+  virtual void deallocate(void* pointer,std::size_t);
 };
 }
 

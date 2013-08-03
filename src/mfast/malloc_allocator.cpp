@@ -49,7 +49,7 @@ malloc_allocator::reallocate(void*&      pointer,
 }
 
 void
-malloc_allocator::deallocate(void* pointer)
+malloc_allocator::deallocate(void* pointer, std::size_t)
 {
   std::free(pointer);
 }
