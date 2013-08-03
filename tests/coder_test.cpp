@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_base msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
   msg_ref.mutable_field(0).as(1);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(group_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_base msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
   msg_ref.mutable_field(0).as(1);
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(sequence_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_base msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
   msg_ref.mutable_field(0).as(1);
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_base msg(&alloc, test_case.template_with_id(2));
+  message_type msg(&alloc, test_case.template_with_id(2));
   message_mref msg_ref = msg.mref();
 
   msg_ref.mutable_field(0).as(1);
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_base msg(&alloc, test_case.template_with_id(2));
+  message_type msg(&alloc, test_case.template_with_id(2));
   message_mref msg_ref = msg.mref();
 
 
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_base msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
   msg_ref.mutable_field(0).as(1);
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE(auto_reset_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_base msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
   msg_ref.mutable_field(0).as(1);

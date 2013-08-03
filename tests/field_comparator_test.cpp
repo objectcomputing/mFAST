@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
     "</templates>\n";
   dynamic_templates_description description(xml_content);
 
-  message_base m1(&alloc, description.instruction(0));
-  message_base m2(&alloc, description.instruction(0));
+  message_type m1(&alloc, description.instruction(0));
+  message_type m2(&alloc, description.instruction(0));
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(group_test)
 
   dynamic_templates_description description(xml_content);
 
-  message_base m1(&alloc, description.instruction(0));
-  message_base m2(&alloc, description.instruction(0));
+  message_type m1(&alloc, description.instruction(0));
+  message_type m2(&alloc, description.instruction(0));
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -129,8 +129,8 @@ BOOST_AUTO_TEST_CASE(sequence_test)
 
   dynamic_templates_description description(xml_content);
 
-  message_base m1(&alloc, description.instruction(0));
-  message_base m2(&alloc, description.instruction(0));
+  message_type m1(&alloc, description.instruction(0));
+  message_type m2(&alloc, description.instruction(0));
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -178,8 +178,8 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
 
   dynamic_templates_description description(xml_content);
 
-  message_base m1(&alloc, description.instruction(1));
-  message_base m2(&alloc, description.instruction(1));
+  message_type m1(&alloc, description.instruction(1));
+  message_type m2(&alloc, description.instruction(1));
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -225,8 +225,8 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
 
   dynamic_templates_description description(xml_content);
 
-  message_base m1(&alloc, description.instruction(1));
-  message_base m2(&alloc, description.instruction(1));
+  message_type m1(&alloc, description.instruction(1));
+  message_type m2(&alloc, description.instruction(1));
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();

@@ -83,7 +83,7 @@ add_custom_command(
   OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
   COMMAND $<TARGET_FILE:fast_type_gen>
   ARGS ${ARGN}
-  DEPENDS ${ARGN} ${FASTTYPEGEN_EXECUTABLE}
+  DEPENDS ${ARGN} fast_type_gen
   COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
   

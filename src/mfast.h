@@ -32,4 +32,5 @@
 #include <mfast/encoder.h>
 #include <mfast/decoder.h>
 #include <mfast/field_comparator.h>
+#include <mfast/composite_field.h>
 #endif /* end of include guard: MFAST_H_4EMINVTV */

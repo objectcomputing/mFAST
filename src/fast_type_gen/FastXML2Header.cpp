@@ -159,7 +159,7 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
   header_mref_.str("");
 
   out_<< "class " << name_attr << "\n"
-      << "  : public mfast::message_base\n"
+      << "  : public mfast::message_type\n"
       << "{\n"
       << "  public:\n"
       << "    enum {\n"

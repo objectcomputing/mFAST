@@ -32,7 +32,6 @@ namespace mfast {
 template <typename ConstMessageRef>
 class make_message_mref;
 
-class message_base;
 struct encoder_impl;
 struct decoder_impl;
 
@@ -94,7 +93,6 @@ class message_cref
     const template_instruction* instruction_;
     const value_storage* storage_;
 
-    friend class message_base;
     friend class field_storage_helper;
 };
 
@@ -117,78 +115,21 @@ class make_message_mref
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
+  private:
+    friend struct decoder_impl;
+    // Used by decoder to indicate this object uses arena allocator,
+    // and the allocator has been resetted. All previously allocated memory
+    // are invalidated. Thus memory for sub-fields needs to be re-allocated.
+    void reset() const;
 };
 
 typedef make_message_mref<message_cref> message_mref;
 
-
-class message_base
+template <>
+struct mref_of<message_cref>
 {
-  BOOST_MOVABLE_BUT_NOT_COPYABLE(message_base)
-
-  public:
-    message_base(mfast::allocator*           alloc=0,
-                 const template_instruction* instruction=0);
-
-    // a special constructor to facilitate puting a message_base instance in an associative container
-    // using emplace()
-    message_base(std::pair<mfast::allocator*,const template_instruction*> p);
-    ~message_base();
-
-    message_base(const message_cref& other,
-                 mfast::allocator*   alloc);
-
-    message_base(BOOST_RV_REF(message_base)other)
-      : alloc_(other.alloc_)
-      , instruction_ (other.instruction_)
-    {
-      // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
-      my_storage_ = other.my_storage_;
-      other.instruction_ = 0;
-    }
-
-    message_base& operator = (BOOST_RV_REF(message_base)other)
-    {
-      // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
-      if (this->instruction())
-        this->instruction()->destruct_value(my_storage_, alloc_);
-
-      alloc_ = other.alloc_;
-      instruction_ = other.instruction_;
-      my_storage_ = other.my_storage_;
-
-      other.instruction_ = 0;
-      return *this;
-    }
-
-    message_mref ref();
-    message_mref mref();
-    message_cref ref() const;
-    message_cref cref() const;
-
-    const template_instruction* instruction() const;
-    const char* name() const;
-    mfast::allocator* allocator() const;
-
-  protected:
-    const value_storage* storage_for(const message_cref& other) const;
-
-    friend struct decoder_impl;
-    // Used by encoder to indicate this object uses arena allocator,
-    // and the allocator has been resetted. All previously allocated memory
-    // are invalidated. Thus memory for sub-fields needs to be re-allocated.
-    void reset();
-
-    void ensure_valid();
-
-    mfast::allocator* alloc_;
-    const template_instruction* instruction_;
-    value_storage my_storage_;
-
-    const template_instruction* resolove_instruction(const template_instruction* inst);
+  typedef message_mref type;
 };
-
-
 
 ////////////////////////////
 
@@ -309,99 +250,13 @@ make_message_mref<ConstMessageRef>::make_message_mref(const field_mref_base& oth
 {
 }
 
-///////////////////////////////////////////////////////
-
-inline
-message_base::message_base(mfast::allocator*           alloc,
-                           const template_instruction* instruction)
-  : alloc_(alloc)
-  , instruction_(instruction)
-{
-  if (instruction_)
-    instruction_->construct_value(my_storage_, 0, alloc_);
-}
-
-inline
-message_base::message_base(std::pair<mfast::allocator*,const template_instruction*> p)
-  : alloc_(p.first)
-  , instruction_(p.second)
-{
-  instruction_->construct_value(my_storage_, 0, alloc_);
-}
-
-inline
-message_base::~message_base()
-{
-  if (this->instruction())
-    this->instruction()->destruct_value(my_storage_, alloc_);
-}
-
-inline const template_instruction*
-message_base::instruction() const
-{
-  return instruction_;
-}
-
-inline
-message_base::message_base(const message_cref& other,
-                           mfast::allocator*   alloc)
-  : alloc_(alloc)
-  , instruction_(other.instruction())
-{
-  this->instruction()->copy_construct_value(my_storage_, 0, alloc, other.storage_);
-}
-
-inline message_mref
-message_base::ref()
-{
-  return message_mref(alloc_, &my_storage_, instruction_);
-}
-
-inline message_mref
-message_base::mref()
-{
-  return message_mref(alloc_, &my_storage_, instruction_);
-}
-
-inline message_cref
-message_base::ref() const
-{
-  return message_cref(&my_storage_, instruction_);
-}
-
-inline message_cref
-message_base::cref() const
-{
-  return message_cref(&my_storage_, instruction_);
-}
-
-inline const value_storage*
-message_base::storage_for(const message_cref& other) const
-{
-  return other.storage_;
-}
-
+template <typename ConstMessageRef>
 inline void
-message_base::reset()
+make_message_mref<ConstMessageRef>::reset() const
 {
-  my_storage_.of_group.content_ = 0;
+  const_cast<value_storage*>(this->storage_)->of_group.content_ = 0;
 }
 
-inline const char*
-message_base::name() const
-{
-  return instruction_->name();
-}
-
-inline void message_base::ensure_valid()
-{
-  this->instruction()->ensure_valid_storage(my_storage_, this->alloc_);
-}
-
-inline mfast::allocator* message_base::allocator() const
-{
-  return this->alloc_;
-}
 
 }
 #endif /* end of include guard: MESSAGE_BASE_H_CZBMHN6L */

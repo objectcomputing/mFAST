@@ -28,9 +28,10 @@
 #include "mfast/decoder/decoder_presence_map.h"
 #include "mfast/decoder/decoder_field_operator.h"
 #include "mfast/decoder/fast_istream.h"
+#include "mfast/composite_field.h"
 namespace mfast {
 
-typedef boost::container::map<uint32_t, message_base> message_map_t;
+typedef boost::container::map<uint32_t, message_type> message_map_t;
 
 struct decoder_impl
   : field_mutator_base
@@ -86,7 +87,7 @@ struct decoder_impl
   message_map_t template_messages_; // Do not change the order of the two
 
   allocator* message_alloc_;
-  message_base* active_message_;
+  message_type* active_message_;
   bool force_reset_;
   debug_stream debug_;
   decoder_presence_map* current_;
@@ -112,7 +113,7 @@ struct decoder_impl
   bool pre_visit(dynamic_message_ref_type&);
   void post_visit(dynamic_message_ref_type&);
 
-  message_base*  decode_segment(fast_istreambuf& sb);
+  message_type*  decode_segment(fast_istreambuf& sb);
 };
 
 
@@ -128,7 +129,7 @@ void decoder_impl::reset_messages()
   if (message_alloc_->reset()) {
     message_map_t::iterator itr;
     for (itr = template_messages_.begin(); itr!= template_messages_.end(); ++itr) {
-      itr->second.reset();
+      itr->second.ref().reset();
     }
   }
 }
@@ -299,7 +300,7 @@ decoder_impl::post_visit(decoder_impl::dynamic_message_ref_type& mref)
   mref.restore_pmap(this);
 }
 
-message_base*
+message_type*
 decoder_impl::decode_segment(fast_istreambuf& sb)
 {
 
@@ -339,8 +340,8 @@ decoder_impl::decode_segment(fast_istreambuf& sb)
   // we have to keep the active_message_ in a new variable
   // because after the accept_mutator(), the active_message_
   // may change because of the decoding of dynamic template reference
-  message_base* message = active_message_;
-  message->ensure_valid();
+  message_type* message = active_message_;
+  message->ref().ensure_valid();
   message->ref().accept_mutator(*this);
   return message;
 }
