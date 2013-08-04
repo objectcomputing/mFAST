@@ -278,12 +278,13 @@ bool FastXML2Source::VisitEnterGroup (const XMLElement & /* element */,
 bool FastXML2Source::VisitExitGroup (const XMLElement & element,
                                      const std::string& name_attr,
                                      std::size_t        numFields,
-                                     std::size_t /* index */)
+                                     std::size_t        index)
 {
   output_subinstructions(name_attr);
 
   out_ << cref_scope_.str() << "instruction_type\n"
        << name_attr << "_instruction(\n"
+       << "  "<<  index << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
        << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
        << "  \""<< name_attr << "\", // name\n"
@@ -330,6 +331,7 @@ bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
   // length
   out_ << "uint32_field_instruction\n"
        << name_attr << "_length_instruction(\n"
+       << "  0,"
        << "  "<< "operator_" << fieldOpName << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
        << "  "<< id << ", // id\n"
@@ -343,7 +345,7 @@ bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
 bool FastXML2Source::VisitExitSequence (const XMLElement & element,
                                         const std::string& name_attr,
                                         std::size_t        numFields,
-                                        std::size_t /* index */)
+                                        std::size_t        index)
 {
 
   output_subinstructions(name_attr);
@@ -355,6 +357,7 @@ bool FastXML2Source::VisitExitSequence (const XMLElement & element,
 
   out_ << cref_scope_.str() << "instruction_type\n"
        << name_attr << "_instruction(\n"
+       << "  "<<  index << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
        << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
        << "  \""<< name_attr << "\", // name\n"
@@ -402,7 +405,7 @@ bool FastXML2Source::get_field_attributes(const XMLElement & element,
 
 bool FastXML2Source::VisitString (const XMLElement & element,
                                   const std::string& name_attr,
-                                  std::size_t /* index */)
+                                  std::size_t        index)
 {
   std::string fieldOpName;
   std::string opContext;
@@ -413,6 +416,7 @@ bool FastXML2Source::VisitString (const XMLElement & element,
   std::string charset =  get_optional_attr(element, "charset", "ascii");
   out_ << charset << "_field_instruction\n"
        << name_attr << "_instruction(\n"
+       << "  " << index << ",\n"
        << "  "<< "operator_" << fieldOpName << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
        << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
@@ -437,7 +441,7 @@ bool FastXML2Source::VisitString (const XMLElement & element,
 bool FastXML2Source::VisitInteger (const XMLElement & element,
                                    int                bits,
                                    const std::string& name_attr,
-                                   std::size_t /* index */)
+                                   std::size_t        index)
 {
   std::string fieldOpName;
   std::string opContext;
@@ -460,6 +464,7 @@ bool FastXML2Source::VisitInteger (const XMLElement & element,
 
   out_ << cpp_type << "_field_instruction\n"
        << name_attr << "_instruction(\n"
+       << "  " << index << ",\n"
        << "  "<< "operator_" << fieldOpName << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
        << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
@@ -474,7 +479,7 @@ bool FastXML2Source::VisitInteger (const XMLElement & element,
 
 bool FastXML2Source::VisitDecimal (const XMLElement & element,
                                    const std::string& name_attr,
-                                   std::size_t /* index */)
+                                   std::size_t        index)
 {
   const XMLElement* mantissa_element = element.FirstChildElement("mantissa");
   const XMLElement* exponent_element = element.FirstChildElement("exponent");
@@ -512,6 +517,7 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
 
     out_ << "decimal_field_instruction\n"
          << name_attr << "_instruction(\n"
+         << "  " << index << ",\n"
          << "  "<< "operator_" << exponent_fieldOpName << ", // exponent\n"
          << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
          << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
@@ -540,6 +546,7 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
 
       out_ << "decimal_field_instruction\n"
            << name_attr << "_instruction(\n"
+           << "  " << index << ",\n"
            << "  "<< "operator_" << fieldOpName << ",\n"
            << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
            << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
@@ -560,7 +567,7 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
 
 bool FastXML2Source::VisitByteVector (const XMLElement & element,
                                       const std::string& name_attr,
-                                      std::size_t /* index */)
+                                      std::size_t        index)
 {
   std::string fieldOpName;
   std::string opContext;
@@ -598,6 +605,7 @@ bool FastXML2Source::VisitByteVector (const XMLElement & element,
 
   out_ << "byte_vector_field_instruction\n"
        << name_attr << "_instruction(\n"
+       << "  " << index << ",\n"
        << "operator_" << fieldOpName << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
        << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
@@ -638,7 +646,7 @@ void FastXML2Source::output_subinstructions(const std::string name_attr)
 
 bool FastXML2Source::VisitTemplateRef(const XMLElement & element,
                                       const std::string& name_attr,
-                                      std::size_t /* index */)
+                                      std::size_t index)
 {
   if (name_attr.size()) {
     std::string ns = get_optional_attr(element, "ns", current_context().ns_.c_str());
@@ -656,12 +664,21 @@ bool FastXML2Source::VisitTemplateRef(const XMLElement & element,
           << name_attr << "\", ns=\"" << ns << "\"\n";
       throw std::runtime_error(err.str());
     }
-    std::string tmp = cpp_namespace + name_attr;
-    tmp += "_cref::the";
-    add_to_instruction_list(tmp);
+    
+    out_ << "templateref_instruction\n"
+         << "templateref" << index << "_instruction(\n"
+         << "  " << index << ",\n"
+         << "  &" << cpp_namespace << name_attr << "_cref::the_instruction);\n\n";
   }
   else {
-    subinstructions_list_.back() += "templateref_instruction::instance()";
+    out_ << "templateref_instruction\n"
+         << "templateref" << index << "_instruction(\n"
+         << "  " << index << ");\n\n";    
   }
+  
+  std::stringstream tmp;
+  tmp << "templateref" << index ;
+  add_to_instruction_list(tmp.str());
+  
   return true;
 }

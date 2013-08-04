@@ -196,15 +196,22 @@ class field_instruction
       return static_cast<operator_enum_t>(operator_id_);
     }
 
+    uint16_t field_index() const
+    {
+      return field_index_;
+    }
+
     const char* field_type_name() const;
 
-    field_instruction(operator_enum_t operator_id,
+    field_instruction(uint16_t        field_index,
+                      operator_enum_t operator_id,
                       int             field_type,
                       presence_enum_t optional,
                       uint32_t        id,
                       const char*     name,
                       const char*     ns)
-      : operator_id_(operator_id)
+      : field_index_(field_index)
+      , operator_id_(operator_id)
       , optional_flag_(optional)
       , nullable_flag_( optional &&  (operator_id != operator_constant) )
       , has_pmap_bit_(operator_id > operator_delta ||
@@ -217,12 +224,13 @@ class field_instruction
     }
 
   protected:
+    uint16_t field_index_;
     uint16_t operator_id_ : 4;
     uint16_t optional_flag_ : 1;
     uint16_t nullable_flag_ : 1;
     uint16_t has_initial_value_ : 1;
     uint16_t has_pmap_bit_ : 1;
-    uint16_t field_type_;
+    uint16_t field_type_ : 8;
     uint32_t id_;
     const char* name_;
     const char* ns_;
@@ -234,14 +242,15 @@ class integer_field_instruction_base
   : public field_instruction
 {
   public:
-    integer_field_instruction_base(operator_enum_t     operator_id,
+    integer_field_instruction_base(uint16_t            field_index,
+                                   operator_enum_t     operator_id,
                                    int                 field_type,
                                    presence_enum_t     optional,
                                    uint32_t            id,
                                    const char*         name,
                                    const char*         ns,
                                    const op_context_t* context)
-      : field_instruction(operator_id, field_type, optional, id, name, ns)
+      : field_instruction(field_index, operator_id, field_type, optional, id, name, ns)
       , op_context_(context)
       , default_value_(1)
       , prev_value_(&prev_storage_)
@@ -293,14 +302,16 @@ class int_field_instruction
   : public integer_field_instruction_base
 {
   public:
-    int_field_instruction(operator_enum_t     operator_id,
+    int_field_instruction(uint16_t            field_index,
+                          operator_enum_t     operator_id,
                           presence_enum_t     optional,
                           uint32_t            id,
                           const char*         name,
                           const char*         ns,
                           const op_context_t* context,
                           nullable<T>         initial_value = nullable<T>())
-      : integer_field_instruction_base(operator_id,
+      : integer_field_instruction_base(field_index,
+                                       operator_id,
                                        field_type_trait<T>::id,
                                        optional,
                                        id,
@@ -340,7 +351,7 @@ class mantissa_field_instruction
     mantissa_field_instruction(operator_enum_t     operator_id,
                                const op_context_t* context,
                                nullable<int64_t>   initial_value)
-      : int64_field_instruction(operator_id, presence_mandatory, 0, 0, 0, context, initial_value)
+      : int64_field_instruction(0, operator_id, presence_mandatory, 0, 0, 0, context, initial_value)
     {
     }
 
@@ -400,14 +411,16 @@ class decimal_field_instruction
 {
   public:
 
-    decimal_field_instruction(operator_enum_t     decimal_operator_id,
+    decimal_field_instruction(uint16_t            field_index,
+                              operator_enum_t     decimal_operator_id,
                               presence_enum_t     optional,
                               uint32_t            id,
                               const char*         name,
                               const char*         ns,
                               const op_context_t* decimal_context,
                               nullable_decimal    initial_value = nullable_decimal())
-      : integer_field_instruction_base(decimal_operator_id,
+      : integer_field_instruction_base(field_index,
+                                       decimal_operator_id,
                                        field_type_decimal,
                                        optional,
                                        id,
@@ -423,7 +436,8 @@ class decimal_field_instruction
       }
     }
 
-    decimal_field_instruction(operator_enum_t             exponent_operator_id,
+    decimal_field_instruction(uint16_t                    field_index,
+                              operator_enum_t             exponent_operator_id,
                               presence_enum_t             optional,
                               uint32_t                    id,
                               const char*                 name,
@@ -431,7 +445,8 @@ class decimal_field_instruction
                               const op_context_t*         exponent_context,
                               mantissa_field_instruction* mantissa_instruction,
                               nullable<int8_t>            exponent_initial_value = nullable<int8_t>())
-      : integer_field_instruction_base(exponent_operator_id,
+      : integer_field_instruction_base(field_index,
+                                       exponent_operator_id,
                                        field_type_exponent,
                                        optional,
                                        id,
@@ -458,12 +473,12 @@ class decimal_field_instruction
       , mantissa_instruction_(mantissa_instruction)
     {
     }
-    
+
     /// Perform deep copy
     virtual void copy_value(const value_storage& src,
                             value_storage&       dest,
                             allocator*           alloc) const;
-    
+
 
     int64_t mantissa_initial_value() const
     {
@@ -498,7 +513,8 @@ class string_field_instruction
 {
   public:
 
-    string_field_instruction(operator_enum_t     operator_id,
+    string_field_instruction(uint16_t            field_index,
+                             operator_enum_t     operator_id,
                              field_type_enum_t   field_type,
                              presence_enum_t     optional,
                              uint32_t            id,
@@ -507,7 +523,7 @@ class string_field_instruction
                              const op_context_t* context,
                              const char*         initial_value=0,
                              uint32_t            initial_value_length=0)
-      : field_instruction(operator_id, field_type, optional,
+      : field_instruction(field_index, operator_id, field_type, optional,
                           id,
                           name,
                           ns)
@@ -581,7 +597,8 @@ class ascii_field_instruction
   : public string_field_instruction
 {
   public:
-    ascii_field_instruction(operator_enum_t     operator_id,
+    ascii_field_instruction(uint16_t            field_index,
+                            operator_enum_t     operator_id,
                             presence_enum_t     optional,
                             uint32_t            id,
                             const char*         name,
@@ -589,7 +606,8 @@ class ascii_field_instruction
                             const op_context_t* context,
                             const char*         initial_value=0,
                             uint32_t            initial_value_length=0)
-      : string_field_instruction(operator_id,
+      : string_field_instruction(field_index,
+                                 operator_id,
                                  field_type_ascii_string,
                                  optional,
                                  id, name, ns, context, initial_value,
@@ -609,7 +627,8 @@ class unicode_field_instruction
   : public string_field_instruction
 {
   public:
-    unicode_field_instruction(operator_enum_t     operator_id,
+    unicode_field_instruction(uint16_t            field_index,
+                              operator_enum_t     operator_id,
                               presence_enum_t     optional,
                               uint32_t            id,
                               const char*         name,
@@ -617,7 +636,8 @@ class unicode_field_instruction
                               const op_context_t* context,
                               const char*         initial_value=0,
                               uint32_t            initial_value_length=0)
-      : string_field_instruction(operator_id,
+      : string_field_instruction(field_index,
+                                 operator_id,
                                  field_type_unicode_string,
                                  optional,
                                  id, name, ns, context, initial_value,
@@ -639,7 +659,8 @@ class byte_vector_field_instruction
   : public string_field_instruction
 {
   public:
-    byte_vector_field_instruction(operator_enum_t     operator_id,
+    byte_vector_field_instruction(uint16_t            field_index,
+                                  operator_enum_t     operator_id,
                                   presence_enum_t     optional,
                                   uint32_t            id,
                                   const char*         name,
@@ -648,7 +669,8 @@ class byte_vector_field_instruction
                                   uint32_t            length_id,
                                   const char*         length_name,
                                   const char*         length_ns)
-      : string_field_instruction(operator_id,
+      : string_field_instruction(field_index,
+                                 operator_id,
                                  field_type_byte_vector,
                                  optional,
                                  id, name, ns, value_context)
@@ -658,7 +680,8 @@ class byte_vector_field_instruction
     {
     }
 
-    byte_vector_field_instruction(operator_enum_t      operator_id,
+    byte_vector_field_instruction(uint16_t             field_index,
+                                  operator_enum_t      operator_id,
                                   presence_enum_t      optional,
                                   uint32_t             id,
                                   const char*          name,
@@ -669,7 +692,8 @@ class byte_vector_field_instruction
                                   uint32_t             length_id,
                                   const char*          length_name,
                                   const char*          length_ns)
-      : string_field_instruction(operator_id,
+      : string_field_instruction(field_index,
+                                 operator_id,
                                  field_type_byte_vector,
                                  optional,
                                  id, name, ns, value_context,
@@ -700,10 +724,10 @@ class byte_vector_field_instruction
 struct aggregate_instruction_base
 {
   aggregate_instruction_base(const char* dictionary,
-                       void*       subinstructions,
-                       uint32_t    subinstructions_count,
-                       const char* typeref_name,
-                       const char* typeref_ns)
+                             void*       subinstructions,
+                             uint32_t    subinstructions_count,
+                             const char* typeref_name,
+                             const char* typeref_ns)
     : dictionary_(dictionary),subinstructions_(static_cast<field_instruction**>(subinstructions))
     , subinstructions_count_(subinstructions_count)
     , typeref_name_(typeref_name)
@@ -777,7 +801,8 @@ class group_field_instruction
 {
   public:
 
-    group_field_instruction(presence_enum_t optional,
+    group_field_instruction(uint16_t        field_index,
+                            presence_enum_t optional,
                             uint32_t        id,
                             const char*     name,
                             const char*     ns,
@@ -786,13 +811,16 @@ class group_field_instruction
                             uint32_t        subinstructions_count,
                             const char*     typeref_name ="",
                             const char*     typeref_ns="")
-      : field_instruction(operator_constant, field_type_group, optional,
+      : field_instruction(field_index,
+                          operator_constant,
+                          field_type_group,
+                          optional,
                           id,
                           name, ns)
       , aggregate_instruction_base(dictionary, subinstructions,
-                             subinstructions_count,
-                             typeref_name,
-                             typeref_ns)
+                                   subinstructions_count,
+                                   typeref_name,
+                                   typeref_ns)
     {
       has_pmap_bit_ = subinstruction_has_pmap_bit();
     }
@@ -819,7 +847,8 @@ class group_instruction_ex
   : public group_field_instruction
 {
   public:
-    group_instruction_ex(presence_enum_t optional,
+    group_instruction_ex(uint16_t        field_index,
+                         presence_enum_t optional,
                          uint32_t        id,
                          const char*     name,
                          const char*     ns,
@@ -828,7 +857,16 @@ class group_instruction_ex
                          uint32_t        subinstructions_count,
                          const char*     typeref_name ="",
                          const char*     typeref_ns="")
-      : group_field_instruction(optional, id, name, ns, dictionary, subinstructions, subinstructions_count, typeref_name, typeref_ns)
+      : group_field_instruction(field_index,
+                                optional,
+                                id,
+                                name,
+                                ns,
+                                dictionary,
+                                subinstructions,
+                                subinstructions_count,
+                                typeref_name,
+                                typeref_ns)
     {
     }
 
@@ -839,7 +877,8 @@ class sequence_field_instruction
   , public aggregate_instruction_base
 {
   public:
-    sequence_field_instruction(presence_enum_t           optional,
+    sequence_field_instruction(uint16_t                  field_index,
+                               presence_enum_t           optional,
                                uint32_t                  id,
                                const char*               name,
                                const char*               ns,
@@ -849,14 +888,17 @@ class sequence_field_instruction
                                uint32_field_instruction* sequence_length_instruction,
                                const char*               typeref_name="",
                                const char*               typeref_ns="")
-      : field_instruction(operator_constant, field_type_sequence, optional,
+      : field_instruction(field_index,
+                          operator_constant,
+                          field_type_sequence,
+                          optional,
                           id,
                           name, ns)
       , aggregate_instruction_base(dictionary,
-                             subinstructions,
-                             subinstructions_count,
-                             typeref_name,
-                             typeref_ns)
+                                   subinstructions,
+                                   subinstructions_count,
+                                   typeref_name,
+                                   typeref_ns)
       , sequence_length_instruction_(sequence_length_instruction)
     {
       has_pmap_bit_ = subinstruction_has_pmap_bit();
@@ -892,7 +934,8 @@ class sequence_instruction_ex
   : public sequence_field_instruction
 {
   public:
-    sequence_instruction_ex(presence_enum_t           optional,
+    sequence_instruction_ex(uint16_t                  field_index,
+                            presence_enum_t           optional,
                             uint32_t                  id,
                             const char*               name,
                             const char*               ns,
@@ -902,7 +945,7 @@ class sequence_instruction_ex
                             uint32_field_instruction* sequence_length_instruction,
                             const char*               typeref_name="",
                             const char*               typeref_ns="")
-      : sequence_field_instruction(optional, id, name, ns, dictionary, subinstructions,
+      : sequence_field_instruction(field_index, optional, id, name, ns, dictionary, subinstructions,
                                    subinstructions_count, sequence_length_instruction, typeref_name, typeref_ns)
     {
     }
@@ -923,7 +966,7 @@ class template_instruction
                          bool        reset,
                          const char* typeref_name="",
                          const char* typeref_ns="")
-      : group_field_instruction(presence_mandatory,
+      : group_field_instruction(0, presence_mandatory,
                                 id,
                                 name,
                                 ns,
@@ -1002,9 +1045,18 @@ class templateref_instruction
   : public field_instruction
 {
   public:
-    templateref_instruction(const char* name,
-                            const char* ns)
-      : field_instruction(operator_none, field_type_templateref, presence_mandatory, 0, name, ns)
+    templateref_instruction(uint16_t    field_index,
+                            const char* name = 0,
+                            const char* ns = 0)
+      : field_instruction(field_index, operator_none, field_type_templateref, presence_mandatory, 0, name, ns)
+      , target_(0)
+    {
+    }
+
+    templateref_instruction(uint16_t                    field_index,
+                            const template_instruction* ref)
+      : field_instruction(field_index, operator_none, field_type_templateref, presence_mandatory, 0, ref->name(), ref->ns())
+      , target_(ref)
     {
     }
 
@@ -1021,8 +1073,12 @@ class templateref_instruction
 
     virtual void accept(field_instruction_visitor&, void*) const;
 
-
-    static templateref_instruction* instance();
+    const template_instruction* target() const
+    {
+      return target_;
+    }
+  private:
+    const template_instruction* target_;
 };
 
 class templates_loader;

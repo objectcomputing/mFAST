@@ -203,17 +203,20 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
   message_mref msg_ref = msg.mref();
 
   msg_ref.mutable_field(0).as(1);
+  
+  nested_message_mref nested(msg_ref.mutable_field(1));
+  BOOST_CHECK(nested.is_static());
 
-  message_mref nested(msg_ref.mutable_field(1));
-  nested.mutable_field(0).as(2);
-  nested.mutable_field(1).as(3);
+  message_mref target(msg_ref.mutable_field(1));
+  target.mutable_field(0).as(2);
+  target.mutable_field(1).as(3);
 
   BOOST_CHECK(test_case.encoding(msg_ref,"\xF8\x82\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xF8\x82\x81\x82\x83", msg_ref));
   
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
+BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
 {
   fast_coding_test_case test_case (
     "<?xml version=\" 1.0 \"?>\n"
@@ -235,10 +238,14 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
 
 
   msg_ref.mutable_field(0).as(1);
+  nested_message_mref nested(msg_ref.mutable_field(1));
+  BOOST_CHECK(!nested.is_static());
 
-  message_mref nested = dynamic_message_mref(msg_ref.mutable_field(1)).rebind(test_case.template_with_id(1));
-  nested.mutable_field(0).as(2);
-  nested.mutable_field(1).as(3);
+  message_mref target = nested.rebind(test_case.template_with_id(1));
+  
+    
+  target.mutable_field(0).as(2);
+  target.mutable_field(1).as(3);
 
   BOOST_CHECK(test_case.encoding(msg_ref,"\xE0\x82\x81\xF0\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xE0\x82\x81\xF0\x81\x82\x83", msg_ref));

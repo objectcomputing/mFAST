@@ -33,6 +33,22 @@
 namespace mfast
 {
 
+
+std::size_t pmap_size(const group_cref& ref)
+{
+   return ref.instruction()->pmap_size();
+}
+
+std::size_t pmap_size(const sequence_element_cref& ref)
+{
+   return ref.instruction()->pmap_size();
+}
+
+std::size_t pmap_size(const nested_message_cref& ref)
+{
+   return ref.target().instruction()->pmap_size();
+}
+
 struct encoder_impl
   : field_accessor_base
   , detail::field_storage_helper
@@ -64,7 +80,7 @@ struct encoder_impl
       {
         this->prev_pmap_ = coder->current_;
         coder->current_ = &pmap_;
-        pmap_.init(&coder->strm_, this->instruction()->pmap_size());
+        pmap_.init(&coder->strm_, pmap_size(*this));
       }
 
       void commit_pmap(encoder_impl* coder)
@@ -82,7 +98,7 @@ struct encoder_impl
 
   typedef cref_mixin<mfast::group_cref> group_ref_type;
   typedef cref_mixin<mfast::sequence_element_cref> sequence_element_ref_type;
-  typedef cref_mixin<mfast::dynamic_message_cref> dynamic_message_ref_type;
+  typedef cref_mixin<mfast::nested_message_cref> nested_message_ref_type;
 
 
   fast_ostream strm_;
@@ -112,8 +128,8 @@ struct encoder_impl
   void post_visit(sequence_element_ref_type& cref);
   bool pre_visit(const message_cref&);
   void post_visit(const message_cref&);
-  bool pre_visit(dynamic_message_ref_type&);
-  void post_visit(dynamic_message_ref_type&);
+  bool pre_visit(nested_message_ref_type&);
+  void post_visit(nested_message_ref_type&);
 
   template_instruction*  encode_segment_preemble(uint32_t template_id, bool force_reset);
   void encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool force_reset);
@@ -230,17 +246,24 @@ encoder_impl::post_visit(const message_cref&)
 }
 
 inline bool
-encoder_impl::pre_visit(encoder_impl::dynamic_message_ref_type& cref)
+encoder_impl::pre_visit(encoder_impl::nested_message_ref_type& cref)
 {
-  cref.setup_pmap(this);
-  cref.instruction_ = encode_segment_preemble(cref.instruction()->id(), false);
+  if (!cref.is_static()) {
+    cref.setup_pmap(this);
+    // we have to replace the target instruction in cref so that the previous values of
+    // the inner fields can be accessed.
+    const template_instruction*& target_inst = detail::field_storage_helper::storage_of(cref).of_templateref.of_instruction.instruction_;
+    target_inst = encode_segment_preemble(target_inst->id(), false);
+  }
   return true;
 }
 
 inline void
-encoder_impl::post_visit(encoder_impl::dynamic_message_ref_type& cref)
+encoder_impl::post_visit(encoder_impl::nested_message_ref_type& cref)
 {
-  cref.commit_pmap(this);
+  if (!cref.is_static()) {
+    cref.commit_pmap(this);
+  }
 }
 
 template_instruction*

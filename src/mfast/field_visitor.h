@@ -25,7 +25,7 @@
 #include "mfast/group_ref.h"
 #include "mfast/sequence_ref.h"
 #include "mfast/message_ref.h"
-#include "mfast/dynamic_message_ref.h"
+#include "mfast/nested_message_ref.h"
 #include <boost/tti/tti.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
@@ -71,7 +71,7 @@ struct field_accessor_base
   typedef mfast::sequence_cref sequence_ref_type;
   typedef mfast::sequence_element_cref sequence_element_ref_type;
   typedef mfast::message_cref message_ref_type;
-  typedef mfast::dynamic_message_cref dynamic_message_ref_type;
+  typedef mfast::nested_message_cref nested_message_ref_type;
 
 };
 
@@ -88,7 +88,7 @@ class field_accessor_adaptor
     typedef typename FieldAccessor::sequence_ref_type sequence_ref_type;
     typedef typename FieldAccessor::sequence_element_ref_type sequence_element_ref_type;
     typedef typename FieldAccessor::message_ref_type message_ref_type;
-    typedef typename FieldAccessor::dynamic_message_ref_type dynamic_message_ref_type;
+    typedef typename FieldAccessor::nested_message_ref_type nested_message_ref_type;
 
     field_accessor_adaptor(FieldAccessor& accssor)
       : accssor_(accssor)
@@ -203,30 +203,15 @@ class field_accessor_adaptor
       this->visit(ref);
     }
 
-    void visit_dynamic_message(dynamic_message_ref_type& dyn_cref,
-                               boost::false_type)
-    {
-      if (accssor_.pre_visit(dyn_cref)) {
-        message_cref ref(dyn_cref);
-        visit_subfields(ref.to_aggregate());
-        accssor_.post_visit(dyn_cref);
-      }
-    }
-
-    void visit_dynamic_message(dynamic_message_ref_type& dyn_cref,
-                               boost::true_type)
-    {
-      message_cref ref(dyn_cref);
-      this->visit(ref);
-    }
-
     virtual void visit(const templateref_instruction* inst, void* storage)
     {
       value_storage* v = static_cast<value_storage*>(storage);
-      dynamic_message_ref_type dyn_cref(v, inst);
-      typedef typename boost::is_base_of<message_cref, dynamic_message_ref_type> is_derived_from_message_cref;
-      visit_dynamic_message(dyn_cref,
-                            is_derived_from_message_cref() );
+      nested_message_ref_type nested_cref(v, inst);
+      if (accssor_.pre_visit(nested_cref)) {
+        message_cref ref(nested_cref);
+        visit_subfields(ref.to_aggregate());
+        accssor_.post_visit(nested_cref);
+      }
     }
 
 };
@@ -238,7 +223,7 @@ struct field_mutator_base
   typedef mfast::sequence_mref sequence_ref_type;
   typedef mfast::sequence_element_mref sequence_element_ref_type;
   typedef mfast::message_mref message_ref_type;
-  typedef mfast::dynamic_message_mref dynamic_message_ref_type;
+  typedef mfast::nested_message_mref nested_message_ref_type;
 };
 
 
@@ -256,7 +241,7 @@ class field_mutator_adaptor
     typedef typename FieldMutator::sequence_ref_type sequence_ref_type;
     typedef typename FieldMutator::sequence_element_ref_type sequence_element_ref_type;
     typedef typename FieldMutator::message_ref_type message_ref_type;
-    typedef typename FieldMutator::dynamic_message_ref_type dynamic_message_ref_type;
+    typedef typename FieldMutator::nested_message_ref_type nested_message_ref_type;
 
     field_mutator_adaptor(FieldMutator& mutator, allocator* alloc)
       : alloc_(alloc)
@@ -372,11 +357,11 @@ class field_mutator_adaptor
     virtual void visit(const templateref_instruction* inst, void* storage)
     {
       value_storage* v = static_cast<value_storage*>(storage);
-      dynamic_message_ref_type dyn_mref(alloc_, v, inst);
-      if (mutator_.pre_visit(dyn_mref)) {
+      nested_message_ref_type nested_mref(alloc_, v, inst);
+      if (mutator_.pre_visit(nested_mref)) {
         message_mref mref(alloc_, v, v->of_templateref.of_instruction.instruction_);
         visit_subfields(mref.to_aggregate());
-        mutator_.post_visit(dyn_mref);
+        mutator_.post_visit(nested_mref);
       }
     }
 

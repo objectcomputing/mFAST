@@ -33,5 +33,6 @@
                 <copy/>
             </string>
         </sequence>
+		<templateRef />
     </template>
 </templates>

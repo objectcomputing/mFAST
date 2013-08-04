@@ -67,12 +67,12 @@ class field_comparator
     }
     
     
-    bool pre_visit(const dynamic_message_cref& cref)
+    bool pre_visit(const nested_message_cref& cref)
     {
-      dynamic_message_cref rhs = dynamic_cast_as<dynamic_message_cref>(others_.top());
+      nested_message_cref rhs = dynamic_cast_as<nested_message_cref>(others_.top());
       others_.pop();
-      others_.push(field_cref(rhs));
-      this->pre_visit(message_cref(cref));
+      others_.push( field_cref( rhs.target() ) );
+      this->pre_visit( cref.target() );
       return true;
     }
     

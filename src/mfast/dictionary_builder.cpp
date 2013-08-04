@@ -169,7 +169,7 @@ void dictionary_builder::visit(const template_instruction* src_inst, void* dest_
 
 void dictionary_builder::visit(const templateref_instruction* src_inst, void* dest_inst)
 {
-  if (src_inst->name()[0] != 0)
+  if (src_inst->name() != 0)
   {
     // this is static templateRef, we have to bind to the right template instruction
     template_instruction*& dest = *static_cast<template_instruction**>(dest_inst);
@@ -205,6 +205,7 @@ void dictionary_builder::visit(const sequence_field_instruction* src_inst, void*
   }
   else {
     dest->sequence_length_instruction_ = new (*alloc_)uint32_field_instruction(
+      0,
       operator_none,
       presence_mandatory,
       0,

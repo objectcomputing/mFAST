@@ -312,18 +312,18 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
   else {
     out_ << "\n"
          << "inline\n"
-         << "dynamic_message_cref\n"
-         << cref_scope_.str() << "get_dynamic_ref" << index << "() const\n"
+         << "nested_message_cref\n"
+         << cref_scope_.str() << "get_nested_message" << index << "() const\n"
          << "{\n"
-         << "  return dynamic_message_cref(this->const_field("<< index << "));\n"
+         << "  return nested_message_cref(this->const_field("<< index << "));\n"
          << "}\n\n";
 
 
     out_ << "inline\n"
-         << "dynamic_message_mref\n"
-         << mref_scope_.str() << "set_dynamic_ref" << index << "() const\n"
+         << "nested_message_mref\n"
+         << mref_scope_.str() << "set_nested_message" << index << "() const\n"
          << "{\n"
-         << "  return dynamic_message_mref(this->mutable_field("<< index << "));\n"
+         << "  return nested_message_mref(this->mutable_field("<< index << "));\n"
          << "}\n";
   }
   return true;

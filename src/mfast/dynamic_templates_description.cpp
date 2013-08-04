@@ -284,18 +284,22 @@ class templates_loader
 
     virtual bool VisitTemplateRef(const XMLElement & element,
                                   const std::string& name_attr,
-                                  std::size_t /* index */)
+                                  std::size_t        index)
     {
-      const char* template_name = name_attr.size() ? name_attr.c_str() : 0;
+      const char* template_ns = 0;
+      const char* template_name = 0;
       templateref_instruction* instruction;
+
       if (name_attr.size()) {
-        instruction = new (*alloc_)templateref_instruction(
-          new_string(template_name),
-          get_templateNs(element));
+        template_name = new_string(name_attr.c_str());
+        template_ns = get_templateNs(element);
       }
-      else {
-        instruction = templateref_instruction::instance();
-      }
+
+      instruction = new (*alloc_)templateref_instruction(
+        static_cast<uint16_t>(index),
+        template_name,
+        template_ns);
+
       current().push_back(instruction);
       return true;
     }
@@ -311,9 +315,10 @@ class templates_loader
     virtual bool VisitExitGroup(const XMLElement & element,
                                 const std::string& name_attr,
                                 std::size_t /* numFields */,
-                                std::size_t /* index */)
+                                std::size_t        index)
     {
       group_field_instruction* instruction = new (*alloc_)group_field_instruction (
+        static_cast<uint16_t>(index),
         get_presence(element),
         get_id(element),
         new_string(name_attr.c_str()),
@@ -341,7 +346,7 @@ class templates_loader
     virtual bool VisitExitSequence(const XMLElement & element,
                                    const std::string& name_attr,
                                    std::size_t /* numFields */,
-                                   std::size_t /* index */)
+                                   std::size_t        index)
     {
       const XMLElement* length_element = element.FirstChildElement("length");
       uint32_field_instruction* length_instruction = 0;
@@ -366,6 +371,7 @@ class templates_loader
       }
 
       length_instruction = new (*alloc_)uint32_field_instruction(
+        0,
         fieldOp,
         get_presence(element),
         id,
@@ -375,6 +381,7 @@ class templates_loader
         initial_value);
 
       sequence_field_instruction* instruction = new (*alloc_)sequence_field_instruction(
+        static_cast<uint16_t>(index),
         get_presence(element),
         get_id(element),
         new_string(name_attr.c_str()),
@@ -393,7 +400,8 @@ class templates_loader
 
     template <typename INT_TYPE>
     void gen_integer_instruction(const XMLElement & element,
-                                 const std::string& name_attr)
+                                 const std::string& name_attr,
+                                 std::size_t        index)
     {
       operator_enum_t fieldOp;
       op_context_t* opContext;
@@ -409,6 +417,7 @@ class templates_loader
 
       typedef typename instruction_trait<INT_TYPE>::type intruction_t;
       intruction_t* instruction= new (*alloc_)intruction_t  (
+        static_cast<uint16_t>(index),
         fieldOp,
         get_presence(element),
         get_id(element),
@@ -424,27 +433,27 @@ class templates_loader
     virtual bool VisitInteger(const XMLElement & element,
                               int                integer_bits,
                               const std::string& name_attr,
-                              std::size_t /* index */)
+                              std::size_t        index)
     {
       bool is_unsigned = element.Name()[0] == 'u';
       if (is_unsigned) {
         if (integer_bits == 64)
-          gen_integer_instruction<uint64_t>(element, name_attr);
+          gen_integer_instruction<uint64_t>(element, name_attr, index);
         else
-          gen_integer_instruction<uint32_t>(element, name_attr);
+          gen_integer_instruction<uint32_t>(element, name_attr, index);
       }
       else {
         if (integer_bits == 64)
-          gen_integer_instruction<int64_t>(element, name_attr);
+          gen_integer_instruction<int64_t>(element, name_attr, index);
         else
-          gen_integer_instruction<int32_t>(element, name_attr);
+          gen_integer_instruction<int32_t>(element, name_attr, index);
       }
       return true;
     }
 
     virtual bool VisitDecimal(const XMLElement & element,
                               const std::string& name_attr,
-                              std::size_t /* index */)
+                              std::size_t        index)
     {
       decimal_field_instruction* instruction;
       const XMLElement* mantissa_element = element.FirstChildElement("mantissa");
@@ -498,6 +507,7 @@ class templates_loader
         }
 
         instruction = new (*alloc_)decimal_field_instruction(
+          static_cast<uint16_t>(index),
           exponent_fieldOp,
           get_presence(element),
           get_id(element),
@@ -521,6 +531,7 @@ class templates_loader
         }
 
         instruction = new (*alloc_)decimal_field_instruction(
+          static_cast<uint16_t>(index),
           fieldOp,
           get_presence(element),
           get_id(element),
@@ -535,7 +546,8 @@ class templates_loader
 
     template <typename InstructionType>
     void gen_string_instruction(const XMLElement & element,
-                                const std::string& name_attr)
+                                const std::string& name_attr,
+                                std::size_t        index)
     {
       operator_enum_t fieldOp;
       op_context_t* opContext;
@@ -545,6 +557,7 @@ class templates_loader
 
 
       InstructionType* instruction= new (*alloc_)InstructionType  (
+        static_cast<uint16_t>(index),
         fieldOp,
         get_presence(element),
         get_id(element),
@@ -560,14 +573,14 @@ class templates_loader
 
     virtual bool VisitString(const XMLElement & element,
                              const std::string& name_attr,
-                             std::size_t /* index */)
+                             std::size_t        index)
     {
       const char* charset =  get_optional_attr(element, "charset", "ascii");
       if (strcmp(charset, "ascii") == 0) {
-        gen_string_instruction<ascii_field_instruction>( element, name_attr);
+        gen_string_instruction<ascii_field_instruction>( element, name_attr, index);
       }
       else {
-        gen_string_instruction<unicode_field_instruction>(element, name_attr);
+        gen_string_instruction<unicode_field_instruction>(element, name_attr, index);
       }
       return true;
     }
@@ -615,7 +628,7 @@ class templates_loader
 
     virtual bool VisitByteVector(const XMLElement & element,
                                  const std::string& name_attr,
-                                 std::size_t /* index */)
+                                 std::size_t        index)
     {
       operator_enum_t fieldOp;
       op_context_t* opContext;
@@ -645,6 +658,7 @@ class templates_loader
       }
 
       byte_vector_field_instruction* instruction = new (*alloc_)byte_vector_field_instruction(
+        static_cast<uint16_t>(index),
         fieldOp,
         get_presence(element),
         get_id(element),

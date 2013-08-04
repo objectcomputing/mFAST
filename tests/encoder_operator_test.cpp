@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(operator_none,
+    uint64_field_instruction inst(0, operator_none,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
     BOOST_CHECK( encode_mref("\x80\x80", result, CHANGE_PREVIOUS_VALUE) );
   }
   {
-    uint64_field_instruction inst(operator_none,
+    uint64_field_instruction inst(0, operator_none,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
     // An optional field with the constant operator will occupy a single bit. If the bit is set, the value
     // is the initial value in the instruction context. If the bit is not set, the value is considered absent.
 
-    uint64_field_instruction inst(operator_constant,
+    uint64_field_instruction inst(0, operator_constant,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
   {
     // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
 
-    uint64_field_instruction inst(operator_constant,
+    uint64_field_instruction inst(0, operator_constant,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(operator_default,
+    uint64_field_instruction inst(0, operator_default,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
   }
 
   {
-    uint64_field_instruction inst(operator_default,
+    uint64_field_instruction inst(0, operator_default,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
   }
 
   {
-    uint64_field_instruction inst(operator_default,
+    uint64_field_instruction inst(0, operator_default,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
   }
 
   {
-    uint64_field_instruction inst(operator_default,
+    uint64_field_instruction inst(0, operator_default,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
   }
 
   {
-    uint64_field_instruction inst(operator_default,
+    uint64_field_instruction inst(0, operator_default,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(operator_copy,
+    uint64_field_instruction inst(0, operator_copy,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -307,7 +307,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
   }
 
   {
-    uint64_field_instruction inst(operator_copy,
+    uint64_field_instruction inst(0, operator_copy,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -341,7 +341,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
   }
 
   {
-    uint64_field_instruction inst(operator_copy,
+    uint64_field_instruction inst(0, operator_copy,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
   }
 
   {
-    uint64_field_instruction inst(operator_copy,
+    uint64_field_instruction inst(0, operator_copy,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
   }
 
   { // testing no initial value
-    uint64_field_instruction inst(operator_copy,
+    uint64_field_instruction inst(0, operator_copy,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(operator_increment,
+    uint64_field_instruction inst(0, operator_increment,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -437,7 +437,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
   }
 
   {
-    uint64_field_instruction inst(operator_increment,
+    uint64_field_instruction inst(0, operator_increment,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -472,7 +472,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
   }
 
   {
-    uint64_field_instruction inst(operator_increment,
+    uint64_field_instruction inst(0, operator_increment,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -491,7 +491,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
   }
 
   {
-    uint64_field_instruction inst(operator_increment,
+    uint64_field_instruction inst(0, operator_increment,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -528,7 +528,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
   }
 
   { // testing no initial value
-    uint64_field_instruction inst(operator_increment,
+    uint64_field_instruction inst(0, operator_increment,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -554,7 +554,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(operator_delta,
+    uint64_field_instruction inst(0, operator_delta,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -575,7 +575,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
   }
 
   {
-    uint64_field_instruction inst(operator_delta,
+    uint64_field_instruction inst(0, operator_delta,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -596,7 +596,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
   }
 
   {
-    uint64_field_instruction inst(operator_delta,
+    uint64_field_instruction inst(0, operator_delta,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -620,7 +620,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
   }
 
   {
-    uint64_field_instruction inst(operator_delta,
+    uint64_field_instruction inst(0, operator_delta,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -648,7 +648,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
   value_storage storage;
 
   {
-    decimal_field_instruction inst(operator_delta,
+    decimal_field_instruction inst(0, operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_decimal","",
@@ -667,7 +667,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
     BOOST_CHECK(encode_mref("\x80\x82\x83",  result,  CHANGE_PREVIOUS_VALUE ) );
   }
   {
-    decimal_field_instruction inst(operator_delta,
+    decimal_field_instruction inst(0, operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_decimal","",
@@ -685,7 +685,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
   }
 
   {
-    decimal_field_instruction inst(operator_delta,
+    decimal_field_instruction inst(0, operator_delta,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -711,7 +711,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_delta,
+    ascii_field_instruction inst(0, operator_delta,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
@@ -736,7 +736,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_delta,
+    ascii_field_instruction inst(0, operator_delta,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
@@ -760,7 +760,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
 
   { // testing mandatory field without initial value
 
-    ascii_field_instruction inst(operator_delta,
+    ascii_field_instruction inst(0, operator_delta,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
@@ -783,7 +783,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
   { // testing optional field with NULL substraction in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_delta,
+    ascii_field_instruction inst(0, operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -807,7 +807,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_delta,
+    ascii_field_instruction inst(0, operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -833,7 +833,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
   { // testing optional field with negative substraction in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_delta,
+    ascii_field_instruction inst(0, operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -865,7 +865,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    unicode_field_instruction inst(operator_delta,
+    unicode_field_instruction inst(0, operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_ascii","",
@@ -893,7 +893,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
   { // testing mandatory field without initial value
     //const char* default_value = "initial_string";
 
-    unicode_field_instruction inst(operator_delta,
+    unicode_field_instruction inst(0, operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_unicode","",
@@ -918,7 +918,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
   { // testing optional field with NULL substraction in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    unicode_field_instruction inst(operator_delta,
+    unicode_field_instruction inst(0, operator_delta,
                                    presence_optional,
                                    1,
                                    "test_unicode","",
@@ -945,7 +945,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    unicode_field_instruction inst(operator_delta,
+    unicode_field_instruction inst(0, operator_delta,
                                    presence_optional,
                                    1,
                                    "test_unicode","",
@@ -977,7 +977,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_tail,
+    ascii_field_instruction inst(0, operator_tail,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
@@ -1002,7 +1002,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
   { // testing mandatory field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_tail,
+    ascii_field_instruction inst(0, operator_tail,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
@@ -1036,7 +1036,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
   { // testing optional field with initial value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_tail,
+    ascii_field_instruction inst(0, operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -1063,7 +1063,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
   { // testing optional field with NULL tail value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_tail,
+    ascii_field_instruction inst(0, operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -1090,7 +1090,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
   { // testing optional field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
-    ascii_field_instruction inst(operator_tail,
+    ascii_field_instruction inst(0, operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -1131,7 +1131,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
   { // testing optional field without initial value while tail value not in the stream
     // const char* default_value = "initial_string";
 
-    ascii_field_instruction inst(operator_tail,
+    ascii_field_instruction inst(0, operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",

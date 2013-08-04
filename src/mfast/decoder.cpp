@@ -77,7 +77,7 @@ struct decoder_impl
   };
 
   typedef mref_mixin<mfast::group_mref> group_ref_type;
-  typedef mref_mixin<mfast::dynamic_message_mref> dynamic_message_ref_type;
+  typedef mref_mixin<mfast::nested_message_mref> nested_message_ref_type;
   typedef index_mixin<mref_mixin<mfast::sequence_element_mref> > sequence_element_ref_type;
 
   fast_istream strm_;
@@ -110,8 +110,8 @@ struct decoder_impl
   void post_visit(sequence_element_ref_type& mref);
   bool pre_visit(const message_mref&);
   void post_visit(const message_mref&);
-  bool pre_visit(dynamic_message_ref_type&);
-  void post_visit(dynamic_message_ref_type&);
+  bool pre_visit(nested_message_ref_type&);
+  void post_visit(nested_message_ref_type&);
 
   message_type*  decode_segment(fast_istreambuf& sb);
 };
@@ -249,11 +249,8 @@ decoder_impl::post_visit( //std::size_t /* index */,
 }
 
 inline bool
-decoder_impl::pre_visit(const message_mref& mref)
+decoder_impl::pre_visit(const message_mref& )
 {
-  mref.ensure_valid();
-  debug_ << "decoding template " << mref.name()  << " ...\n";
-
   return true;
 }
 
@@ -263,39 +260,45 @@ decoder_impl::post_visit(const message_mref&)
 }
 
 inline bool
-decoder_impl::pre_visit(decoder_impl::dynamic_message_ref_type& mref)
+decoder_impl::pre_visit(decoder_impl::nested_message_ref_type& mref)
 {
-  debug_ << "decoding dynamic templateRef ...\n";
-
-  mref.decode_pmap(this);
-
-  debug_ << "   decoded pmap -> " << current_pmap() << "\n";
-
-  decoder_presence_map& pmap = current_pmap();
-
-  if (pmap.is_next_bit_set()) {
-    uint32_t template_id;
-
-    strm_.decode(template_id, false);
-    debug_ << "   decoded template id -> " << template_id << "\n";
-
-    // find the message with corresponding template id
-    message_map_t::iterator itr = template_messages_.find(template_id);
-    if (itr != template_messages_.end())
-    {
-      active_message_ = &itr->second;
-    }
-    else {
-      BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
-                                                     << referenced_by_info(active_message_->name()));
-    }
+  if (mref.is_static()) {
+    mref.target().ensure_valid();
+    debug_ << "decoding template " << mref.name()  << " ...\n";
   }
-  mref.set_instruction(active_message_->instruction(), false);
+  else {
+    debug_ << "decoding dynamic templateRef ...\n";
+
+    mref.decode_pmap(this);
+
+    debug_ << "   decoded pmap -> " << current_pmap() << "\n";
+
+    decoder_presence_map& pmap = current_pmap();
+
+    if (pmap.is_next_bit_set()) {
+      uint32_t template_id;
+
+      strm_.decode(template_id, false);
+      debug_ << "   decoded template id -> " << template_id << "\n";
+
+      // find the message with corresponding template id
+      message_map_t::iterator itr = template_messages_.find(template_id);
+      if (itr != template_messages_.end())
+      {
+        active_message_ = &itr->second;
+      }
+      else {
+        BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
+                                                       << referenced_by_info(active_message_->name()));
+      }
+    }
+    mref.set_nested_instruction(active_message_->instruction(), false);
+  }
   return true;
 }
 
 inline void
-decoder_impl::post_visit(decoder_impl::dynamic_message_ref_type& mref)
+decoder_impl::post_visit(decoder_impl::nested_message_ref_type& mref)
 {
   mref.restore_pmap(this);
 }

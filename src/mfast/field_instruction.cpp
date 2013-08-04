@@ -392,7 +392,7 @@ void template_instruction::accept(field_instruction_visitor& visitor,
 void templateref_instruction::construct_value(value_storage& storage,
                                               allocator*       ) const
 {
-  storage.of_templateref.of_instruction.instruction_ = 0;
+  storage.of_templateref.of_instruction.instruction_ = target_;
   storage.of_templateref.content_ = 0;
 }
 
@@ -429,10 +429,5 @@ void templateref_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
-templateref_instruction* templateref_instruction::instance()
-{
-  static templateref_instruction inst("","");
-  return &inst;
-}
 
 }
