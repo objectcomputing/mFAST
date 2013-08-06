@@ -39,9 +39,8 @@ class sequence_element_cref
                           instruction_cptr     instruction);
 
     sequence_element_cref(const sequence_element_cref& other);
-    instruction_cptr instruction() const;
+    instruction_cptr instruction() const;    
     
-    aggregate_cref to_aggregate() const;
 };
 
 typedef make_aggregate_mref<sequence_element_cref> sequence_element_mref;
@@ -218,12 +217,6 @@ inline sequence_element_cref::instruction_cptr
 sequence_element_cref::instruction() const
 {
   return static_cast<instruction_cptr>(aggregate_cref::instruction());
-}
-
-inline aggregate_cref 
-sequence_element_cref::to_aggregate() const
-{
-  return *this;
 }
 
 template <typename ElementType>

@@ -33,53 +33,15 @@ namespace mfast {
 
 typedef boost::container::map<uint32_t, message_type> message_map_t;
 
+
+
 struct decoder_impl
-  : field_mutator_base
-{
-  template <typename MREF>
-  class mref_mixin
-    : public MREF
-  {
-    public:
-      mref_mixin(allocator*                      alloc,
-                 value_storage*                  storage,
-                 typename MREF::instruction_cptr inst)
-        : MREF(alloc, storage, inst)
-      {
-      }
-
-      template <typename T>
-      mref_mixin(T t)
-        : MREF(t)
-      {
-      }
-
-      mref_mixin()
-      {
-      }
-
-      void decode_pmap(decoder_impl* coder)
-      {
-        this->prev_pmap_ = coder->current_;
-        coder->current_ = &pmap_;
-        coder->strm_.decode(pmap_);
-      }
-
-      void restore_pmap(decoder_impl* coder)
-      {
-        if (this->prev_pmap_)
-          coder->current_ = this->prev_pmap_;
-      }
-
-    private:
-      decoder_presence_map pmap_;
-      decoder_presence_map* prev_pmap_;
+{  
+  
+  enum {
+    visit_absent = 1
   };
-
-  typedef mref_mixin<mfast::group_mref> group_ref_type;
-  typedef mref_mixin<mfast::nested_message_mref> nested_message_ref_type;
-  typedef index_mixin<mref_mixin<mfast::sequence_element_mref> > sequence_element_ref_type;
-
+  
   fast_istream strm_;
   dictionary_resetter resetter_;
 
@@ -97,21 +59,40 @@ struct decoder_impl
   ~decoder_impl();
   void reset_messages();
   decoder_presence_map& current_pmap();
+  
+  
+  struct pmap_state
+  {
+    decoder_presence_map pmap_;
+    decoder_presence_map* prev_pmap_;
+  
+    pmap_state() 
+      : prev_pmap_(0)
+    {
+    }
+  };
+  
+  void decode_pmap(pmap_state& state)
+  {
+    state.prev_pmap_ = this->current_;
+    this->current_ = &state.pmap_;
+    this->strm_.decode(state.pmap_);
+  }
+
+  void restore_pmap(pmap_state& state)
+  {
+    if (state.prev_pmap_)
+      this->current_ = state.prev_pmap_;
+  }
+  
 
   template <typename SimpleMRef>
   void visit(SimpleMRef &mref);
-
-  bool pre_visit(group_ref_type& mref);
-  void post_visit(group_ref_type& mref);
-  bool pre_visit(sequence_mref& mref);
-  void post_visit(sequence_mref&);
-
-  bool pre_visit(sequence_element_ref_type& mref);
-  void post_visit(sequence_element_ref_type& mref);
-  bool pre_visit(const message_mref&);
-  void post_visit(const message_mref&);
-  bool pre_visit(nested_message_ref_type&);
-  void post_visit(nested_message_ref_type&);
+  
+  void visit(group_mref& mref, int);  
+  void visit(sequence_mref& mref, int);
+  void visit(nested_message_mref& mref, int);
+  void visit(sequence_element_mref& mref, int);
 
   message_type*  decode_segment(fast_istreambuf& sb);
 };
@@ -164,43 +145,41 @@ decoder_impl::visit(SimpleMRef& mref)
     debug_ << "   decoded " << mref.name() << " is absent\n";
 }
 
-inline bool
-decoder_impl::pre_visit(group_ref_type& mref)
+inline void
+decoder_impl::visit(group_mref& mref, int)
 {
   debug_ << "decoding group " << mref.name();
-
+  
   // If a group field is optional, it will occupy a single bit in the presence map.
   // The contents of the group may appear in the stream iff the bit is set.
-
   if (mref.optional())
   {
     debug_ << " : current pmap = " << current_pmap() << "\n";
     if (!current_pmap().is_next_bit_set()) {
       debug_ << "        " << mref.name() << " is absent\n";
       mref.as_absent();
-      return false;
+      return;
     }
   }
   else {
     debug_ << " : mandatory\n";
   }
 
-  if (mref.instruction()->has_pmap_bit()) {
-    mref.decode_pmap(this);
+  pmap_state state;
+  
+  if (mref.instruction()->segment_pmap_size() > 0) {
+    decode_pmap(state);
     debug_ << "        " << mref.name() << " has group pmap -> " << current_pmap() << "\n";
   }
   mref.ensure_valid();
-  return true;
+
+  mref.accept_mutator(*this);
+  
+  restore_pmap(state);
 }
 
 inline void
-decoder_impl::post_visit(group_ref_type& mref)
-{
-  mref.restore_pmap(this);
-}
-
-inline bool
-decoder_impl::pre_visit(sequence_mref& mref)
+decoder_impl::visit(sequence_mref& mref, int)
 {
   debug_ << "decoding sequence " << mref.name()  << " ---\n";
 
@@ -220,48 +199,36 @@ decoder_impl::pre_visit(sequence_mref& mref)
     debug_ << "  " << mref.name() << "is absent\n";
     mref.as_absent();
   }
-  return length_mref.present() && length_mref.value() > 0;
+  if (length_mref.present() && length_mref.value() > 0)
+  {
+    mref.accept_mutator(*this);
+  }
 }
 
 inline void
-decoder_impl::post_visit(sequence_mref&)
+decoder_impl::visit(sequence_element_mref& mref, int index)
 {
-}
+  debug_ << "decoding  element[" << index << "] : segment pmap size = " <<  mref.instruction()->segment_pmap_size() << "\n";
 
-inline bool
-decoder_impl::pre_visit(decoder_impl::sequence_element_ref_type& mref)
-{
-  debug_ << "decoding  element[" << mref.index << "] : has pmap bit = " <<  mref.instruction()->has_pmap_bit() << "\n";
-
-  if (mref.instruction()->has_pmap_bit())
+  pmap_state state;
+  if (mref.instruction()->segment_pmap_size() > 0)
   {
-    mref.decode_pmap(this);
+    decode_pmap(state);
     debug_ << "    decoded pmap -> " <<  current_pmap() << "\n";
   }
-  return true;
+  
+  mref.accept_mutator(*this);
+  
+  restore_pmap(state);
 }
+
 
 inline void
-decoder_impl::post_visit( //std::size_t /* index */,
-  decoder_impl::sequence_element_ref_type& mref)
+decoder_impl::visit(nested_message_mref& mref, int)
 {
-  mref.restore_pmap(this);
-}
-
-inline bool
-decoder_impl::pre_visit(const message_mref& )
-{
-  return true;
-}
-
-inline void
-decoder_impl::post_visit(const message_mref&)
-{
-}
-
-inline bool
-decoder_impl::pre_visit(decoder_impl::nested_message_ref_type& mref)
-{
+  pmap_state state;
+  message_type* saved_active_message = active_message_;
+    
   if (mref.is_static()) {
     mref.target().ensure_valid();
     debug_ << "decoding template " << mref.name()  << " ...\n";
@@ -269,7 +236,7 @@ decoder_impl::pre_visit(decoder_impl::nested_message_ref_type& mref)
   else {
     debug_ << "decoding dynamic templateRef ...\n";
 
-    mref.decode_pmap(this);
+    decode_pmap(state);
 
     debug_ << "   decoded pmap -> " << current_pmap() << "\n";
 
@@ -292,15 +259,13 @@ decoder_impl::pre_visit(decoder_impl::nested_message_ref_type& mref)
                                                        << referenced_by_info(active_message_->name()));
       }
     }
-    mref.set_nested_instruction(active_message_->instruction(), false);
+    mref.set_target_instruction(active_message_->instruction(), false);
   }
-  return true;
-}
-
-inline void
-decoder_impl::post_visit(decoder_impl::nested_message_ref_type& mref)
-{
-  mref.restore_pmap(this);
+  mref.accept_mutator(*this);
+  
+  restore_pmap(state);
+  active_message_ = saved_active_message;
+  
 }
 
 message_type*

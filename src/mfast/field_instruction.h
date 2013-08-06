@@ -151,6 +151,8 @@ class field_instruction
                             allocator*           alloc) const;
 
     virtual void accept(field_instruction_visitor&, void*) const=0;
+    virtual std::size_t pmap_size() const;
+
     bool is_nullable() const
     {
       return nullable_flag_;
@@ -186,11 +188,6 @@ class field_instruction
       return static_cast<field_type_enum_t>(field_type_);
     }
 
-    bool has_pmap_bit() const
-    {
-      return has_pmap_bit_;
-    }
-
     operator_enum_t field_operator() const
     {
       return static_cast<operator_enum_t>(operator_id_);
@@ -214,8 +211,7 @@ class field_instruction
       , operator_id_(operator_id)
       , optional_flag_(optional)
       , nullable_flag_( optional &&  (operator_id != operator_constant) )
-      , has_pmap_bit_(operator_id > operator_delta ||
-                      ((operator_id == operator_constant) && optional))
+      , has_pmap_bit_(operator_id > operator_delta || ((operator_id == operator_constant) && optional))
       , field_type_(field_type)
       , id_(id)
       , name_(name)
@@ -224,6 +220,7 @@ class field_instruction
     }
 
   protected:
+
     uint16_t field_index_;
     uint16_t operator_id_ : 4;
     uint16_t optional_flag_ : 1;
@@ -462,8 +459,8 @@ class decimal_field_instruction
         this->default_value_.of_decimal.mantissa_ = mantissa_instruction->initial_value();
       }
 
-      if (!has_pmap_bit_) {
-        has_pmap_bit_ = mantissa_instruction->has_pmap_bit();
+      if (has_pmap_bit_ == 0) {
+        has_pmap_bit_ = mantissa_instruction->pmap_size();
       }
     }
 
@@ -728,11 +725,13 @@ struct aggregate_instruction_base
                              uint32_t    subinstructions_count,
                              const char* typeref_name,
                              const char* typeref_ns)
-    : dictionary_(dictionary),subinstructions_(static_cast<field_instruction**>(subinstructions))
+    : dictionary_(dictionary)
     , subinstructions_count_(subinstructions_count)
     , typeref_name_(typeref_name)
     , typeref_ns_(typeref_ns)
+    , segment_pmap_size_(0)
   {
+    set_subinstructions(static_cast<field_instruction**>(subinstructions));
   }
 
   void construct_group_subfields(value_storage* group_content,
@@ -769,30 +768,27 @@ struct aggregate_instruction_base
     return subinstructions_[index];
   }
 
-  bool subinstruction_has_pmap_bit() const
+  std::size_t segment_pmap_size() const
   {
-    for (uint32_t i = 0; i < subinstructions_count_; ++i) {
-      if (subinstruction(i)->has_pmap_bit())
-        return true;
-    }
-    return false;
+    return segment_pmap_size_;
   }
 
-  std::size_t pmap_size() const
+  void set_subinstructions(field_instruction** subinstructions)
   {
-    std::size_t n = 0;
+    subinstructions_ = subinstructions;
+    segment_pmap_size_ = 0;
     for (uint32_t i = 0; i < subinstructions_count_; ++i) {
-      if (subinstruction(i)->has_pmap_bit())
-        ++n;
+      segment_pmap_size_ += subinstruction(i)->pmap_size();
     }
-    return n;
   }
 
   const char* dictionary_;
-  field_instruction** subinstructions_;
   uint32_t subinstructions_count_;
   const char* typeref_name_;
   const char* typeref_ns_;
+  std::size_t segment_pmap_size_;
+private:
+  field_instruction** subinstructions_;
 };
 
 class group_field_instruction
@@ -822,7 +818,7 @@ class group_field_instruction
                                    typeref_name,
                                    typeref_ns)
     {
-      has_pmap_bit_ = subinstruction_has_pmap_bit();
+      has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
     }
 
     virtual void construct_value(value_storage& storage,
@@ -901,7 +897,7 @@ class sequence_field_instruction
                                    typeref_ns)
       , sequence_length_instruction_(sequence_length_instruction)
     {
-      has_pmap_bit_ = subinstruction_has_pmap_bit();
+      has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
     }
 
     virtual void construct_value(value_storage& storage,
@@ -979,7 +975,6 @@ class template_instruction
       , reset_(reset)
     {
       field_type_ = field_type_template;
-      has_pmap_bit_ = true;
     }
 
     const char* template_ns() const
@@ -1045,12 +1040,15 @@ class templateref_instruction
   : public field_instruction
 {
   public:
+
     templateref_instruction(uint16_t    field_index,
-                            const char* name = 0,
-                            const char* ns = 0)
+                            const char* name = "",
+                            const char* ns = "")
       : field_instruction(field_index, operator_none, field_type_templateref, presence_mandatory, 0, name, ns)
       , target_(0)
     {
+      // I used empty string instead of null pointer for name to represent dynamic templateRef because I wanted
+      // to be able to print the name of dynamic templateRef directly (albeit empty) without using an if branch.
     }
 
     templateref_instruction(uint16_t                    field_index,
@@ -1065,6 +1063,7 @@ class templateref_instruction
     virtual void destruct_value(value_storage& storage,
                                 allocator*     alloc) const;
 
+    virtual std::size_t pmap_size() const;
 
     /// Perform deep copy
     virtual void copy_value(const value_storage& src,
@@ -1077,6 +1076,12 @@ class templateref_instruction
     {
       return target_;
     }
+
+    bool is_static() const
+    {
+      return name()[0] != 0;
+    }
+
   private:
     const template_instruction* target_;
 };

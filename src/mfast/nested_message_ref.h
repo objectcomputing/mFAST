@@ -52,13 +52,26 @@ class nested_message_cref
 
     bool is_static() const
     {
-      return instruction()->name() != 0;
+      return instruction()->is_static();
     }
     
     message_cref target() const 
     {
       return message_cref(*this);
     }
+    
+    const template_instruction* target_instruction() const
+    {
+      return storage()->of_templateref.of_instruction.instruction_;
+    }
+    
+    operator aggregate_cref() const
+    {
+      return aggregate_cref(storage()->of_group.content_, target_instruction());
+    }
+    
+    template <typename FieldAccessor>
+    void accept_accessor(FieldAccessor&) const;
 
 };
 
@@ -84,36 +97,44 @@ class nested_message_mref
     
     message_mref target() const 
     {
-      return message_mref(alloc_, storage(), storage()->of_templateref.of_instruction.instruction_);
+      return message_mref(alloc_, this->storage(), this->target_instruction());
+    }
+    
+    operator aggregate_mref() const
+    {
+      return aggregate_mref(alloc_, storage()->of_group.content_, this->target_instruction());
     }
 
+    template <typename FieldMutator>
+    void accept_mutator(FieldMutator&) const;
+    
     template <typename MESSAGE_MREF>
     MESSAGE_MREF as() const
     {
-      set_nested_instruction(MESSAGE_MREF::the_instruction, true);
-      return MESSAGE_MREF(alloc_, storage());
+      set_target_instruction(MESSAGE_MREF::the_instruction, true);
+      return MESSAGE_MREF(alloc_, this->storage());
     }
 
     message_mref rebind(const template_instruction* inst) const
     {
-      set_nested_instruction(inst, true);
-      return message_mref(alloc_, storage(), inst);
+      set_target_instruction(inst, true);
+      return message_mref(alloc_, this->storage(), inst);
     }
 
-    void set_nested_instruction(const template_instruction* inst, bool construct_subfields = true) const
+    void set_target_instruction(const template_instruction* inst, bool construct_subfields = true) const
     {
-      const template_instruction*& target = storage()->of_templateref.of_instruction.instruction_;
+      const template_instruction*& target_inst = this->storage()->of_templateref.of_instruction.instruction_;
       
-      assert(!is_static() || target == 0);
+      assert(!is_static() || target_inst == 0);
 
-      if (inst == target)
+      if (inst == target_inst)
         return;
 
-      if (target) {
-        target->destruct_value(*storage(), alloc_);
+      if (target_inst) {
+        target_inst->destruct_value(*this->storage(), alloc_);
       }
-      inst->construct_value(*storage(), 0, alloc_, construct_subfields);
-      target = inst;
+      inst->construct_value(*this->storage(), 0, alloc_, construct_subfields);
+      target_inst = inst;
     }
 };
 

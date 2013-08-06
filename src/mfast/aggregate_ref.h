@@ -34,7 +34,7 @@ class aggregate_cref
                    instruction_cptr     instruction);
 
     aggregate_cref(const aggregate_cref& other);
-
+    
     size_t fields_count() const;
 
     field_cref const_field(size_t index) const;
@@ -50,13 +50,21 @@ class aggregate_cref
     const field_instruction* subinstruction(size_t index) const;
 
     const value_storage* field_storage(size_t index) const;
+    
+    template <typename FieldAccesor>
+    void accept_accessor(FieldAccesor&) const;
 
   protected:
     aggregate_cref& operator= (const aggregate_cref&);
 
+    const value_storage* storage() const
+    {
+      return storage_;
+    }
     const aggregate_instruction_base* instruction_;
     const value_storage* storage_;
-    friend class field_storage_helper;
+    
+    friend class detail::field_storage_helper;
 };
 
 template <typename ConstRef>
@@ -70,7 +78,8 @@ class make_aggregate_mref
 
     make_aggregate_mref();
 
-    make_aggregate_mref(const make_aggregate_mref& other);
+    template <typename U>
+    make_aggregate_mref(const make_aggregate_mref<U>& other);
 
     make_aggregate_mref(mfast::allocator* alloc,
                         value_storage*    storage,
@@ -80,7 +89,10 @@ class make_aggregate_mref
 
     mfast::allocator* allocator() const;
     
-    make_aggregate_mref<aggregate_cref> to_aggregate() const;
+    
+    template <typename FieldMutator>
+    void accept_mutator(FieldMutator&) const;
+    
   protected:
     template <class FieldMutator> friend class field_mutator_adaptor;
 
@@ -92,6 +104,7 @@ class make_aggregate_mref
     void ensure_valid() const;
 
     mfast::allocator* alloc_;
+    friend class detail::field_storage_helper;
 };
 
 typedef make_aggregate_mref<aggregate_cref> aggregate_mref;
@@ -168,10 +181,11 @@ make_aggregate_mref<ConstRef>::make_aggregate_mref()
 }
 
 template <typename ConstRef>
+template <typename U>
 inline
-make_aggregate_mref<ConstRef>::make_aggregate_mref(const make_aggregate_mref<ConstRef>& other)
-  : ConstRef(other)
-  , alloc_(other.alloc_)
+make_aggregate_mref<ConstRef>::make_aggregate_mref(const make_aggregate_mref<U>& other)
+  : ConstRef(detail::field_storage_helper::storage_ptr_of(other), other.instruction())
+  , alloc_(other.allocator())
 {
 }
 
@@ -192,7 +206,7 @@ make_aggregate_mref<ConstRef>::mutable_field(size_t index) const
   assert(index < this->fields_count());
   return field_mref(this->alloc_,
                     this->field_storage(index),
-                    this->instruction()->subinstructions_[index]);
+                    this->instruction()->subinstruction(index));
 }
 
 template <typename ConstRef>
@@ -221,12 +235,6 @@ make_aggregate_mref<ConstRef>::ensure_valid() const
 }
 
 
-template <typename ConstRef>
-inline make_aggregate_mref<aggregate_cref> 
-make_aggregate_mref<ConstRef>::to_aggregate() const
-{
-  return make_aggregate_mref<aggregate_cref> (alloc_, const_cast<value_storage*>(this->storage_), this->instruction());
-}
 
 }
 

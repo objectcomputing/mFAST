@@ -286,19 +286,18 @@ class templates_loader
                                   const std::string& name_attr,
                                   std::size_t        index)
     {
-      const char* template_ns = 0;
-      const char* template_name = 0;
       templateref_instruction* instruction;
 
       if (name_attr.size()) {
-        template_name = new_string(name_attr.c_str());
-        template_ns = get_templateNs(element);
+        instruction = new (*alloc_)templateref_instruction(
+          static_cast<uint16_t>(index),
+          new_string(name_attr.c_str()),
+          get_templateNs(element));
       }
-
-      instruction = new (*alloc_)templateref_instruction(
-        static_cast<uint16_t>(index),
-        template_name,
-        template_ns);
+      else {
+        instruction = new (*alloc_)templateref_instruction(
+          static_cast<uint16_t>(index));
+      }
 
       current().push_back(instruction);
       return true;

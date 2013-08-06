@@ -142,7 +142,7 @@ field_ref_with_id(value_storage*                    storage,
   if (helper) {
     int index = helper->find_subinstruction_index_by_id(id);
     if (index >= 0)
-      return field_mref(alloc, &storage[index], helper->subinstructions_[index]);
+      return field_mref(alloc, &storage[index], helper->subinstruction(index));
   }
   return field_mref();
 }
@@ -156,7 +156,7 @@ field_ref_with_name(value_storage*                    storage,
   if (helper) {
     int index = helper->find_subinstruction_index_by_name(name);
     if (index >= 0)
-      return field_mref(alloc, &storage[index], helper->subinstructions_[index]);
+      return field_mref(alloc, &storage[index], helper->subinstruction(index));
   }
   return field_mref();
 }

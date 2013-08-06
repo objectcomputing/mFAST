@@ -68,7 +68,7 @@ class message_cref
 
     const char* name() const;
     
-    aggregate_cref to_aggregate() const;
+    operator aggregate_cref() const;
 
     size_t fields_count() const;
 
@@ -194,8 +194,8 @@ message_cref::name() const
   return instruction_->name();
 }
 
-inline aggregate_cref 
-message_cref::to_aggregate() const
+inline 
+message_cref::operator aggregate_cref() const
 {
   return aggregate_cref(storage_->of_group.content_, instruction_);
 }
@@ -203,20 +203,20 @@ message_cref::to_aggregate() const
 inline field_cref
 message_cref::const_field(std::size_t index) const
 {
-  return to_aggregate().const_field(index);
+  return aggregate_cref(*this).const_field(index);
 }
 
 /// return -1 if no such field is found
 inline int
 message_cref::field_index_with_id(std::size_t id) const
 {
-  return to_aggregate().field_index_with_id(id);
+  return aggregate_cref(*this).field_index_with_id(id);
 }
 
 inline int
 message_cref::field_index_with_name(const char* name) const
 {
-  return to_aggregate().field_index_with_name(name);
+  return aggregate_cref(*this).field_index_with_name(name);
 }
 
 

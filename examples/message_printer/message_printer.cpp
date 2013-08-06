@@ -46,17 +46,17 @@ operator << (std::ostream& os, const indenter& indent)
 }
 
 class message_printer
-  : public field_accessor_base
 {
   std::ostream& os_;
   indenter indent_;
   
-
-
   public:
     
-    typedef index_mixin<sequence_element_cref> sequence_element_ref_type;
-
+    enum {
+      visit_absent = 0
+    };
+        
+    
     message_printer(std::ostream& os)
       : os_(os)
     {
@@ -70,26 +70,21 @@ class message_printer
     }
 
     template <typename CompositeTypeRef>
-    bool pre_visit(const CompositeTypeRef& ref)
+    void visit(const CompositeTypeRef& ref, int)
     {
       os_ << indent_ << ref.name() << ":\n";
       ++indent_;
-      return true;
-    }
-
-    template <typename CompositeTypeRef>
-    void post_visit(const CompositeTypeRef& /* ref */)
-    {
+      ref.accept_accessor(*this);
       --indent_;
     }
 
-    bool pre_visit(const sequence_element_ref_type&  ref)
+    void visit(const sequence_element_cref&  ref, int index)
     {
-      os_ << indent_ <<  "[" << ref.index << "]:\n";
+      os_ << indent_ <<  "[" << index << "]:\n";
       ++indent_;
-      return true;
+      ref.accept_accessor(*this);
+      --indent_;
     }
-
 };
 
 int main()

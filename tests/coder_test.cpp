@@ -210,11 +210,12 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
   message_mref target(msg_ref.mutable_field(1));
   target.mutable_field(0).as(2);
   target.mutable_field(1).as(3);
-
+                                 // pmap | template id | field1 | field2 | field 3 |
+                                 //  F8         82        81        82       83     
   BOOST_CHECK(test_case.encoding(msg_ref,"\xF8\x82\x81\x82\x83"));
-  BOOST_CHECK(test_case.decoding("\xF8\x82\x81\x82\x83", msg_ref));
-  
+  BOOST_CHECK(test_case.decoding("\xF8\x82\x81\x82\x83", msg_ref));  
 }
+
 
 BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
 {
@@ -249,7 +250,6 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
 
   BOOST_CHECK(test_case.encoding(msg_ref,"\xE0\x82\x81\xF0\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xE0\x82\x81\xF0\x81\x82\x83", msg_ref));
-
 }
 
 BOOST_AUTO_TEST_CASE(manual_reset_test)

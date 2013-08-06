@@ -46,12 +46,6 @@ class field_storage_helper
     {
       return const_cast<value_storage*>(ref.storage());
     }
-    
-    // template <typename Ref>
-   //  value_storage* field_storage(const Ref& ref, std::size_t i)
-   //  {
-   //    return ref.field_storage(i);
-   //  }
 };
 
 }
@@ -282,7 +276,7 @@ field_ref_with_id(const value_storage*        storage,
 
     int index = helper->find_subinstruction_index_by_id(id);
     if (index >= 0)
-      return field_cref(&storage[index], helper->subinstructions_[index]);
+      return field_cref(&storage[index], helper->subinstruction(index));
   }
   return field_cref();
 }
@@ -295,7 +289,7 @@ field_ref_with_name(const value_storage*        storage,
   if (helper) {
     int index = helper->find_subinstruction_index_by_name(name);
     if (index >= 0)
-      return field_cref(&storage[index], helper->subinstructions_[index]);
+      return field_cref(&storage[index], helper->subinstruction(index));
   }
   return field_cref();
 }

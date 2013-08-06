@@ -132,10 +132,10 @@ void dictionary_builder::build_group(const field_instruction*    fi,
     static_cast<field_instruction**>( alloc_->allocate( instructions_count *
                                                         sizeof(field_instruction*) ) );
   for (size_t i = 0; i < instructions_count; ++i) {
-    src->subinstructions_[i]->accept(*this, &subinstructions[i]);
+    src->subinstruction(i)->accept(*this, &subinstructions[i]);
   }
 
-  dest->subinstructions_ = subinstructions;
+  dest->set_subinstructions(subinstructions);
 
   current_type_ = inherited_type;
   current_ns_ = inherited_ns;
@@ -169,13 +169,13 @@ void dictionary_builder::visit(const template_instruction* src_inst, void* dest_
 
 void dictionary_builder::visit(const templateref_instruction* src_inst, void* dest_inst)
 {
-  if (src_inst->name() != 0)
+  templateref_instruction*& dest = *static_cast<templateref_instruction**>(dest_inst);
+  if (src_inst->is_static())
   {
     // this is static templateRef, we have to bind to the right template instruction
-    template_instruction*& dest = *static_cast<template_instruction**>(dest_inst);
     template_name_map_t::iterator itr = template_name_map_.find( qualified_name(src_inst->ns(), src_inst->name()) );
     if (itr != template_name_map_.end()) {
-      dest = itr->second;
+      dest = new (*alloc_) templateref_instruction( src_inst->field_index(), itr->second);
     }
     else {
       BOOST_THROW_EXCEPTION(template_not_found_error(src_inst->name(), current_template_.c_str()));
@@ -183,8 +183,7 @@ void dictionary_builder::visit(const templateref_instruction* src_inst, void* de
   }
   else {
     // this is dynamic templateRef, it can only be binded at decoding time
-    const templateref_instruction*& dest = *static_cast<const templateref_instruction**>(dest_inst);
-    dest = src_inst;
+    dest = new (*alloc_) templateref_instruction( src_inst->field_index() );
   }
 }
 

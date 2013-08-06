@@ -59,6 +59,12 @@ field_instruction::field_type_name() const
   return names[this->field_type()];
 }
 
+std::size_t 
+field_instruction::pmap_size() const
+{
+  return has_pmap_bit_;
+}
+
 //////////////////////////////////////////////////////
 
 void integer_field_instruction_base::construct_value(value_storage& storage,
@@ -390,10 +396,18 @@ void template_instruction::accept(field_instruction_visitor& visitor,
 ///////////////////////////////////////////////////////////
 
 void templateref_instruction::construct_value(value_storage& storage,
-                                              allocator*       ) const
+                                              allocator*     alloc) const
 {
   storage.of_templateref.of_instruction.instruction_ = target_;
-  storage.of_templateref.content_ = 0;
+  if (target_) {
+    storage.of_templateref.content_ = static_cast<value_storage*>(
+      alloc->allocate(target_->group_content_byte_count()));
+
+    target_->construct_group_subfields(storage.of_templateref.content_, alloc);    
+  }
+  else {
+    storage.of_templateref.content_ = 0;
+  }
 }
 
 void templateref_instruction::destruct_value(value_storage& storage,
@@ -429,5 +443,12 @@ void templateref_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
+std::size_t templateref_instruction::pmap_size() const
+{
+  if (target_) {
+    return target_->segment_pmap_size();
+  }
+  return 0;
+}
 
 }

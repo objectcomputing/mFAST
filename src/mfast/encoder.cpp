@@ -34,73 +34,14 @@ namespace mfast
 {
 
 
-std::size_t pmap_size(const group_cref& ref)
-{
-   return ref.instruction()->pmap_size();
-}
-
-std::size_t pmap_size(const sequence_element_cref& ref)
-{
-   return ref.instruction()->pmap_size();
-}
-
-std::size_t pmap_size(const nested_message_cref& ref)
-{
-   return ref.target().instruction()->pmap_size();
-}
-
 struct encoder_impl
-  : field_accessor_base
-  , detail::field_storage_helper
+  : detail::field_storage_helper
 {
-  template <typename CREF>
-  class cref_mixin
-    : public CREF
-  {
-    public:
-
-
-      cref_mixin(value_storage*                  storage,
-                 typename CREF::instruction_cptr inst)
-        : CREF(storage, inst)
-      {
-      }
-
-      template <typename T>
-      cref_mixin(T t)
-        : CREF(t)
-      {
-      }
-
-      cref_mixin()
-      {
-      }
-
-      void setup_pmap(encoder_impl* coder)
-      {
-        this->prev_pmap_ = coder->current_;
-        coder->current_ = &pmap_;
-        pmap_.init(&coder->strm_, pmap_size(*this));
-      }
-
-      void commit_pmap(encoder_impl* coder)
-      {
-        if (this->prev_pmap_) {
-          pmap_.commit();
-          coder->current_ = this->prev_pmap_;
-        }
-      }
-
-    private:
-      encoder_presence_map pmap_;
-      encoder_presence_map* prev_pmap_;
+  
+  enum {
+    visit_absent = 1
   };
-
-  typedef cref_mixin<mfast::group_cref> group_ref_type;
-  typedef cref_mixin<mfast::sequence_element_cref> sequence_element_ref_type;
-  typedef cref_mixin<mfast::nested_message_cref> nested_message_ref_type;
-
-
+  
   fast_ostream strm_;
   dictionary_resetter resetter_;
   dictionary_value_destroyer value_destroyer_;
@@ -116,20 +57,43 @@ struct encoder_impl
   encoder_impl(allocator* alloc);
   ~encoder_impl();
   encoder_presence_map& current_pmap();
+  
+  
+  struct pmap_state
+  {
+    encoder_presence_map pmap_;
+    encoder_presence_map* prev_pmap_;
+  
+    pmap_state()
+      : prev_pmap_(0)
+    {
+    }
+  };
+  
+  
+  void setup_pmap(pmap_state& state, std::size_t sz)
+  {
+    state.prev_pmap_ = this->current_;
+    this->current_ = &state.pmap_;
+    state.pmap_.init(&this->strm_, sz);
+  }
+
+  void commit_pmap(pmap_state& state)
+  {
+    if (state.prev_pmap_) {
+      state.pmap_.commit();
+      this->current_ = state.prev_pmap_;
+    }
+  }
+  
 
   template <typename SimpleCRef>
   void visit(SimpleCRef &cref);
 
-  bool pre_visit(group_ref_type& cref);
-  void post_visit(group_ref_type& cref);
-  bool pre_visit(sequence_cref& cref);
-  void post_visit(sequence_cref&);
-  bool pre_visit(sequence_element_ref_type& cref);
-  void post_visit(sequence_element_ref_type& cref);
-  bool pre_visit(const message_cref&);
-  void post_visit(const message_cref&);
-  bool pre_visit(nested_message_ref_type&);
-  void post_visit(nested_message_ref_type&);
+  void visit(group_cref& cref, int);
+  void visit(sequence_cref&, int);
+  void visit(sequence_element_cref& cref, int);
+  void visit(nested_message_cref&, int);
 
   template_instruction*  encode_segment_preemble(uint32_t template_id, bool force_reset);
   void encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool force_reset);
@@ -166,8 +130,8 @@ encoder_impl::visit(SimpleCRef& cref)
 
 }
 
-inline bool
-encoder_impl::pre_visit(group_ref_type& cref)
+inline void
+encoder_impl::visit(group_cref& cref, int)
 {
 
   // If a group field is optional, it will occupy a single bit in the presence map.
@@ -178,24 +142,22 @@ encoder_impl::pre_visit(group_ref_type& cref)
     current_pmap().set_next_bit(cref.present());
 
     if (cref.absent())
-      return false;
+      return;
   }
+  
+  pmap_state state;
 
-
-  if (cref.instruction()->has_pmap_bit()) {
-    cref.setup_pmap(this);
+  if (cref.instruction()->segment_pmap_size() > 0) {
+    setup_pmap(state, cref.instruction()->segment_pmap_size() );
   }
-  return true;
+  
+  cref.accept_accessor(*this);
+  
+  commit_pmap(state);
 }
 
 inline void
-encoder_impl::post_visit(group_ref_type& cref)
-{
-  cref.commit_pmap(this);
-}
-
-inline bool
-encoder_impl::pre_visit(sequence_cref& cref)
+encoder_impl::visit(sequence_cref& cref, int)
 {
 
   uint32_field_instruction* length_instruction = cref.instruction()->sequence_length_instruction_;
@@ -210,60 +172,44 @@ encoder_impl::pre_visit(sequence_cref& cref)
 
   this->visit(length_mref);
 
-  return length_mref.present() && length_mref.value() > 0;
+  if (length_mref.present() && length_mref.value() > 0)
+    cref.accept_accessor(*this);
+
 }
 
 inline void
-encoder_impl::post_visit(sequence_cref&)
+encoder_impl::visit(sequence_element_cref& cref, int)
 {
-}
-
-inline bool
-encoder_impl::pre_visit(encoder_impl::sequence_element_ref_type& cref)
-{
-  if (cref.instruction()->has_pmap_bit())
+  pmap_state state;
+  if (cref.instruction()->segment_pmap_size() > 0)
   {
-    cref.setup_pmap(this);
+    setup_pmap(state, cref.instruction()->segment_pmap_size());
   }
-  return true;
+  cref.accept_accessor(*this);
+  commit_pmap(state);
 }
+
 
 inline void
-encoder_impl::post_visit(encoder_impl::sequence_element_ref_type& cref)
+encoder_impl::visit(nested_message_cref& cref, int)
 {
-  cref.commit_pmap(this);
-}
-
-inline bool
-encoder_impl::pre_visit(const message_cref&)
-{
-  return true;
-}
-
-inline void
-encoder_impl::post_visit(const message_cref&)
-{
-}
-
-inline bool
-encoder_impl::pre_visit(encoder_impl::nested_message_ref_type& cref)
-{
+  pmap_state state;
+  int64_t saved_message_id = active_message_id_;
+  
   if (!cref.is_static()) {
-    cref.setup_pmap(this);
+    state.prev_pmap_ = this->current_;
+    this->current_ = &state.pmap_;
+    
     // we have to replace the target instruction in cref so that the previous values of
     // the inner fields can be accessed.
     const template_instruction*& target_inst = detail::field_storage_helper::storage_of(cref).of_templateref.of_instruction.instruction_;
     target_inst = encode_segment_preemble(target_inst->id(), false);
   }
-  return true;
-}
-
-inline void
-encoder_impl::post_visit(encoder_impl::nested_message_ref_type& cref)
-{
-  if (!cref.is_static()) {
-    cref.commit_pmap(this);
-  }
+  
+  cref.accept_accessor(*this);
+  
+  commit_pmap(state);
+  active_message_id_ = saved_message_id;
 }
 
 template_instruction*
@@ -274,6 +220,7 @@ encoder_impl::encode_segment_preemble(uint32_t template_id, bool force_reset)
 
   if (itr != templates_map_.end()) {
     instruction = itr->second;
+    current_pmap().init(&this->strm_, instruction->segment_pmap_size());
   }
   else {
     BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id));
@@ -281,7 +228,8 @@ encoder_impl::encode_segment_preemble(uint32_t template_id, bool force_reset)
 
   if ( force_reset ||  instruction->has_reset_attribute())
     resetter_.reset();
-
+  
+  
   bool need_encode_template_id = (active_message_id_ != template_id);
   current_pmap().set_next_bit(need_encode_template_id);
 
@@ -300,7 +248,6 @@ encoder_impl::encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool
 
   encoder_presence_map pmap;
   this->current_ = &pmap;
-  pmap.init(&this->strm_, cref.instruction()->pmap_size());
 
   template_instruction* instruction = encode_segment_preemble(cref.id(), force_reset);
 

@@ -59,7 +59,7 @@ class group_cref
       return instruction()->subinstructions_count_;
     }
     
-    aggregate_cref to_aggregate() const;
+    operator aggregate_cref() const;
 
     field_cref const_field(size_t index) const;
 
@@ -129,7 +129,7 @@ class make_group_mref
 
     field_mref mutable_field(size_t index) const;
     
-    aggregate_mref to_aggregate() const;
+    operator aggregate_mref() const;
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
@@ -146,8 +146,8 @@ typedef make_group_mref<group_cref> group_mref;
 ///////////////////////////////////////////////////////////////////////////////
 
 
-inline aggregate_cref 
-group_cref::to_aggregate() const
+inline 
+group_cref::operator aggregate_cref() const
 {
   return aggregate_cref(static_cast<const value_storage*>(storage_->of_array.content_), instruction());
 }
@@ -155,20 +155,20 @@ group_cref::to_aggregate() const
 inline field_cref
 group_cref::const_field(std::size_t index) const
 {
-  return to_aggregate().const_field(index);
+  return aggregate_cref(*this).const_field(index);
 }
 
 /// return -1 if no such field is found
 inline int
 group_cref::field_index_with_id(std::size_t id) const
 {
-  return to_aggregate().field_index_with_id(id);
+  return aggregate_cref(*this).field_index_with_id(id);
 }
 
 inline int
 group_cref::field_index_with_name(const char* name) const
 {
-  return to_aggregate().field_index_with_name(name);
+  return aggregate_cref(*this).field_index_with_name(name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -182,7 +182,7 @@ make_group_mref<ConstGroupRef>::mutable_field(size_t index)  const
   // return field_mref(this->alloc_,
   //                   this->field_storage(index),
   //                   this->instruction()->subinstructions_[index]);
-  return this->to_aggregate().mutable_field(index);
+  return aggregate_mref(*this).mutable_field(index);
 }
 
 template <typename ConstGroupRef>
@@ -198,8 +198,8 @@ make_group_mref<ConstGroupRef>::ensure_valid() const
 
 
 template <typename ConstGroupRef>
-inline aggregate_mref 
-make_group_mref<ConstGroupRef>::to_aggregate() const
+inline 
+make_group_mref<ConstGroupRef>::operator aggregate_mref() const
 {
   return aggregate_mref(this->alloc_, const_cast<value_storage*>(this->storage_->of_group.content_), this->instruction());
 }
