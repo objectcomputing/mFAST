@@ -63,12 +63,16 @@ class string_cref
 
 #ifdef BOOST_HAS_RVALUE_REFS
     std::string&& value() const
+    {
+      return std::move(std::string(this->data(), this->size()));
+    }
 #else
     std::string value() const
-#endif
     {
       return std::string(this->data(), this->size());
     }
+#endif
+
 
     bool operator == (const char* other) const
     {
