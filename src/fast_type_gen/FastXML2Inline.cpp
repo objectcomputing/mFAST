@@ -213,7 +213,9 @@ bool FastXML2Inline::VisitExitSequence (const XMLElement & /* element */,
                                         std::size_t /* numFields */,
                                         std::size_t /* index */)
 {
-  restore_scope(name_attr);
+  std::string name(name_attr);
+  name += "_element";
+  restore_scope(name);
   return true;
 }
 
@@ -312,18 +314,18 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
   else {
     out_ << "\n"
          << "inline\n"
-         << "nested_message_cref\n"
+         << "mfast::nested_message_cref\n"
          << cref_scope_.str() << "get_nested_message" << index << "() const\n"
          << "{\n"
-         << "  return nested_message_cref(this->const_field("<< index << "));\n"
+         << "  return mfast::nested_message_cref(this->const_field("<< index << "));\n"
          << "}\n\n";
 
 
     out_ << "inline\n"
-         << "nested_message_mref\n"
+         << "mfast::nested_message_mref\n"
          << mref_scope_.str() << "set_nested_message" << index << "() const\n"
          << "{\n"
-         << "  return nested_message_mref(this->mutable_field("<< index << "));\n"
+         << "  return mfast::nested_message_mref(this->mutable_field("<< index << "));\n"
          << "}\n";
   }
   return true;
