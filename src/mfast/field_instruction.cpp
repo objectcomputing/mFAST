@@ -220,7 +220,8 @@ void group_field_instruction::destruct_value(value_storage& storage,
 {
   if (storage.of_group.content_) {
     destruct_group_subfields(storage.of_group.content_, alloc);
-    alloc->deallocate(storage.of_group.content_, this->group_content_byte_count());
+    if (storage.of_group.own_content_)
+      alloc->deallocate(storage.of_group.content_, this->group_content_byte_count());
   }
 }
 
