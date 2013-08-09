@@ -234,6 +234,9 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
   {
     BOOST_CHECK_EQUAL(m1ref.const_field(i).instruction()->field_index(), i);
   }
+  
+  aggregate_mref aggregate1(nested1);
+  BOOST_CHECK_EQUAL(aggregate1.instruction(), static_cast<const aggregate_instruction_base*>(target1.instruction()));
 
   m2ref.mutable_field(0).as(1);
   nested_message_mref nested2(m2ref.mutable_field(1));

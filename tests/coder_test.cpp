@@ -200,6 +200,8 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
 
   debug_allocator alloc;
   message_type msg(&alloc, test_case.template_with_id(2));
+  
+  BOOST_CHECK_EQUAL(test_case.template_with_id(2)->segment_pmap_size(), 3);
   message_mref msg_ref = msg.mref();
 
   msg_ref.mutable_field(0).as(1);
