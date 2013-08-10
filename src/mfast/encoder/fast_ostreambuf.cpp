@@ -18,18 +18,30 @@ fast_ostreambuf::length() const
 }
 
 void 
-fast_ostreambuf::write_bytes_at(const char* data, std::size_t n, std::size_t offset)
+fast_ostreambuf::write_bytes_at(const char* data, std::size_t n, std::size_t offset, bool shrink)
 {
   assert ( (pbase_ + offset +n) <= pptr_);
   std::copy(data, data+n, pbase_+offset);
+  
+  if (shrink) {
+    std::size_t index = offset + n-1;
+    if ( pbase_[index] == '\x80' ) {
+      --index;
+      for ( ;index >0 && pbase_[index] == 0; --index);
+      
+      if (pbase_[index] & '\x80') {
+        ++index;
+      }
+      pbase_[index] |= '\x80';
+      ++index;
+      const char* src = pbase_ + offset + n;
+      std::memmove(pbase_ + index, src ,  pptr_ - src);
+      
+      pptr_ -= (offset + n - index);
+    }
+  }
 }
 
-void 
-fast_ostreambuf::shrink(std::size_t offset, std::size_t nbytes)
-{
-  assert ( (pbase_ + offset + nbytes) <= pptr_);
-  std::memmove(pbase_, pbase_ + nbytes, pptr_- (pbase_ + offset + nbytes) );
-  pptr_ -= nbytes;
-}
+
 
 }

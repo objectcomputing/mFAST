@@ -65,10 +65,7 @@ class fast_ostream
   private:
     friend class encoder_presence_map;
 
-    void write_bytes_at(uint64_t* bytes, std::size_t nbytes, std::size_t offset);
-    void commit(uint64_t* bytes, std::size_t nbytes, std::size_t offset);
-
-    void shrink(std::size_t offset, std::size_t nbytes);
+    void write_bytes_at(uint64_t* bytes, std::size_t nbytes, std::size_t offset, bool pmap_end);
 
     std::size_t offset() const
     {
@@ -292,16 +289,11 @@ fast_ostream::save_previous_value(const T& cref) const
 }
 
 inline void
-fast_ostream::write_bytes_at(uint64_t* bytes, std::size_t nbytes, std::size_t offset)
+fast_ostream::write_bytes_at(uint64_t* bytes, std::size_t nbytes, std::size_t offset, bool pmap_end)
 {
-  rdbuf()->write_bytes_at(reinterpret_cast<const char*>(bytes), nbytes, offset);
+  rdbuf()->write_bytes_at(reinterpret_cast<const char*>(bytes), nbytes, offset, pmap_end && !allow_overlong_pmap_);
 }
 
-inline void
-fast_ostream::commit(uint64_t* bytes, std::size_t nbytes, std::size_t offset)
-{
-  write_bytes_at(bytes, nbytes, offset);
-}
 
 inline void
 fast_ostream::encode_null()

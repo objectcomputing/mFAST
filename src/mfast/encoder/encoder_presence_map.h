@@ -87,7 +87,7 @@ encoder_presence_map::commit()
 #endif
   
   value_ |= stop_bit_mask;
-  stream_->commit(&value_, ++nbytes_, offset_);
+  stream_->write_bytes_at(&value_, ++nbytes_, offset_, true);
 }
 
 inline void
@@ -107,7 +107,7 @@ encoder_presence_map::set_next_bit(bool v)
 
   if (mask_ == 0) {
     // we need to commit the current pmap before preceed
-    stream_->write_bytes_at(&value_, 8, offset_);
+    stream_->write_bytes_at(&value_, 8, offset_, false);
     offset_ += 8;
     maxbytes_ -= 8;
     reset();

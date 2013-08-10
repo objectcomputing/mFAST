@@ -50,8 +50,7 @@ class fast_ostreambuf
     void skip(std::size_t n);
 
     virtual std::size_t length() const;
-    virtual void write_bytes_at(const char* data, std::size_t n, std::size_t offset);
-    virtual void shrink(std::size_t offset, std::size_t nbytes);
+    virtual void write_bytes_at(const char* data, std::size_t n, std::size_t offset, bool shrink);
 
     const char* pbase() const { return pbase_; }
   protected:

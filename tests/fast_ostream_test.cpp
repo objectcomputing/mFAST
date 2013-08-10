@@ -250,4 +250,88 @@ BOOST_AUTO_TEST_CASE(encoder_presence_map_test)
   BOOST_CHECK( encode_pmap("\x81\x02\x04\x08\x10\x20\x40\x80", 63, "\x40\x40\x40\x40\x40\x40\x40\x40\xC0" ) );
 }
 
+BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
+{
+  char buffer[32];
+  
+  debug_allocator alloc;
+  
+  {
+    fast_ostreambuf sb(buffer);
+    fast_ostream strm(&alloc);
+    strm.rdbuf(&sb);
+    
+    strm.allow_overlong_pmap(false);
+    
+    encoder_presence_map pmap;
+    pmap.init(&strm, 70);
+    
+    strm.encode("\x40\x41\x42\x43",
+                4,
+                false,
+                static_cast<const ascii_field_instruction*>(0));
+    
+    for (std::size_t i = 0; i < 70; ++i) {
+      pmap.set_next_bit(false);
+    }
+    
+    pmap.commit();
+    
+    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\x40\x41\x42\xC3"));    
+  }
+  
+  {
+    fast_ostreambuf sb(buffer);
+    fast_ostream strm(&alloc);
+    strm.rdbuf(&sb);
+    
+    strm.allow_overlong_pmap(false);
+    
+    strm.encode(0, false, false);
+    encoder_presence_map pmap;
+    pmap.init(&strm, 70);
+    
+    strm.encode("\x40\x41\x42\x43",
+                4,
+                false,
+                static_cast<const ascii_field_instruction*>(0));
+    
+    for (std::size_t i = 0; i < 70; ++i) {
+      pmap.set_next_bit(false);
+    }
+    
+    pmap.commit();
+    
+    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\x80\x40\x41\x42\xC3"));    
+  }
+  
+  {
+    fast_ostreambuf sb(buffer);
+    fast_ostream strm(&alloc);
+    strm.rdbuf(&sb);
+    
+    strm.allow_overlong_pmap(false);
+    
+    strm.encode(0, false, false);
+    encoder_presence_map pmap;
+    pmap.init(&strm, 71);
+    
+    strm.encode("\x40\x41\x42\x43",
+                4,
+                false,
+                static_cast<const ascii_field_instruction*>(0));
+    
+    pmap.set_next_bit(true);
+    for (std::size_t i = 0; i < 70; ++i) {
+      pmap.set_next_bit(false);
+    }
+    
+    pmap.commit();
+    
+    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\xC0\x40\x41\x42\xC3"));    
+  }
+}
+
+
+
 BOOST_AUTO_TEST_SUITE_END()
