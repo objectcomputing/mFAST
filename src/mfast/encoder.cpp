@@ -318,4 +318,10 @@ encoder::template_with_id(uint32_t id)
   return instruction;
 }
 
+void
+encoder::allow_overlong_pmap(bool v)
+{
+  impl_->strm_.allow_overlong_pmap(v);
+}
+
 }

@@ -93,9 +93,9 @@ class make_sequence_cref
       return instruction()->subinstructions_count_;
     }
 
-    const sequence_field_instruction* instruction() const
+    instruction_cptr instruction() const
     {
-      return static_cast<const sequence_field_instruction*>(instruction_);
+      return static_cast<instruction_cptr>(instruction_);
     }
 
     template <typename FieldAccesor>

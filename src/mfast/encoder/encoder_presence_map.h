@@ -87,9 +87,7 @@ encoder_presence_map::commit()
 #endif
   
   value_ |= stop_bit_mask;
-  stream_->write_bytes_at(&value_, ++nbytes_, offset_);
-  // if (nbytes_ < maxbytes_)
-  //   stream_->shrink(offset_ + nbytes_, maxbytes_ - nbytes_);
+  stream_->commit(&value_, ++nbytes_, offset_);
 }
 
 inline void

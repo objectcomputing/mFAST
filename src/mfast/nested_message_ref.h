@@ -111,7 +111,7 @@ class nested_message_mref
     template <typename MESSAGE_MREF>
     MESSAGE_MREF as() const
     {
-      set_target_instruction(MESSAGE_MREF::the_instruction, true);
+      set_target_instruction(&MESSAGE_MREF::the_instruction, true);
       return MESSAGE_MREF(alloc_, this->storage());
     }
 

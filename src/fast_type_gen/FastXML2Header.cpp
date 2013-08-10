@@ -173,6 +173,7 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "    " <<  name_attr << "_cref ref() const;\n"
       << "    " <<  name_attr << "_cref cref() const;\n"
       << "    " <<  name_attr << "_mref ref();\n"
+      << "    " <<  name_attr << "_mref mref();\n"
       << "  private:\n"
       << "    " << name_attr << "(const " << name_attr << "&);\n"
       << "    " << name_attr << "& operator = (const "  << name_attr << "&);\n"

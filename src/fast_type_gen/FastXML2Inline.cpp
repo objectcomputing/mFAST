@@ -101,6 +101,11 @@ bool FastXML2Inline::VisitEnterTemplate (const XMLElement & /* element */,
        << name_attr << "::ref()\n"
        << "{\n"
        << "  return " << name_attr << "_mref(alloc_, &my_storage_, static_cast<"<< name_attr << "_cref::instruction_cptr>(this->instruction()));\n"
+       << "}\n\n"
+       << "inline "<< name_attr << "_mref\n"
+       << name_attr << "::mref()\n"
+       << "{\n"
+       << "  return " << name_attr << "_mref(alloc_, &my_storage_, static_cast<"<< name_attr << "_cref::instruction_cptr>(this->instruction()));\n"
        << "}\n\n";
 
   cref_scope_ << name_attr << "_cref::";

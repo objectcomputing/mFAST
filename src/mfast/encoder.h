@@ -80,8 +80,12 @@ class encoder
     void encode(const message_cref& message,
                 std::vector<char>&  buffer,
                 bool                force_reset = false);
-
-    // void debug_log(std::ostream* os);
+              
+    /// Instruct the encoder whether the overlong presence map is allowed.
+    ///
+    /// Overlong presence map is allowed by default for better performance. 
+    /// It can be disabled for better standard conformance reason.
+    void allow_overlong_pmap(bool v);
 
   private:
     encoder_impl* impl_;

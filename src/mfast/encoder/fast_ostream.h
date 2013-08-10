@@ -60,10 +60,13 @@ class fast_ostream
     template <typename T>
     void save_previous_value(const T& cref) const;
 
+    void allow_overlong_pmap(bool v);
+
   private:
     friend class encoder_presence_map;
 
     void write_bytes_at(uint64_t* bytes, std::size_t nbytes, std::size_t offset);
+    void commit(uint64_t* bytes, std::size_t nbytes, std::size_t offset);
 
     void shrink(std::size_t offset, std::size_t nbytes);
 
@@ -74,11 +77,13 @@ class fast_ostream
 
     fast_ostreambuf* buf_;
     allocator* alloc_;
+    bool allow_overlong_pmap_;
 };
 
 inline
 fast_ostream::fast_ostream(allocator* alloc)
   : alloc_(alloc)
+  , allow_overlong_pmap_(true)
 {
 }
 
@@ -110,41 +115,42 @@ is_positive(T)
 {
   return true;
 }
+
 // use non-const reference to avoid ambiguious overloading problem
 inline bool encode_max_value(uint64_t& value, fast_ostreambuf* buf)
 {
-   if (value == std::numeric_limits<uint64_t>::max()) {
-     buf->sputn("\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80", 10);
-     return true;
-   }
-   return false;
+  if (value == std::numeric_limits<uint64_t>::max()) {
+    buf->sputn("\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80", 10);
+    return true;
+  }
+  return false;
 }
 
 inline bool encode_max_value(int64_t& value, fast_ostreambuf* buf)
 {
-   if (value == std::numeric_limits<int64_t>::max()) {
-     buf->sputn("\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80", 10);
-     return true;
-   }
-   return false;
+  if (value == std::numeric_limits<int64_t>::max()) {
+    buf->sputn("\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80", 10);
+    return true;
+  }
+  return false;
 }
 
 inline bool encode_max_value(uint32_t& value, fast_ostreambuf* buf)
 {
-   if (value == std::numeric_limits<uint32_t>::max()) {
-     buf->sputn("\x10\x00\x00\x00\x80", 5);
-     return true;
-   }
-   return false;
+  if (value == std::numeric_limits<uint32_t>::max()) {
+    buf->sputn("\x10\x00\x00\x00\x80", 5);
+    return true;
+  }
+  return false;
 }
 
 inline bool encode_max_value(int32_t& value, fast_ostreambuf* buf)
 {
-   if (value == std::numeric_limits<int32_t>::max()) {
-     buf->sputn("\x08\x00\x00\x00\x80", 5);
-     return true;
-   }
-   return false;
+  if (value == std::numeric_limits<int32_t>::max()) {
+    buf->sputn("\x08\x00\x00\x00\x80", 5);
+    return true;
+  }
+  return false;
 }
 
 inline bool encode_max_value(int8_t&, fast_ostreambuf*)
@@ -195,11 +201,11 @@ void fast_ostream::encode(IntType value, bool nullable, bool is_null)
     if (positive) {
       // check if the sign bit is on
       if (buffer[i] & 0x40 ) {
-        // signed bit is on and this is positive integer, we need to pad an extra byte \x00 in the front 
+        // signed bit is on and this is positive integer, we need to pad an extra byte \x00 in the front
         buffer[--i] = '\x00';
       }
     }
-    else if ((buffer[i] & 0x40) == 0){
+    else if ((buffer[i] & 0x40) == 0) {
       // this is negative integer and yet the sign bit is off, we need to pad an extra byte \x7F in the front
       buffer[--i] = '\x7F';
     }
@@ -221,7 +227,7 @@ fast_ostream::encode(const char* ascii,
     rdbuf()->sputc('\x80');
     return;
   }
-  
+
   if (len == 0) {
     if (nullable) {
       rdbuf()->sputc('\x00');
@@ -229,7 +235,7 @@ fast_ostream::encode(const char* ascii,
     rdbuf()->sputc('\x80');
     return;
   }
-  
+
   if (len == 1 && ascii[0] == '\x00') {
     if (nullable) {
       rdbuf()->sputn("\x00\x00\x80", 3);
@@ -239,7 +245,7 @@ fast_ostream::encode(const char* ascii,
     }
     return;
   }
-  
+
 
   rdbuf()->sputn(ascii, len-1);
   rdbuf()->sputc(ascii[len-1] | 0x80);
@@ -292,15 +298,21 @@ fast_ostream::write_bytes_at(uint64_t* bytes, std::size_t nbytes, std::size_t of
 }
 
 inline void
-fast_ostream::shrink(std::size_t offset, std::size_t nbytes)
+fast_ostream::commit(uint64_t* bytes, std::size_t nbytes, std::size_t offset)
 {
-  rdbuf()->shrink(offset, nbytes);
+  write_bytes_at(bytes, nbytes, offset);
 }
 
 inline void
 fast_ostream::encode_null()
 {
   rdbuf()->sputc('\x80');
+}
+
+inline void
+fast_ostream::allow_overlong_pmap(bool v)
+{
+  allow_overlong_pmap_ = v;
 }
 
 }
