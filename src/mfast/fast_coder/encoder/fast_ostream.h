@@ -21,8 +21,8 @@
 #define FAST_OSTREAM_H_DUY5XTNJ
 
 #include "mfast/field_instruction.h"
-#include "mfast/codec_helper.h"
-#include "mfast/encoder/fast_ostreambuf.h"
+#include "mfast/fast_coder/codec_helper.h"
+#include "mfast/fast_coder/encoder/fast_ostreambuf.h"
 
 namespace mfast {
 

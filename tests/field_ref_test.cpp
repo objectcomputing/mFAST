@@ -24,7 +24,7 @@
 #include <mfast/decimal_ref.h>
 #include <mfast/group_ref.h>
 #include <mfast/sequence_ref.h>
-#include <mfast/codec_helper.h>
+#include <mfast/fast_coder/codec_helper.h>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>

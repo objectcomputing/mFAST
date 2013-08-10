@@ -16,7 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "mfast/decoder/decoder_presence_map.h"
+#include "mfast/fast_coder/decoder/decoder_presence_map.h"
 
 
 #ifndef NDEBUG

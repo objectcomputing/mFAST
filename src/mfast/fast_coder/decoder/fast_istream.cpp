@@ -17,7 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "mfast/output.h"
-#include "mfast/decoder/fast_istream.h"
+#include "mfast/fast_coder/decoder/fast_istream.h"
 
 #include <boost/io/ios_state.hpp>
 

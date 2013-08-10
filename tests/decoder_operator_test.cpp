@@ -16,10 +16,10 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <mfast/codec_helper.h>
+#include <mfast/fast_coder/codec_helper.h>
 #include <mfast/int_ref.h>
-#include <mfast/decoder/fast_istream.h>
-#include <mfast/decoder/decoder_field_operator.h>
+#include <mfast/fast_coder/decoder/fast_istream.h>
+#include <mfast/fast_coder/decoder/decoder_field_operator.h>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>

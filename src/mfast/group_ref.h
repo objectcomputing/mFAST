@@ -136,7 +136,7 @@ class make_group_mref
 
   private:
     make_group_mref& operator= (const make_group_mref&);
-    friend struct decoder_impl;
+    friend class detail::codec_helper;
     void ensure_valid() const;
 };
 

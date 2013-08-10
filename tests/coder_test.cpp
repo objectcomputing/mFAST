@@ -83,8 +83,8 @@ class fast_coding_test_case
   private:
     dynamic_templates_description description_;
     debug_allocator alloc_;
-    encoder encoder_;
-    decoder decoder_;
+    fast_encoder encoder_;
+    fast_decoder decoder_;
 };
 
 BOOST_AUTO_TEST_SUITE( test_encoder )

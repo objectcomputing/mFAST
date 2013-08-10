@@ -107,7 +107,7 @@ int main(int argc, const char** argv)
     mfast::allocator* alloc = &malloc_allc;
     if (use_arena)
       alloc = &arena_alloc;
-    mfast::decoder coder(alloc);
+    mfast::fast_decoder coder(alloc);
     const mfast::templates_description* descriptions[] = { &example::the_description };
 
     coder.include(descriptions);

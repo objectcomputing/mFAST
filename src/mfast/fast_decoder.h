@@ -16,23 +16,23 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef DECODER_H_WYWT9TG7
-#define DECODER_H_WYWT9TG7
+#ifndef FAST_DECODER_H_WYWT9TG7
+#define FAST_DECODER_H_WYWT9TG7
 #include "mfast/message_ref.h"
 #include "mfast/malloc_allocator.h"
 
 namespace mfast
 {
 
-struct decoder_impl;
+struct fast_decoder_impl;
 
 ///
-class decoder
+class fast_decoder
 {
   public:
     /// Construct a decode using a specified memory allocator
-    decoder(allocator* alloc=  malloc_allocator::instance());
-    ~decoder();
+    fast_decoder(allocator* alloc=  malloc_allocator::instance());
+    ~fast_decoder();
 
     /// Import templates descriptions into the decoder.
     ///
@@ -68,7 +68,7 @@ class decoder
     void warning_log(std::ostream* os);
 
   private:
-    decoder_impl* impl_;
+    fast_decoder_impl* impl_;
 };
 
 
@@ -77,4 +77,4 @@ class decoder
 
 
 
-#endif /* end of include guard: DECODER_H_WYWT9TG7 */
+#endif /* end of include guard: FAST_DECODER_H_WYWT9TG7 */

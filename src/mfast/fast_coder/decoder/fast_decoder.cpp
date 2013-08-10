@@ -17,31 +17,32 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include <boost/container/map.hpp>
-#include "mfast/decoder.h"
+#include "mfast/fast_decoder.h"
 #include "mfast/field_visitor.h"
 #include "mfast/sequence_ref.h"
-#include "mfast/dictionary_builder.h"
 #include "mfast/malloc_allocator.h"
 #include "mfast/exceptions.h"
 #include "mfast/debug_stream.h"
 #include "mfast/output.h"
-#include "mfast/decoder/decoder_presence_map.h"
-#include "mfast/decoder/decoder_field_operator.h"
-#include "mfast/decoder/fast_istream.h"
 #include "mfast/composite_field.h"
+#include "mfast/fast_coder/dictionary_builder.h"
+#include "mfast/fast_coder/codec_helper.h"
+#include "mfast/fast_coder/decoder/decoder_presence_map.h"
+#include "mfast/fast_coder/decoder/decoder_field_operator.h"
+#include "mfast/fast_coder/decoder/fast_istream.h"
 namespace mfast {
 
 typedef boost::container::map<uint32_t, message_type> message_map_t;
 
 
 
-struct decoder_impl
-{  
-  
+struct fast_decoder_impl
+{
+
   enum {
     visit_absent = 1
   };
-  
+
   fast_istream strm_;
   dictionary_resetter resetter_;
 
@@ -55,23 +56,24 @@ struct decoder_impl
   decoder_presence_map* current_;
   std::ostream* warning_log_;
 
-  decoder_impl();
-  ~decoder_impl();
+  fast_decoder_impl();
+  ~fast_decoder_impl();
   void reset_messages();
   decoder_presence_map& current_pmap();
-  
-  
+
+
   struct pmap_state
   {
     decoder_presence_map pmap_;
     decoder_presence_map* prev_pmap_;
-  
-    pmap_state() 
+
+    pmap_state()
       : prev_pmap_(0)
     {
     }
+
   };
-  
+
   void decode_pmap(pmap_state& state)
   {
     state.prev_pmap_ = this->current_;
@@ -84,12 +86,11 @@ struct decoder_impl
     if (state.prev_pmap_)
       this->current_ = state.prev_pmap_;
   }
-  
 
   template <typename SimpleMRef>
   void visit(SimpleMRef &mref);
-  
-  void visit(group_mref& mref, int);  
+
+  void visit(group_mref& mref, int);
   void visit(sequence_mref& mref, int);
   void visit(nested_message_mref& mref, int);
   void visit(sequence_element_mref& mref, int);
@@ -99,36 +100,36 @@ struct decoder_impl
 
 
 inline
-decoder_impl::decoder_impl()
+fast_decoder_impl::fast_decoder_impl()
   : strm_(0)
   , warning_log_(0)
 {
 }
 
-void decoder_impl::reset_messages()
+void fast_decoder_impl::reset_messages()
 {
   if (message_alloc_->reset()) {
     message_map_t::iterator itr;
     for (itr = template_messages_.begin(); itr!= template_messages_.end(); ++itr) {
-      itr->second.ref().reset();
+      detail::codec_helper::reset(itr->second.ref());
     }
   }
 }
 
-decoder_impl::~decoder_impl()
+fast_decoder_impl::~fast_decoder_impl()
 {
   reset_messages();
 }
 
 inline decoder_presence_map&
-decoder_impl::current_pmap()
+fast_decoder_impl::current_pmap()
 {
   return *current_;
 }
 
 template <typename SimpleMRef>
 inline void
-decoder_impl::visit(SimpleMRef& mref)
+fast_decoder_impl::visit(SimpleMRef& mref)
 {
   debug_ << "   decoding " << mref.name() << ": pmap -> " << current_pmap() << "\n"
          << "               stream -> " << strm_ << "\n";
@@ -146,10 +147,10 @@ decoder_impl::visit(SimpleMRef& mref)
 }
 
 inline void
-decoder_impl::visit(group_mref& mref, int)
+fast_decoder_impl::visit(group_mref& mref, int)
 {
   debug_ << "decoding group " << mref.name();
-  
+
   // If a group field is optional, it will occupy a single bit in the presence map.
   // The contents of the group may appear in the stream iff the bit is set.
   if (mref.optional())
@@ -166,20 +167,20 @@ decoder_impl::visit(group_mref& mref, int)
   }
 
   pmap_state state;
-  
+
   if (mref.instruction()->segment_pmap_size() > 0) {
     decode_pmap(state);
     debug_ << "        " << mref.name() << " has group pmap -> " << current_pmap() << "\n";
   }
-  mref.ensure_valid();
+  detail::codec_helper::ensure_valid(mref);
 
   mref.accept_mutator(*this);
-  
+
   restore_pmap(state);
 }
 
 inline void
-decoder_impl::visit(sequence_mref& mref, int)
+fast_decoder_impl::visit(sequence_mref& mref, int)
 {
   debug_ << "decoding sequence " << mref.name()  << " ---\n";
 
@@ -206,7 +207,7 @@ decoder_impl::visit(sequence_mref& mref, int)
 }
 
 inline void
-decoder_impl::visit(sequence_element_mref& mref, int index)
+fast_decoder_impl::visit(sequence_element_mref& mref, int index)
 {
   debug_ << "decoding  element[" << index << "] : segment pmap size = " <<  mref.instruction()->segment_pmap_size() << "\n";
 
@@ -216,21 +217,20 @@ decoder_impl::visit(sequence_element_mref& mref, int index)
     decode_pmap(state);
     debug_ << "    decoded pmap -> " <<  current_pmap() << "\n";
   }
-  
+
   mref.accept_mutator(*this);
-  
+
   restore_pmap(state);
 }
 
-
 inline void
-decoder_impl::visit(nested_message_mref& mref, int)
+fast_decoder_impl::visit(nested_message_mref& mref, int)
 {
   pmap_state state;
   message_type* saved_active_message = active_message_;
-    
+
   if (mref.is_static()) {
-    mref.target().ensure_valid();
+    detail::codec_helper::ensure_valid(mref.target());
     debug_ << "decoding template " << mref.name()  << " ...\n";
   }
   else {
@@ -262,14 +262,14 @@ decoder_impl::visit(nested_message_mref& mref, int)
     mref.set_target_instruction(active_message_->instruction(), false);
   }
   mref.accept_mutator(*this);
-  
+
   restore_pmap(state);
   active_message_ = saved_active_message;
-  
+
 }
 
 message_type*
-decoder_impl::decode_segment(fast_istreambuf& sb)
+fast_decoder_impl::decode_segment(fast_istreambuf& sb)
 {
 
   strm_.reset(&sb);
@@ -309,24 +309,24 @@ decoder_impl::decode_segment(fast_istreambuf& sb)
   // because after the accept_mutator(), the active_message_
   // may change because of the decoding of dynamic template reference
   message_type* message = active_message_;
-  message->ref().ensure_valid();
+  detail::codec_helper::ensure_valid(message->ref());
   message->ref().accept_mutator(*this);
   return message;
 }
 
-decoder::decoder(allocator* alloc)
-  : impl_(new decoder_impl)
+fast_decoder::fast_decoder(allocator* alloc)
+  : impl_(new fast_decoder_impl)
 {
   impl_->message_alloc_ = alloc;
 }
 
-decoder::~decoder()
+fast_decoder::~fast_decoder()
 {
   delete impl_;
 }
 
 void
-decoder::include(const templates_description** descriptions, std::size_t description_count)
+fast_decoder::include(const templates_description** descriptions, std::size_t description_count)
 {
   template_id_map_t templates_map;
   dictionary_builder builder(impl_->resetter_,templates_map,  &impl_->template_alloc_);
@@ -350,7 +350,7 @@ decoder::include(const templates_description** descriptions, std::size_t descrip
 }
 
 message_cref
-decoder::decode(const char*& first, const char* last, bool force_reset)
+fast_decoder::decode(const char*& first, const char* last, bool force_reset)
 {
   assert(first < last);
   fast_istreambuf sb(first, last-first);
@@ -361,13 +361,13 @@ decoder::decode(const char*& first, const char* last, bool force_reset)
 }
 
 void
-decoder::debug_log(std::ostream* log)
+fast_decoder::debug_log(std::ostream* log)
 {
   impl_->debug_.set(log);
 }
 
 void
-decoder::warning_log(std::ostream* os)
+fast_decoder::warning_log(std::ostream* os)
 {
   impl_->strm_.warning_log(os);
 }

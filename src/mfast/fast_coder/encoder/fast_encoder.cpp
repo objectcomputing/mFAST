@@ -17,24 +17,24 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "mfast/encoder.h"
+#include "mfast/fast_encoder.h"
 #include "mfast/field_visitor.h"
 #include "mfast/sequence_ref.h"
-#include "mfast/dictionary_builder.h"
+#include "mfast/fast_coder/dictionary_builder.h"
 #include "mfast/malloc_allocator.h"
 #include "mfast/exceptions.h"
 #include "mfast/debug_stream.h"
 #include "mfast/output.h"
-#include "mfast/encoder/encoder_presence_map.h"
-#include "mfast/encoder/encoder_field_operator.h"
-#include "mfast/encoder/fast_ostream.h"
-#include "mfast/encoder/resizable_fast_ostreambuf.h"
+#include "mfast/fast_coder/encoder/encoder_presence_map.h"
+#include "mfast/fast_coder/encoder/encoder_field_operator.h"
+#include "mfast/fast_coder/encoder/fast_ostream.h"
+#include "mfast/fast_coder/encoder/resizable_fast_ostreambuf.h"
 
 namespace mfast
 {
 
 
-struct encoder_impl
+struct fast_encoder_impl
   : detail::field_storage_helper
 {
   
@@ -54,8 +54,8 @@ struct encoder_impl
   template_id_map_t templates_map_;
 
 
-  encoder_impl(allocator* alloc);
-  ~encoder_impl();
+  fast_encoder_impl(allocator* alloc);
+  ~fast_encoder_impl();
   encoder_presence_map& current_pmap();
   
   
@@ -100,26 +100,26 @@ struct encoder_impl
 };
 
 inline
-encoder_impl::encoder_impl(allocator* alloc)
+fast_encoder_impl::fast_encoder_impl(allocator* alloc)
   : strm_(alloc)
   , value_destroyer_(alloc)
   , active_message_id_(-1)
 {
 }
 
-encoder_impl::~encoder_impl()
+fast_encoder_impl::~fast_encoder_impl()
 {
 }
 
 inline encoder_presence_map&
-encoder_impl::current_pmap()
+fast_encoder_impl::current_pmap()
 {
   return *current_;
 }
 
 template <typename SimpleCRef>
 inline void
-encoder_impl::visit(SimpleCRef& cref)
+fast_encoder_impl::visit(SimpleCRef& cref)
 {
 
   encoder_field_operator* field_operator
@@ -131,7 +131,7 @@ encoder_impl::visit(SimpleCRef& cref)
 }
 
 inline void
-encoder_impl::visit(group_cref& cref, int)
+fast_encoder_impl::visit(group_cref& cref, int)
 {
 
   // If a group field is optional, it will occupy a single bit in the presence map.
@@ -157,7 +157,7 @@ encoder_impl::visit(group_cref& cref, int)
 }
 
 inline void
-encoder_impl::visit(sequence_cref& cref, int)
+fast_encoder_impl::visit(sequence_cref& cref, int)
 {
 
   uint32_field_instruction* length_instruction = cref.instruction()->sequence_length_instruction_;
@@ -178,7 +178,7 @@ encoder_impl::visit(sequence_cref& cref, int)
 }
 
 inline void
-encoder_impl::visit(sequence_element_cref& cref, int)
+fast_encoder_impl::visit(sequence_element_cref& cref, int)
 {
   pmap_state state;
   if (cref.instruction()->segment_pmap_size() > 0)
@@ -191,7 +191,7 @@ encoder_impl::visit(sequence_element_cref& cref, int)
 
 
 inline void
-encoder_impl::visit(nested_message_cref& cref, int)
+fast_encoder_impl::visit(nested_message_cref& cref, int)
 {
   pmap_state state;
   int64_t saved_message_id = active_message_id_;
@@ -213,7 +213,7 @@ encoder_impl::visit(nested_message_cref& cref, int)
 }
 
 template_instruction*
-encoder_impl::encode_segment_preemble(uint32_t template_id, bool force_reset)
+fast_encoder_impl::encode_segment_preemble(uint32_t template_id, bool force_reset)
 {
   template_instruction* instruction;
   template_id_map_t::iterator itr = templates_map_.find(template_id);
@@ -242,7 +242,7 @@ encoder_impl::encode_segment_preemble(uint32_t template_id, bool force_reset)
 }
 
 void
-encoder_impl::encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool force_reset)
+fast_encoder_impl::encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool force_reset)
 {
   this->strm_.rdbuf(&sb);
 
@@ -257,18 +257,18 @@ encoder_impl::encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool
   pmap.commit();
 }
 
-encoder::encoder(allocator* alloc)
-  : impl_(new encoder_impl(alloc))
+fast_encoder::fast_encoder(allocator* alloc)
+  : impl_(new fast_encoder_impl(alloc))
 {
 }
 
-encoder::~encoder()
+fast_encoder::~fast_encoder()
 {
   delete impl_;
 }
 
 void
-encoder::include(const templates_description** descriptions, std::size_t description_count)
+fast_encoder::include(const templates_description** descriptions, std::size_t description_count)
 {
   dictionary_builder builder(impl_->resetter_,
                              impl_->templates_map_,
@@ -284,7 +284,7 @@ encoder::include(const templates_description** descriptions, std::size_t descrip
 }
 
 std::size_t
-encoder::encode(const message_cref& message,
+fast_encoder::encode(const message_cref& message,
                 char*               buffer,
                 std::size_t         buffer_size,
                 bool                force_reset)
@@ -297,7 +297,7 @@ encoder::encode(const message_cref& message,
 }
 
 void
-encoder::encode(const message_cref& message,
+fast_encoder::encode(const message_cref& message,
                 std::vector<char>&  buffer,
                 bool                force_reset)
 {
@@ -307,7 +307,7 @@ encoder::encode(const message_cref& message,
 }
 
 const template_instruction*
-encoder::template_with_id(uint32_t id)
+fast_encoder::template_with_id(uint32_t id)
 {
   template_instruction* instruction =0;
   template_id_map_t::iterator itr = impl_->templates_map_.find(id);
@@ -319,7 +319,7 @@ encoder::template_with_id(uint32_t id)
 }
 
 void
-encoder::allow_overlong_pmap(bool v)
+fast_encoder::allow_overlong_pmap(bool v)
 {
   impl_->strm_.allow_overlong_pmap(v);
 }

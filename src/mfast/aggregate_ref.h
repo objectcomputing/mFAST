@@ -100,7 +100,7 @@ class make_aggregate_mref
 
   private:
     make_aggregate_mref& operator= (const make_aggregate_mref&);
-    friend struct decoder_impl;
+    friend struct fast_decoder_impl;
     void ensure_valid() const;
 
     mfast::allocator* alloc_;

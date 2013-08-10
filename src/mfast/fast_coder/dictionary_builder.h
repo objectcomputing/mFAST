@@ -19,8 +19,8 @@
 #ifndef DICTIONARY_BUILDER_H_F26FXFII
 #define DICTIONARY_BUILDER_H_F26FXFII
 
-#include "field_instruction.h"
-#include "arena_allocator.h"
+#include "mfast/field_instruction.h"
+#include "mfast/arena_allocator.h"
 #include <vector>
 #include <map>
 #include <string>

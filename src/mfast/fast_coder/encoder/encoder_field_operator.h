@@ -24,7 +24,7 @@
 #include "mfast/string_ref.h"
 #include "mfast/decimal_ref.h"
 #include "mfast/vector_ref.h"
-#include "mfast/encoder/fast_ostream.h"
+#include "mfast/fast_coder/encoder/fast_ostream.h"
 
 namespace mfast {
 

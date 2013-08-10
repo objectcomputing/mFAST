@@ -26,16 +26,16 @@
 
 namespace mfast
 {
-struct encoder_impl;
+struct fast_encoder_impl;
 
 ///
-class encoder
+class fast_encoder
 {
   public:
     /// Consturct a encoder using default memory allocator (i.e. malloc)
-    encoder(allocator* alloc = malloc_allocator::instance());
+    fast_encoder(allocator* alloc = malloc_allocator::instance());
 
-    ~encoder();
+    ~fast_encoder();
 
     /// Import templates descriptions into the encoder.
     ///
@@ -88,7 +88,7 @@ class encoder
     void allow_overlong_pmap(bool v);
 
   private:
-    encoder_impl* impl_;
+    fast_encoder_impl* impl_;
 };
 
 }

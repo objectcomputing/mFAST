@@ -32,8 +32,7 @@ namespace mfast {
 template <typename ConstMessageRef>
 class make_message_mref;
 
-struct encoder_impl;
-struct decoder_impl;
+struct fast_decoder_impl;
 
 
 class unbouned_templateref_error
@@ -116,7 +115,7 @@ class make_message_mref
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
   private:
-    friend struct decoder_impl;
+    friend class detail::codec_helper;
     // Used by decoder to indicate this object uses arena allocator,
     // and the allocator has been resetted. All previously allocated memory
     // are invalidated. Thus memory for sub-fields needs to be re-allocated.

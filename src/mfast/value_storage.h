@@ -57,7 +57,7 @@ namespace mfast
       uint32_t capacity_ : 31; ///< used to track the length of memory that has been reserved
                                ///< for \a content_. if <tt>capacity_ == 0</tt> and <tt>len_ > 0</tt>,
                                ///< it means the object does not own the memory in \a content_.
-      uint32_t defined_bit_ : 1; ///< used by FAST encoder/decoder for tracking if a dictionary
+      uint32_t defined_bit_ : 1; ///< used by FAST fast_coder/encoder/decoder for tracking if a dictionary
                                  ///< value is defined or not.
       void* content_;
     } of_array;

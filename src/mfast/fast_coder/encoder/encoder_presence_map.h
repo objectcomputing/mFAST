@@ -20,7 +20,7 @@
 #define ENCODER_PRESENCE_MAP_H_MQSBLA37
 
 #include <boost/detail/endian.hpp>
-#include "mfast/encoder/fast_ostream.h"
+#include "mfast/fast_coder/encoder/fast_ostream.h"
 
 
 namespace mfast

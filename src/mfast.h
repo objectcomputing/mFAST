@@ -29,8 +29,8 @@
 #include <mfast/malloc_allocator.h>
 #include <mfast/field_visitor.h>
 #include <mfast/arena_allocator.h>
-#include <mfast/encoder.h>
-#include <mfast/decoder.h>
+#include <mfast/fast_encoder.h>
+#include <mfast/fast_decoder.h>
 #include <mfast/field_comparator.h>
 #include <mfast/composite_field.h>
 #endif /* end of include guard: MFAST_H_4EMINVTV */

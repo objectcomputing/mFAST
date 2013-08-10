@@ -19,8 +19,8 @@
 #ifndef CODEC_HELPER_H_QI11HSL8
 #define CODEC_HELPER_H_QI11HSL8
 
-#include "string_ref.h"
-#include "exceptions.h"
+#include "mfast/string_ref.h"
+#include "mfast/exceptions.h"
 #include <boost/type_traits.hpp>
 #include <stdexcept>
 
@@ -154,7 +154,18 @@ class codec_helper
         copy_string_raw(mref, delta_start_index, delta_str, delta_len);
       }
     }
-
+    
+    template <typename MessageMref>
+    static void reset(const MessageMref& mref)
+    {
+      mref.reset();
+    }
+    
+    template <typename MRef>
+    static void ensure_valid(const MRef& mref)
+    {
+      mref.ensure_valid();
+    }
 };
 
 }
