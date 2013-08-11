@@ -36,7 +36,7 @@ endif()
 ## Setting up Boost Library
 ################################
 
-find_package( Boost 1.54.0 REQUIRED unit_test_framework system filesystem)
+find_package( Boost 1.53.0 REQUIRED unit_test_framework system filesystem)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 

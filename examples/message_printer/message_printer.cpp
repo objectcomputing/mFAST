@@ -89,12 +89,10 @@ class message_printer
 
 int main()
 {
-  using namespace MDRefreshSample;
-
-  MarketDataIncrementalRefresh message;
-  MarketDataIncrementalRefresh_mref ref = message.ref();
+  MDRefreshSample::MDRefreshSample message;
+  MDRefreshSample::MDRefreshSample_mref ref = message.ref();
   ref.set_MDEntries().resize(1);
-  MarketDataIncrementalRefresh_mref::MDEntries_element_mref entry(ref.set_MDEntries()[0]);
+  MDRefreshSample::MDRefreshSample_mref::MDEntries_element_mref entry(ref.set_MDEntries()[0]);
   entry.set_MDUpdateAction().as(1);
   const char* str = "abcd";
   entry.set_MDEntryType().as(str);

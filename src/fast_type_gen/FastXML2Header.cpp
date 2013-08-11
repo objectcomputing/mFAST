@@ -181,15 +181,15 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "};\n\n";
   restore_scope(name_attr);
 
-  const XMLElement* typeRefElem = element.FirstChildElement("typeRef");
-  if (typeRefElem) {
-    std::string typeRef_name = get_optional_attr(*typeRefElem, "name", "");
-    if (typeRef_name.size()) {
-      out_<< "typedef " << name_attr << " " << typeRef_name << ";\n"
-          << "typedef " << name_attr << "_cref " << typeRef_name << "_cref;\n"
-          << "typedef " << name_attr << "_mref " << typeRef_name << "_mref;\n";
-    }
-  }
+  // const XMLElement* typeRefElem = element.FirstChildElement("typeRef");
+  // if (typeRefElem) {
+  //   std::string typeRef_name = get_optional_attr(*typeRefElem, "name", "");
+  //   if (typeRef_name.size()) {
+  //     out_<< "typedef " << name_attr << " " << typeRef_name << ";\n"
+  //         << "typedef " << name_attr << "_cref " << typeRef_name << "_cref;\n"
+  //         << "typedef " << name_attr << "_mref " << typeRef_name << "_mref;\n";
+  //   }
+  // }
 
   return out_.good();
 }
