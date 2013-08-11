@@ -30,10 +30,6 @@ namespace mfast {
 
 // field value is use to store the previous values inside dictionaries.
 
-inline bool is_empty_string(const char* str)
-{
-  return str == 0 || str[0] == '\0';
-}
 
 class dictionary_resetter
 {

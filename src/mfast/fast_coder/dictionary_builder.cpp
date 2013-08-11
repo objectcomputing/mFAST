@@ -25,6 +25,11 @@
 
 namespace mfast {
 
+inline bool is_empty_string(const char* str)
+{
+  return str == 0 || str[0] == '\0';
+}
+
 struct tag_key {};
 
 typedef boost::error_info<tag_key,std::string> key_info;
@@ -103,7 +108,7 @@ void dictionary_builder::build(const templates_description* def)
   }
 }
 
-void dictionary_builder::build_group(const field_instruction*    fi,
+void dictionary_builder::build_group(const field_instruction*          fi,
                                      const aggregate_instruction_base* src,
                                      aggregate_instruction_base*       dest)
 {
@@ -175,7 +180,7 @@ void dictionary_builder::visit(const templateref_instruction* src_inst, void* de
     // this is static templateRef, we have to bind to the right template instruction
     template_name_map_t::iterator itr = template_name_map_.find( qualified_name(src_inst->ns(), src_inst->name()) );
     if (itr != template_name_map_.end()) {
-      dest = new (*alloc_) templateref_instruction( src_inst->field_index(), itr->second);
+      dest = new (*alloc_)templateref_instruction( src_inst->field_index(), itr->second);
     }
     else {
       BOOST_THROW_EXCEPTION(template_not_found_error(src_inst->name(), current_template_.c_str()));
@@ -183,7 +188,7 @@ void dictionary_builder::visit(const templateref_instruction* src_inst, void* de
   }
   else {
     // this is dynamic templateRef, it can only be binded at decoding time
-    dest = new (*alloc_) templateref_instruction( src_inst->field_index() );
+    dest = new (*alloc_)templateref_instruction( src_inst->field_index() );
   }
 }
 
@@ -226,13 +231,17 @@ dictionary_builder::get_dictionary_storage(const char*         key,
   const char* dict = "";
 
   if (op_context) {
-    key = op_context->key_;
+    if (!is_empty_string(op_context->key_))
+      key = op_context->key_;
     ns = op_context->ns_;
     dict = op_context->dictionary_;
   }
 
   if (is_empty_string(dict)) {
     dict = this->current_dictionary_;
+    if (is_empty_string(dict)) {
+      dict = "global";
+    }
   }
 
   if (is_empty_string(ns)) {
@@ -240,7 +249,7 @@ dictionary_builder::get_dictionary_storage(const char*         key,
   }
 
   // qualified key is constructed with
-  // 2 or 3 tuples where tuples are separated
+  // 3 tuples where tuples are separated
   // with '::'. The first tuple
   // is the dictionary (i.e. global, template,
   // type or others). If the first tuple is

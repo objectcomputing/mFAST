@@ -22,7 +22,8 @@ add_executable (mfast_test
 				coder_test.cpp
 				value_storage_test.cpp				
 			    ${FASTTYPEGEN_test_types_OUTPUTS}
-			    fast_type_gen_test.cpp)
+			    fast_type_gen_test.cpp
+			    dictionary_builder_test.cpp)
 
 target_link_libraries (mfast_test ${MFAST_LIBRARIES}  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 

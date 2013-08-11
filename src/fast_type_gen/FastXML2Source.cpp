@@ -386,12 +386,13 @@ bool FastXML2Source::get_field_attributes(const XMLElement & element,
     fieldOpName = fieldOpElem->Name();
 
     std::string opContext_key = get_optional_attr(*fieldOpElem, "key", "");
-    if (!opContext_key.empty()) {
+    std::string opContext_dict = get_optional_attr(*fieldOpElem, "dictionary", "");
+    if (!opContext_key.empty() || !opContext_dict.empty()) {
 
       out_ << "op_context_t " << name_attr << "_opContext ={\n"
            << "  \"" << opContext_key << "\", \n"
            << "  \""<< get_optional_attr(*fieldOpElem, "ns", "") << "\", \n"
-           << "  \""<< get_optional_attr(*fieldOpElem, "dictionary", "") << "\"};";
+           << "  \""<< opContext_dict << "\"};";
 
       opContext = "&";
       opContext += name_attr;

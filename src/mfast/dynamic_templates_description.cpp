@@ -212,11 +212,12 @@ class templates_loader
         fieldOp = operator_map[fieldOpElem->Name()];
 
         std::string opContext_key = get_optional_attr(*fieldOpElem, "key", "");
-        if (!opContext_key.empty()) {
+        std::string opContext_dict = get_optional_attr(*fieldOpElem, "dictionary", "");
+        if (!opContext_key.empty() || !opContext_dict.empty()) {
           opContext = new (*alloc_)op_context_t;
           opContext->key_ = new_string(opContext_key.c_str());
           opContext->ns_ = new_string(get_optional_attr(*fieldOpElem, "ns", ""));
-          opContext->dictionary_ = new_string(get_optional_attr(*fieldOpElem, "dictionary", ""));
+          opContext->dictionary_ = new_string(opContext_dict.c_str());
         }
         initialValue = get_optional_attr(*fieldOpElem, "value", "");
         return true;
