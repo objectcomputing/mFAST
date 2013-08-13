@@ -47,7 +47,12 @@ to access a message in a generic way.
     // a generic message accessor
     struct message_printer // notice that we don't inherit from any class
     {
-        indenter_t indenter_;
+	    std::ostream& os_;
+	    indenter indent_;
+  
+        enum {
+          visit_absent = 0
+        };       
 
         template <typename PrimitiveTypes>
         void visit(const PrimitiveTypes& ref)
@@ -57,49 +62,23 @@ to access a message in a generic way.
             std::cout << indenter_ << ref.name() << ":" << ref << "\n";
         }
 
-        bool pre_visit(const group_cref& ref)
-        {
-          std::cout << indenter_++ << ref.name() << ":\n";
-          return true; // return true if we want its children to be visited
-        }
+	    template <typename CompositeTypeRef>
+	    void visit(const CompositeTypeRef& ref, int)
+	    {
+	      os_ << indent_ << ref.name() << ":\n";
+	      ++indent_;
+	      ref.accept_accessor(*this);
+	      --indent_;
+	    }
 
-        void post_visit(const group_cref& ref)
-        {
-          --indenter_;
-        }
+	    void visit(const sequence_element_cref&  ref, int index)
+	    {
+	      os_ << indent_ <<  "[" << index << "]:\n";
+	      ++indent_;
+	      ref.accept_accessor(*this);
+	      --indent_;
+	    }
 
-        bool pre_visit(const sequence_cref& ref)
-        {
-          std::cout << indenter_++ << ref.name() << ":\n";
-          return true; // return true if we want its children to be visited
-        }
-
-        void post_visit(const sequence_cref& ref)
-        {
-          --indenter_;
-        }
-
-        bool pre_visit(std::size_t index, const sequence_element_cref& ref)
-        {
-          std::cout << indenter_++ <<  "[" << index << "]:\n";
-          return true; // return true if we want its children to be visited
-        }
-
-        void post_visit(std::size_t index, const sequence_element_cref& ref)
-        {
-          --indenter_;
-        }
-
-        bool pre_visit(const message_cref& ref)
-        {
-          std::cout  << indenter_++ << ref.name() << "\n";
-          return true; // return true if we want its children to be visisted
-        }
-
-        void post_visit(const message_cref&)
-        {
-          --indenter_;
-        }
     };
 
     //////////////////////////////////////////
@@ -173,7 +152,6 @@ Even though mFAST is only a encoder at current stage, it already provides better
 memory footprint and superior runtime efficiency than QuickFAST. However there are still some
 area that needs to be done :
 
-1. Testing on platforms other than Mac OS/X.
+1. FAST specification version 1.2 support.
 2. Better documentation.
-3. Of course, a mFAST encoder.
 

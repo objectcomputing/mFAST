@@ -34,14 +34,14 @@ struct debug_stream {
 
 
   template <class T>
-  const debug_stream& operator<<(const T& t ) const
+  const debug_stream& operator<<(const T&) const
   {
     return *this;
   }
 
   typedef std::ostream& (*ostream_manipulator)(std::ostream&);
   // define an operator<< to take in std::endl
-  const debug_stream& operator<<(ostream_manipulator manip) const
+  const debug_stream& operator<<(ostream_manipulator) const
   {
     // call the function, but we cannot return it's value
     return *this;

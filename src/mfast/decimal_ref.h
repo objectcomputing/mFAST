@@ -21,17 +21,22 @@
 
 #include <cmath>
 #include <cfloat>
-#include <boost/multiprecision/cpp_dec_float.hpp>
 
 #include "mfast/field_ref.h"
 #include "mfast/int_ref.h"
 
+#include <boost/multiprecision/cpp_dec_float.hpp>
+
+#if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
+extern template class boost::multiprecision::cpp_dec_float<18>;
+#elif (defined(__GNUC__) && (__GNUC__ >= 3))
+__extension__ extern template boost::multiprecision::cpp_dec_float<18>;
+#endif
+
 namespace mfast {
-
+  
 typedef boost::multiprecision::cpp_dec_float<18> decimal_backend;
-
 typedef boost::multiprecision::number<decimal_backend> decimal;
-
 class allocator;
 
 namespace detail {
@@ -341,7 +346,7 @@ class decimal_mref
     }
 
     template <unsigned Digits10, class ExponentType, class Allocator>
-    void as(boost::multiprecision::number<boost::multiprecision::cpp_dec_float<Digits10,ExponentType,Allocator> > d)
+    void as(boost::multiprecision::number<boost::multiprecision::cpp_dec_float<Digits10,ExponentType,Allocator> > d) const
     {
       double m;
       int32_t exp;
@@ -382,7 +387,7 @@ class decimal_mref
       return int64_mref(0, this->storage(), this->instruction()->mantissa_instruction());
     }
 
-    void normalize()
+    void normalize() const
     {
       while (mantissa() != 0 && mantissa() % 10 == 0) {
         this->set_mantissa(mantissa()/10);

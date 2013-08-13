@@ -30,9 +30,14 @@ class resizable_fast_ostreambuf
 {
   public:
     resizable_fast_ostreambuf(std::vector<char>& buf)
-      : fast_ostreambuf(&buf[0], buf.size())
+      : fast_ostreambuf(0, 0)
       , buf_(buf)
     {
+      std::size_t old_size = buf.size();
+      std::size_t new_size = old_size + 1024;
+      buf.resize(new_size);
+      setp(&buf_[0], &buf_[old_size], &buf_[ new_size ]);
+      
     }
 
     virtual void overflow(std::size_t n)

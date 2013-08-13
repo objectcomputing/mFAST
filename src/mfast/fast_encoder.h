@@ -72,10 +72,10 @@ class fast_encoder
                        std::size_t         buffer_size,
                        bool                force_reset = false);
 
-    /// Encode a  message into FAST byte stream.
+    /// Encode a  message into FAST byte stream and append the encoded stream to \a buffer.
     ///
     /// @param[in] message The message to be encoded.
-    /// @param[in] buffer The buffer for the encoded FAST stream to be written to.
+    /// @param[in] buffer The buffer for the encoded FAST stream to be appended to.
     /// @param[in] force_reset Force the encoder to reset and discard all exisiting history values.
     void encode(const message_cref& message,
                 std::vector<char>&  buffer,

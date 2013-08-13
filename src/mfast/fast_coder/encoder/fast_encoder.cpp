@@ -23,7 +23,6 @@
 #include "mfast/fast_coder/dictionary_builder.h"
 #include "mfast/malloc_allocator.h"
 #include "mfast/exceptions.h"
-#include "mfast/debug_stream.h"
 #include "mfast/output.h"
 #include "mfast/fast_coder/encoder/encoder_presence_map.h"
 #include "mfast/fast_coder/encoder/encoder_field_operator.h"
@@ -49,7 +48,6 @@ struct fast_encoder_impl
   arena_allocator template_alloc_;
 
   int64_t active_message_id_;
-  debug_stream debug_;
   encoder_presence_map* current_;
   template_id_map_t templates_map_;
 

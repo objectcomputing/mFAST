@@ -107,10 +107,17 @@ int main(int argc, const char** argv)
     mfast::allocator* alloc = &malloc_allc;
     if (use_arena)
       alloc = &arena_alloc;
-    mfast::fast_decoder coder(alloc);
+    
     const mfast::templates_description* descriptions[] = { &example::the_description };
 
-    coder.include(descriptions);
+    mfast::fast_decoder decoder(alloc);
+    decoder.include(descriptions);
+    
+    mfast::fast_encoder encoder(alloc);
+    encoder.include(descriptions);
+    std::vector<char> buffer;
+    buffer.reserve(message_contents.size());
+      
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
 
     // typedef boost::chrono::high_resolution_clock clock;
@@ -123,12 +130,16 @@ int main(int argc, const char** argv)
         const char *last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
-          coder.decode(first, last, force_reset || first_message ); 
+          mfast::message_cref msg = decoder.decode(first, last, force_reset || first_message ); 
+          
+          encoder.encode(msg, buffer, force_reset || first_message);
+          
           first_message = false;
           first += skip_header_bytes;
         }
       }
     }
+    
     boost::posix_time::ptime stop = boost::posix_time::microsec_clock::universal_time();
     std::cout << "time spent " <<  static_cast<unsigned long>((stop - start).total_milliseconds()) << " msec\n";
 
