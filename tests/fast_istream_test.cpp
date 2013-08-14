@@ -140,7 +140,7 @@ decode_byte_vector(const byte_stream& bs, bool nullable, const char* result, std
 
   bool not_null = strm.decode(str, len, nullable, 0);
 
-  if ((str == 0 && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
+  if ((result == 0 && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
     return true;
 
   boost::test_tools::predicate_result res( false );
