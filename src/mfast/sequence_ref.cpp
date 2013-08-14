@@ -27,25 +27,9 @@ void sequence_mref_helper::resize(const sequence_field_instruction* instruction,
                                   allocator*                        alloc,
                                   std::size_t                       n)
 {
-  std::size_t seq_size = storage->of_array.len_;
-  if (seq_size) --seq_size;
-
-  long diff = n- seq_size;
-  if (diff == 0)
-    return;
-  if (diff < 0)
-  {
-    instruction->destruct_sequence_elements (*storage,
-                                             seq_size,
-                                             -diff,
-                                             alloc);
-    storage->array_length(n);
-    return;
-  }
 
   reserve (instruction, storage, alloc, n);
 
-  instruction->construct_sequence_elements (*storage, seq_size, diff, alloc);
   storage->array_length(n);
 }
 
@@ -56,12 +40,19 @@ void sequence_mref_helper::reserve(const sequence_field_instruction* instruction
 {
   if (n > storage->of_array.capacity_)
   {
-    std::size_t element_size = instruction->group_content_byte_count ();
+    std::size_t element_size = instruction->group_content_byte_count ();    
     std::size_t reserve_size = n*element_size;
-    storage->of_array.capacity_ =
+    
+    std::size_t new_capacity_ = 
       alloc->reallocate (storage->of_array.content_,
                          storage->of_array.capacity_ * element_size,
                          reserve_size)/element_size;
+                         
+    instruction->construct_sequence_elements (*storage, 
+                                              storage->of_array.capacity_, 
+                                              new_capacity_ - storage->of_array.capacity_, 
+                                              alloc);
+    storage->of_array.capacity_ = new_capacity_;
   }
 }
 

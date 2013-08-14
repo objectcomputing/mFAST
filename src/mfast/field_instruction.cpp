@@ -300,7 +300,7 @@ void sequence_field_instruction::destruct_value(value_storage& storage,
                                                 allocator*     alloc ) const
 {
   if (storage.of_array.capacity_ && storage.array_length() > 0) {
-    destruct_sequence_elements(storage, 0, storage.array_length(), alloc);
+    destruct_sequence_elements(storage, 0, storage.of_array.capacity_, alloc);
     alloc->deallocate(storage.of_array.content_, this->group_content_byte_count()*storage.of_array.capacity_ );
   }
 }

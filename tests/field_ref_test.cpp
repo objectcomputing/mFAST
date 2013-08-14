@@ -878,7 +878,7 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
 
     ref.reserve(2);
     BOOST_CHECK_EQUAL(ref.size(),                    0);
-    BOOST_CHECK_EQUAL(mock0.construct_value_called_, 0);
+    BOOST_CHECK_EQUAL(mock0.construct_value_called_, 2);
     BOOST_CHECK_EQUAL(mock0.destruct_value_called_,  0);
 
 
@@ -892,7 +892,7 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
 
     ref.resize(1);
     BOOST_CHECK_EQUAL(mock0.construct_value_called_, 2);
-    BOOST_CHECK_EQUAL(mock0.destruct_value_called_,  1);
+    BOOST_CHECK_EQUAL(mock0.destruct_value_called_,  0);
 
   }
 

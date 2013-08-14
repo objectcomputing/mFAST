@@ -11,9 +11,11 @@ namespace mfast
 template <typename CRef>
 class composite_field
 {
-  BOOST_MOVABLE_BUT_NOT_COPYABLE(composite_field)
+  private:
+    BOOST_MOVABLE_BUT_NOT_COPYABLE(composite_field)
 
   public:
+
     typedef typename CRef::instruction_cptr instruction_cptr;
     typedef CRef cref_type;
     typedef typename mref_of<cref_type>::type mref_type;
@@ -29,7 +31,7 @@ class composite_field
     composite_field(const cref_type & other,
                     mfast::allocator* alloc);
 
-    composite_field(BOOST_RV_REF(composite_field)other)
+    composite_field(BOOST_RV_REF(composite_field) other)
       : alloc_(other.alloc_)
       , instruction_ (other.instruction_)
     {
@@ -38,7 +40,7 @@ class composite_field
       other.instruction_ = 0;
     }
 
-    composite_field& operator = (BOOST_RV_REF(composite_field)other)
+    composite_field& operator = (BOOST_RV_REF(composite_field) other)
     {
       // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
       if (this->instruction())
@@ -60,7 +62,7 @@ class composite_field
     instruction_cptr instruction() const;
     const char* name() const;
     mfast::allocator* allocator() const;
-    
+
     const value_storage* storage_for(const cref_type& other) const;
 
   protected:
@@ -99,7 +101,7 @@ template <typename CRef>
 inline
 composite_field<CRef>::~composite_field()
 {
-  if (this->instruction())
+  if (alloc_ && this->instruction())
     this->instruction()->destruct_value(my_storage_, alloc_);
 }
 
