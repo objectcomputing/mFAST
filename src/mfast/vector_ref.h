@@ -206,9 +206,9 @@ class make_vector_mref
     {
     }
 
-    make_vector_mref(allocator*       alloc,
-                     value_storage*   storage,
-                     instruction_cptr instruction)
+    make_vector_mref(mfast::allocator* alloc,
+                     value_storage*    storage,
+                     instruction_cptr  instruction)
       : base_type(alloc, storage, instruction)
     {
     }

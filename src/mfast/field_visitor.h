@@ -26,7 +26,6 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/message_ref.h"
 #include "mfast/nested_message_ref.h"
-#include <boost/tti/tti.hpp>
 #include <boost/utility/enable_if.hpp>
 
 namespace mfast {
@@ -125,7 +124,7 @@ class field_accessor_adaptor
       accssor_.visit(ref, 0);
     }
 
-    virtual void visit(const template_instruction* , void* )
+    virtual void visit(const template_instruction*, void* )
     {
     }
 
@@ -232,7 +231,7 @@ class field_mutator_adaptor
       mutator_.visit(ref, 0);
     }
 
-    virtual void visit(const template_instruction* , void* )
+    virtual void visit(const template_instruction*, void* )
     {
     }
 
@@ -313,7 +312,7 @@ template <typename FieldAccessor>
 inline void nested_message_cref::accept_accessor(FieldAccessor& accessor) const
 {
   detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-  adaptor.visit(*this);  
+  adaptor.visit(*this);
 }
 
 template <typename ConstFieldRef>

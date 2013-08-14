@@ -71,6 +71,7 @@ class string_cref
     {
       return std::string(this->data(), this->size());
     }
+
 #endif
 
 
@@ -253,9 +254,9 @@ class string_mref
     {
     }
 
-    string_mref(allocator*       alloc,
-                value_storage*   storage,
-                instruction_cptr instruction)
+    string_mref(mfast::allocator* alloc,
+                value_storage*    storage,
+                instruction_cptr  instruction)
       : base_type(alloc, storage, instruction)
     {
     }

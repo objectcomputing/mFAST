@@ -31,7 +31,7 @@ class composite_field
     composite_field(const cref_type & other,
                     mfast::allocator* alloc);
 
-    composite_field(BOOST_RV_REF(composite_field) other)
+    composite_field(BOOST_RV_REF(composite_field)other)
       : alloc_(other.alloc_)
       , instruction_ (other.instruction_)
     {
@@ -40,7 +40,7 @@ class composite_field
       other.instruction_ = 0;
     }
 
-    composite_field& operator = (BOOST_RV_REF(composite_field) other)
+    composite_field& operator = (BOOST_RV_REF(composite_field)other)
     {
       // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
       if (this->instruction())
@@ -114,8 +114,8 @@ composite_field<CRef>::instruction() const
 
 template <typename CRef>
 inline
-composite_field<CRef>::composite_field(const composite_field<CRef>::cref_type& other,
-                                       mfast::allocator*                       alloc)
+composite_field<CRef>::composite_field(const typename composite_field<CRef>::cref_type& other,
+                                       mfast::allocator*                                alloc)
   : alloc_(alloc)
   , instruction_(other.instruction())
 {

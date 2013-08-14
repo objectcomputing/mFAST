@@ -567,7 +567,7 @@ class delta_operator
       T tmp(0, &bv, 0);
 
       check_overflow(tmp.value(), d, mref.instruction(), stream);
-      mref.as( tmp.value()+d );
+      mref.as( static_cast<typename T::value_type>(tmp.value()+d) );
 
       save_previous_value(mref);
     }

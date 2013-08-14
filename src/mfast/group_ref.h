@@ -58,7 +58,7 @@ class group_cref
     {
       return instruction()->subinstructions_count_;
     }
-    
+
     operator aggregate_cref() const;
 
     field_cref const_field(size_t index) const;
@@ -74,7 +74,6 @@ class group_cref
       return static_cast<const group_field_instruction*>(instruction_);
     }
 
-
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
@@ -84,6 +83,7 @@ class group_cref
       if (instruction()->optional())
         const_cast<value_storage*>(storage_)->present(true);
     }
+
   private:
     group_cref& operator= (const group_cref&);
 };
@@ -109,15 +109,15 @@ class make_group_mref
     }
 
     template <typename Instruction>
-    make_group_mref(allocator*         alloc,
+    make_group_mref(mfast::allocator*  alloc,
                     value_storage*     storage,
                     const Instruction* instruction)
       : base_type(alloc, storage, instruction)
     {
     }
 
-    make_group_mref(value_storage* storage,
-                    allocator*     alloc)
+    make_group_mref(value_storage*    storage,
+                    mfast::allocator* alloc)
       : base_type(storage, alloc)
     {
     }
@@ -128,7 +128,7 @@ class make_group_mref
     }
 
     field_mref mutable_field(size_t index) const;
-    
+
     operator aggregate_mref() const;
 
     template <typename FieldMutator>
@@ -146,7 +146,7 @@ typedef make_group_mref<group_cref> group_mref;
 ///////////////////////////////////////////////////////////////////////////////
 
 
-inline 
+inline
 group_cref::operator aggregate_cref() const
 {
   return aggregate_cref(static_cast<const value_storage*>(storage_->of_array.content_), instruction());
@@ -196,9 +196,8 @@ make_group_mref<ConstGroupRef>::ensure_valid() const
   this->instruction()->ensure_valid_storage(const_cast<value_storage&>(*this->storage_), this->alloc_);
 }
 
-
 template <typename ConstGroupRef>
-inline 
+inline
 make_group_mref<ConstGroupRef>::operator aggregate_mref() const
 {
   return aggregate_mref(this->alloc_, const_cast<value_storage*>(this->storage_->of_group.content_), this->instruction());

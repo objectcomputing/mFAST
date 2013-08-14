@@ -39,8 +39,8 @@ class sequence_element_cref
                           instruction_cptr     instruction);
 
     sequence_element_cref(const sequence_element_cref& other);
-    instruction_cptr instruction() const;    
-    
+    instruction_cptr instruction() const;
+
 };
 
 typedef make_aggregate_mref<sequence_element_cref> sequence_element_mref;
@@ -148,15 +148,15 @@ class make_sequence_mref
     {
     }
 
-    make_sequence_mref(allocator*       alloc,
-                       value_storage*   storage,
-                       instruction_cptr instruction)
+    make_sequence_mref(mfast::allocator* alloc,
+                       value_storage*    storage,
+                       instruction_cptr  instruction)
       : base_type(alloc, storage, instruction)
     {
     }
 
-    make_sequence_mref(value_storage* storage,
-                       allocator*     alloc)
+    make_sequence_mref(value_storage*    storage,
+                       mfast::allocator* alloc)
       : base_type(storage,alloc)
     {
     }
@@ -201,9 +201,9 @@ typedef make_sequence_mref<sequence_element_mref> sequence_mref;
 //////////////////////////////////////////////////////////////
 
 inline
-sequence_element_cref::sequence_element_cref(const value_storage* storage,
-                                             sequence_element_cref::instruction_cptr     instruction)
-  : aggregate_cref(storage, instruction) 
+sequence_element_cref::sequence_element_cref(const value_storage*                    storage,
+                                             sequence_element_cref::instruction_cptr instruction)
+  : aggregate_cref(storage, instruction)
 {
 }
 
@@ -213,7 +213,7 @@ sequence_element_cref::sequence_element_cref(const sequence_element_cref &other)
 {
 }
 
-inline sequence_element_cref::instruction_cptr 
+inline sequence_element_cref::instruction_cptr
 sequence_element_cref::instruction() const
 {
   return static_cast<instruction_cptr>(aggregate_cref::instruction());

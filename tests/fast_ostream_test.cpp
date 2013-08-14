@@ -33,7 +33,7 @@ using namespace mfast;
 template <typename T>
 boost::test_tools::predicate_result
 encode_integer(T value, bool nullable, const byte_stream& result)
-{  
+{
   char buffer[16];
   debug_allocator alloc;
   fast_ostreambuf sb(buffer);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(ascii_string_test)
   BOOST_CHECK(encode_string(0, 0, true, "\x80"));
   BOOST_CHECK(encode_string("", 0, true, "\x00\x80"));
   BOOST_CHECK(encode_string("\x0", 1, true, "\x00\x00\x80"));
-  
+
   BOOST_CHECK(encode_string("\x40\x40\xC0", 3, true, "\x40\x40\xC0"));
   BOOST_CHECK(encode_string("\x40\x40\xC0", 3, false, "\x40\x40\xC0"));
 
@@ -212,36 +212,35 @@ boost::test_tools::predicate_result
 encode_pmap(const char* bits, std::size_t maxbits, const byte_stream& result)
 {
   char buffer[16];
-  
+
   debug_allocator alloc;
   fast_ostreambuf sb(buffer);
   fast_ostream strm(&alloc);
   strm.rdbuf(&sb);
- 
+
   encoder_presence_map pmap;
   pmap.init(&strm, maxbits);
-  
+
   unsigned byte;
-  
+
   for (std::size_t i = 0; i < maxbits; ++i ) {
-    
+
     if (i % 8 == 0) {
       byte = bits[0];
       bits += 1;
     }
-    
-    pmap.set_next_bit( byte & 0x80 ) ;
+
+    pmap.set_next_bit( (byte & 0x80) != 0 );
     byte <<= 1;
   }
-  
-   pmap.commit();
-   if (byte_stream(sb) == result)
-     return true;
-   boost::test_tools::predicate_result res( false );
-   res.message() << "Got \"" << byte_stream(sb) << "\" instead.";
-   return res;
-}
 
+  pmap.commit();
+  if (byte_stream(sb) == result)
+    return true;
+  boost::test_tools::predicate_result res( false );
+  res.message() << "Got \"" << byte_stream(sb) << "\" instead.";
+  return res;
+}
 
 BOOST_AUTO_TEST_CASE(encoder_presence_map_test)
 {
@@ -253,82 +252,82 @@ BOOST_AUTO_TEST_CASE(encoder_presence_map_test)
 BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 {
   char buffer[32];
-  
+
   debug_allocator alloc;
-  
+
   {
     fast_ostreambuf sb(buffer);
     fast_ostream strm(&alloc);
     strm.rdbuf(&sb);
-    
+
     strm.allow_overlong_pmap(false);
-    
+
     encoder_presence_map pmap;
     pmap.init(&strm, 70);
-    
+
     strm.encode("\x40\x41\x42\x43",
                 4,
                 false,
                 static_cast<const ascii_field_instruction*>(0));
-    
+
     for (std::size_t i = 0; i < 70; ++i) {
       pmap.set_next_bit(false);
     }
-    
+
     pmap.commit();
-    
-    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\x40\x41\x42\xC3"));    
+
+    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\x40\x41\x42\xC3"));
   }
-  
+
   {
     fast_ostreambuf sb(buffer);
     fast_ostream strm(&alloc);
     strm.rdbuf(&sb);
-    
+
     strm.allow_overlong_pmap(false);
-    
+
     strm.encode(0, false, false);
     encoder_presence_map pmap;
     pmap.init(&strm, 70);
-    
+
     strm.encode("\x40\x41\x42\x43",
                 4,
                 false,
                 static_cast<const ascii_field_instruction*>(0));
-    
+
     for (std::size_t i = 0; i < 70; ++i) {
       pmap.set_next_bit(false);
     }
-    
+
     pmap.commit();
-    
-    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\x80\x40\x41\x42\xC3"));    
+
+    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\x80\x40\x41\x42\xC3"));
   }
-  
+
   {
     fast_ostreambuf sb(buffer);
     fast_ostream strm(&alloc);
     strm.rdbuf(&sb);
-    
+
     strm.allow_overlong_pmap(false);
-    
+
     strm.encode(0, false, false);
     encoder_presence_map pmap;
     pmap.init(&strm, 71);
-    
+
     strm.encode("\x40\x41\x42\x43",
                 4,
                 false,
                 static_cast<const ascii_field_instruction*>(0));
-    
+
     pmap.set_next_bit(true);
     for (std::size_t i = 0; i < 70; ++i) {
       pmap.set_next_bit(false);
     }
-    
+
     pmap.commit();
-    
-    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\xC0\x40\x41\x42\xC3"));    
+
+    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\xC0\x40\x41\x42\xC3"));
   }
 }
 

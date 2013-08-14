@@ -34,7 +34,7 @@ __extension__ extern template boost::multiprecision::cpp_dec_float<18>;
 #endif
 
 namespace mfast {
-  
+
 typedef boost::multiprecision::cpp_dec_float<18> decimal_backend;
 typedef boost::multiprecision::number<decimal_backend> decimal;
 class allocator;
@@ -342,6 +342,18 @@ class decimal_mref
       assert (exp <= 64 && exp >= -64);
       this->storage()->of_decimal.mantissa_ = mant;
       this->storage()->of_decimal.exponent_ = exp;
+      this->storage()->present(1);
+    }
+
+    void as (decimal d) const
+    {
+      double m;
+      int32_t exp;
+      d.backend().extract_parts(m, exp);
+      d *= decimal(decimal_backend(1.0, 18-exp));
+      this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
+      this->storage()->of_decimal.exponent_ = exp-18;
+      normalize();
       this->storage()->present(1);
     }
 

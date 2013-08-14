@@ -125,9 +125,9 @@ class int_mref
     {
     }
 
-    int_mref(allocator*       alloc,
-             value_storage*   storage,
-             instruction_cptr instruction)
+    int_mref(mfast::allocator* alloc,
+             value_storage*    storage,
+             instruction_cptr  instruction)
       : base_type(alloc, storage, instruction)
     {
     }
