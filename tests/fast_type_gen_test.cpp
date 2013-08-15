@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   BOOST_CHECK_EQUAL(test1::SampleInfo_cref::the_instruction.id(),                    1);
   BOOST_CHECK_EQUAL(test1::SampleInfo_cref::the_instruction.subinstructions_count(), 4);
   test1::SampleInfo_cref info_cref = info.cref();
-
+  
   BOOST_CHECK(equal_string(info_cref.get_BeginString(), "FIX4.4"));
   BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->field_index(),        0);
   BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->field_type(),     mfast::field_type_ascii_string);
@@ -125,6 +125,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
 
   BOOST_CHECK_EQUAL(sample.mref().get_nested_message2().target_instruction(), &test1::SampleInfo_cref::the_instruction);
   BOOST_CHECK_EQUAL(d2.instruction(),                                         &test1::SampleInfo_cref::the_instruction);
+  
 }
 
 BOOST_AUTO_TEST_SUITE_END()

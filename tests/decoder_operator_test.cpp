@@ -52,16 +52,20 @@ decode_mref(const byte_stream&       input_stream,
   strm.decode(pmap);
   uint64_t old_mask = pmap.mask();
 
-  malloc_allocator allocator;
+  mfast::allocator* alloc = expected.allocator();
   value_storage storage;
+  
   typename MREF::instruction_cptr instruction = expected.instruction();
-  instruction->construct_value(storage, &allocator);
+  instruction->construct_value(storage, alloc);
 
-
-  value_storage old_prev_storage = instruction->prev_value();
+  value_storage old_prev_storage;
+  instruction->copy_value(instruction->prev_value(),
+                          old_prev_storage,
+                          alloc);
+  
   typename MREF::cref_type old_prev( &old_prev_storage, instruction);
 
-  MREF ref(&allocator, &storage, instruction);
+  MREF ref(alloc, &storage, instruction);
 
   decoder_operators[instruction->field_operator()]->decode(ref, strm, pmap);
 
@@ -102,8 +106,9 @@ decode_mref(const byte_stream&       input_stream,
   }
 
   res = res.has_empty_message();
-
-  instruction->destruct_value(storage, &allocator);
+  
+  instruction->destruct_value(old_prev_storage, alloc);
+  instruction->destruct_value(storage, alloc);
   return res;
 }
 
@@ -111,7 +116,7 @@ BOOST_AUTO_TEST_SUITE( test_decoder_operator )
 
 
 
-BOOST_AUTO_TEST_CASE(operator_none_test)
+BOOST_AUTO_TEST_CASE(operator_none_decode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -153,7 +158,7 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_constant_test)
+BOOST_AUTO_TEST_CASE(operator_constant_decode_test)
 {
 
   malloc_allocator allocator;
@@ -203,7 +208,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_default_test)
+BOOST_AUTO_TEST_CASE(operator_default_decode_test)
 {
 
   malloc_allocator allocator;
@@ -298,7 +303,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_copy_test)
+BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -427,7 +432,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_increment_test)
+BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -562,7 +567,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
+BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -656,7 +661,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
+BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -717,7 +722,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
+BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
 {
   debug_allocator alloc;
   value_storage storage;
@@ -868,7 +873,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
+BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
 {
   debug_allocator alloc;
   value_storage storage;
@@ -898,7 +903,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
   
     inst.destruct_value(storage, &alloc);
   }
-
+  
   { // testing mandatory field without initial value
     //const char* default_value = "initial_string";
 
@@ -923,7 +928,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
     
     inst.destruct_value(storage, &alloc);
   }
-
+  
   { // testing optional field with NULL substraction in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
@@ -951,6 +956,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
     
     inst.destruct_value(storage, &alloc);
   }
+  
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
@@ -978,7 +984,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
+BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 {
   debug_allocator alloc;
   value_storage storage;
@@ -1007,7 +1013,6 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.destruct_value(storage, &alloc);
   }
-
   { // testing mandatory field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
@@ -1039,6 +1044,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     result.as("ABCDE");
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
     
+    inst.destruct_value(const_cast<value_storage&>(inst.prev_value()), &alloc);
     inst.destruct_value(storage, &alloc);
 
   }
@@ -1063,7 +1069,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.destruct_value(storage, &alloc);
   }
-
+  
   { // testing optional field with initial value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
@@ -1090,7 +1096,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.destruct_value(storage, &alloc);
   }
-
+  
   { // testing optional field with NULL tail value
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
@@ -1117,7 +1123,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     inst.destruct_value(storage, &alloc);
   }
-
+  
   { // testing optional field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
     const uint32_t default_len = strlen(default_value);
@@ -1144,7 +1150,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
 
     ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
     // change the previous value to "ABCDE" so we can verified the case with defined previous value
-    prev = "ABCDE";
+    prev.shallow_assign( "ABCDE" );
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  assigned – the value of the field is the previous value.
     result.as("ABCDE");
@@ -1181,6 +1187,8 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
     
     result.as_absent();
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+    inst.destruct_value(storage, &alloc);    
   }
+  
 }
 BOOST_AUTO_TEST_SUITE_END()

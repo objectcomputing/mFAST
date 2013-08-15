@@ -79,7 +79,8 @@ bool FastXML2Header::VisitEnter( const XMLDocument& doc)
   out_<< "#ifndef __" << filebase_upper << "_H__\n"
       << "#define __" << filebase_upper << "_H__\n"
       << "\n"
-      << "#include <mfast.h>\n\n";
+      << "#include <mfast.h>\n"
+      << "#include <boost/array.hpp>\n";
 
   DependencyTracker tracker(out_, registry_);
   doc.Accept(&tracker);
@@ -159,7 +160,8 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
   header_mref_.str("");
 
   out_<< "class " << name_attr << "\n"
-      << "  : public mfast::message_type\n"
+      << "  : private boost::array<mfast::value_storage, " << numFields << ">\n"
+      << "  , public mfast::message_type\n"
       << "{\n"
       << "  public:\n"
       << "    enum {\n"
@@ -177,7 +179,6 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "  private:\n"
       << "    " << name_attr << "(const " << name_attr << "&);\n"
       << "    " << name_attr << "& operator = (const "  << name_attr << "&);\n"
-      << "    mfast::value_storage fields_storage_[" << numFields << "];\n"
       << "};\n\n";
   restore_scope(name_attr);
 

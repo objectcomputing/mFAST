@@ -21,7 +21,8 @@ class composite_field
     typedef typename mref_of<cref_type>::type mref_type;
 
     composite_field(mfast::allocator* alloc=0,
-                    instruction_cptr  instruction=0);
+                    instruction_cptr  instruction=0,
+                    value_storage*    fields_storage=0);
 
     // a special constructor to facilitate puting a message_type instance in an associative container
     // using emplace()
@@ -80,12 +81,13 @@ typedef composite_field<sequence_cref> sequence_type;
 template <typename CRef>
 inline
 composite_field<CRef>::composite_field(mfast::allocator*                                alloc,
-                                       typename composite_field<CRef>::instruction_cptr instruction)
+                                       typename composite_field<CRef>::instruction_cptr instruction,
+                                       value_storage*                                   fields_storage)
   : alloc_(alloc)
   , instruction_(instruction)
 {
   if (instruction_)
-    instruction_->construct_value(my_storage_, 0, alloc_);
+    instruction_->construct_value(my_storage_, fields_storage, alloc_);
 }
 
 template <typename CRef>

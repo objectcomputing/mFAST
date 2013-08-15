@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(group_test)
+BOOST_AUTO_TEST_CASE(group_coder_test)
 {
   fast_coding_test_case test_case (
     "<?xml version=\" 1.0 \"?>\n"

@@ -337,6 +337,11 @@ class make_vector_mref
     void shallow_assign(const value_type* addr, size_t n) const
     {
       assert( n < INT32_MAX );
+      if (this->storage()->of_array.capacity_ > 0 && 
+          this->storage()->of_array.content_ != 0) {
+        this->allocator()->deallocate(this->storage()->of_array.content_,
+                                      this->storage()->of_array.capacity_);
+      }
       this->storage()->of_array.content_ = const_cast<char*>(addr);
       this->storage()->array_length(n);
       this->storage()->of_array.capacity_ = 0;

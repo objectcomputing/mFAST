@@ -23,37 +23,51 @@
 #include <mfast/malloc_allocator.h>
 #include <set>
 
-class debug_allocator : public mfast::malloc_allocator
+class debug_allocator
+  : public mfast::malloc_allocator
 {
-public:
+  public:
 
-  debug_allocator() {
-    BOOST_CHECK_EQUAL(leased_addresses_.size(), 0);
-  }
+    debug_allocator()
+    {
+    }
 
-  virtual void* allocate(std::size_t s) {
-    void* pointer = std::malloc(s);
-    if (pointer == 0) throw std::bad_alloc();
-    leased_addresses_.insert(pointer);
-    return pointer;
-  }
+    ~debug_allocator()
+    {
+      BOOST_CHECK_EQUAL(leased_addresses_.size(), 0);
+    }
 
-  virtual std::size_t reallocate(void*& pointer, std::size_t /* old_size */, std::size_t new_size)
-  {
-    pointer = std::realloc(pointer, new_size);
-    if (pointer == 0) throw std::bad_alloc();
-    leased_addresses_.insert(pointer);
-    return new_size;
-  }
+    virtual void* allocate(std::size_t s)
+    {
+      void* pointer = std::malloc(s);
+      if (pointer == 0) throw std::bad_alloc();
+      leased_addresses_.insert(pointer);
+      return pointer;
+    }
 
-  virtual void deallocate(void* pointer, std::size_t) {
+    virtual std::size_t reallocate(void*& pointer, std::size_t /* old_size */, std::size_t new_size)
+    {
+      void* old_ptr = pointer;
+      pointer = std::realloc(pointer, new_size);
+      leased_addresses_.erase(old_ptr);
+      if (pointer == 0) {
+        std::free(old_ptr);
+        throw std::bad_alloc();
+      }
+      leased_addresses_.insert(pointer);
+      return new_size;
+    }
 
-    BOOST_CHECK(leased_addresses_.count(pointer));
-    std::free(pointer);
-    leased_addresses_.erase(pointer);
-  }
- private:
-  std::set<void*> leased_addresses_;
+    virtual void deallocate(void* pointer, std::size_t)
+    {
+
+      BOOST_CHECK(leased_addresses_.count(pointer));
+      std::free(pointer);
+      leased_addresses_.erase(pointer);
+    }
+
+  private:
+    std::set<void*> leased_addresses_;
 };
 
 #ifndef UINT64_MAX

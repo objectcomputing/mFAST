@@ -211,7 +211,7 @@ void group_field_instruction::construct_value(value_storage& storage,
   // function for reseting a key and thus no memory deallocation is required.
   storage.of_group.content_ =
     static_cast<value_storage*>(alloc->allocate( this->group_content_byte_count() ));
-
+  storage.of_group.own_content_ = true;
   construct_group_subfields(storage.of_group.content_, alloc);
 }
 
@@ -230,6 +230,7 @@ void group_field_instruction::copy_value(const value_storage& src,
                                          allocator*           alloc) const
 {
   dest.of_group.present_ = src.of_group.present_;
+  dest.of_group.own_content_ = true;
   dest.of_group.content_ =
     static_cast<value_storage*>(alloc->allocate( this->group_content_byte_count() ));
 
@@ -299,7 +300,7 @@ void sequence_field_instruction::construct_value(value_storage& storage,
 void sequence_field_instruction::destruct_value(value_storage& storage,
                                                 allocator*     alloc ) const
 {
-  if (storage.of_array.capacity_ && storage.array_length() > 0) {
+  if (storage.of_array.capacity_) {
     destruct_sequence_elements(storage, 0, storage.of_array.capacity_, alloc);
     alloc->deallocate(storage.of_array.content_, this->group_content_byte_count()*storage.of_array.capacity_ );
   }

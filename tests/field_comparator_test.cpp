@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   BOOST_CHECK(m3.cref() == m1ref);
 }
 
-BOOST_AUTO_TEST_CASE(group_test)
+BOOST_AUTO_TEST_CASE(group_compare_test)
 {
   debug_allocator alloc;
 
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(group_test)
   BOOST_CHECK(m3.cref() == m1ref);
 }
 
-BOOST_AUTO_TEST_CASE(sequence_test)
+BOOST_AUTO_TEST_CASE(sequence_compare_test)
 {
   debug_allocator alloc;
 
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(sequence_test)
   BOOST_CHECK(m3.cref() == m1ref);
 }
 
-BOOST_AUTO_TEST_CASE(static_templateref_test)
+BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
 {
   debug_allocator alloc;
 
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
   BOOST_CHECK(m3.cref() == m1ref);
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_templateref_test)
+BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
 {
   debug_allocator alloc;
 

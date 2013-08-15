@@ -45,17 +45,19 @@ encode_mref(const byte_stream&       result_stream,
 {
   char buffer[32];
   
-  debug_allocator alloc;
+  mfast::allocator* alloc = value.allocator();
   fast_ostreambuf sb(buffer);
-  fast_ostream strm(&alloc);
+  fast_ostream strm(alloc);
   strm.rdbuf(&sb);
   
   encoder_presence_map pmap;
   pmap.init(&strm, 7);
   
   typename MREF::instruction_cptr instruction = value.instruction();
-
-  value_storage old_prev_storage = instruction->prev_value();
+  value_storage& prev_storage = const_cast<value_storage&>(instruction->prev_value());
+  value_storage old_prev_storage;
+  instruction->copy_value(prev_storage, old_prev_storage, alloc);
+  
   typename MREF::cref_type old_prev( &old_prev_storage, instruction);
 
 
@@ -87,11 +89,15 @@ encode_mref(const byte_stream&       result_stream,
   }
 
   res = res.has_empty_message();
-
+  
+  instruction->destruct_value(prev_storage,alloc);
+  instruction->destruct_value(old_prev_storage,alloc);
+  prev_storage.of_array.capacity_ = 0;
+  
   return res;
 }
 
-BOOST_AUTO_TEST_SUITE( test_encoder_operator )
+BOOST_AUTO_TEST_SUITE( test_encoder_encode_operator )
 
 BOOST_AUTO_TEST_CASE(operator_none_test)
 {
@@ -135,7 +141,7 @@ BOOST_AUTO_TEST_CASE(operator_none_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_constant_test)
+BOOST_AUTO_TEST_CASE(operator_constant_encode_test)
 {
 
   malloc_allocator allocator;
@@ -185,7 +191,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_default_test)
+BOOST_AUTO_TEST_CASE(operator_default_encode_test)
 {
 
   malloc_allocator allocator;
@@ -284,7 +290,7 @@ BOOST_AUTO_TEST_CASE(operator_default_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_copy_test)
+BOOST_AUTO_TEST_CASE(operator_copy_encode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -413,7 +419,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_increment_test)
+BOOST_AUTO_TEST_CASE(operator_increment_encode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -548,7 +554,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
+BOOST_AUTO_TEST_CASE(operator_delta_integer_encode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -642,7 +648,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
+BOOST_AUTO_TEST_CASE(operator_delta_decimal_encode_test)
 {
   malloc_allocator allocator;
   value_storage storage;
@@ -703,7 +709,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
+BOOST_AUTO_TEST_CASE(operator_delta_ascii_encode_test)
 {
   debug_allocator alloc;
   value_storage storage;
@@ -857,7 +863,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
+BOOST_AUTO_TEST_CASE(operator_delta_unicode_encode_test)
 {
   debug_allocator alloc;
   value_storage storage;
@@ -969,7 +975,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(operator_tail_ascii_test)
+BOOST_AUTO_TEST_CASE(operator_tail_ascii_encode_test)
 {
   debug_allocator alloc;
   value_storage storage;

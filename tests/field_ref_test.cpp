@@ -469,11 +469,11 @@ BOOST_AUTO_TEST_CASE(string_field_test)
 
     ref.replace(4, 2, "aaaa", 4);
     BOOST_CHECK(ref == "xxxxaaaa");
-
+    
     ref.shallow_assign("abcde");
     BOOST_CHECK(ref == "abcde");
     BOOST_CHECK_EQUAL(storage.of_array.capacity_, 0);
-
+    
     ref.as_absent();
     BOOST_CHECK(ref.absent());
 
@@ -481,7 +481,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     detail::codec_helper helper;
 
     BOOST_CHECK(!helper.previous_value_of(ref).is_defined() );
-
+    
     // testing delta base value
 
     // The base value depends on the state of the previous value in the following way:
@@ -538,6 +538,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "initial_string" );
     }
+    
   }
 
   inst.destruct_value(storage, &alloc);
@@ -625,7 +626,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
   BOOST_CHECK_EQUAL(group_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
   group_inst.construct_value(storage, &alloc);
-
+  
   BOOST_CHECK(storage.of_group.content_ != 0);
   {
     group_cref ref(&storage, &group_inst);
@@ -648,6 +649,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     unicode_string_cref cf1(f1);
     BOOST_CHECK_EQUAL(cf1.field_type(), field_type_unicode_string);
   }
+
   {
     group_mref ref(&alloc, &storage, &group_inst);
     BOOST_CHECK_EQUAL(ref.present(),      false);
@@ -679,6 +681,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     BOOST_CHECK_EQUAL(mf0.size(),                            4);
     BOOST_CHECK_EQUAL(memcmp(mf0.data(), bytes, mf0.size()), 0);
   }
+  
   group_inst.destruct_value(storage, &alloc);
 
 }
@@ -730,7 +733,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
   BOOST_CHECK_EQUAL(sequence_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
   sequence_inst.construct_value(storage, &alloc);
-
+  
   {
     sequence_mref ref(&alloc, &storage, &sequence_inst);
     BOOST_CHECK_EQUAL(ref.present(),      false);
@@ -793,6 +796,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
       BOOST_CHECK(cstr == str);
     }
   }
+  
   sequence_inst.destruct_value(storage, &alloc);
 
 }

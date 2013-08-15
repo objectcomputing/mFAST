@@ -170,18 +170,24 @@ extract_from_stream(const byte_stream& bs, const T& result)
 
   debug_allocator alloc;
   value_storage storage;
+  
+  result.instruction()->construct_value(storage, &alloc);
+  
   T mref(&alloc, &storage, result.instruction());
   strm >> mref;
 
 
-  if (mref == result)
+  if (mref == result) {
+    result.instruction()->destruct_value(storage, &alloc);
     return true;
+  }
 
   boost::test_tools::predicate_result res( false );
   if (mref.present())
     res.message() << "Extract failure!\nGot \"" << mref << "\" instead.";
   else
     res.message() << "Extract failure!\nGot absent value instead.";
+  result.instruction()->destruct_value(storage, &alloc);
   return res;
 }
 
