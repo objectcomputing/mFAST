@@ -30,7 +30,7 @@
 #if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
 extern template class boost::multiprecision::cpp_dec_float<18>;
 #elif (defined(__GNUC__) && (__GNUC__ >= 3))
-__extension__ extern template boost::multiprecision::cpp_dec_float<18>;
+inline template class boost::multiprecision::cpp_dec_float<18>;
 #endif
 
 namespace mfast {

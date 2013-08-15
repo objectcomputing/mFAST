@@ -18,6 +18,7 @@
 //
 #include "mfast/allocator.h"
 #include <new>
+#include <cstring>
 
 namespace mfast {
 

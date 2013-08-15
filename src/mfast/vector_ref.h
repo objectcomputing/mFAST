@@ -22,6 +22,7 @@
 #include <iterator>
 #include <cstring>
 #include <vector>
+#include <limits>
 #include "mfast/field_ref.h"
 #include "mfast/allocator.h"
 namespace mfast {
@@ -282,7 +283,7 @@ class make_vector_mref
 
     void resize(size_t n, char c = 0) const
     {
-      assert( n < INT32_MAX);
+      assert( n < static_cast<size_t>(std::numeric_limits<int32_t>::max()));
       size_t len = n+1;
       if ( len > this->capacity()) {
         reserve(n);
@@ -336,7 +337,7 @@ class make_vector_mref
 
     void shallow_assign(const value_type* addr, size_t n) const
     {
-      assert( n < INT32_MAX );
+      assert( n < static_cast<size_t>(std::numeric_limits<int32_t>::max()) );
       if (this->storage()->of_array.capacity_ > 0 && 
           this->storage()->of_array.content_ != 0) {
         this->allocator()->deallocate(this->storage()->of_array.content_,

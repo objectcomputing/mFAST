@@ -22,6 +22,7 @@
 #include "mfast/field_instruction.h"
 #include <new>
 #include <iostream>
+#include <typeinfo>
 #include <boost/config.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/utility/enable_if.hpp>
