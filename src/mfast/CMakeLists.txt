@@ -4,9 +4,9 @@ file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current 
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-set(mfast_SRCS ../fastxml/tinyxml2.cpp ../fastxml/FastXMLVisitor.cpp ${sources} ${headers})
+set(mfast_SRCS  ${sources} ${headers})
 
-add_library(mfast ${mfast_SRCS})
+add_library(mfast $<TARGET_OBJECTS:fastxml> ${mfast_SRCS})
 
 # set_target_properties(mfast PROPERTIES
 #   PUBLIC_HEADER ${headers})

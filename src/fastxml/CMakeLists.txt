@@ -1,0 +1,1 @@
+add_library(fastxml OBJECT ../../tinyxml2/tinyxml2.cpp FastXMLVisitor.cpp)

@@ -3,10 +3,9 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 add_executable (fast_type_gen
 	            fast_type_gen.cpp
-				../fastxml/tinyxml2.cpp
-				../fastxml/FastXMLVisitor.cpp
 				FastXML2Header.cpp
 				FastXML2Inline.cpp
-				FastXML2Source.cpp )
+				FastXML2Source.cpp 
+			    $<TARGET_OBJECTS:fastxml>)
 
-target_link_libraries (fast_type_gen ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+target_link_libraries (fast_type_gen  ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})

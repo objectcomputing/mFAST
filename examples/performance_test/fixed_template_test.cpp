@@ -113,10 +113,12 @@ int main(int argc, const char** argv)
     mfast::fast_decoder decoder(alloc);
     decoder.include(descriptions);
     
-    mfast::fast_encoder encoder(alloc);
-    encoder.include(descriptions);
-    std::vector<char> buffer;
-    buffer.reserve(message_contents.size());
+    // mfast::fast_encoder encoder(alloc);
+    // encoder.include(descriptions);
+    // std::vector<char> buffer;
+    // buffer.reserve(message_contents.size());
+    // 
+    mfast::message_type msg_value;
       
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
 
@@ -132,7 +134,8 @@ int main(int argc, const char** argv)
         while (first < last ) {
           mfast::message_cref msg = decoder.decode(first, last, force_reset || first_message ); 
           
-          encoder.encode(msg, buffer, force_reset || first_message);
+          // encoder.encode(msg, buffer, force_reset || first_message);
+          msg_value = mfast::message_type(msg, &malloc_allc);
           
           first_message = false;
           first += skip_header_bytes;
