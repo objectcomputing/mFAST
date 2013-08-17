@@ -27,10 +27,16 @@
 
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
+
 #if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
-extern template class boost::multiprecision::cpp_dec_float<18>;
-#elif (defined(__GNUC__) && (__GNUC__ >= 3))
-inline template class boost::multiprecision::cpp_dec_float<18>;
+#  if  (defined(__GNUC__) && (__GNUC__ >= 3)) && (!defined(__clang__))
+// g++ extern template class does not work when the template class has static data members, need to use inline stead.
+  namespace boost { namespace multiprecision {
+  inline template class cpp_dec_float<18>;
+  }}
+#  else
+  extern template class boost::multiprecision::cpp_dec_float<18>;
+#  endif
 #endif
 
 namespace mfast {
