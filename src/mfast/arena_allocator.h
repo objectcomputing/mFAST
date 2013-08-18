@@ -24,12 +24,11 @@
 #include <cassert>
 #include <cstddef>
 #include "allocator.h"
-
 namespace mfast {
 
   /// A special memory allocator where small memory blocks are allocated from a big memory chunk
   /// and those small memory blocks are all returned to the allocator in one shot.
-class arena_allocator
+class MFAST_EXPORT arena_allocator
   : public allocator
 {
 public:

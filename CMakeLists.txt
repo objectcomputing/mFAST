@@ -56,7 +56,13 @@ include_directories ("${PROJECT_BINARY_DIR}"
 add_subdirectory (src)
 
 link_directories (${PROJECT_BINARY_DIR}/src)
-set(MFAST_LIBRARIES mfast)
+
+
+if (BUILD_SHARED_LIBS)
+  set(MFAST_LIBRARIES mfast)
+else()
+  set(MFAST_LIBRARIES mfast_static)
+endif()
 
 #============================================================
 # FASTTYPEGEN_TARGET (public macro)

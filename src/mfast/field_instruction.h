@@ -22,7 +22,8 @@
 #include <cstddef>
 #include <cassert>
 #include <boost/static_assert.hpp>
-#include "mfast/value_storage.h"
+#include "value_storage.h"
+#include "mfast/mfast_export.h"
 namespace mfast {
 
 class allocator;
@@ -137,7 +138,7 @@ class nullable
 };
 
 
-class field_instruction
+class MFAST_EXPORT field_instruction
 {
   public:
     virtual void construct_value(value_storage& storage,
@@ -235,7 +236,7 @@ class field_instruction
 
 class dictionary_builder;
 
-class integer_field_instruction_base
+class MFAST_EXPORT integer_field_instruction_base
   : public field_instruction
 {
   public:
@@ -335,12 +336,24 @@ class int_field_instruction
 
 };
 
+#if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
+extern template class MFAST_EXPORT int_field_instruction<int32_t>;
+extern template class MFAST_EXPORT int_field_instruction<uint32_t>;
+extern template class MFAST_EXPORT int_field_instruction<int64_t>;
+extern template class MFAST_EXPORT int_field_instruction<uint64_t>;
+#elif !defined(MFAST_STATIC_DEFINE)
+template class MFAST_EXPORT int_field_instruction<int32_t>;
+template class MFAST_EXPORT int_field_instruction<uint32_t>;
+template class MFAST_EXPORT int_field_instruction<int64_t>;
+template class MFAST_EXPORT int_field_instruction<uint64_t>;
+#endif
+
 typedef int_field_instruction<int32_t> int32_field_instruction;
 typedef int_field_instruction<uint32_t> uint32_field_instruction;
 typedef int_field_instruction<int64_t> int64_field_instruction;
 typedef int_field_instruction<uint64_t> uint64_field_instruction;
 
-class mantissa_field_instruction
+class MFAST_EXPORT mantissa_field_instruction
   : public int64_field_instruction
 {
   public:
@@ -360,7 +373,7 @@ class mantissa_field_instruction
 };
 
 
-class nullable_decimal
+class MFAST_EXPORT nullable_decimal
 {
   public:
     nullable_decimal()
@@ -403,7 +416,7 @@ class nullable_decimal
     bool is_null_;
 };
 
-class decimal_field_instruction
+class MFAST_EXPORT decimal_field_instruction
   : public integer_field_instruction_base
 {
   public:
@@ -505,7 +518,7 @@ class decimal_field_instruction
 };
 
 
-class string_field_instruction
+class MFAST_EXPORT string_field_instruction
   : public field_instruction
 {
   public:
@@ -590,7 +603,7 @@ class string_field_instruction
 };
 
 
-class ascii_field_instruction
+class MFAST_EXPORT ascii_field_instruction
   : public string_field_instruction
 {
   public:
@@ -620,7 +633,7 @@ class ascii_field_instruction
     virtual void accept(field_instruction_visitor& visitor, void* context) const;
 };
 
-class unicode_field_instruction
+class MFAST_EXPORT unicode_field_instruction
   : public string_field_instruction
 {
   public:
@@ -652,7 +665,7 @@ class unicode_field_instruction
 
 
 
-class byte_vector_field_instruction
+class MFAST_EXPORT byte_vector_field_instruction
   : public string_field_instruction
 {
   public:
@@ -718,7 +731,7 @@ class byte_vector_field_instruction
     const char* length_ns_;
 };
 
-struct aggregate_instruction_base
+struct MFAST_EXPORT aggregate_instruction_base
 {
   aggregate_instruction_base(const char* dictionary,
                              void*       subinstructions,
@@ -791,7 +804,7 @@ private:
   field_instruction** subinstructions_;
 };
 
-class group_field_instruction
+class MFAST_EXPORT group_field_instruction
   : public field_instruction
   , public aggregate_instruction_base
 {
@@ -868,7 +881,7 @@ class group_instruction_ex
 
 };
 
-class sequence_field_instruction
+class MFAST_EXPORT sequence_field_instruction
   : public field_instruction
   , public aggregate_instruction_base
 {
@@ -948,7 +961,7 @@ class sequence_instruction_ex
 
 };
 
-class template_instruction
+class MFAST_EXPORT template_instruction
   : public group_field_instruction
 {
   public:
@@ -1036,7 +1049,7 @@ class template_instruction_ex
 
 };
 
-class templateref_instruction
+class MFAST_EXPORT templateref_instruction
   : public field_instruction
 {
   public:
@@ -1087,7 +1100,7 @@ class templateref_instruction
 };
 
 class templates_loader;
-class templates_description
+class MFAST_EXPORT templates_description
 {
   public:
     template <unsigned SIZE>
@@ -1152,7 +1165,7 @@ class templates_description
 };
 
 
-class field_instruction_visitor
+class MFAST_EXPORT field_instruction_visitor
 {
   public:
     virtual void visit(const int32_field_instruction*, void*)=0;

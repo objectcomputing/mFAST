@@ -25,12 +25,15 @@
 #include <map>
 #include <set>
 
-#include "exceptions.h"
+#include "fast_coder/exceptions.h"
 using namespace std;
 using namespace boost::assign; // bring 'map_list_of()' into scope
 
 namespace mfast
 {
+
+struct tag_reason;
+typedef boost::error_info<tag_referenced_by,std::string> reason_info;
 
 // parse a decimal string representation (like 120 or 0.12) and store
 // it into a nullable_decimal object.

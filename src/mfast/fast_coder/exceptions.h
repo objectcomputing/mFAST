@@ -20,16 +20,16 @@
 #define EXCEPTIONS_H_87B9JUIK
 
 #include <boost/exception/all.hpp>
-
+#include "mfast/mfast_export.h"
 namespace mfast
 {
 
 
 
-struct tag_error_code;
-typedef boost::error_info<tag_error_code,std::string> fast_error_info;
+// we should always export exception classes; otherwise, the vtable won't
+// be available for application when they are in shared libraries.
 
-class fast_error
+class MFAST_EXPORT fast_error
   : public virtual boost::exception, public virtual std::exception
 {
   public:
@@ -37,15 +37,12 @@ class fast_error
     {
     }
 
-    fast_error(const char* error_code)
-    {
-      *this << fast_error_info(error_code);
-    }
+    fast_error(const char* error_code);
 
 };
 
 
-class fast_static_error
+class MFAST_EXPORT fast_static_error
   : public fast_error
 {
 public:
@@ -59,7 +56,7 @@ public:
 
 };
 
-class fast_dynamic_error
+class MFAST_EXPORT fast_dynamic_error
   : public fast_error
 {
   public:
@@ -70,7 +67,7 @@ class fast_dynamic_error
 
 };
 
-class fast_reportable_error
+class MFAST_EXPORT fast_reportable_error
   : public fast_error
 {
 public:
@@ -81,37 +78,11 @@ public:
 };
 
 
-struct tag_template_id;
-typedef boost::error_info<tag_template_id,unsigned> template_id_info;
-struct tag_template_name;
-typedef boost::error_info<tag_template_name,std::string> template_name_info;
 struct tag_referenced_by;
+struct tag_template_id;
+
 typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info;
-struct tag_reason;
-typedef boost::error_info<tag_referenced_by,std::string> reason_info;
-
-class duplicate_template_id_error
-  : public fast_static_error
-{
-  public:
-    duplicate_template_id_error(unsigned tid)
-    {
-      *this << template_id_info(tid);
-    }
-
-};
-
-class template_not_found_error
-  : public fast_dynamic_error
-{
-  public:
-    template_not_found_error(const char* template_name, const char* referenced_by)
-      : fast_dynamic_error("D8")
-    {
-      *this << template_name_info(template_name) << referenced_by_info(referenced_by);
-    }
-
-};
+typedef boost::error_info<tag_template_id,unsigned> template_id_info;
 
 }
 

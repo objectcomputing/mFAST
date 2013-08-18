@@ -22,7 +22,7 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/fast_coder/dictionary_builder.h"
 #include "mfast/malloc_allocator.h"
-#include "mfast/exceptions.h"
+#include "mfast/fast_coder/exceptions.h"
 #include "mfast/output.h"
 #include "mfast/fast_coder/encoder/encoder_presence_map.h"
 #include "mfast/fast_coder/encoder/encoder_field_operator.h"

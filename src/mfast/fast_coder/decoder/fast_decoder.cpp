@@ -21,7 +21,7 @@
 #include "mfast/field_visitor.h"
 #include "mfast/sequence_ref.h"
 #include "mfast/malloc_allocator.h"
-#include "mfast/exceptions.h"
+#include "mfast/fast_coder/exceptions.h"
 #include "mfast/output.h"
 #include "mfast/composite_field.h"
 #include "mfast/fast_coder/debug_stream.h"

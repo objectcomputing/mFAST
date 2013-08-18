@@ -75,6 +75,12 @@ void integer_field_instruction_base::construct_value(value_storage& storage,
   storage.of_uint.present_ = !optional();
 }
 
+
+template class int_field_instruction<int32_t>;
+template class int_field_instruction<uint32_t>;
+template class int_field_instruction<int64_t>;
+template class int_field_instruction<uint64_t>;
+
 /////////////////////////////////////////////////////////
 
 void decimal_field_instruction::construct_value(value_storage& storage,

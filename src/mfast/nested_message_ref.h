@@ -21,7 +21,6 @@
 
 #include "mfast/field_instruction.h"
 #include "mfast/field_ref.h"
-#include "mfast/exceptions.h"
 #include "mfast/message_ref.h"
 
 namespace mfast

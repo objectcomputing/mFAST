@@ -21,12 +21,12 @@
 
 #include <cstddef>
 #include <algorithm>
-
+#include "mfast/mfast_export.h"
 namespace mfast {
 
 /// An abstract interface for allocators.
 ///
-class allocator
+class MFAST_EXPORT allocator
 {
   public:
     /// Allocate exactly n bytes for the memory that is not subjected to regrow

@@ -29,7 +29,7 @@ namespace mfast
 struct fast_encoder_impl;
 
 ///
-class fast_encoder
+class MFAST_EXPORT fast_encoder
 {
   public:
     /// Consturct a encoder using default memory allocator (i.e. malloc)

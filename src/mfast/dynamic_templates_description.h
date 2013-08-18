@@ -24,7 +24,7 @@
 #include "arena_allocator.h"
 namespace mfast
 {
-class dynamic_templates_description
+class MFAST_EXPORT dynamic_templates_description
   : public templates_description
 {
   public:

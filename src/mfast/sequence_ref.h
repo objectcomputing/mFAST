@@ -119,12 +119,8 @@ class make_sequence_cref
 typedef make_sequence_cref<sequence_element_cref> sequence_cref;
 
 namespace detail {
-struct sequence_mref_helper
+struct MFAST_EXPORT sequence_mref_helper
 {
-  static void resize(const sequence_field_instruction* instruction,
-                     value_storage*                    storage,
-                     allocator*                        alloc,
-                     std::size_t                       n);
 
   static void reserve(const sequence_field_instruction* instruction,
                       value_storage*                    storage,
@@ -223,7 +219,8 @@ template <typename ElementType>
 inline void
 make_sequence_mref<ElementType>::resize(size_t n) const
 {
-  detail::sequence_mref_helper::resize(this->instruction(), this->storage(), this->alloc_, n);
+  this->reserve (n);
+  this->storage()->array_length(n);
 }
 
 template <typename ElementType>

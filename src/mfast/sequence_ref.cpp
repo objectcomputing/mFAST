@@ -22,17 +22,6 @@
 namespace mfast {
 namespace detail {
 
-void sequence_mref_helper::resize(const sequence_field_instruction* instruction,
-                                  value_storage*                    storage,
-                                  allocator*                        alloc,
-                                  std::size_t                       n)
-{
-
-  reserve (instruction, storage, alloc, n);
-
-  storage->array_length(n);
-}
-
 void sequence_mref_helper::reserve(const sequence_field_instruction* instruction,
                                    value_storage*                    storage,
                                    allocator*                        alloc,

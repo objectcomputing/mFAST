@@ -1,6 +1,6 @@
 #ifndef FIELD_COMPARATOR_H_NPPC6W1A
 #define FIELD_COMPARATOR_H_NPPC6W1A
-
+#include <utility>
 #include "mfast/field_visitor.h"
 namespace mfast
 {
@@ -123,19 +123,9 @@ inline bool operator == (const group_cref& lhs, const group_cref& rhs)
   return detail::equal(lhs, rhs);
 }
 
-inline bool operator != (const group_cref& lhs, const group_cref& rhs)
-{
-  return !(lhs == rhs);
-}
-
 inline bool operator == (const sequence_cref& lhs, const sequence_cref& rhs)
 {
   return detail::equal(lhs, rhs);
-}
-
-inline bool operator != (const sequence_cref& lhs, const sequence_cref& rhs)
-{
-  return !(lhs == rhs);
 }
 
 inline bool operator == (const message_cref& lhs, const message_cref& rhs)
@@ -143,10 +133,7 @@ inline bool operator == (const message_cref& lhs, const message_cref& rhs)
  return detail::equal(lhs, rhs);
 }
 
-inline bool operator != (const message_cref& lhs, const message_cref& rhs)
-{
-  return !(lhs == rhs);
-}
+using namespace std::rel_ops;
 
 }
 

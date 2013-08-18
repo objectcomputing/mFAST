@@ -18,19 +18,22 @@
 //
 #ifndef MALLOC_ALLOCATOR_H_M03J5JS6
 #define MALLOC_ALLOCATOR_H_M03J5JS6
-
-#include "mfast/allocator.h"
+#include "allocator.h"
 #include <cstdlib>
 #include <new>
-namespace mfast {
-class malloc_allocator : public allocator {
-public:
-  static malloc_allocator* instance();
 
-  virtual void* allocate(std::size_t s);
-  virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size);
-  virtual void deallocate(void* pointer,std::size_t);
+namespace mfast {
+class MFAST_EXPORT malloc_allocator
+  : public allocator
+{
+  public:
+    static malloc_allocator* instance();
+
+    virtual void* allocate(std::size_t s);
+    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size);
+    virtual void deallocate(void* pointer,std::size_t);
 };
+
 }
 
 #endif /* end of include guard: MALLOC_ALLOCATOR_H_M03J5JS6 */
