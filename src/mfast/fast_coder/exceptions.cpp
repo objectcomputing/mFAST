@@ -11,12 +11,3 @@ fast_error::fast_error(const char* error_code)
 }
 
 }
-
-#ifdef MFAST_STATIC_DEFINE
-
-namespace boost {
-template class error_info<mfast::tag_referenced_by,std::string>;
-template class error_info<mfast::tag_template_id,unsigned>;
-}
-
-#endif

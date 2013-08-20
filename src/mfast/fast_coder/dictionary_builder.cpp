@@ -243,7 +243,7 @@ void dictionary_builder::visit(const sequence_field_instruction* src_inst, void*
       "",
       "",
       0,
-      nullable<uint32_t>()
+      int_value_storage<uint32_t>()
       );
   }
 }

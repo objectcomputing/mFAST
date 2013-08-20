@@ -57,7 +57,7 @@ class encoder_field_operator
                         encoder_presence_map& pmap) const;
 };
 
-extern encoder_field_operator* encoder_operators[operators_count];
+extern const encoder_field_operator* const encoder_operators[operators_count];
 
 }
 

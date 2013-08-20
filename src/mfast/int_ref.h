@@ -65,12 +65,13 @@ class int_cref
 
     bool is_initial_value() const
     {
-      return present() && value() == this->instruction()->initial_value();
+      return (this->absent() == this->instruction()->initial_value().is_empty() && 
+              (this->absent() || value() == this->instruction()->initial_value().template get<T>()));
     }
 
     T value() const
     {
-      return *reinterpret_cast<const T*>(&storage_->of_uint.content_);
+      return storage_->template get<T>();
     }
 
     instruction_cptr instruction() const
@@ -95,8 +96,8 @@ class int_cref
 template <typename T>
 inline bool operator == (const int_cref<T>& lhs, const int_cref<T>& rhs)
 {
-  return (lhs.absent() && rhs.absent()) ||
-         (lhs.present() && rhs.present() && lhs.value() == rhs.value());
+  return (lhs.absent() == rhs.absent()) &&
+         (lhs.absent() || lhs.value() == rhs.value());
 }
 
 template <typename T>
@@ -154,31 +155,21 @@ class int_mref
 
     void as(T v) const
     {
-      value(v);
+      this->storage()->present(1);
+      this->storage()->template set<T>(v);   
     }
 
     void as_initial_value() const
     {
-      this->storage()->present(1);
-      this->storage()->of_uint.content_ = this->instruction()->initial_value();
+      *this->storage() = this->instruction()->initial_value();
     }
 
     T value() const
     {
-      return *reinterpret_cast<const T*>(&this->storage()->of_uint.content_);
+      return this->storage()->template get<T>();
     }
 
   protected:
-
-    // explicit int_mref(const field_mref& other)
-    //   : base_type(other)
-    // {
-    // }
-
-    void value(T& v) const
-    {
-      value_ref() = v;
-    }
 
     T& value_ref() const
     {
@@ -200,7 +191,7 @@ class int_mref
 
     void copy_from(value_storage v) const
     {
-      as(*reinterpret_cast<T*>(&v.of_uint.content_));
+      *this->storage() = v;
     }
 
 };

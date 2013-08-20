@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef GROUP_VALUE_REF_H_15PUY407
-#define GROUP_VALUE_REF_H_15PUY407
+#ifndef GROUP_REF_H_15PUY407
+#define GROUP_REF_H_15PUY407
 
 #include "mfast/field_instruction.h"
 #include "mfast/field_ref.h"
@@ -205,4 +205,4 @@ make_group_mref<ConstGroupRef>::operator aggregate_mref() const
 
 }
 
-#endif /* end of include guard: GROUP_VALUE_REF_H_15PUY407 */
+#endif /* end of include guard: GROUP_REF_H_15PUY407 */

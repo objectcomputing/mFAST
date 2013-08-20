@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef MESSAGE_BASE_H_CZBMHN6L
-#define MESSAGE_BASE_H_CZBMHN6L
+#ifndef MESSAGE_REF_H_CZBMHN6L
+#define MESSAGE_REF_H_CZBMHN6L
 
 #include <cassert>
 #include <boost/move/core.hpp>
@@ -258,4 +258,4 @@ make_message_mref<ConstMessageRef>::reset() const
 }
 
 }
-#endif /* end of include guard: MESSAGE_BASE_H_CZBMHN6L */
+#endif /* end of include guard: MESSAGE_REF_H_CZBMHN6L */

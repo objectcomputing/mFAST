@@ -120,7 +120,7 @@ inline void
 fast_encoder_impl::visit(SimpleCRef& cref)
 {
 
-  encoder_field_operator* field_operator
+  const encoder_field_operator* field_operator
     = encoder_operators[cref.instruction()->field_operator()];
   field_operator->encode(cref,
                          strm_,

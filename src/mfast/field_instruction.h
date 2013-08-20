@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef TYPE_DEFINITION_H_PMKVDZOC
-#define TYPE_DEFINITION_H_PMKVDZOC
+#ifndef FIELD_INSTRUCTION_H_PMKVDZOC
+#define FIELD_INSTRUCTION_H_PMKVDZOC
 
 #include <cstddef>
 #include <cassert>
@@ -101,42 +101,6 @@ struct field_type_trait<uint64_t>
 
 class field_instruction_visitor;
 
-template <class T>
-class nullable
-{
-  public:
-    nullable()
-      : is_null_(true)
-    {
-    }
-
-    nullable(T value)
-      :  v_(value)
-      , is_null_(false)
-    {
-    }
-
-    void set(T value)
-    {
-      v_ = value;
-      is_null_ = false;
-    }
-
-    bool is_null() const
-    {
-      return is_null_;
-    }
-
-    T value() const
-    {
-      return v_;
-    }
-
-  private:
-    T v_;
-    bool is_null_;
-};
-
 
 class MFAST_EXPORT field_instruction
 {
@@ -162,11 +126,6 @@ class MFAST_EXPORT field_instruction
     bool optional() const
     {
       return optional_flag_;
-    }
-
-    bool has_initial_value() const
-    {
-      return has_initial_value_;
     }
 
     uint32_t id() const
@@ -198,6 +157,11 @@ class MFAST_EXPORT field_instruction
     {
       return field_index_;
     }
+    
+    bool mandatory_without_initial_value() const
+    {
+      return mandatory_no_initial_value_;
+    }
 
     const char* field_type_name() const;
 
@@ -213,6 +177,7 @@ class MFAST_EXPORT field_instruction
       , optional_flag_(optional)
       , nullable_flag_( optional &&  (operator_id != operator_constant) )
       , has_pmap_bit_(operator_id > operator_delta || ((operator_id == operator_constant) && optional))
+      , mandatory_no_initial_value_(false)
       , field_type_(field_type)
       , id_(id)
       , name_(name)
@@ -226,8 +191,8 @@ class MFAST_EXPORT field_instruction
     uint16_t operator_id_ : 4;
     uint16_t optional_flag_ : 1;
     uint16_t nullable_flag_ : 1;
-    uint16_t has_initial_value_ : 1;
     uint16_t has_pmap_bit_ : 1;
+    uint16_t mandatory_no_initial_value_ : 1;
     uint16_t field_type_ : 8;
     uint32_t id_;
     const char* name_;
@@ -240,26 +205,30 @@ class MFAST_EXPORT integer_field_instruction_base
   : public field_instruction
 {
   public:
-    integer_field_instruction_base(uint16_t            field_index,
-                                   operator_enum_t     operator_id,
-                                   int                 field_type,
-                                   presence_enum_t     optional,
-                                   uint32_t            id,
-                                   const char*         name,
-                                   const char*         ns,
-                                   const op_context_t* context)
+    integer_field_instruction_base(uint16_t             field_index,
+                                   operator_enum_t      operator_id,
+                                   int                  field_type,
+                                   presence_enum_t      optional,
+                                   uint32_t             id,
+                                   const char*          name,
+                                   const char*          ns,
+                                   const op_context_t*  context,
+                                   const value_storage& initial_storage)
       : field_instruction(field_index, operator_id, field_type, optional, id, name, ns)
       , op_context_(context)
-      , default_value_(1)
+      , initial_value_(initial_storage)
       , prev_value_(&prev_storage_)
+      , initial_or_default_value_(initial_storage.is_empty() ? &default_value_ : &initial_value_)
     {
+      mandatory_no_initial_value_ = !optional && initial_storage.is_empty();
     }
 
     integer_field_instruction_base(const integer_field_instruction_base& other)
       : field_instruction(other)
       , op_context_(other.op_context_)
-      , default_value_(other.default_value_)
+      , initial_value_(other.initial_value_)
       , prev_value_(&prev_storage_)
+      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
     {
     }
 
@@ -281,18 +250,25 @@ class MFAST_EXPORT integer_field_instruction_base
       return op_context_;
     }
 
-    const value_storage& default_value() const
+    const value_storage& initial_value() const
     {
-      return default_value_;
+      return initial_value_;
+    }
+
+    const value_storage& initial_or_default_value() const
+    {
+      return *initial_or_default_value_;
     }
 
   protected:
 
     friend class dictionary_builder;
     const op_context_t* op_context_;
-    value_storage default_value_;
+    value_storage initial_value_;
     value_storage* prev_value_;
     value_storage prev_storage_;
+    const value_storage* initial_or_default_value_;
+    static const value_storage default_value_;
 };
 
 template <typename T>
@@ -300,14 +276,14 @@ class int_field_instruction
   : public integer_field_instruction_base
 {
   public:
-    int_field_instruction(uint16_t            field_index,
-                          operator_enum_t     operator_id,
-                          presence_enum_t     optional,
-                          uint32_t            id,
-                          const char*         name,
-                          const char*         ns,
-                          const op_context_t* context,
-                          nullable<T>         initial_value = nullable<T>())
+    int_field_instruction(uint16_t             field_index,
+                          operator_enum_t      operator_id,
+                          presence_enum_t      optional,
+                          uint32_t             id,
+                          const char*          name,
+                          const char*          ns,
+                          const op_context_t*  context,
+                          int_value_storage<T> initial_value = int_value_storage<T>())
       : integer_field_instruction_base(field_index,
                                        operator_id,
                                        field_type_trait<T>::id,
@@ -315,11 +291,9 @@ class int_field_instruction
                                        id,
                                        name,
                                        ns,
-                                       context)
+                                       context,
+                                       initial_value.storage_)
     {
-      this->has_initial_value_ = !initial_value.is_null();
-      if (this->has_initial_value_)
-        reinterpret_cast<T&>(this->default_value_.of_uint.content_) = initial_value.value();
     }
 
     int_field_instruction(const int_field_instruction& other)
@@ -328,11 +302,6 @@ class int_field_instruction
     }
 
     virtual void accept(field_instruction_visitor& visitor, void* context) const;
-
-    T initial_value() const
-    {
-      return *reinterpret_cast<const T*>(&this->default_value_.of_uint.content_);
-    }
 
 };
 
@@ -358,9 +327,9 @@ class MFAST_EXPORT mantissa_field_instruction
 {
   public:
 
-    mantissa_field_instruction(operator_enum_t     operator_id,
-                               const op_context_t* context,
-                               nullable<int64_t>   initial_value)
+    mantissa_field_instruction(operator_enum_t            operator_id,
+                               const op_context_t*        context,
+                               int_value_storage<int64_t> initial_value)
       : int64_field_instruction(0, operator_id, presence_mandatory, 0, 0, 0, context, initial_value)
     {
     }
@@ -373,62 +342,19 @@ class MFAST_EXPORT mantissa_field_instruction
 };
 
 
-class MFAST_EXPORT nullable_decimal
-{
-  public:
-    nullable_decimal()
-      : is_null_ (true)
-    {
-    }
-
-    nullable_decimal(int64_t mantissa, int8_t exponent)
-      : mantissa_(mantissa)
-      , exponent_(exponent)
-      , is_null_(false)
-    {
-    }
-
-    void set(int64_t mantissa, int8_t exponent)
-    {
-      mantissa_ = mantissa;
-      exponent_ = exponent;
-      is_null_ = false;
-    }
-
-    bool is_null() const
-    {
-      return is_null_;
-    }
-
-    int64_t mantissa() const
-    {
-      return mantissa_;
-    }
-
-    int8_t exponent() const
-    {
-      return exponent_;
-    }
-
-  private:
-    int64_t mantissa_;
-    int8_t exponent_;
-    bool is_null_;
-};
-
 class MFAST_EXPORT decimal_field_instruction
   : public integer_field_instruction_base
 {
   public:
 
-    decimal_field_instruction(uint16_t            field_index,
-                              operator_enum_t     decimal_operator_id,
-                              presence_enum_t     optional,
-                              uint32_t            id,
-                              const char*         name,
-                              const char*         ns,
-                              const op_context_t* decimal_context,
-                              nullable_decimal    initial_value = nullable_decimal())
+    decimal_field_instruction(uint16_t              field_index,
+                              operator_enum_t       decimal_operator_id,
+                              presence_enum_t       optional,
+                              uint32_t              id,
+                              const char*           name,
+                              const char*           ns,
+                              const op_context_t*   decimal_context,
+                              decimal_value_storage initial_value = decimal_value_storage())
       : integer_field_instruction_base(field_index,
                                        decimal_operator_id,
                                        field_type_decimal,
@@ -436,14 +362,10 @@ class MFAST_EXPORT decimal_field_instruction
                                        id,
                                        name,
                                        ns,
-                                       decimal_context)
+                                       decimal_context,
+                                       initial_value.storage_)
       , mantissa_instruction_(0)
     {
-      this->has_initial_value_ = !initial_value.is_null();
-      if (this->has_initial_value_) {
-        this->default_value_.of_decimal.exponent_ = initial_value.exponent();
-        this->default_value_.of_decimal.mantissa_ = initial_value.mantissa();
-      }
     }
 
     decimal_field_instruction(uint16_t                    field_index,
@@ -454,7 +376,7 @@ class MFAST_EXPORT decimal_field_instruction
                               const char*                 ns,
                               const op_context_t*         exponent_context,
                               mantissa_field_instruction* mantissa_instruction,
-                              nullable<int8_t>            exponent_initial_value = nullable<int8_t>())
+                              decimal_value_storage       initial_value = decimal_value_storage())
       : integer_field_instruction_base(field_index,
                                        exponent_operator_id,
                                        field_type_exponent,
@@ -462,15 +384,12 @@ class MFAST_EXPORT decimal_field_instruction
                                        id,
                                        name,
                                        ns,
-                                       exponent_context)
+                                       exponent_context,
+                                       initial_value.storage_)
       , mantissa_instruction_(mantissa_instruction)
     {
       assert(mantissa_instruction);
-      this->has_initial_value_ = !exponent_initial_value.is_null();
-      if (this->has_initial_value_ ) {
-        this->default_value_.of_decimal.exponent_ = exponent_initial_value.value();
-        this->default_value_.of_decimal.mantissa_ = mantissa_instruction->initial_value();
-      }
+      this->initial_value_.of_decimal.mantissa_ = mantissa_instruction->initial_value().get<int64_t>();
 
       if (has_pmap_bit_ == 0) {
         has_pmap_bit_ = mantissa_instruction->pmap_size();
@@ -490,16 +409,6 @@ class MFAST_EXPORT decimal_field_instruction
                             allocator*           alloc) const;
 
 
-    int64_t mantissa_initial_value() const
-    {
-      return this->default_value_.of_decimal.mantissa_;
-    }
-
-    int8_t exponent_initial_value() const
-    {
-      return static_cast<int8_t>(this->default_value_.of_decimal.exponent_);
-    }
-
     virtual void construct_value(value_storage& storage,
                                  allocator*     alloc) const;
 
@@ -509,6 +418,15 @@ class MFAST_EXPORT decimal_field_instruction
     const mantissa_field_instruction* mantissa_instruction() const
     {
       return mantissa_instruction_;
+    }
+
+    const value_storage& initial_or_default_value() const
+    {
+      if (initial_value_.is_empty()) {
+        static const decimal_value_storage default_value(0,0);
+        return default_value.storage_;
+      }
+      return initial_value_;
     }
 
   protected:
@@ -523,42 +441,33 @@ class MFAST_EXPORT string_field_instruction
 {
   public:
 
-    string_field_instruction(uint16_t            field_index,
-                             operator_enum_t     operator_id,
-                             field_type_enum_t   field_type,
-                             presence_enum_t     optional,
-                             uint32_t            id,
-                             const char*         name,
-                             const char*         ns,
-                             const op_context_t* context,
-                             const char*         initial_value=0,
-                             uint32_t            initial_value_length=0)
+    string_field_instruction(uint16_t             field_index,
+                             operator_enum_t      operator_id,
+                             field_type_enum_t    field_type,
+                             presence_enum_t      optional,
+                             uint32_t             id,
+                             const char*          name,
+                             const char*          ns,
+                             const op_context_t*  context,
+                             string_value_storage initial_value)
       : field_instruction(field_index, operator_id, field_type, optional,
                           id,
                           name,
                           ns)
       , op_context_(context)
-      , default_value_(1)
+      , initial_value_(initial_value.storage_)
       , prev_value_(&prev_storage_)
+      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
     {
-      this->has_initial_value_ = (initial_value != 0);
-      if (initial_value) {
-        this->has_initial_value_ = 1;
-        this->default_value_.of_array.content_ = const_cast<char*>(initial_value);
-        this->default_value_.array_length(initial_value_length);
-      }
-      else {
-        this->has_initial_value_ = 0;
-        this->default_value_.of_array.content_ = const_cast<char*>("");
-        this->default_value_.array_length(0);
-      }
+      mandatory_no_initial_value_ = !optional && initial_value.storage_.is_empty();
     }
 
     string_field_instruction(const string_field_instruction& other)
       : field_instruction(other)
       , op_context_(other.op_context_)
-      , default_value_(other.default_value_)
+      , initial_value_(other.initial_value_)
       , prev_value_(&prev_storage_)
+      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
     {
     }
 
@@ -589,17 +498,24 @@ class MFAST_EXPORT string_field_instruction
       return op_context_;
     }
 
-    const value_storage& default_value() const
+    const value_storage& initial_value() const
     {
-      return default_value_;
+      return initial_value_;
+    }
+
+    const value_storage& initial_or_default_value() const
+    {
+      return *initial_or_default_value_;
     }
 
   protected:
     friend class dictionary_builder;
     const op_context_t* op_context_;
-    value_storage default_value_;
+    value_storage initial_value_;
     value_storage* prev_value_;
     value_storage prev_storage_;
+    const value_storage* initial_or_default_value_;
+    static const value_storage default_value_;
 };
 
 
@@ -607,21 +523,20 @@ class MFAST_EXPORT ascii_field_instruction
   : public string_field_instruction
 {
   public:
-    ascii_field_instruction(uint16_t            field_index,
-                            operator_enum_t     operator_id,
-                            presence_enum_t     optional,
-                            uint32_t            id,
-                            const char*         name,
-                            const char*         ns,
-                            const op_context_t* context,
-                            const char*         initial_value=0,
-                            uint32_t            initial_value_length=0)
+    ascii_field_instruction(uint16_t             field_index,
+                            operator_enum_t      operator_id,
+                            presence_enum_t      optional,
+                            uint32_t             id,
+                            const char*          name,
+                            const char*          ns,
+                            const op_context_t*  context,
+                            string_value_storage initial_value = string_value_storage())
       : string_field_instruction(field_index,
                                  operator_id,
                                  field_type_ascii_string,
                                  optional,
-                                 id, name, ns, context, initial_value,
-                                 initial_value_length)
+                                 id, name, ns, context,
+                                 initial_value)
     {
     }
 
@@ -637,21 +552,19 @@ class MFAST_EXPORT unicode_field_instruction
   : public string_field_instruction
 {
   public:
-    unicode_field_instruction(uint16_t            field_index,
-                              operator_enum_t     operator_id,
-                              presence_enum_t     optional,
-                              uint32_t            id,
-                              const char*         name,
-                              const char*         ns,
-                              const op_context_t* context,
-                              const char*         initial_value=0,
-                              uint32_t            initial_value_length=0)
+    unicode_field_instruction(uint16_t             field_index,
+                              operator_enum_t      operator_id,
+                              presence_enum_t      optional,
+                              uint32_t             id,
+                              const char*          name,
+                              const char*          ns,
+                              const op_context_t*  context,
+                              string_value_storage initial_value = string_value_storage())
       : string_field_instruction(field_index,
                                  operator_id,
                                  field_type_unicode_string,
                                  optional,
-                                 id, name, ns, context, initial_value,
-                                 initial_value_length)
+                                 id, name, ns, context, initial_value)
     {
     }
 
@@ -669,46 +582,23 @@ class MFAST_EXPORT byte_vector_field_instruction
   : public string_field_instruction
 {
   public:
-    byte_vector_field_instruction(uint16_t            field_index,
-                                  operator_enum_t     operator_id,
-                                  presence_enum_t     optional,
-                                  uint32_t            id,
-                                  const char*         name,
-                                  const char*         ns,
-                                  const op_context_t* value_context,
-                                  uint32_t            length_id,
-                                  const char*         length_name,
-                                  const char*         length_ns)
-      : string_field_instruction(field_index,
-                                 operator_id,
-                                 field_type_byte_vector,
-                                 optional,
-                                 id, name, ns, value_context)
-      , length_id_(length_id)
-      , length_name_(length_name)
-      , length_ns_(length_ns)
-    {
-    }
-
-    byte_vector_field_instruction(uint16_t             field_index,
-                                  operator_enum_t      operator_id,
-                                  presence_enum_t      optional,
-                                  uint32_t             id,
-                                  const char*          name,
-                                  const char*          ns,
-                                  const op_context_t*  value_context,
-                                  const unsigned char* initial_value,
-                                  uint32_t             initial_value_length,
-                                  uint32_t             length_id,
-                                  const char*          length_name,
-                                  const char*          length_ns)
+    byte_vector_field_instruction(uint16_t                  field_index,
+                                  operator_enum_t           operator_id,
+                                  presence_enum_t           optional,
+                                  uint32_t                  id,
+                                  const char*               name,
+                                  const char*               ns,
+                                  const op_context_t*       value_context,
+                                  byte_vector_value_storage initial_value = byte_vector_value_storage(),
+                                  uint32_t                  length_id = 0,
+                                  const char*               length_name = 0,
+                                  const char*               length_ns = 0)
       : string_field_instruction(field_index,
                                  operator_id,
                                  field_type_byte_vector,
                                  optional,
                                  id, name, ns, value_context,
-                                 reinterpret_cast<const char*>(initial_value),
-                                 initial_value_length)
+                                 initial_value)
       , length_id_(length_id)
       , length_name_(length_name)
       , length_ns_(length_ns)
@@ -800,8 +690,9 @@ struct MFAST_EXPORT aggregate_instruction_base
   const char* typeref_name_;
   const char* typeref_ns_;
   std::size_t segment_pmap_size_;
-private:
-  field_instruction** subinstructions_;
+
+  private:
+    field_instruction** subinstructions_;
 };
 
 class MFAST_EXPORT group_field_instruction
@@ -1236,4 +1127,4 @@ struct instruction_trait<unsigned char, true>
 
 
 } // namespace mfast
-#endif /* end of include guard: TYPE_DEFINITION_H_PMKVDZOC */
+#endif /* end of include guard: FIELD_INSTRUCTION_H_PMKVDZOC */

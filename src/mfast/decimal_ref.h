@@ -74,7 +74,8 @@ class exponent_cref
 
     bool is_initial_value() const
     {
-      return present() && value() == this->instruction()->exponent_initial_value();
+      return (this->absent() == instruction()->initial_value().is_empty()) && 
+        ( this->absent() || this->value() == instruction()->initial_value().of_decimal.exponent_);
     }
 
     int8_t value() const
@@ -146,13 +147,7 @@ class decimal_cref
       return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
     }
 
-    bool is_initial_value() const
-    {
-      return present() &&
-             mantissa() == instruction()->mantissa_initial_value() &&
-             exponent() == instruction()->exponent_initial_value();
-
-    }
+    bool is_initial_value() const;
 
     decimal value() const
     {
@@ -204,12 +199,18 @@ class decimal_cref
 
 inline bool operator == (const decimal_cref& lhs, const decimal_cref& rhs)
 {
-  return (lhs.absent() && rhs.absent()) || ( lhs.present() && rhs.present() && lhs.mantissa() == rhs.mantissa() && lhs.exponent() == rhs.exponent());
+  return (lhs.absent() == rhs.absent()) && ( lhs.absent() ||  (lhs.mantissa() == rhs.mantissa() && lhs.exponent() == rhs.exponent()));
 }
 
 inline bool operator != (const decimal_cref& lhs, const decimal_cref& rhs)
 {
   return !(lhs == rhs);
+}
+
+inline 
+bool decimal_cref::is_initial_value() const
+{
+  return *this == decimal_cref(&this->instruction()->initial_value(), this->instruction()); 
 }
 
 class exponent_mref
@@ -239,7 +240,7 @@ class exponent_mref
 
     void as_initial_value() const
     {
-      as(this->instruction()->exponent_initial_value());
+      as(this->instruction()->initial_value().of_decimal.exponent_);
     }
 
     void as(int8_t v) const
@@ -275,7 +276,8 @@ class exponent_mref
 
     void copy_from(value_storage v) const
     {
-      as(v.of_decimal.exponent_);
+      this->storage()->of_decimal.exponent_ = v.of_decimal.exponent_;
+      this->storage()->present(!v.is_empty());
     }
 
 };
@@ -384,9 +386,7 @@ class decimal_mref
 
     void as_initial_value() const
     {
-      this->storage()->of_decimal.mantissa_ = instruction()->mantissa_initial_value();
-      this->storage()->of_decimal.exponent_ = instruction()->exponent_initial_value();
-      this->storage()->present(1);
+      *this->storage() = instruction()->initial_value();
     }
 
     exponent_mref for_exponent() const

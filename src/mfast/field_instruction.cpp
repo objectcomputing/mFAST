@@ -70,11 +70,12 @@ field_instruction::pmap_size() const
 void integer_field_instruction_base::construct_value(value_storage& storage,
                                                      allocator* /* alloc */) const
 {
-  storage.of_uint.content_ = default_value_.of_uint.content_;
+  storage.of_uint.content_ = initial_value_.of_uint.content_;
   storage.of_uint.defined_bit_ = 1;
   storage.of_uint.present_ = !optional();
 }
 
+const  value_storage integer_field_instruction_base::default_value_(1);
 
 template class int_field_instruction<int32_t>;
 template class int_field_instruction<uint32_t>;
@@ -86,7 +87,7 @@ template class int_field_instruction<uint64_t>;
 void decimal_field_instruction::construct_value(value_storage& storage,
                                                 allocator*       ) const
 {
-  storage = default_value_;
+  storage = initial_value_;
   storage.of_decimal.present_ = !optional();
 }
 
@@ -111,7 +112,7 @@ void decimal_field_instruction::accept(field_instruction_visitor& visitor,
 void string_field_instruction::construct_value(value_storage& storage,
                                                allocator*       ) const
 {
-  storage = default_value_;
+  storage = initial_value_;
   if (optional())
     storage.of_array.len_ = 0;
 }
@@ -129,7 +130,7 @@ void string_field_instruction::copy_value(const value_storage& src,
                                           allocator*           alloc) const
 {
   size_t len = src.of_array.len_;
-  if (len && src.of_array.content_ != default_value_.of_array.content_) {
+  if (len && src.of_array.content_ != initial_value_.of_array.content_) {
     dest.of_array.content_ = alloc->allocate(len);
     memcpy(dest.of_array.content_, src.of_array.content_, len);
     dest.of_array.capacity_ = len;
@@ -140,6 +141,9 @@ void string_field_instruction::copy_value(const value_storage& src,
   }
   dest.of_array.len_ = len;
 }
+
+
+const value_storage string_field_instruction::default_value_("");
 
 /////////////////////////////////////////////////////////
 
@@ -289,13 +293,14 @@ void sequence_field_instruction::construct_value(value_storage& storage,
                                                  allocator*     alloc ) const
 {
   // len_ == 0 is reserve for null/absent
-  storage.of_array.len_ = optional() ? 0 : sequence_length_instruction_->initial_value()+1;
-  if (sequence_length_instruction_ && sequence_length_instruction_->initial_value() > 0) {
+  uint32_t initial_length = sequence_length_instruction_->initial_value().get<uint32_t>();
+  storage.of_array.len_ = optional() ? 0 : initial_length+1;
+  if (sequence_length_instruction_ && initial_length > 0) {
     std::size_t element_size = this->group_content_byte_count();
-    std::size_t reserve_size = (sequence_length_instruction_->initial_value())*element_size;
+    std::size_t reserve_size = initial_length*element_size;
     storage.of_array.content_ = 0;
     storage.of_array.capacity_ =  alloc->reallocate(storage.of_array.content_, 0, reserve_size)/element_size;
-    construct_sequence_elements(storage,0, sequence_length_instruction_->initial_value(), alloc);
+    construct_sequence_elements(storage,0, initial_length, alloc);
   }
   else {
     storage.of_array.content_ = 0;

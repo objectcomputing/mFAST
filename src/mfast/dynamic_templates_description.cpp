@@ -36,9 +36,9 @@ struct tag_reason;
 typedef boost::error_info<tag_referenced_by,std::string> reason_info;
 
 // parse a decimal string representation (like 120 or 0.12) and store
-// it into a nullable_decimal object.
+// it into a decimal_value_storage object.
 std::istream &
-operator>>(std::istream &source, nullable_decimal& result)
+operator>>(std::istream &source, decimal_value_storage& result)
 {
   std::string decimal_string;
   source >> decimal_string;
@@ -54,12 +54,13 @@ operator>>(std::istream &source, nullable_decimal& result)
     }
     if (nonzero_pos == std::string::npos)
       nonzero_pos = 0;
-    result.set(boost::lexical_cast<int64_t>(decimal_string.substr(0, nonzero_pos+1)),
-               decimal_string.size()-1 - nonzero_pos);
+    result = decimal_value_storage(boost::lexical_cast<int64_t>(decimal_string.substr(0, nonzero_pos+1)),
+                                   decimal_string.size()-1 - nonzero_pos);
   }
   else {
     decimal_string = decimal_string.substr(0, nonzero_pos+1);
-    result.set( boost::lexical_cast<int64_t>(decimal_string.erase(float_pos, 1)), float_pos - decimal_string.size() +1);
+    result = decimal_value_storage( boost::lexical_cast<int64_t>(decimal_string.erase(float_pos, 1)),
+                                    float_pos - decimal_string.size() +1);
   }
   return source;
 }
@@ -360,7 +361,7 @@ class templates_loader
       std::string initial_value_str;
       std::string length_name = name_attr + "___length___";
       std::string ns;
-      nullable<uint32_t> initial_value;
+      int_value_storage<uint32_t> initial_value;
 
       if (length_element) {
         id = get_id(*length_element);
@@ -369,7 +370,7 @@ class templates_loader
         length_name = get_optional_attr(*length_element, "name", "");
         ns = get_ns(*length_element);
         if (initial_value_str.size()) {
-          initial_value.set(boost::lexical_cast<uint32_t>(initial_value_str));
+          initial_value = int_value_storage<uint32_t>(boost::lexical_cast<uint32_t>(initial_value_str));
         }
       }
 
@@ -410,12 +411,12 @@ class templates_loader
       op_context_t* opContext;
       std::string initial_value_str;
 
-      nullable<INT_TYPE> initial_value;
+      int_value_storage<INT_TYPE> initial_value;
 
       get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
 
       if (initial_value_str.size()) {
-        initial_value.set(boost::lexical_cast<INT_TYPE>(initial_value_str));
+        initial_value = int_value_storage<INT_TYPE>(boost::lexical_cast<INT_TYPE>(initial_value_str));
       }
 
       typedef typename instruction_trait<INT_TYPE>::type intruction_t;
@@ -479,10 +480,10 @@ class templates_loader
                                mantissa_initial_value_str);
 
 
-          nullable<int64_t> mantissa_initial_value;
+          int_value_storage<int64_t> mantissa_initial_value;
 
           if (mantissa_initial_value_str.size()) {
-            mantissa_initial_value.set(boost::lexical_cast<int64_t>(mantissa_initial_value_str.c_str()));
+            mantissa_initial_value = int_value_storage<int64_t>(boost::lexical_cast<int64_t>(mantissa_initial_value_str.c_str()));
           }
 
           mantissa_instruction = new (*alloc_)mantissa_field_instruction(
@@ -494,7 +495,7 @@ class templates_loader
 
         operator_enum_t exponent_fieldOp = operator_none;
         op_context_t* exponent_opContext = 0;
-        nullable<int8_t> exponent_initial_value;
+        decimal_value_storage exponent_initial_value;
 
         if (exponent_element) {
 
@@ -505,7 +506,7 @@ class templates_loader
                                exponent_initial_value_str);
 
           if (exponent_initial_value_str.size()) {
-            exponent_initial_value.set(boost::lexical_cast<int8_t>(exponent_initial_value_str.c_str()));
+            exponent_initial_value = decimal_value_storage(0, boost::lexical_cast<int8_t>(exponent_initial_value_str.c_str()));
           }
         }
 
@@ -525,12 +526,12 @@ class templates_loader
         operator_enum_t fieldOp;
         op_context_t* opContext;
         std::string initial_value_str;
-        nullable_decimal initial_value;
+        decimal_value_storage initial_value;
 
         get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str);
 
         if (initial_value_str.size()) {
-          initial_value = boost::lexical_cast<nullable_decimal>(initial_value_str.c_str());
+          initial_value = decimal_value_storage(boost::lexical_cast<decimal_value_storage>(initial_value_str.c_str()));
         }
 
         instruction = new (*alloc_)decimal_field_instruction(
@@ -557,7 +558,7 @@ class templates_loader
       std::string initial_value_str;
 
       get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
-
+      string_value_storage initial_value(new_string(initial_value_str.c_str()));
 
       InstructionType* instruction= new (*alloc_)InstructionType  (
         static_cast<uint16_t>(index),
@@ -567,8 +568,7 @@ class templates_loader
         new_string(name_attr.c_str()),
         get_ns(element),
         opContext,
-        new_string(initial_value_str.c_str()),
-        initial_value_str.size()
+        initial_value
         );
 
       current().push_back(instruction);
@@ -649,17 +649,18 @@ class templates_loader
         length_ns = get_ns(*length_element);
       }
 
-      unsigned char* initial_value=0;
+      unsigned char* initial_value_buffer=0;
       int32_t initial_value_len=0;
 
       if (initial_value_str.size()) {
-        initial_value = static_cast<unsigned char*>(alloc_->allocate(initial_value_str.size()/2+1));
-        initial_value_len = hex2binary(initial_value_str.c_str(), initial_value);
+        initial_value_buffer = static_cast<unsigned char*>(alloc_->allocate(initial_value_str.size()/2+1));
+        initial_value_len = hex2binary(initial_value_str.c_str(), initial_value_buffer);
         if (initial_value_len == -1) {
           BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid byteVector initial value: ") +  initial_value_str ) );
         }
       }
-
+      
+      byte_vector_value_storage initial_value(initial_value_buffer, initial_value_len);
       byte_vector_field_instruction* instruction = new (*alloc_)byte_vector_field_instruction(
         static_cast<uint16_t>(index),
         fieldOp,
@@ -669,7 +670,6 @@ class templates_loader
         get_ns(element),
         opContext,
         initial_value,
-        initial_value_len,
         length_id,
         length_name,
         length_ns

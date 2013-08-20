@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef DYNAMIC_MESSAGE_REF_H_X549MWYP
-#define DYNAMIC_MESSAGE_REF_H_X549MWYP
+#ifndef NESTED_MESSAGE_REF_H_X549MWYP
+#define NESTED_MESSAGE_REF_H_X549MWYP
 
 #include "mfast/field_instruction.h"
 #include "mfast/field_ref.h"
@@ -141,4 +141,4 @@ class nested_message_mref
 }
 
 
-#endif /* end of include guard: DYNAMIC_MESSAGE_REF_H_X549MWYP */
+#endif /* end of include guard: NESTED_MESSAGE_REF_H_X549MWYP */

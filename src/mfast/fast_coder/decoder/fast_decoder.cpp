@@ -134,7 +134,7 @@ fast_decoder_impl::visit(SimpleMRef& mref)
   debug_ << "   decoding " << mref.name() << ": pmap -> " << current_pmap() << "\n"
          << "               stream -> " << strm_ << "\n";
 
-  decoder_field_operator* field_operator
+  const decoder_field_operator* field_operator
     = decoder_operators[mref.instruction()->field_operator()];
   field_operator->decode(mref,
                          strm_,

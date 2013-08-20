@@ -102,7 +102,7 @@ struct decimal_encoder
       derived->encode_impl(cref.for_exponent(), stream, pmap);
       if (cref.present()) {
         int64_cref mantissa_cref = cref.for_mantissa();
-        encoder_field_operator* mantissa_operator = encoder_operators[mantissa_cref.instruction()->field_operator()];
+        const encoder_field_operator* mantissa_operator = encoder_operators[mantissa_cref.instruction()->field_operator()];
         mantissa_operator->encode(mantissa_cref, stream, pmap);
       }
     }
@@ -116,6 +116,10 @@ class no_operator
   , public decimal_encoder<no_operator>
 {
   public:
+    no_operator()
+    {
+    }
+
     template <typename T>
     void encode_impl(const T&      cref,
                      fast_ostream& stream,
@@ -198,6 +202,10 @@ class constant_operator
   , public decimal_encoder<constant_operator>
 {
   public:
+    constant_operator()
+    {
+    }
+
     template <typename T>
     void encode_impl(const T&              cref,
                      fast_ostream&         stream,
@@ -277,6 +285,10 @@ class copy_or_increment_operator_impl
   : public mfast::detail::codec_helper
 {
   public:
+    copy_or_increment_operator_impl()
+    {
+    }
+
     template <typename T>
     void encode_impl(const T&              cref,
                      fast_ostream&         stream,
@@ -292,8 +304,7 @@ class copy_or_increment_operator_impl
         // that also becomes the new previous value.
         // If the field has optional presence and no initial value, the field is considered
         // absent and the state of the previous value is changed to empty.
-        if ((cref.has_initial_value() && cref.is_initial_value()) ||
-            (!cref.has_initial_value() && cref.absent()) ) {
+        if (cref.is_initial_value()) {
 
           pmap.set_next_bit(false);
           return;
@@ -368,6 +379,10 @@ class copy_operator
 {
 
   public:
+    copy_operator()
+    {
+    }
+
     virtual void encode(const int32_cref&     cref,
                         fast_ostream&         stream,
                         encoder_presence_map& pmap) const
@@ -442,6 +457,10 @@ class increment_operator
 {
 
   public:
+    increment_operator()
+    {
+    }
+
     virtual void encode(const int32_cref&     cref,
                         fast_ostream&         stream,
                         encoder_presence_map& pmap) const
@@ -478,6 +497,10 @@ class default_operator
   , public decimal_encoder<default_operator>
 {
   public:
+    default_operator()
+    {
+    }
+
     template <typename T>
     void encode_impl(const T&              cref,
                      fast_ostream&         stream,
@@ -486,28 +509,18 @@ class default_operator
       // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
       // Optional integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream in a nullable representation.
 
-      if (cref.has_initial_value())
-      {
-        //  The default operator specifies that the value of a field is either present in the stream
-        //  or it will be the initial value.
-        if (cref.is_initial_value()) {
-          pmap.set_next_bit(false);
-          stream.save_previous_value(cref);
-          return;
-        }
-      }
-      else if (cref.absent())
-      {
-        // If the field has optional presence and no initial value, the field is considered absent
-        // when there is no value in the stream.
 
+      //  The default operator specifies that the value of a field is either present in the stream
+      //  or it will be the initial value.
+
+      // If the field has optional presence and no initial value, the field is considered absent
+      // when there is no value in the stream.
+
+      if (cref.is_initial_value()) {
         pmap.set_next_bit(false);
         stream.save_previous_value(cref);
-
         return;
       }
-
-      // the instruction has initial value when we get here
 
       pmap.set_next_bit(true);
       if ( cref.absent() ) {
@@ -654,6 +667,10 @@ class delta_operator
   }
 
   public:
+    delta_operator()
+    {
+    };
+
     virtual void encode(const int32_cref& cref,
                         fast_ostream&     stream,
                         encoder_presence_map      & /* pmap */) const
@@ -708,7 +725,7 @@ class delta_operator
         encode_integer(cref.for_exponent(), stream);
         if (cref.present()) {
           int64_cref mantissa_cref = cref.for_mantissa();
-          encoder_field_operator* mantissa_operator = encoder_operators[mantissa_cref.instruction()->field_operator()];
+          const encoder_field_operator* mantissa_operator = encoder_operators[mantissa_cref.instruction()->field_operator()];
           mantissa_operator->encode(mantissa_cref, stream, pmap);
         }
       }
@@ -807,6 +824,9 @@ class tail_operator
     }
 
   public:
+    tail_operator()
+    {
+    }
 
     virtual void encode(const ascii_string_cref& cref,
                         fast_ostream&            stream,
@@ -831,17 +851,17 @@ class tail_operator
 
 };
 
-static no_operator no_operator_instance;
-static constant_operator constant_operator_instance;
-static copy_operator copy_operator_instance;
-static default_operator default_operator_instance;
-static delta_operator delta_operator_instance;
-static increment_operator increment_operator_instance;
-static tail_operator tail_operator_instance;
+static const no_operator no_operator_instance;
+static const constant_operator constant_operator_instance;
+static const copy_operator copy_operator_instance;
+static const default_operator default_operator_instance;
+static const delta_operator delta_operator_instance;
+static const increment_operator increment_operator_instance;
+static const tail_operator tail_operator_instance;
 
 }
 
-encoder_field_operator*
+const encoder_field_operator* const
 encoder_operators[] = {
   &encoder_detail::no_operator_instance,
   &encoder_detail::constant_operator_instance,

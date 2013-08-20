@@ -21,7 +21,7 @@
 #define VALUE_STORAGE_H_OMNNMOZX
 
 #include <stdint.h>
-
+#include <cstring>
 namespace mfast 
 {
   class template_instruction;
@@ -66,7 +66,7 @@ namespace mfast
     {
       union {
         const template_instruction* instruction_;
-        uint64_t dummy; // make sure content_ and instruction_ won't be packed together in 32 bits environment
+        uint64_t dummy_; // make sure content_ and instruction_ won't be packed together in 32 bits environment
       } of_instruction;
 
       value_storage* content_;
@@ -76,19 +76,26 @@ namespace mfast
     // construct an undefined value
     value_storage()
     {
-      of_uint.content_ = 0;
-      of_uint.padding_ = 0;
-      of_uint.defined_bit_ = 0;
-      of_uint.present_ = 0;
+      of_templateref.content_ = 0;
+      of_templateref.of_instruction.dummy_ = 0;
     };
 
-    // construct a defined non-empty value
+    // construct a default numeric value
     value_storage(int)
     {
       of_uint.content_ = 0;
       of_uint.padding_ = 0;
       of_uint.defined_bit_ = 1;
       of_uint.present_ = 1;
+    };
+    
+    // construct a default zero length string value
+    value_storage(const char*)
+    {
+      of_array.content_ = const_cast<char*>("");
+      of_array.len_ = 1;
+      of_array.capacity_ = 0;
+      of_array.defined_bit_ = 1;  
     };
 
     bool is_defined() const
@@ -119,6 +126,88 @@ namespace mfast
     void array_length(uint32_t n)
     {
       of_array.len_ = n+1;
+    }
+    
+    template <typename T>
+    T get() const 
+    {
+      return reinterpret_cast<const T&>(of_uint.content_);
+    }
+    
+    template <typename T>
+    void set(T v) 
+    {
+      reinterpret_cast<T&>(of_uint.content_) = v;
+    }
+  };
+  
+
+  template <typename IntType>
+  struct int_value_storage
+  {
+    value_storage storage_;
+    
+    int_value_storage(){
+      storage_.of_uint.defined_bit_ = 1;
+    }
+    int_value_storage(IntType v)
+    {
+      storage_.of_uint.defined_bit_ = 1;
+      storage_.of_uint.present_ = 1;
+      
+      storage_.set<IntType>(v);
+    }
+  };
+  
+  struct decimal_value_storage
+  {
+    value_storage storage_;
+    
+    decimal_value_storage(){
+      storage_.of_decimal.defined_bit_ = 1;
+    }
+    decimal_value_storage(int64_t mantissa, uint8_t exponent)
+    {
+      storage_.of_decimal.defined_bit_ = 1;
+      storage_.of_decimal.present_ = 1;
+      storage_.of_decimal.mantissa_ = mantissa;
+      storage_.of_decimal.exponent_ = exponent;
+    }
+  };
+  
+  struct string_value_storage
+  {
+    value_storage storage_;
+    
+    string_value_storage(){
+      storage_.of_array.defined_bit_ = 1;
+    }
+    
+    string_value_storage(const char* v)
+    {
+      storage_.of_array.defined_bit_ = 1;
+      storage_.of_array.len_ = std::strlen(v) +1;
+      storage_.of_array.content_ = const_cast<char*>(v);
+      storage_.of_array.capacity_ = 0;
+    }
+    
+    string_value_storage(const char* v, std::size_t n)
+    {
+      storage_.of_array.defined_bit_ = 1;
+      storage_.of_array.len_ = n+1;
+      storage_.of_array.content_ = const_cast<char*>(v);
+      storage_.of_array.capacity_ = 0;
+    }
+  };
+  
+  struct byte_vector_value_storage
+    : string_value_storage
+  {
+    
+    byte_vector_value_storage(){}
+    byte_vector_value_storage(const unsigned char* v, std::size_t n)
+      : string_value_storage(reinterpret_cast<const char*>(v), n)
+    {
     }
   };
   

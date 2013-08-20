@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(operator_none_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
     // If a field is optional and has no field operator, it is encoded with a
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(operator_none_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
     // If a field is optional and has no field operator, it is encoded with a
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
     
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
     uint64_mref result(&allocator, &storage, &inst);
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -443,7 +443,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -496,7 +496,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -515,7 +515,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
 
@@ -578,7 +578,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(5ULL));
+                                  int_value_storage<uint64_t>(5ULL));
     inst.construct_value(storage, &allocator);
 
 
@@ -620,7 +620,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(5ULL));
+                                  int_value_storage<uint64_t>(5ULL));
     inst.construct_value(storage, &allocator);
 
 
@@ -644,7 +644,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(5ULL));
+                                  int_value_storage<uint64_t>(5ULL));
     inst.construct_value(storage, &allocator);
 
 
@@ -672,7 +672,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
                                    1,
                                    "test_decimal","",
                                    0,
-                                   nullable_decimal(12,1)); //  initial
+                                   decimal_value_storage(12,1)); //  initial
 
     inst.construct_value(storage, &allocator);
     
@@ -729,14 +729,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_delta,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -798,14 +796,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
 
   { // testing optional field with NULL substraction in the stream
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -822,14 +818,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
   }
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -848,14 +842,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
   
   { // testing optional field with negative substraction in the stream
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -880,14 +872,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     unicode_field_instruction inst(0, operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_ascii","",
                                    0,
-                                   default_value,
-                                   default_len);
+                                   string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -931,14 +921,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
   
   { // testing optional field with NULL substraction in the stream
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     unicode_field_instruction inst(0, operator_delta,
                                    presence_optional,
                                    1,
                                    "test_unicode","",
                                    0,
-                                   default_value,
-                                   default_len);
+                                   string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -959,14 +947,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
   
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     unicode_field_instruction inst(0, operator_delta,
                                    presence_optional,
                                    1,
                                    "test_unicode","",
                                    0,
-                                   default_value,
-                                   default_len);
+                                   string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -991,15 +977,12 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_tail,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
-
+                                 string_value_storage(default_value));
     inst.construct_value(storage, &alloc);
 
     ascii_string_mref result(&alloc, &storage, &inst);
@@ -1015,14 +998,12 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
   }
   { // testing mandatory field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_tail,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -1072,14 +1053,12 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
   
   { // testing optional field with initial value
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -1099,14 +1078,12 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
   
   { // testing optional field with NULL tail value
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 
@@ -1126,14 +1103,12 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
   
   { // testing optional field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
-    const uint32_t default_len = strlen(default_value);
     ascii_field_instruction inst(0, operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value,
-                                 default_len);
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
 

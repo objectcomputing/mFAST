@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value, strlen(default_value));
+                                 string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref mref(&alloc, &storage, &inst);
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
                                    1,
                                    "test_decimal","",
                                    0,
-                                   nullable_decimal(INT64_MAX,64));
+                                   decimal_value_storage(INT64_MAX,64));
 
     inst.construct_value(storage, &alloc);
     decimal_mref mref(&alloc, &storage, &inst);

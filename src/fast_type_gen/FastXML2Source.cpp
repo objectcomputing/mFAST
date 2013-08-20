@@ -338,7 +338,7 @@ bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
        << "  \""<< length_name << "\", // name\n"
        << "  \""<< ns << "\", // ns\n"
        << "  "<< opContext << ",  // opContext\n"
-       << "  nullable<uint32_t>(" << initialValue << ")); // initial_value\n\n";
+       << "  int_value_storage<uint32_t>(" << initialValue << ")); // initial_value\n\n";
   return out_.good();
 }
 
@@ -428,8 +428,7 @@ bool FastXML2Source::VisitString (const XMLElement & element,
 
   if (initialValue.size()) {
     out_ << ",  // opContext\n"
-         << "  "<< "\""<< initialValue << "\", // initial_value\n"
-         << "  "<<  initialValue.size() << "); // intitial_value length\n\n";
+         << "  "<< "string_value_storage(\""<< initialValue << "\"," <<  initialValue.size() << ")); // initial_value\n\n";
   }
   else {
     out_ << ");  // opContext\n\n";
@@ -472,7 +471,7 @@ bool FastXML2Source::VisitInteger (const XMLElement & element,
        << "  \""<< name_attr << "\", // name\n"
        << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
        << "  "<< opContext << ",  // opContext\n"
-       << "  nullable<"<< cpp_type << "_t>(" << initialValue  <<  ")); // initial_value\n\n";
+       << "  int_value_storage<"<< cpp_type << "_t>(" << initialValue  <<  ")); // initial_value\n\n";
 
   add_to_instruction_list(name_attr);
   return out_.good();
@@ -508,13 +507,20 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
          << name_attr << "_mantissa_instruction(\n"
          << "  "<< "operator_" << mantissa_fieldOpName << ",\n"
          << "  "<< mantissa_opContext << ",  // mantissa opContext\n"
-         << "  nullable<int64_t>("<< mantissa_initialValue << "));// mantissa inital value\n\n";
+         << "  int_value_storage<int64_t>("<< mantissa_initialValue << "));// mantissa inital value\n\n";
 
     get_field_attributes(*exponent_element,
                          name_attr + "_exponent",
                          exponent_fieldOpName,
                          exponent_opContext,
                          exponent_initialValue);
+                         
+    if (exponent_initialValue.size()) {
+      exponent_initialValue = std::string("decimal_value_storage(0,") + exponent_initialValue;
+    }
+    else {
+      exponent_initialValue = "decimal_value_storage(";
+    }
 
     out_ << "decimal_field_instruction\n"
          << name_attr << "_instruction(\n"
@@ -526,7 +532,7 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
          << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
          << "  "<< exponent_opContext << ",  // exponent opContext\n"
          << "  &" << name_attr << "_mantissa_instruction,\n"
-         << "  nullable<int8_t>("<< exponent_initialValue << ")); // exponent intitial_value\n";
+         << "  "<< exponent_initialValue << ")); // exponent initial_value\n\n";
 
   }
   else {
@@ -554,7 +560,7 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
            << "  \""<< name_attr << "\", // name\n"
            << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
            << "  "<< opContext << ",  // opContext\n"
-           << "  nullable_decimal("<< initialValue  << ")); // intitial_value\n\n";
+           << "  decimal_value_storage("<< initialValue  << ")); // initial_value\n\n";
 
     }
     catch (boost::bad_lexical_cast&) {
@@ -615,8 +621,8 @@ bool FastXML2Source::VisitByteVector (const XMLElement & element,
        << "  "<< opContext << ",  // opContext\n";
 
   if (initialValue.size()) {
-    out_ << "  \""<< initialValue << "\", // initial_value\n"
-         << "  " <<  initialValue.size()/4 << ", // intitial_value length\n";
+    out_ << "  byte_vector_value_storage(\""<< initialValue << "\","
+         <<  initialValue.size()/4 << "), // initial_value\n";
   }
 
   const XMLElement* length_element = element.FirstChildElement("length");

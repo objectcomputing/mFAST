@@ -62,7 +62,7 @@ class codec_helper
       // * empty – it is a dynamic error [ERR D6] if the previous value is empty.
 
       if (!previous.is_defined()) {
-        return mref.instruction()->default_value();
+        return mref.instruction()->initial_or_default_value();
       }
 
       if (previous.is_empty())
@@ -81,7 +81,7 @@ class codec_helper
       // * undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
       // * empty – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
       if (!previous.is_defined() || previous.is_empty()) {
-        return mref.instruction()->default_value();
+        return mref.instruction()->initial_or_default_value();
       }
 
       return previous;

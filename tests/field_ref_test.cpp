@@ -50,9 +50,9 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
 
-    BOOST_CHECK_EQUAL(inst.has_initial_value(), true);
+    BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
 
     inst.construct_value(storage, &allocator);
 
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
                                   1,
                                   "test_uint64","",
                                   0,
-                                  nullable<uint64_t>(UINT64_MAX));
+                                  int_value_storage<uint64_t>(UINT64_MAX));
 
 
     inst.construct_value(storage, &allocator);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
                                  1,
                                  "test_int32","",
                                  0,
-                                 nullable<int32_t>(INT32_MIN));
+                                 int_value_storage<int32_t>(INT32_MIN));
 
     inst.construct_value(storage, &allocator);
 
@@ -164,9 +164,9 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
                                 1,
                                 "test_uint32","",
                                 0,
-                                nullable<uint32_t>());
+                                int_value_storage<uint32_t>());
 
-  BOOST_CHECK_EQUAL(inst.has_initial_value(), false);
+  BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
 
 }
 
@@ -178,8 +178,8 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                    1,
                                    "test_decimal","",
                                    0,
-                                   nullable_decimal(INT64_MAX,64));
-    BOOST_CHECK_EQUAL(inst.has_initial_value(), true);
+                                   decimal_value_storage(INT64_MAX,64));
+    BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
   }
 
   {
@@ -188,13 +188,13 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                    1,
                                    "test_decimal","",
                                    0,
-                                   nullable_decimal());
-    BOOST_CHECK_EQUAL(inst.has_initial_value(), false);
+                                   decimal_value_storage());
+    BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
   }
   {
     mantissa_field_instruction mantissa_inst(operator_copy,
                                              0,
-                                             nullable<int64_t>());
+                                             int_value_storage<int64_t>());
 
     decimal_field_instruction inst(0, operator_copy,
                                    presence_optional,
@@ -202,12 +202,12 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                    "test_decimal","",
                                    0,
                                    &mantissa_inst);
-    BOOST_CHECK_EQUAL(inst.has_initial_value(), false);
+    BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
   }
   {
     mantissa_field_instruction mantissa_inst(operator_copy,
                                              0,
-                                             nullable<int64_t>());
+                                             int_value_storage<int64_t>());
 
     decimal_field_instruction inst(0, operator_copy,
                                    presence_optional,
@@ -215,8 +215,8 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                    "test_decimal","",
                                    0,
                                    &mantissa_inst,
-                                             nullable<int8_t>(3));
-    BOOST_CHECK_EQUAL(inst.has_initial_value(), true);
+                                   decimal_value_storage(0, 3));
+    BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
   }
 }
 
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
                                    1,
                                    "test_decimal","",
                                    0,
-                                   nullable_decimal(INT64_MAX,64));
+                                   decimal_value_storage(INT64_MAX,64));
 
     inst.construct_value(storage, &allocator);
     BOOST_CHECK(inst.mantissa_instruction() == 0);
@@ -331,14 +331,14 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
   value_storage storage;
 
   {
-    mantissa_field_instruction mantissa_inst(operator_copy, 0, nullable<int64_t>(6));
+    mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
     decimal_field_instruction inst(0, operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal2","",
                                    0,
                                    &mantissa_inst,
-                                   nullable<int8_t>(64));
+                                   decimal_value_storage(0,64));
 
     inst.construct_value(storage, &allocator);
 
@@ -397,9 +397,9 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
                                  1,
                                  "test_ascii","",
                                  0,
-                                 default_value, strlen(default_value));
+                                 string_value_storage(default_value));
 
-    BOOST_CHECK_EQUAL(inst.has_initial_value(), true);
+    BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
   }
   {
     ascii_field_instruction inst(0, operator_copy,
@@ -407,9 +407,9 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
                                  1,
                                  "test_ascii","",
                                  0,
-                                 0, 0);
+                                 string_value_storage());
 
-    BOOST_CHECK_EQUAL(inst.has_initial_value(), false);
+    BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
   }
 }
 
@@ -423,10 +423,10 @@ BOOST_AUTO_TEST_CASE(string_field_test)
                                1,
                                "test_ascii","",
                                0,
-                               default_value, strlen(default_value));
+                               string_value_storage(default_value));
 
   inst.construct_value(storage, &alloc);
-  BOOST_CHECK_EQUAL(inst.has_initial_value(),   true);
+  BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
 
   BOOST_CHECK_EQUAL(storage.of_array.capacity_, 0);
 
@@ -557,7 +557,7 @@ BOOST_AUTO_TEST_CASE(string_delta_test)
                                1,
                                "test_ascii","",
                                0,
-                               default_value, strlen(default_value));
+                               string_value_storage(default_value));
 
   inst.construct_value(storage, &alloc);
   detail::codec_helper helper;
@@ -602,16 +602,15 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                       1,
                                       "test_byte_vector","",
                                       0,
-                                      f0_initial,
-                                      sizeof(f0_initial), 0, 0, 0);
+                                      byte_vector_value_storage(f0_initial,sizeof(f0_initial)), 
+                                      0, 0, 0);
 
   unicode_field_instruction inst1(1, operator_copy,
                                   presence_optional,
                                   2,
                                   "test_unicode","",
                                   0,
-                                  f1_initial,
-                                  strlen(f1_initial));
+                                  string_value_storage(f1_initial));
 
   field_instruction* instructions[] = {
     &inst0,&inst1
@@ -699,16 +698,15 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                       1,
                                       "test_byte_vector","",
                                       0,
-                                      f0_initial,
-                                      sizeof(f0_initial), 0, 0, 0);
+                                      byte_vector_value_storage(f0_initial,sizeof(f0_initial)), 
+                                      0, 0, 0);
 
   unicode_field_instruction inst1(1, operator_copy,
                                   presence_optional,
                                   2,
                                   "test_unicode","",
                                   0,
-                                  f1_initial,
-                                  strlen(f1_initial));
+                                  string_value_storage(f1_initial));
 
   uint32_field_instruction length_inst(0, operator_none,
                                        presence_mandatory,
@@ -863,7 +861,7 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
                                        4,
                                        "","",
                                        0,
-                                       nullable<uint32_t>(0));
+                                       int_value_storage<uint32_t>(0));
 
   sequence_field_instruction sequence_inst(0, presence_optional,
                                            3, // id

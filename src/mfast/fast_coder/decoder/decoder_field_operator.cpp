@@ -99,7 +99,7 @@ struct decimal_decoder
       derived->decode_impl(mref.for_exponent(), stream, pmap);
       if (mref.present()) {
         int64_mref mantissa_mref = mref.for_mantissa();
-        decoder_field_operator* mantissa_operator = decoder_operators[mantissa_mref.instruction()->field_operator()];
+        const decoder_field_operator* mantissa_operator = decoder_operators[mantissa_mref.instruction()->field_operator()];
         mantissa_operator->decode(mantissa_mref, stream, pmap);
       }
     }
@@ -113,6 +113,8 @@ class no_operator
   , public decimal_decoder<no_operator>
 {
   public:
+    no_operator(){}
+    
     template <typename T>
     void decode_impl(const T&      mref,
                      fast_istream& stream,
@@ -195,6 +197,8 @@ class constant_operator
   , public decimal_decoder<constant_operator>
 {
   public:
+    constant_operator(){}
+    
     template <typename T>
     void decode_impl(const T&              mref,
                      fast_istream& /* stream */,
@@ -300,31 +304,27 @@ class copy_or_increment_operator_impl
         {
           // if the previous value is undefined – the value of the field is the initial value
           // that also becomes the new previous value.
-          if (mref.has_initial_value())
-          {
-            mref.as_initial_value();
-            save_previous_value(mref);
-          }
-          else if (!mref.optional()) {
+          
+          // If the field has optional presence and no initial value, the field is considered
+          // absent and the state of the previous value is changed to empty.
+          mref.as_initial_value();
+          save_previous_value(mref);
+          
+          if (mref.instruction()->mandatory_without_initial_value()) {
             // Unless the field has optional presence, it is a dynamic error [ERR D5]
             // if the instruction context has no initial value.
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D5"));
           }
-          else {
-            // If the field has optional presence and no initial value, the field is considered
-            // absent and the state of the previous value is changed to empty.
-            mref.as_absent();
-            save_previous_value(mref);
-          }
         }
         else if (previous.is_empty()) {
-          // if the previous value is empty – the value of the field is empty.
-          // If the field is optional the value is considered absent.
-          mref.as_absent();
+
           // It is a dynamic error [ERR D6] if the field is mandatory.
           if (!mref.optional()) {
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
           }
+          // if the previous value is empty – the value of the field is empty.
+          // If the field is optional the value is considered absent.
+          mref.as_absent();
         }
         else {
           Operation() (mref, previous);
@@ -353,6 +353,8 @@ class copy_operator
 {
 
   public:
+    copy_operator(){}
+    
     virtual void decode(const int32_mref&     mref,
                         fast_istream&         stream,
                         decoder_presence_map& pmap) const
@@ -427,6 +429,8 @@ class increment_operator
 {
 
   public:
+    increment_operator(){}
+    
     virtual void decode(const int32_mref&     mref,
                         fast_istream&         stream,
                         decoder_presence_map& pmap) const
@@ -464,6 +468,8 @@ class default_operator
   , public decimal_decoder<default_operator>
 {
   public:
+    default_operator(){}
+    
     template <typename T>
     void decode_impl(const T&              mref,
                      fast_istream&         stream,
@@ -478,16 +484,13 @@ class default_operator
         if (mref.absent())
           return;
       }
-      else if (mref.has_initial_value())
-      {
-        //  The default operator specifies that the value of a field is either present in the stream
-        //  or it will be the initial value.
-        mref.as_initial_value();
-      }
       else {
         // If the field has optional presence and no initial value, the field is considered absent
         // when there is no value in the stream.
-        mref.as_absent();
+        
+        //  The default operator specifies that the value of a field is either present in the stream
+        //  or it will be the initial value.
+        mref.as_initial_value();
       }
 
       save_previous_value(mref);
@@ -612,6 +615,8 @@ class delta_operator
   }
 
   public:
+    delta_operator(){}
+    
     virtual void decode(const int32_mref& mref,
                         fast_istream&     stream,
                         decoder_presence_map      & /* pmap */) const
@@ -666,7 +671,7 @@ class delta_operator
         decode_integer(mref.for_exponent(), stream);
         if (mref.present()) {
           int64_mref mantissa_mref = mref.for_mantissa();
-          decoder_field_operator* mantissa_operator = decoder_operators[mantissa_mref.instruction()->field_operator()];
+          const decoder_field_operator* mantissa_operator = decoder_operators[mantissa_mref.instruction()->field_operator()];
           mantissa_operator->decode(mantissa_mref, stream, pmap);
         }
       }
@@ -727,14 +732,11 @@ class tail_operator
 
         if (!prev.is_defined()) {
           //  * undefined – the value of the field is the initial value that also becomes the new previous value.
-          if (mref.instruction()->has_initial_value()) {
-            mref.as_initial_value();
-          }
-          else if (mref.optional()) {
-            // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
-            mref.as_absent();
-          }
-          else {
+          
+         // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
+          mref.as_initial_value();
+          
+          if (mref.instruction()->mandatory_without_initial_value()) {
             // Unless the field has optional presence, it is a dynamic error [ERR D6] if the instruction context has no initial value.
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
           }
@@ -742,11 +744,9 @@ class tail_operator
         else if (prev.is_empty()) {
           //  * empty – the value of the field is empty. If the field is optional the value is considered absent.
           //            It is a dynamic error [ERR D7] if the field is mandatory.
-          if (mref.optional())
-            mref.as_absent();
-          else
-            BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
-
+          if (!mref.optional())
+             BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
+          mref.as_absent();
         }
         else {
           // * assigned – the value of the field is the previous value.
@@ -758,7 +758,7 @@ class tail_operator
     }
 
   public:
-
+    tail_operator(){}
     virtual void decode(const ascii_string_mref& mref,
                         fast_istream&            stream,
                         decoder_presence_map&    pmap) const
@@ -782,16 +782,16 @@ class tail_operator
 
 };
 
-static no_operator no_operator_instance;
-static constant_operator constant_operator_instance;
-static copy_operator copy_operator_instance;
-static default_operator default_operator_instance;
-static delta_operator delta_operator_instance;
-static increment_operator increment_operator_instance;
-static tail_operator tail_operator_instance;
+static const no_operator no_operator_instance;
+static const constant_operator constant_operator_instance;
+static const copy_operator copy_operator_instance;
+static const default_operator default_operator_instance;
+static const delta_operator delta_operator_instance;
+static const increment_operator increment_operator_instance;
+static const tail_operator tail_operator_instance;
 }
 
-decoder_field_operator*
+const decoder_field_operator* const
 decoder_operators[] = {
   &decoder_detail::no_operator_instance,
   &decoder_detail::constant_operator_instance,

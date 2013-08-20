@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef FIELD_VALUE_H_BJLDKLDX
-#define FIELD_VALUE_H_BJLDKLDX
+#ifndef FIELD_REF_H_BJLDKLDX
+#define FIELD_REF_H_BJLDKLDX
 
 #include "mfast/field_instruction.h"
 #include <new>
@@ -98,15 +98,22 @@ class field_cref
     {
       return !absent ();
     }
+    
+    bool operator ! () const
+    {
+      return this->absent();
+    }
+    
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+    explicit bool operator() const 
+    {
+      return this->present();
+    }
+#endif
 
     bool optional() const
     {
       return instruction_->optional();
-    }
-
-    bool has_initial_value() const
-    {
-      return instruction_->has_initial_value();
     }
 
     field_type_enum_t field_type() const
@@ -299,4 +306,4 @@ field_ref_with_name(const value_storage*        storage,
 
 }
 
-#endif /* end of include guard: FIELD_VALUE_H_BJLDKLDX */
+#endif /* end of include guard: FIELD_REF_H_BJLDKLDX */

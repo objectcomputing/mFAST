@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef BYTE_VECTOR_H_RIH6NA7X
-#define BYTE_VECTOR_H_RIH6NA7X
+#ifndef VECTOR_REF_H_RIH6NA7X
+#define VECTOR_REF_H_RIH6NA7X
 #include <cassert>
 #include <iterator>
 #include <cstring>
@@ -99,7 +99,7 @@ class vector_cref
 
     bool is_initial_value() const
     {
-      return *this == vector_cref<T,NotUnicode>(&this->instruction()->default_value(), instruction());
+      return *this == vector_cref<T,NotUnicode>(&this->instruction()->initial_value(), instruction());
     }
 
     const_iterator begin() const
@@ -226,7 +226,10 @@ class make_vector_mref
 
     void as_initial_value() const
     {
-      copy_from(this->instruction()->default_value());
+      if (this->instruction()->initial_value().is_empty())
+        this->as_absent();
+      else
+        copy_from(this->instruction()->initial_value());
     }
 
     void as (const ConstVectorRef& cref) const
@@ -491,4 +494,4 @@ void make_vector_mref<ConstVectorRef>::replace(size_t            pos,
 
 }
 
-#endif /* end of include guard: BYTE_VECTOR_H_RIH6NA7X */
+#endif /* end of include guard: VECTOR_REF_H_RIH6NA7X */

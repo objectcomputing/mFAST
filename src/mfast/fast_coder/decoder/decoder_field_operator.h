@@ -56,7 +56,7 @@ class decoder_field_operator
                         decoder_presence_map& pmap) const;
 };
 
-extern decoder_field_operator* decoder_operators[operators_count];
+extern const decoder_field_operator* const decoder_operators[operators_count];
 
 }
 #endif /* end of include guard: DECODER_FIELD_OPERATOR_H_NHLHKGSN */
