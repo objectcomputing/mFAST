@@ -48,8 +48,8 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
     "</templates>\n";
   dynamic_templates_description description(xml_content);
 
-  message_type m1(&alloc, description.instruction(0));
-  message_type m2(&alloc, description.instruction(0));
+  message_type m1(&alloc, description[0]);
+  message_type m2(&alloc, description[0]);
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -101,8 +101,8 @@ BOOST_AUTO_TEST_CASE(group_compare_test)
 
   dynamic_templates_description description(xml_content);
 
-  message_type m1(&alloc, description.instruction(0));
-  message_type m2(&alloc, description.instruction(0));
+  message_type m1(&alloc, description[0]);
+  message_type m2(&alloc, description[0]);
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE(sequence_compare_test)
 
   dynamic_templates_description description(xml_content);
 
-  message_type m1(&alloc, description.instruction(0));
-  message_type m2(&alloc, description.instruction(0));
+  message_type m1(&alloc, description[0]);
+  message_type m2(&alloc, description[0]);
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -215,8 +215,8 @@ BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
 
   dynamic_templates_description description(xml_content);
 
-  message_type m1(&alloc, description.instruction(1));
-  message_type m2(&alloc, description.instruction(1));
+  message_type m1(&alloc, description[1]);
+  message_type m2(&alloc, description[1]);
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
   // static templateRef won't be resolved by dynamic_templates_description constructor
   // we have to manual resolve the reference manually.
   nested_message_mref nested1(m1ref.mutable_field(1));
-  message_mref target1 = nested1.rebind(description.instruction(0));
+  message_mref target1 = nested1.rebind(description[0]);
   target1.mutable_field(0).as(2);
   target1.mutable_field(1).as(3);
 
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
 
   m2ref.mutable_field(0).as(1);
   nested_message_mref nested2(m2ref.mutable_field(1));
-  message_mref target2 = nested2.rebind(description.instruction(0));
+  message_mref target2 = nested2.rebind(description[0]);
   target2.mutable_field(0).as(2);
   target2.mutable_field(1).as(3);
 
@@ -273,8 +273,8 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
 
   dynamic_templates_description description(xml_content);
 
-  message_type m1(&alloc, description.instruction(1));
-  message_type m2(&alloc, description.instruction(1));
+  message_type m1(&alloc, description[1]);
+  message_type m2(&alloc, description[1]);
 
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
 
   nested_message_mref nested1(m1ref.mutable_field(1));
   BOOST_CHECK(!nested1.is_static());
-  message_mref target1 = nested1.rebind(description.instruction(0));
+  message_mref target1 = nested1.rebind(description[0]);
   target1.mutable_field(0).as(2);
   target1.mutable_field(1).as(3);
   
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
   m2ref.mutable_field(0).as(1);
 
   nested_message_mref nested2(m2ref.mutable_field(1));
-  message_mref target2 = nested2.rebind(description.instruction(0));
+  message_mref target2 = nested2.rebind(description[0]);
   target2.mutable_field(0).as(2);
   target2.mutable_field(1).as(3);
 

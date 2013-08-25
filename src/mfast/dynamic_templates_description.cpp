@@ -548,11 +548,11 @@ class templates_loader
       return true;
     }
 
-    template <typename InstructionType>
-    void gen_string_instruction(const XMLElement & element,
-                                const std::string& name_attr,
-                                std::size_t        index)
+    virtual bool VisitString(const XMLElement & element,
+                             const std::string& name_attr,
+                             std::size_t        index)
     {
+      const char* charset =  get_optional_attr(element, "charset", "ascii");
       operator_enum_t fieldOp;
       op_context_t* opContext;
       std::string initial_value_str;
@@ -560,31 +560,50 @@ class templates_loader
       get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
       string_value_storage initial_value(new_string(initial_value_str.c_str()));
 
-      InstructionType* instruction= new (*alloc_)InstructionType  (
-        static_cast<uint16_t>(index),
-        fieldOp,
-        get_presence(element),
-        get_id(element),
-        new_string(name_attr.c_str()),
-        get_ns(element),
-        opContext,
-        initial_value
-        );
+      field_instruction* instruction = 0;
 
-      current().push_back(instruction);
-    }
-
-    virtual bool VisitString(const XMLElement & element,
-                             const std::string& name_attr,
-                             std::size_t        index)
-    {
-      const char* charset =  get_optional_attr(element, "charset", "ascii");
       if (strcmp(charset, "ascii") == 0) {
-        gen_string_instruction<ascii_field_instruction>( element, name_attr, index);
+        instruction= new (*alloc_)ascii_field_instruction  (
+          static_cast<uint16_t>(index),
+          fieldOp,
+          get_presence(element),
+          get_id(element),
+          new_string(name_attr.c_str()),
+          get_ns(element),
+          opContext,
+          initial_value
+          );
+
       }
       else {
-        gen_string_instruction<unicode_field_instruction>(element, name_attr, index);
+
+        uint32_t length_id =0;
+        const char* length_name=0;
+        const char* length_ns=0;
+        const XMLElement* length_element = element.FirstChildElement("length");
+        if (length_element) {
+          length_id = get_id(*length_element);
+          length_name = new_string(get_optional_attr(*length_element, "name", ""));
+          length_ns = get_ns(*length_element);
+        }
+
+
+        instruction= new (*alloc_) unicode_field_instruction  (
+          static_cast<uint16_t>(index),
+          fieldOp,
+          get_presence(element),
+          get_id(element),
+          new_string(name_attr.c_str()),
+          get_ns(element),
+          opContext,
+          initial_value,
+          length_id,
+          length_name,
+          length_ns
+          );
       }
+
+      current().push_back(instruction);
       return true;
     }
 
@@ -659,7 +678,7 @@ class templates_loader
           BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid byteVector initial value: ") +  initial_value_str ) );
         }
       }
-      
+
       byte_vector_value_storage initial_value(initial_value_buffer, initial_value_len);
       byte_vector_field_instruction* instruction = new (*alloc_)byte_vector_field_instruction(
         static_cast<uint16_t>(index),

@@ -423,15 +423,30 @@ bool FastXML2Source::VisitString (const XMLElement & element,
        << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
        << "  \""<< name_attr << "\", // name\n"
        << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
-       << "  "<< opContext;
+       << "  "<< opContext << ",  // opContext\n";
 
 
   if (initialValue.size()) {
-    out_ << ",  // opContext\n"
-         << "  "<< "string_value_storage(\""<< initialValue << "\"," <<  initialValue.size() << ")); // initial_value\n\n";
+    out_ << "  "<< "string_value_storage(\""<< initialValue << "\"," <<  initialValue.size() << ")";
   }
   else {
-    out_ << ");  // opContext\n\n";
+    out_ << "  "<< "string_value_storage()";
+  }
+
+  if (charset == "unicode") {
+    out_ << ", // initial value\n";
+    const XMLElement* length_element = element.FirstChildElement("length");
+    if (length_element) {
+      out_ << "  " << get_optional_attr(*length_element, "id", "0") << ", // length id\n"
+           << "  \"" <<  get_optional_attr(*length_element, "name", "") << "\", // length name\n"
+           << "  \"" << get_optional_attr(*length_element, "ns", "") << "\"); // length ns\n\n";
+    }
+    else {
+      out_ << "0,\"\",\"\"); // no length element\n\n";
+    }
+  }
+  else {
+    out_ << "); // initial value\n\n";
   }
 
   add_to_instruction_list(name_attr);
@@ -514,7 +529,7 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
                          exponent_fieldOpName,
                          exponent_opContext,
                          exponent_initialValue);
-                         
+
     if (exponent_initialValue.size()) {
       exponent_initialValue = std::string("decimal_value_storage(0,") + exponent_initialValue;
     }
@@ -621,18 +636,23 @@ bool FastXML2Source::VisitByteVector (const XMLElement & element,
        << "  "<< opContext << ",  // opContext\n";
 
   if (initialValue.size()) {
-    out_ << "  byte_vector_value_storage(\""<< initialValue << "\","
-         <<  initialValue.size()/4 << "), // initial_value\n";
-  }
-
-  const XMLElement* length_element = element.FirstChildElement("length");
-  if (length_element) {
-    out_ << get_optional_attr(*length_element, "id", "0") << ", // length id\n"
-         << get_optional_attr(*length_element, "name", "0") << ", // length name\n"
-         << get_optional_attr(*length_element, "ns", "0") << "); // length ns\n\n";
+    out_ << "  "<< "byte_vector_value_storage(\""<< initialValue << "\"," <<  initialValue.size()/4 << ")";
   }
   else {
-    out_ << "0,0,0}; // no length element\n\n";
+    out_ << "  "<< "byte_vector_value_storage()";
+  }
+  
+  out_ << ", // initial_value\n";
+  
+  const XMLElement* length_element = element.FirstChildElement("length");
+  if (length_element) {
+    out_ << "  " << get_optional_attr(*length_element, "id", "0") << ", // length id\n"
+         << "  \"" <<  get_optional_attr(*length_element, "name", "") << "\", // length name\n"
+         << "  \"" << get_optional_attr(*length_element, "ns", "") << "\"); // length ns\n\n";
+
+  }
+  else {
+    out_ << "0,\"\",\"\"); // no length element\n\n";
   }
 
   add_to_instruction_list(name_attr);
@@ -653,7 +673,7 @@ void FastXML2Source::output_subinstructions(const std::string name_attr)
 
 bool FastXML2Source::VisitTemplateRef(const XMLElement & element,
                                       const std::string& name_attr,
-                                      std::size_t index)
+                                      std::size_t        index)
 {
   if (name_attr.size()) {
     std::string ns = get_optional_attr(element, "ns", current_context().ns_.c_str());
@@ -671,7 +691,7 @@ bool FastXML2Source::VisitTemplateRef(const XMLElement & element,
           << name_attr << "\", ns=\"" << ns << "\"\n";
       throw std::runtime_error(err.str());
     }
-    
+
     out_ << "templateref_instruction\n"
          << "templateref" << index << "_instruction(\n"
          << "  " << index << ",\n"
@@ -680,12 +700,12 @@ bool FastXML2Source::VisitTemplateRef(const XMLElement & element,
   else {
     out_ << "templateref_instruction\n"
          << "templateref" << index << "_instruction(\n"
-         << "  " << index << ");\n\n";    
+         << "  " << index << ");\n\n";
   }
-  
+
   std::stringstream tmp;
-  tmp << "templateref" << index ;
+  tmp << "templateref" << index;
   add_to_instruction_list(tmp.str());
-  
+
   return true;
 }

@@ -157,7 +157,7 @@ class MFAST_EXPORT field_instruction
     {
       return field_index_;
     }
-    
+
     bool mandatory_without_initial_value() const
     {
       return mandatory_no_initial_value_;
@@ -305,17 +305,17 @@ class int_field_instruction
 
 };
 
-#if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
-extern template class MFAST_EXPORT int_field_instruction<int32_t>;
-extern template class MFAST_EXPORT int_field_instruction<uint32_t>;
-extern template class MFAST_EXPORT int_field_instruction<int64_t>;
-extern template class MFAST_EXPORT int_field_instruction<uint64_t>;
-#elif !defined(MFAST_STATIC_DEFINE)
-template class MFAST_EXPORT int_field_instruction<int32_t>;
-template class MFAST_EXPORT int_field_instruction<uint32_t>;
-template class MFAST_EXPORT int_field_instruction<int64_t>;
-template class MFAST_EXPORT int_field_instruction<uint64_t>;
-#endif
+// #if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE) && !defined(MFAST_DYN_LINK) && !defined(mfast_EXPORTS)
+// extern template class int_field_instruction<int32_t>;
+// extern template class int_field_instruction<uint32_t>;
+// extern template class int_field_instruction<int64_t>;
+// extern template class int_field_instruction<uint64_t>;
+// #elif defined(MFAST_DYN_LINK) || defined(mfast_EXPORTS)
+// template class MFAST_EXPORT int_field_instruction<int32_t>;
+// template class MFAST_EXPORT int_field_instruction<uint32_t>;
+// template class MFAST_EXPORT int_field_instruction<int64_t>;
+// template class MFAST_EXPORT int_field_instruction<uint64_t>;
+// #endif
 
 typedef int_field_instruction<int32_t> int32_field_instruction;
 typedef int_field_instruction<uint32_t> uint32_field_instruction;
@@ -559,21 +559,50 @@ class MFAST_EXPORT unicode_field_instruction
                               const char*          name,
                               const char*          ns,
                               const op_context_t*  context,
-                              string_value_storage initial_value = string_value_storage())
+                              string_value_storage initial_value = string_value_storage(),
+                              uint32_t             length_id = 0,
+                              const char*          length_name = "",
+                              const char*          length_ns = "")
       : string_field_instruction(field_index,
                                  operator_id,
                                  field_type_unicode_string,
                                  optional,
                                  id, name, ns, context, initial_value)
+      , length_id_(length_id)
+      , length_name_(length_name)
+      , length_ns_(length_ns)
     {
     }
 
     unicode_field_instruction(const unicode_field_instruction& other)
       : string_field_instruction(other)
+      , length_id_(other.length_id_)
+      , length_name_(other.length_name_)
+      , length_ns_(other.length_ns_)
     {
     }
 
     virtual void accept(field_instruction_visitor& visitor, void* context) const;
+    
+    uint32_t length_id() const
+    {
+      return length_id_;
+    }
+
+    const char* length_name() const
+    {
+      return length_name_;
+    }
+
+    const char* length_ns() const
+    {
+      return length_ns_;
+    }
+
+  protected:
+    uint32_t length_id_;
+    const char* length_name_;
+    const char* length_ns_;
 };
 
 
@@ -591,8 +620,8 @@ class MFAST_EXPORT byte_vector_field_instruction
                                   const op_context_t*       value_context,
                                   byte_vector_value_storage initial_value = byte_vector_value_storage(),
                                   uint32_t                  length_id = 0,
-                                  const char*               length_name = 0,
-                                  const char*               length_ns = 0)
+                                  const char*               length_name = "",
+                                  const char*               length_ns = "")
       : string_field_instruction(field_index,
                                  operator_id,
                                  field_type_byte_vector,
@@ -615,6 +644,20 @@ class MFAST_EXPORT byte_vector_field_instruction
 
     virtual void accept(field_instruction_visitor& visitor, void* context) const;
 
+    uint32_t length_id() const
+    {
+      return length_id_;
+    }
+
+    const char* length_name() const
+    {
+      return length_name_;
+    }
+
+    const char* length_ns() const
+    {
+      return length_ns_;
+    }
   protected:
     uint32_t length_id_;
     const char* length_name_;
@@ -824,8 +867,13 @@ class MFAST_EXPORT sequence_field_instruction
                             allocator*           alloc) const;
 
     virtual void accept(field_instruction_visitor&, void*) const;
+    const uint32_field_instruction* length_instruction() const
+    {
+      return sequence_length_instruction_;
+    }
 
-
+  private:
+    friend class dictionary_builder;
     uint32_field_instruction* sequence_length_instruction_;
 };
 
@@ -1007,6 +1055,8 @@ class MFAST_EXPORT templates_description
       , instructions_count_(SIZE)
     {
     }
+    
+    typedef const template_instruction** iterator;
 
     const char* ns() const
     {
@@ -1023,21 +1073,31 @@ class MFAST_EXPORT templates_description
       return dictionary_;
     }
 
-    const template_instruction* instruction(std::size_t i) const
+    const template_instruction* operator[](std::size_t i) const
     {
       return instructions_[i];
+    }
+    
+    iterator begin() const
+    {
+      return instructions_;
+    }
+    
+    iterator end() const
+    {
+      return instructions_+ size();
     }
 
     const template_instruction* instruction_with_id(uint32_t id) const
     {
       for (uint32_t i = 0; i <  instructions_count_; ++i) {
-        if (instruction(i)->id() == id)
-          return instruction(i);
+        if (instructions_[i]->id() == id)
+          return instructions_[i];
       }
       return 0;
     }
 
-    uint32_t instructions_count() const
+    uint32_t size() const
     {
       return instructions_count_;
     }

@@ -9,5 +9,9 @@ fast_error::fast_error(const char* error_code)
 {
   *this << fast_error_info(error_code);
 }
+}
 
+namespace boost {
+template class error_info<mfast::tag_referenced_by,std::string>;
+template class error_info<mfast::tag_template_id,unsigned>;
 }

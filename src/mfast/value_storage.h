@@ -22,11 +22,13 @@
 
 #include <stdint.h>
 #include <cstring>
+#include "mfast/mfast_export.h"
+
 namespace mfast 
 {
   class template_instruction;
 
-  union value_storage {
+  union MFAST_EXPORT value_storage {
     struct {
       uint32_t present_;                ///< indicate if the value is present,
       uint32_t padding_ : 31;

@@ -26,8 +26,6 @@ add_executable (mfast_test
 			    fast_type_gen_test.cpp
 			    dictionary_builder_test.cpp)
 
-set_target_properties(mfast_test PROPERTIES COMPILE_FLAGS -DMFAST_STATIC_DEFINE)
-
 target_link_libraries (mfast_test mfast_static  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 

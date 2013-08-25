@@ -4,24 +4,23 @@
 
 #include <boost/config.hpp>
 
-#ifdef MFAST_STATIC_DEFINE
-#  define MFAST_EXPORT
-#  define MFAST_NO_EXPORT
-#else
-#  ifndef MFAST_EXPORT
-#    ifdef mfast_EXPORTS
-        /* We are building this library */
-#      define MFAST_EXPORT BOOST_SYMBOL_EXPORT 
-#    else
-        /* We are using this library */
-#      define MFAST_EXPORT BOOST_SYMBOL_IMPORT 
-#    endif
-#  endif
 
-#  ifndef MFAST_NO_EXPORT
-#    define MFAST_NO_EXPORT 
+#ifndef MFAST_EXPORT
+#  ifdef mfast_EXPORTS
+      /* We are building the shared variant of this library */
+#    define MFAST_EXPORT BOOST_SYMBOL_EXPORT 
+#    define MFAST_BUILD_SHARED_LIBS
+#  elif defined(MFAST_DYN_LINK)
+     /* We are using the shared variant of this library */
+#    define MFAST_EXPORT BOOST_SYMBOL_IMPORT 
+#    define MFAST_USE_SHARED_LIBS
+#  else
+    /* We are either using or building static libs */
+#    define MFAST_EXPORT
+#    define MAST_NO_SHARED_LIBS 
 #  endif
 #endif
+
 
 #if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
 #  if  (defined(__GNUC__) && (__GNUC__ >= 3)) && (!defined(__clang__))

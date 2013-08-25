@@ -30,11 +30,11 @@
 #include "mfast/fast_coder/decoder/decoder_presence_map.h"
 #include "mfast/fast_coder/decoder/decoder_field_operator.h"
 #include "mfast/fast_coder/decoder/fast_istream.h"
+
+
 namespace mfast {
 
 typedef boost::container::map<uint32_t, message_type> message_map_t;
-
-
 
 struct fast_decoder_impl
 {
@@ -184,7 +184,7 @@ fast_decoder_impl::visit(sequence_mref& mref, int)
 {
   debug_ << "decoding sequence " << mref.name()  << " ---\n";
 
-  uint32_field_instruction* length_instruction = mref.instruction()->sequence_length_instruction_;
+  const uint32_field_instruction* length_instruction = mref.instruction()->length_instruction();
   value_storage storage;
 
   debug_ << "  decoding sequence length " << mref.name()  << " : stream -> " << strm_ << "\n";

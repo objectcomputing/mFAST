@@ -20,8 +20,12 @@
                 <delta/>
             </decimal>
             <decimal name="MDEntrySize" id="271">
-                <exponent> <delta/> </exponent>
-                <mantissa> <delta/> </mantissa>
+                <exponent>
+                    <delta/>
+                </exponent>
+                <mantissa>
+                    <delta/>
+                </mantissa>
             </decimal>
             <uInt32 name="NumberOfOrders" id="346">
                 <delta/>
@@ -32,7 +36,15 @@
             <string name="TradeCondition" id="277">
                 <copy/>
             </string>
+            <string name="EncodedIssuer" id="349" charset="unicode">
+                <length name="EncodedIssuerLen" id="348"/>
+                <copy/>
+            </string>
+            <byteVector name="EncodedSecurityDesc" id="351">
+                <length name="EncodedSecurityDescLen" id="350"/>
+                <copy/>
+            </byteVector>
         </sequence>
-		<templateRef />
+        <templateRef/>
     </template>
 </templates>

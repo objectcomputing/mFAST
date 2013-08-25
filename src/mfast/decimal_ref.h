@@ -27,7 +27,7 @@
 
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
-#ifdef MFAST_STATIC_DEFINE
+#ifdef MAST_NO_SHARED_LIBS
 namespace boost { namespace multiprecision {
 MFAST_EXTERN_TEMPLATE template class cpp_dec_float<18>;
 }}
@@ -111,6 +111,7 @@ class decimal_cref
   public:
     typedef decimal_field_instruction instruction_type;
     typedef const instruction_type* instruction_cptr;
+    typedef decimal value_type;
 
     decimal_cref()
     {

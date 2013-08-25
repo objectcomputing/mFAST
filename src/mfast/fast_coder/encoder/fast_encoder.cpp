@@ -158,10 +158,9 @@ inline void
 fast_encoder_impl::visit(sequence_cref& cref, int)
 {
 
-  uint32_field_instruction* length_instruction = cref.instruction()->sequence_length_instruction_;
   value_storage storage;
 
-  uint32_mref length_mref(0, &storage, length_instruction);
+  uint32_mref length_mref(0, &storage, cref.instruction()->length_instruction());
 
   if (cref.present())
     length_mref.as(cref.size());

@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include "mfast/fast_coder/exceptions.h"
 
+
 namespace mfast {
 
 struct tag_template_name;
@@ -121,8 +122,8 @@ void dictionary_builder::build(const templates_description* def)
   current_ns_ = def->template_ns();
   current_dictionary_ = is_empty_string(def->dictionary()) ?  "global" : def->dictionary();
 
-  for (uint32_t i  = 0; i < def->instructions_count(); ++i ) {
-    template_instruction* inst = new (*alloc_)template_instruction(*def->instruction(i));
+  for (uint32_t i  = 0; i < def->size(); ++i ) {
+    template_instruction* inst = new (*alloc_)template_instruction(*(*def)[i]);
     build_template(inst, inst);
 
     if (template_id_map_.count(inst->id())) {
@@ -231,8 +232,8 @@ void dictionary_builder::visit(const sequence_field_instruction* src_inst, void*
   sequence_field_instruction*& dest = *static_cast<sequence_field_instruction**>(dest_inst);
   dest = new (*alloc_)sequence_field_instruction(*src_inst);
   this->build_group(src_inst, src_inst, dest);
-  if (src_inst->sequence_length_instruction_) {
-    visit(src_inst->sequence_length_instruction_, &dest->sequence_length_instruction_);
+  if (src_inst->length_instruction()) {
+    visit(src_inst->length_instruction(), &dest->sequence_length_instruction_);
   }
   else {
     dest->sequence_length_instruction_ = new (*alloc_)uint32_field_instruction(

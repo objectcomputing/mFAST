@@ -77,10 +77,10 @@ void integer_field_instruction_base::construct_value(value_storage& storage,
 
 const  value_storage integer_field_instruction_base::default_value_(1);
 
-template class int_field_instruction<int32_t>;
-template class int_field_instruction<uint32_t>;
-template class int_field_instruction<int64_t>;
-template class int_field_instruction<uint64_t>;
+// template class int_field_instruction<int32_t>;
+// template class int_field_instruction<uint32_t>;
+// template class int_field_instruction<int64_t>;
+// template class int_field_instruction<uint64_t>;
 
 /////////////////////////////////////////////////////////
 

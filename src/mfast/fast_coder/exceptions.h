@@ -21,10 +21,14 @@
 
 #include <boost/exception/all.hpp>
 #include "mfast/mfast_export.h"
+
+#ifdef BOOST_MSVC 
+# pragma warning(push) 
+# pragma warning(disable : 4275) 
+#endif 
+
 namespace mfast
 {
-
-
 
 // we should always export exception classes; otherwise, the vtable won't
 // be available for application when they are in shared libraries.
@@ -77,14 +81,27 @@ public:
   }
 };
 
-
 struct tag_referenced_by;
 struct tag_template_id;
-
-typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info;
-typedef boost::error_info<tag_template_id,unsigned> template_id_info;
-
 }
 
+namespace  boost {
+  // For Clang, we must use extern template and explicit template instantiation; 
+  //     otherwise, we will have duplicated definition link error when building shared library.
+  // For GCC, we must nest the explicit instantiation statement inside their original namespace;
+  //     otherwise, the code won't compile.
+extern template class error_info<mfast::tag_referenced_by,std::string>;
+extern template class error_info<mfast::tag_template_id,unsigned>;
+}
+
+namespace mfast {
+typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info; 
+typedef boost::error_info<tag_template_id,unsigned> template_id_info;
+}
+
+
+#ifdef BOOST_MSVC 
+#pragma warning(pop) 
+#endif 
 
 #endif /* end of include guard: EXCEPTIONS_H_87B9JUIK */

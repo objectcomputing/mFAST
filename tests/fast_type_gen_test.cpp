@@ -94,9 +94,9 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
 
   BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->field_index(),           1);
   BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->field_type(),        mfast::field_type_sequence);
-  BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->subinstructions_count(), 9);
+  BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->subinstructions_count(), 11);
 
-  const mfast::uint32_field_instruction* len_inst = sample.cref().get_MDEntries().instruction()->sequence_length_instruction_;
+  const mfast::uint32_field_instruction* len_inst = sample.cref().get_MDEntries().instruction()->length_instruction();
 
   BOOST_CHECK(len_inst != 0);
   BOOST_CHECK(equal_string(len_inst->name(), "NoMDEntries"));
