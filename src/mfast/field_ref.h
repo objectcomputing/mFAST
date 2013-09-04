@@ -180,6 +180,17 @@ class make_field_mref_base<T, boost::true_type>
         ptr->storage()->present(0);
       }
     }
+    
+    void clear() const
+    {
+      const T* ptr = static_cast<const T*>(this);
+      if (ptr->instruction()->optional()) {
+        ptr->storage()->present(0);
+      }
+      else if (ptr->instruction()->is_array()) {
+        ptr->storage()->array_length(0);
+      }
+    }
 
 };
 

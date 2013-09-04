@@ -45,17 +45,17 @@ enum presence_enum_t {
 };
 
 enum field_type_enum_t {
+  field_type_ascii_string,
+  field_type_unicode_string,
+  field_type_byte_vector,
+  field_type_sequence,
   field_type_int32,
   field_type_uint32,
   field_type_int64,
   field_type_uint64,
   field_type_decimal,
   field_type_exponent,
-  field_type_ascii_string,
-  field_type_unicode_string,
-  field_type_byte_vector,
   field_type_group,
-  field_type_sequence,
   field_type_templateref,
   field_type_template
 };
@@ -162,6 +162,12 @@ class MFAST_EXPORT field_instruction
     {
       return mandatory_no_initial_value_;
     }
+    
+    /// @returns true if the field type is string, byteVector or sequence.
+    bool is_array() const 
+    {
+      return is_array_;
+    }
 
     const char* field_type_name() const;
 
@@ -174,6 +180,7 @@ class MFAST_EXPORT field_instruction
                       const char*     ns)
       : field_index_(field_index)
       , operator_id_(operator_id)
+      , is_array_(field_type <= field_type_sequence )
       , optional_flag_(optional)
       , nullable_flag_( optional &&  (operator_id != operator_constant) )
       , has_pmap_bit_(operator_id > operator_delta || ((operator_id == operator_constant) && optional))
@@ -188,7 +195,8 @@ class MFAST_EXPORT field_instruction
   protected:
 
     uint16_t field_index_;
-    uint16_t operator_id_ : 4;
+    uint16_t operator_id_ : 3;
+    uint16_t is_array_ :1;
     uint16_t optional_flag_ : 1;
     uint16_t nullable_flag_ : 1;
     uint16_t has_pmap_bit_ : 1;
