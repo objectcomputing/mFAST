@@ -253,7 +253,7 @@ bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
        << "  \""<< get_optional_attr(element, "templateNs", "") << "\", // templateNs\n"
        << "  \""<< get_optional_attr(element, "dictionary", "") << "\", // dictionary\n"
        << "  "<< name_attr << "_def::subinstructions,\n"
-       << "  "<< numFields << ", // fields_count\n"
+       << "  "<< numFields << ", // num_fields\n"
        << "  " << reset << ", // reset\n";
 
 
@@ -291,7 +291,7 @@ bool FastXML2Source::VisitExitGroup (const XMLElement & element,
        << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
        << "  \""<< get_optional_attr(element, "dictionary", "") << "\", // dictionary\n"
        << "  "<< name_attr << "_def::subinstructions,\n"
-       << "  "<< numFields << ", // fields_count\n";
+       << "  "<< numFields << ", // num_fields\n";
 
   restore_scope(name_attr);
   return output_typeref(element);
@@ -364,7 +364,7 @@ bool FastXML2Source::VisitExitSequence (const XMLElement & element,
        << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
        << "  \""<< get_optional_attr(element, "dictionary", "") << "\", // dictionary\n"
        << "  "<< name_attr << "_def::subinstructions,\n"
-       << "  "<< numFields << ", // fields_count\n"
+       << "  "<< numFields << ", // num_fields\n"
        << "  "<< lengthInstruction << ", // length\n";
   restore_scope(name_attr);
   return output_typeref(element);

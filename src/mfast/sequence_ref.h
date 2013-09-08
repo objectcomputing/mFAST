@@ -88,7 +88,7 @@ class make_sequence_cref
       return storage_->array_length();
     }
 
-    size_t fields_count() const
+    size_t num_fields() const
     {
       return instruction()->subinstructions_count_;
     }
@@ -111,7 +111,7 @@ class make_sequence_cref
     {
       const value_storage* storages =
         static_cast<const value_storage*>(storage_->of_array.content_);
-      return &storages[index*fields_count()];
+      return &storages[index*num_fields()];
     }
 
 };

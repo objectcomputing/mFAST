@@ -70,9 +70,9 @@ class message_cref
 
     operator aggregate_cref() const;
 
-    size_t fields_count() const;
+    size_t num_fields() const;
 
-    field_cref const_field(size_t index) const;
+    field_cref operator[](size_t index) const;
 
     /// return -1 if no such field is found
     int field_index_with_id(size_t id) const;
@@ -166,7 +166,7 @@ message_cref::message_cref(const field_cref& cref)
 }
 
 inline size_t
-message_cref::fields_count() const
+message_cref::num_fields() const
 {
   return instruction_->subinstructions_count_;
 }
@@ -202,9 +202,9 @@ message_cref::operator aggregate_cref() const
 }
 
 inline field_cref
-message_cref::const_field(std::size_t index) const
+message_cref::operator[](std::size_t index) const
 {
-  return aggregate_cref(*this).const_field(index);
+  return aggregate_cref(*this)[index];
 }
 
 /// return -1 if no such field is found

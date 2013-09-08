@@ -107,9 +107,9 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
-  msg_ref.mutable_field(0).as(1);
-  msg_ref.mutable_field(1).as(2);
-  msg_ref.mutable_field(2).as(3);
+  msg_ref[0].as(1);
+  msg_ref[1].as(2);
+  msg_ref[2].as(3);
 
   BOOST_CHECK(test_case.encoding(msg_ref,"\xB8\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
@@ -135,10 +135,10 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
   message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
-  msg_ref.mutable_field(0).as(1);
-  group_mref grp(msg_ref.mutable_field(1));
-  grp.mutable_field(0).as(2);
-  grp.mutable_field(1).as(3);
+  msg_ref[0].as(1);
+  group_mref grp(msg_ref[1]);
+  grp[0].as(2);
+  grp[1].as(3);
 
   BOOST_CHECK(test_case.encoding(msg_ref, "\xB0\x81\xE0\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xB0\x81\xE0\x82\x83", msg_ref));
@@ -164,14 +164,14 @@ BOOST_AUTO_TEST_CASE(sequence_test)
   message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
-  msg_ref.mutable_field(0).as(1);
-  sequence_mref seq(msg_ref.mutable_field(1));
+  msg_ref[0].as(1);
+  sequence_mref seq(msg_ref[1]);
   seq.resize(2);
-  seq[0].mutable_field(0).as(2);
-  seq[0].mutable_field(1).as(3);
+  seq[0][0].as(2);
+  seq[0][1].as(3);
 
-  seq[1].mutable_field(0).as(0);
-  seq[1].mutable_field(1).as(1);
+  seq[1][0].as(0);
+  seq[1][1].as(1);
 
   BOOST_CHECK(test_case.encoding(msg_ref,
                                  // pmap | f1 | s1 len| elem1 pmap | f2 | f3 | elem2 pmap |  f2 | f3 |
@@ -204,14 +204,14 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
   BOOST_CHECK_EQUAL(test_case.template_with_id(2)->segment_pmap_size(), 3);
   message_mref msg_ref = msg.mref();
 
-  msg_ref.mutable_field(0).as(1);
+  msg_ref[0].as(1);
   
-  nested_message_mref nested(msg_ref.mutable_field(1));
+  nested_message_mref nested(msg_ref[1]);
   BOOST_CHECK(nested.is_static());
 
-  message_mref target(msg_ref.mutable_field(1));
-  target.mutable_field(0).as(2);
-  target.mutable_field(1).as(3);
+  message_mref target(msg_ref[1]);
+  target[0].as(2);
+  target[1].as(3);
                                  // pmap | template id | field1 | field2 | field 3 |
                                  //  F8         82        81        82       83     
   BOOST_CHECK(test_case.encoding(msg_ref,"\xF8\x82\x81\x82\x83"));
@@ -240,15 +240,15 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
   message_mref msg_ref = msg.mref();
 
 
-  msg_ref.mutable_field(0).as(1);
-  nested_message_mref nested(msg_ref.mutable_field(1));
+  msg_ref[0].as(1);
+  nested_message_mref nested(msg_ref[1]);
   BOOST_CHECK(!nested.is_static());
 
   message_mref target = nested.rebind(test_case.template_with_id(1));
   
     
-  target.mutable_field(0).as(2);
-  target.mutable_field(1).as(3);
+  target[0].as(2);
+  target[1].as(3);
 
   BOOST_CHECK(test_case.encoding(msg_ref,"\xE0\x82\x81\xF0\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xE0\x82\x81\xF0\x81\x82\x83", msg_ref));
@@ -271,9 +271,9 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
   message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
-  msg_ref.mutable_field(0).as(1);
-  msg_ref.mutable_field(1).as(2);
-  msg_ref.mutable_field(2).as(3);
+  msg_ref[0].as(1);
+  msg_ref[1].as(2);
+  msg_ref[2].as(3);
 
   BOOST_CHECK(test_case.encoding(msg_ref, "\xB8\x81\x82\x83", false));
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref, false));
@@ -283,9 +283,9 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
   BOOST_CHECK(test_case.encoding(msg_ref, "\x80", false));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref, false));
 
-  msg_ref.mutable_field(0).as(11);
-  msg_ref.mutable_field(1).as(12);
-  msg_ref.mutable_field(2).as(13);
+  msg_ref[0].as(11);
+  msg_ref[1].as(12);
+  msg_ref[2].as(13);
 
   // encoding with reset, all values are initial
   BOOST_CHECK(test_case.encoding(msg_ref, "\x80", true));
@@ -310,16 +310,16 @@ BOOST_AUTO_TEST_CASE(auto_reset_test)
   message_type msg(&alloc, test_case.template_with_id(0));
   message_mref msg_ref = msg.mref();
 
-  msg_ref.mutable_field(0).as(1);
-  msg_ref.mutable_field(1).as(2);
-  msg_ref.mutable_field(2).as(3);
+  msg_ref[0].as(1);
+  msg_ref[1].as(2);
+  msg_ref[2].as(3);
 
   BOOST_CHECK(test_case.encoding(msg_ref, "\xB8\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
 
-  msg_ref.mutable_field(0).as(11);
-  msg_ref.mutable_field(1).as(12);
-  msg_ref.mutable_field(2).as(13);
+  msg_ref[0].as(11);
+  msg_ref[1].as(12);
+  msg_ref[2].as(13);
   // encoding with reset, all values are initial
   BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref));

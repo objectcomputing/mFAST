@@ -54,14 +54,14 @@ class group_cref
     {
     }
 
-    size_t fields_count() const
+    size_t num_fields() const
     {
       return instruction()->subinstructions_count_;
     }
 
     operator aggregate_cref() const;
 
-    field_cref const_field(size_t index) const;
+    field_cref operator[](size_t index) const;
 
     /// return -1 if no such field is found
     int field_index_with_id(size_t id) const;
@@ -127,7 +127,7 @@ class make_group_mref
     {
     }
 
-    field_mref mutable_field(size_t index) const;
+    field_mref operator[](size_t index) const;
 
     operator aggregate_mref() const;
 
@@ -153,9 +153,9 @@ group_cref::operator aggregate_cref() const
 }
 
 inline field_cref
-group_cref::const_field(std::size_t index) const
+group_cref::operator[](std::size_t index) const
 {
-  return aggregate_cref(*this).const_field(index);
+  return aggregate_cref(*this)[index];
 }
 
 /// return -1 if no such field is found
@@ -175,14 +175,14 @@ group_cref::field_index_with_name(const char* name) const
 
 template <typename ConstGroupRef>
 inline field_mref
-make_group_mref<ConstGroupRef>::mutable_field(size_t index)  const
+make_group_mref<ConstGroupRef>::operator[](size_t index)  const
 {
-  assert(index < this->fields_count());
+  assert(index < this->num_fields());
   this->as_present();
   // return field_mref(this->alloc_,
   //                   this->field_storage(index),
   //                   this->instruction()->subinstructions_[index]);
-  return aggregate_mref(*this).mutable_field(index);
+  return aggregate_mref(*this)[index];
 }
 
 template <typename ConstGroupRef>

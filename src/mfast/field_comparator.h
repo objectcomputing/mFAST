@@ -26,9 +26,9 @@ class field_comparator
     
     void visit(const group_cref& lhs, int) const
     {
-      group_cref rhs =  dynamic_cast_as<group_cref>(parent_.const_field(lhs.instruction()->field_index()));
+      group_cref rhs =  dynamic_cast_as<group_cref>(parent_[lhs.instruction()->field_index()]);
       
-      if (lhs.fields_count() != rhs.fields_count())
+      if (lhs.num_fields() != rhs.num_fields())
         throw field_uneqaul_exception ();
       
       field_comparator<group_cref> new_comp(rhs); 
@@ -43,7 +43,7 @@ class field_comparator
     
     void visit(const nested_message_cref& lhs, int) const
     {
-      nested_message_cref rhs =  dynamic_cast_as<nested_message_cref>(parent_.const_field(lhs.instruction()->field_index()));
+      nested_message_cref rhs =  dynamic_cast_as<nested_message_cref>(parent_[lhs.instruction()->field_index()]);
       field_comparator<message_cref> new_comp(rhs.target());
       lhs.target().accept_accessor( new_comp );
     }
@@ -51,7 +51,7 @@ class field_comparator
     template <typename SimpleType>
     void visit(const SimpleType& lhs) const
     {
-      SimpleType rhs =  dynamic_cast_as<SimpleType>(parent_.const_field(lhs.instruction()->field_index()));
+      SimpleType rhs =  dynamic_cast_as<SimpleType>(parent_[lhs.instruction()->field_index()]);
       if (lhs != rhs)
         throw field_uneqaul_exception();
     }
@@ -94,9 +94,9 @@ public:
 template <typename T>
 void field_comparator<T>::visit(const sequence_cref& lhs, int) const
 {
-  sequence_cref rhs =  dynamic_cast_as<sequence_cref>(parent_.const_field(lhs.instruction()->field_index()));
+  sequence_cref rhs =  dynamic_cast_as<sequence_cref>(parent_[lhs.instruction()->field_index()]);
   
-  if (lhs.fields_count() != rhs.fields_count() || lhs.size() != rhs.size())
+  if (lhs.num_fields() != rhs.num_fields() || lhs.size() != rhs.size())
     throw field_uneqaul_exception ();
   
   field_comparator<sequence_cref> new_comp(rhs); 

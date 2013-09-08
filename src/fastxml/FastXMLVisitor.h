@@ -41,7 +41,7 @@ class FastXMLVisitor
       std::string dictionary_;
     };
 
-    std::vector<uint32_t> fields_count_;
+    std::vector<uint32_t> num_fields_;
     std::deque<instruction_context> context_stack_;
 
     instruction_context& current_context();

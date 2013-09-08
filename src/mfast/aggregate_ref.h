@@ -35,9 +35,9 @@ class aggregate_cref
 
     aggregate_cref(const aggregate_cref& other);
     
-    size_t fields_count() const;
+    size_t num_fields() const;
 
-    field_cref const_field(size_t index) const;
+    field_cref operator[](size_t index) const;
 
     /// return -1 if no such field is found
     int field_index_with_id(std::size_t id) const;
@@ -85,7 +85,7 @@ class make_aggregate_mref
                         value_storage*    storage,
                         instruction_cptr  instruction);
 
-    field_mref mutable_field(size_t index) const;
+    field_mref operator[](size_t index) const;
 
     mfast::allocator* allocator() const;
     
@@ -128,13 +128,13 @@ aggregate_cref::aggregate_cref(const aggregate_cref& other)
 }
 
 inline size_t
-aggregate_cref::fields_count() const
+aggregate_cref::num_fields() const
 {
   return instruction()->subinstructions_count_;
 }
 
 inline field_cref
-aggregate_cref::const_field(size_t index) const
+aggregate_cref::operator[](size_t index) const
 {
   return field_cref(&storage_[index],subinstruction(index));
 }
@@ -201,9 +201,9 @@ make_aggregate_mref<ConstRef>::make_aggregate_mref(mfast::allocator* alloc,
 
 template <typename ConstRef>
 inline field_mref
-make_aggregate_mref<ConstRef>::mutable_field(size_t index) const
+make_aggregate_mref<ConstRef>::operator[](size_t index) const
 {
-  assert(index < this->fields_count());
+  assert(index < this->num_fields());
   return field_mref(this->alloc_,
                     this->field_storage(index),
                     this->instruction()->subinstruction(index));

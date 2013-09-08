@@ -54,26 +54,26 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
 
-  m1ref.mutable_field(0).as(0);
-  m1ref.mutable_field(1).as(1);
-  m1ref.mutable_field(2).as(2);
-  m1ref.mutable_field(3).as("abcd");
+  m1ref[0].as(0);
+  m1ref[1].as(1);
+  m1ref[2].as(2);
+  m1ref[3].as("abcd");
   
   
-  for (std::size_t i = 0; i < m1ref.fields_count(); ++i)
+  for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
   {
-    BOOST_CHECK_EQUAL(m1ref.const_field(i).instruction()->field_index(), i);
+    BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
   }
 
-  m2ref.mutable_field(0).as(0);
-  m2ref.mutable_field(1).as(1);
-  m2ref.mutable_field(2).as(2);
-  m2ref.mutable_field(3).as("abcd");
+  m2ref[0].as(0);
+  m2ref[1].as(1);
+  m2ref[2].as(2);
+  m2ref[3].as("abcd");
 
 
   BOOST_CHECK(m1ref == m2ref);
 
-  m2ref.mutable_field(2).as(3);
+  m2ref[2].as(3);
   BOOST_CHECK(m1ref != m2ref);
 
   debug_allocator alloc2;
@@ -107,26 +107,26 @@ BOOST_AUTO_TEST_CASE(group_compare_test)
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
 
-  m1ref.mutable_field(0).as(0);
-  group_mref m1group(m1ref.mutable_field(1));
-  m1group.mutable_field(0).as(1);
-  m1group.mutable_field(1).as(2);
+  m1ref[0].as(0);
+  group_mref m1group(m1ref[1]);
+  m1group[0].as(1);
+  m1group[1].as(2);
   
   
-  for (std::size_t i = 0; i < m1group.fields_count(); ++i)
+  for (std::size_t i = 0; i < m1group.num_fields(); ++i)
   {
-    BOOST_CHECK_EQUAL(m1group.const_field(i).instruction()->field_index(), i);
+    BOOST_CHECK_EQUAL(m1group[i].instruction()->field_index(), i);
   }
 
-  m2ref.mutable_field(0).as(0);
-  group_mref m2group(m2ref.mutable_field(1));
-  m2group.mutable_field(0).as(1);
-  m2group.mutable_field(1).as(2);
+  m2ref[0].as(0);
+  group_mref m2group(m2ref[1]);
+  m2group[0].as(1);
+  m2group[1].as(2);
 
 
   BOOST_CHECK(m1ref == m2ref);
 
-  m2group.mutable_field(1).as(3);
+  m2group[1].as(3);
   BOOST_CHECK(m1ref != m2ref);
 
   debug_allocator alloc2;
@@ -160,31 +160,31 @@ BOOST_AUTO_TEST_CASE(sequence_compare_test)
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
 
-  m1ref.mutable_field(0).as(0);
-  sequence_mref m1seq(m1ref.mutable_field(1));
+  m1ref[0].as(0);
+  sequence_mref m1seq(m1ref[1]);
   m1seq.resize(2);
-  m1seq[0].mutable_field(0).as(1);
-  m1seq[0].mutable_field(1).as(2);
-  m1seq[1].mutable_field(0).as(3);
-  m1seq[1].mutable_field(1).as(4);
+  m1seq[0][0].as(1);
+  m1seq[0][1].as(2);
+  m1seq[1][0].as(3);
+  m1seq[1][1].as(4);
   
   
-  for (std::size_t i = 0; i < m1seq[0].fields_count(); ++i)
+  for (std::size_t i = 0; i < m1seq[0].num_fields(); ++i)
   {
-    BOOST_CHECK_EQUAL(m1seq[0].const_field(i).instruction()->field_index(), i);
+    BOOST_CHECK_EQUAL(m1seq[0][i].instruction()->field_index(), i);
   }
 
-  m2ref.mutable_field(0).as(0);
-  sequence_mref m2seq(m2ref.mutable_field(1));
+  m2ref[0].as(0);
+  sequence_mref m2seq(m2ref[1]);
   m2seq.resize(2);
-  m2seq[0].mutable_field(0).as(1);
-  m2seq[0].mutable_field(1).as(2);
-  m2seq[1].mutable_field(0).as(3);
-  m2seq[1].mutable_field(1).as(4);
+  m2seq[0][0].as(1);
+  m2seq[0][1].as(2);
+  m2seq[1][0].as(3);
+  m2seq[1][1].as(4);
 
   BOOST_CHECK(m1ref == m2ref);
 
-  m2seq[1].mutable_field(1).as(10);
+  m2seq[1][1].as(10);
   BOOST_CHECK(m1ref != m2ref);
 
   debug_allocator alloc2;
@@ -221,28 +221,28 @@ BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
 
-  m1ref.mutable_field(0).as(1);
+  m1ref[0].as(1);
 
   // static templateRef won't be resolved by dynamic_templates_description constructor
   // we have to manual resolve the reference manually.
-  nested_message_mref nested1(m1ref.mutable_field(1));
+  nested_message_mref nested1(m1ref[1]);
   message_mref target1 = nested1.rebind(description[0]);
-  target1.mutable_field(0).as(2);
-  target1.mutable_field(1).as(3);
+  target1[0].as(2);
+  target1[1].as(3);
 
-  for (std::size_t i = 0; i < m1ref.fields_count(); ++i)
+  for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
   {
-    BOOST_CHECK_EQUAL(m1ref.const_field(i).instruction()->field_index(), i);
+    BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
   }
   
   aggregate_mref aggregate1(nested1);
   BOOST_CHECK_EQUAL(aggregate1.instruction(), static_cast<const aggregate_instruction_base*>(target1.instruction()));
 
-  m2ref.mutable_field(0).as(1);
-  nested_message_mref nested2(m2ref.mutable_field(1));
+  m2ref[0].as(1);
+  nested_message_mref nested2(m2ref[1]);
   message_mref target2 = nested2.rebind(description[0]);
-  target2.mutable_field(0).as(2);
-  target2.mutable_field(1).as(3);
+  target2[0].as(2);
+  target2[1].as(3);
 
   BOOST_CHECK(m1ref == m2ref);
 
@@ -279,26 +279,26 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
   message_mref m1ref = m1.ref();
   message_mref m2ref = m2.ref();
 
-  m1ref.mutable_field(0).as(1);
+  m1ref[0].as(1);
 
-  nested_message_mref nested1(m1ref.mutable_field(1));
+  nested_message_mref nested1(m1ref[1]);
   BOOST_CHECK(!nested1.is_static());
   message_mref target1 = nested1.rebind(description[0]);
-  target1.mutable_field(0).as(2);
-  target1.mutable_field(1).as(3);
+  target1[0].as(2);
+  target1[1].as(3);
   
-  for (std::size_t i = 0; i < m1ref.fields_count(); ++i)
+  for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
   {
-    BOOST_CHECK_EQUAL(m1ref.const_field(i).instruction()->field_index(), i);
+    BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
   } 
 
 
-  m2ref.mutable_field(0).as(1);
+  m2ref[0].as(1);
 
-  nested_message_mref nested2(m2ref.mutable_field(1));
+  nested_message_mref nested2(m2ref[1]);
   message_mref target2 = nested2.rebind(description[0]);
-  target2.mutable_field(0).as(2);
-  target2.mutable_field(1).as(3);
+  target2[0].as(2);
+  target2[1].as(3);
 
   BOOST_CHECK(m1ref == m2ref);
 

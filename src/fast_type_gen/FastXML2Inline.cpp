@@ -129,7 +129,7 @@ bool FastXML2Inline::VisitEnterGroup (const XMLElement & /* element */,
   out_ << "\ninline " << cref_scope_.str() << name_attr << "_cref\n"
        << cref_scope_.str() << "get_" << name_attr << "() const\n"
        << "{\n"
-       << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>(this->const_field(" << index << "));\n"
+       << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>((*this)[" << index << "]);\n"
        << "}\n\n"
        << "inline\n"
        << cref_scope_.str() << name_attr << "_cref::"<< name_attr << "_cref(\n"
@@ -147,7 +147,7 @@ bool FastXML2Inline::VisitEnterGroup (const XMLElement & /* element */,
        << "inline " << mref_scope_.str() << name_attr << "_mref\n"
        << mref_scope_.str() << "set_" << name_attr << "() const\n"
        << "{\n"
-       << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>(this->mutable_field(" << index << "));\n"
+       << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
        << "}\n\n"
        << "inline\n"
        << mref_scope_.str() << name_attr << "_mref::"<< name_attr << "_mref(\n"
@@ -184,7 +184,7 @@ bool FastXML2Inline::VisitEnterSequence (const XMLElement & /* element */,
   out_ << "\ninline " << cref_scope_.str() << name_attr << "_cref\n"
        << cref_scope_.str() << "get_" << name_attr << "() const\n"
        << "{\n"
-       << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>(this->const_field(" << index << "));\n"
+       << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>((*this)[" << index << "]);\n"
        << "}\n\n"
        << "inline\n"
        << cref_scope_.str() << name_attr << "_element_cref::"<< name_attr << "_element_cref(\n"
@@ -196,7 +196,7 @@ bool FastXML2Inline::VisitEnterSequence (const XMLElement & /* element */,
        << "inline " << mref_scope_.str() << name_attr << "_mref\n"
        << mref_scope_.str() << "set_" << name_attr << "() const\n"
        << "{\n"
-       << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>(this->mutable_field(" << index << "));\n"
+       << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
        << "}\n\n"
        << "inline\n"
        << mref_scope_.str() << name_attr << "_element_mref::"<< name_attr << "_element_mref(\n"
@@ -233,7 +233,7 @@ bool FastXML2Inline::VisitEnterSimpleValue (const XMLElement & element,
        << "mfast::" << cpp_type << "_cref\n"
        << cref_scope_.str() << "get_" << name_attr << "() const\n"
        << "{\n"
-       << "  return static_cast<mfast::" << cpp_type << "_cref>(this->const_field("<< index << "));\n"
+       << "  return static_cast<mfast::" << cpp_type << "_cref>((*this)[" << index << "]);\n"
        << "}\n\n";
 
   if (is_mandatory_constant(element))
@@ -243,7 +243,7 @@ bool FastXML2Inline::VisitEnterSimpleValue (const XMLElement & element,
        << "mfast::"<< cpp_type << "_mref\n"
        << mref_scope_.str() << "set_" << name_attr << "() const\n"
        << "{\n"
-       << "  return static_cast<mfast::" << cpp_type << "_mref>(this->mutable_field("<< index << "));\n"
+       << "  return static_cast<mfast::" << cpp_type << "_mref>((*this)[" << index << "]);\n"
        << "}\n";
   return true;
 }
@@ -304,7 +304,7 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
          << qulified_name << "_cref\n"
          << cref_scope_.str() << "get_" << name_attr << "() const\n"
          << "{\n"
-         << "  return static_cast<" << qulified_name << "_cref>(this->const_field("<< index << "));\n"
+         << "  return static_cast<" << qulified_name << "_cref>((*this)[" << index << "]);\n"
          << "}\n\n";
 
 
@@ -312,7 +312,7 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
          << qulified_name << "_mref\n"
          << mref_scope_.str() << "set_" << name_attr << "() const\n"
          << "{\n"
-         << "  return static_cast<" << qulified_name << "_mref>(this->mutable_field("<< index << "));\n"
+         << "  return static_cast<" << qulified_name << "_mref>((*this)[" << index << "]);\n"
          << "}\n";
   }
   else {
@@ -321,7 +321,7 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
          << "mfast::nested_message_cref\n"
          << cref_scope_.str() << "get_nested_message" << index << "() const\n"
          << "{\n"
-         << "  return mfast::nested_message_cref(this->const_field("<< index << "));\n"
+         << "  return mfast::nested_message_cref((*this)[" << index << "]);\n"
          << "}\n\n";
 
 
@@ -329,7 +329,7 @@ bool FastXML2Inline::VisitTemplateRef(const XMLElement & element,
          << "mfast::nested_message_mref\n"
          << mref_scope_.str() << "set_nested_message" << index << "() const\n"
          << "{\n"
-         << "  return mfast::nested_message_mref(this->mutable_field("<< index << "));\n"
+         << "  return mfast::nested_message_mref((*this)[" << index << "]);\n"
          << "}\n";
   }
   return true;

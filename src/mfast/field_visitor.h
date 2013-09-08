@@ -48,8 +48,8 @@ class field_accessor_adaptor
 
     void visit(const aggregate_cref& ref)
     {
-      for (std::size_t i = 0; i < ref.fields_count(); ++i) {
-        field_cref r(ref.const_field(i));
+      for (std::size_t i = 0; i < ref.num_fields(); ++i) {
+        field_cref r(ref[i]);
         if (r.present() || FieldAccessor::visit_absent ) {
           r.instruction()->accept(*this, storage_ptr_of(r));
         }
@@ -155,8 +155,8 @@ class field_mutator_adaptor
 
     void visit(const aggregate_mref& ref)
     {
-      for (std::size_t i = 0; i < ref.fields_count(); ++i) {
-        field_mref r(ref.mutable_field(i));
+      for (std::size_t i = 0; i < ref.num_fields(); ++i) {
+        field_mref r(ref[i]);
         if (r.present() || FieldMutator::visit_absent ) {
           r.instruction()->accept(*this, storage_ptr_of(r));
         }

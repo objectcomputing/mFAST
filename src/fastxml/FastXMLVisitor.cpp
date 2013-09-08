@@ -41,7 +41,7 @@ bool FastXMLVisitor::is_mandatory_constant(const XMLElement & element)
 
 FastXMLVisitor::FastXMLVisitor()
 {
-  fields_count_.push_back(0);
+  num_fields_.push_back(0);
 }
 
 bool FastXMLVisitor::VisitEnterTemplates(const XMLElement & /* element */)
@@ -133,7 +133,7 @@ bool FastXMLVisitor::VisitEnter (const XMLElement & element, const XMLAttribute*
   std::string name_attr = get_optional_attr(element, "name", "");
 
   if (strcmp(element_name, "templateRef") == 0) {
-    return VisitTemplateRef(element, name_attr, fields_count_.back());
+    return VisitTemplateRef(element, name_attr, num_fields_.back());
   }
 
   if (name_attr.empty())
@@ -143,15 +143,15 @@ bool FastXMLVisitor::VisitEnter (const XMLElement & element, const XMLAttribute*
 
   if (strcmp(element_name, "template") == 0 ) {
     save_context(element);
-    result = VisitEnterTemplate(element, name_attr, fields_count_.back());
+    result = VisitEnterTemplate(element, name_attr, num_fields_.back());
   }
   else if (strcmp(element_name, "group") == 0 ) {
     save_context(element);
-    result = VisitEnterGroup(element, name_attr, fields_count_.back());
+    result = VisitEnterGroup(element, name_attr, num_fields_.back());
   }
   else if (strcmp(element_name, "sequence") == 0 ) {
     save_context(element);
-    result = VisitEnterSequence(element, name_attr, fields_count_.back());
+    result = VisitEnterSequence(element, name_attr, num_fields_.back());
   }
   else {
     int bits;
@@ -163,20 +163,20 @@ bool FastXMLVisitor::VisitEnter (const XMLElement & element, const XMLAttribute*
       }
       else if (bits != 32 && bits != 64)
         return false;
-      return VisitInteger(element,bits, name_attr, fields_count_.back());
+      return VisitInteger(element,bits, name_attr, num_fields_.back());
     }
     else if (strcmp(element_name, "decimal") == 0 ) {
-      return VisitDecimal(element, name_attr, fields_count_.back());
+      return VisitDecimal(element, name_attr, num_fields_.back());
     }
     else if (strcmp(element_name, "string") == 0 ) {
-      return VisitString(element, name_attr, fields_count_.back());
+      return VisitString(element, name_attr, num_fields_.back());
     }
     else if (strcmp(element_name, "byteVector") == 0 ) {
-      return VisitByteVector(element, name_attr, fields_count_.back());
+      return VisitByteVector(element, name_attr, num_fields_.back());
     }
     return true;
   }
-  fields_count_.push_back(0);
+  num_fields_.push_back(0);
   return result;
 }
 
@@ -188,13 +188,13 @@ bool FastXMLVisitor::VisitExit (const XMLElement & element)
   bool result = true;
 
   if (strcmp(element_name, "templates") == 0 ) {
-    return VisitExitTemplates(element,fields_count_.back());
+    return VisitExitTemplates(element,num_fields_.back());
   }
 
   std::string name_attr = get_optional_attr(element, "name", "");
 
   if (strcmp(element_name, "templateRef") == 0) {
-    fields_count_.back() += 1;
+    num_fields_.back() += 1;
     result = true;
   }
 
@@ -219,17 +219,17 @@ bool FastXMLVisitor::VisitExit (const XMLElement & element)
            strcmp(element_name, "string") == 0  ||
            strcmp(element_name, "byteVector") == 0 )
   {
-    fields_count_.back() += 1;
+    num_fields_.back() += 1;
     return true;
   }
   else {
     return true;
   }
 
-  std::size_t numFields = fields_count_.back();
-  fields_count_.pop_back();
-  result = (this->*member_ptr)(element, name_attr, numFields, fields_count_.back());
-  fields_count_.back() += 1;
+  std::size_t numFields = num_fields_.back();
+  num_fields_.pop_back();
+  result = (this->*member_ptr)(element, name_attr, numFields, num_fields_.back());
+  num_fields_.back() += 1;
   context_stack_.pop_back();
 
   return result;

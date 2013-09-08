@@ -630,15 +630,15 @@ BOOST_AUTO_TEST_CASE(group_field_test)
   {
     group_cref ref(&storage, &group_inst);
     BOOST_CHECK_EQUAL(ref.present(),         false);
-    BOOST_CHECK_EQUAL(ref.fields_count(),    2);
+    BOOST_CHECK_EQUAL(ref.num_fields(),    2);
 
     BOOST_CHECK_EQUAL(aggregate_cref(ref).subinstruction(0), &inst0);
     BOOST_CHECK_EQUAL(aggregate_cref(ref).subinstruction(1), &inst1);
 
-    field_cref f0( ref.const_field(0) );
+    field_cref f0( ref[0] );
     BOOST_CHECK(f0.absent());
 
-    field_cref f1( ref.const_field(1) );
+    field_cref f1( ref[1] );
     BOOST_CHECK(f1.absent());
 
 
@@ -652,14 +652,14 @@ BOOST_AUTO_TEST_CASE(group_field_test)
   {
     group_mref ref(&alloc, &storage, &group_inst);
     BOOST_CHECK_EQUAL(ref.present(),      false);
-    BOOST_CHECK_EQUAL(ref.fields_count(), 2);
+    BOOST_CHECK_EQUAL(ref.num_fields(), 2);
 
-    field_mref f0(ref.mutable_field(0) );
+    field_mref f0(ref[0] );
     BOOST_CHECK(f0.absent());
 
     BOOST_CHECK(ref.present());
 
-    field_mref f1( ref.mutable_field(1) );
+    field_mref f1( ref[1] );
     BOOST_CHECK(f1.absent());
 
 
@@ -735,7 +735,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
   {
     sequence_mref ref(&alloc, &storage, &sequence_inst);
     BOOST_CHECK_EQUAL(ref.present(),      false);
-    BOOST_CHECK_EQUAL(ref.fields_count(), 2);
+    BOOST_CHECK_EQUAL(ref.num_fields(), 2);
 
     ref.resize(2);
     BOOST_CHECK_EQUAL(ref.present(),      true);
@@ -750,10 +750,10 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
     sequence_element_cref e0cref(ref[0]);
 
 
-    field_mref e0f0(e0ref.mutable_field(0) );
+    field_mref e0f0(e0ref[0] );
     BOOST_CHECK(e0f0.absent());
 
-    field_mref e0f1( e0ref.mutable_field(1) );
+    field_mref e0f1( e0ref[1] );
     BOOST_CHECK(e0f1.absent());
 
     {
@@ -778,10 +778,10 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
     ref.resize(4);
     BOOST_CHECK_EQUAL(ref.size(), 4);
     {
-      field_mref e3f1(ref[3].mutable_field(1) );
+      field_mref e3f1(ref[3][1] );
       BOOST_CHECK(e3f1.absent());
 
-      field_cref const_e3f1(ref[3].const_field(1) );
+      field_cref const_e3f1(ref[3][1] );
       BOOST_CHECK(const_e3f1.absent());
 
       unicode_string_mref str(e3f1);
@@ -876,7 +876,7 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
   {
     sequence_mref ref(&alloc, &storage, &sequence_inst);
     BOOST_CHECK_EQUAL(ref.present(),                 false);
-    BOOST_CHECK_EQUAL(ref.fields_count(),            1);
+    BOOST_CHECK_EQUAL(ref.num_fields(),            1);
 
     ref.reserve(2);
     BOOST_CHECK_EQUAL(ref.size(),                    0);
