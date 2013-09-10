@@ -28,9 +28,9 @@ inline std::size_t align(std::size_t n, std::size_t x)
   return (n + y) & ~y; 
 }
 
-void arena_allocator::free_list(memory_chunk* head)
+void arena_allocator::free_list(memory_chunk_base* head)
 {
-  memory_chunk* tmp;
+  memory_chunk_base* tmp;
   while ( head ) {
     tmp = head->next_;
     free(head);
@@ -55,19 +55,19 @@ void* arena_allocator::allocate(std::size_t n)
     if (free_list_head_ && free_list_head_->size() >= n ) {
       // The head of free_list is big enough,
       // move the head of free_listto become the head of current_list
-      memory_chunk* tmp = free_list_head_;
-      free_list_head_ = free_list_head_->next_;
+      memory_chunk_base* tmp = free_list_head_;
+      free_list_head_ = static_cast<memory_chunk*>(free_list_head_->next_);
 
       tmp->next_ = current_list_head_;
-      current_list_head_ = tmp;
+      current_list_head_ = static_cast<memory_chunk*>(tmp);
     }
     else {
       if (current_list_head_->size()  >= 64) {
         // if current block is have plenty of free space, move it to the free_list
-        memory_chunk* tmp_current_list_head_head = current_list_head_->next_;
+        memory_chunk_base* tmp_current_list_head_head = current_list_head_->next_;
         current_list_head_->next_ = free_list_head_;
-        free_list_head_ = current_list_head_;
-        current_list_head_ = tmp_current_list_head_head;
+        free_list_head_ = static_cast<memory_chunk*>(current_list_head_);
+        current_list_head_ = static_cast<memory_chunk*>(tmp_current_list_head_head);
       }
       // allocate new memory chunk from the system
       std::size_t new_chunk_size = align(n+ sizeof(memory_chunk) - sizeof(uint64_t), // minimum size for the new block
@@ -99,13 +99,13 @@ bool arena_allocator::reset()
   // first, find the tail of current_list
   memory_chunk* tmp = current_list_head_;
   while (tmp->next_ != 0) {
-    tmp = tmp->next_;
+    tmp = static_cast<memory_chunk*>(tmp->next_);
     tmp->start_ = reinterpret_cast<char*>(tmp->user_memory);
   }
   // append the free_list_head_ to the tail of current_list
   tmp->next_ = free_list_head_;
   // make current_list_head_->next_ to become the new head of free_list
-  free_list_head_ = current_list_head_->next_;
+  free_list_head_ = static_cast<memory_chunk*>(current_list_head_->next_);
 
   // only keeps the head of current_list_head_ list, the reset of the current_list moves to the free_list
   current_list_head_->next_ = 0;

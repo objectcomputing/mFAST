@@ -45,28 +45,37 @@ public:
 
 
 private:
-
-  struct memory_chunk {
-    memory_chunk* next_;
+  
+  struct memory_chunk_base {
+    memory_chunk_base* next_;
     char* end_;
     char* start_;
     uint64_t user_memory[1];
+  };
+  
+  // If we combine memory_chunk and memory_chunk_base, some older GCC would
+  // complain when offsetof() is used because memory_chunk is not POD type
+  // and it's impossible to disable the warning using pragma; therefore
+  // I decide to separate them into two.å
 
+  struct memory_chunk 
+    : memory_chunk_base 
+  {
+ 
     memory_chunk(std::size_t size, memory_chunk* next)
-      : next_(next)
-      , end_ (reinterpret_cast<char*>(this) + size)
-      , start_(reinterpret_cast<char*>(user_memory))
     {
+      next_ = next;
+      end_ = reinterpret_cast<char*>(this) + size;
+      start_ = reinterpret_cast<char*>(user_memory);
       assert(size % sizeof(uint64_t) == 0);
     }
 
     std::size_t size() const {
       return end_ - start_;
     }
-
   };
 
-  void free_list(memory_chunk* list);
+  void free_list(memory_chunk_base* list);
 
   // We maintian two singlely linked list of memory chunks : current_list and free_list.
   // The head of current_list is where new smaller memory blocks are allocated from. The
@@ -79,9 +88,8 @@ private:
 public:
   enum {
     default_chunk_size=4096,
-    chunk_user_size = default_chunk_size - offsetof(struct memory_chunk, user_memory)
+    chunk_user_size = default_chunk_size - offsetof(struct memory_chunk_base, user_memory)
   };
-  
 };
 
 inline
