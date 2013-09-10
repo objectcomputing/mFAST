@@ -851,7 +851,7 @@ class MFAST_EXPORT sequence_field_instruction
                                 typeref_ns)
       , sequence_length_instruction_(sequence_length_instruction)
     {
-      field_type_ = field_type_template;
+      field_type_ = field_type_sequence;
       has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
     }
 
