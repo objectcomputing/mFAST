@@ -57,6 +57,9 @@ class FastXML2Header
     virtual bool VisitDecimal (const XMLElement & element, const std::string& name_attr, std::size_t index);
     virtual bool VisitByteVector (const XMLElement & element, const std::string& name_attr, std::size_t index);
     virtual bool VisitTemplateRef(const XMLElement & element, const std::string& name_attr, std::size_t index);
+    
+    virtual bool VisitEnterDefine(const XMLElement & /* element */, const std::string& /* name_attr */);
+    virtual bool VisitExitDefine(const XMLElement & /* element */, const std::string& /* name_attr */);
 
   private:
     void restore_scope(const std::string& name_attr);
@@ -72,6 +75,7 @@ class FastXML2Header
     ind_stream header_mref_;
     std::stringstream cref_scope_;
     templates_registry_t& registry_;
+    std::string defined_name_;
 };
 
 

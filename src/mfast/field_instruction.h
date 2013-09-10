@@ -196,7 +196,7 @@ class MFAST_EXPORT field_instruction
 
     uint16_t field_index_;
     uint16_t operator_id_ : 3;
-    uint16_t is_array_ :1;
+    uint16_t is_array_ : 1;
     uint16_t optional_flag_ : 1;
     uint16_t nullable_flag_ : 1;
     uint16_t has_pmap_bit_ : 1;
@@ -666,6 +666,7 @@ class MFAST_EXPORT byte_vector_field_instruction
     {
       return length_ns_;
     }
+
   protected:
     uint32_t length_id_;
     const char* length_name_;
@@ -824,8 +825,7 @@ class group_instruction_ex
 };
 
 class MFAST_EXPORT sequence_field_instruction
-  : public field_instruction
-  , public aggregate_instruction_base
+  : public group_field_instruction
 {
   public:
     sequence_field_instruction(uint16_t                  field_index,
@@ -839,19 +839,19 @@ class MFAST_EXPORT sequence_field_instruction
                                uint32_field_instruction* sequence_length_instruction,
                                const char*               typeref_name="",
                                const char*               typeref_ns="")
-      : field_instruction(field_index,
-                          operator_constant,
-                          field_type_sequence,
-                          optional,
-                          id,
-                          name, ns)
-      , aggregate_instruction_base(dictionary,
-                                   subinstructions,
-                                   subinstructions_count,
-                                   typeref_name,
-                                   typeref_ns)
+      : group_field_instruction(field_index,
+                                optional,
+                                id,
+                                name,
+                                ns,
+                                dictionary,
+                                subinstructions,
+                                subinstructions_count,
+                                typeref_name,
+                                typeref_ns)
       , sequence_length_instruction_(sequence_length_instruction)
     {
+      field_type_ = field_type_template;
       has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
     }
 

@@ -109,6 +109,16 @@ bool FastXMLVisitor::VisitByteVector(const XMLElement & /* element */, const std
   return true;
 }
 
+bool FastXMLVisitor::VisitEnterDefine(const XMLElement & /* element */, const std::string& /* name_attr */)
+{
+  return true;
+}
+
+bool FastXMLVisitor::VisitExitDefine(const XMLElement & /* element */, const std::string& /* name_attr */)
+{
+  return true;
+}
+
 void FastXMLVisitor::save_context(const XMLElement & element)
 {
   context_stack_.push_back(context_stack_.back());
@@ -136,9 +146,6 @@ bool FastXMLVisitor::VisitEnter (const XMLElement & element, const XMLAttribute*
     return VisitTemplateRef(element, name_attr, num_fields_.back());
   }
 
-  if (name_attr.empty())
-    return true;
-
   bool result = true;
 
   if (strcmp(element_name, "template") == 0 ) {
@@ -152,6 +159,9 @@ bool FastXMLVisitor::VisitEnter (const XMLElement & element, const XMLAttribute*
   else if (strcmp(element_name, "sequence") == 0 ) {
     save_context(element);
     result = VisitEnterSequence(element, name_attr, num_fields_.back());
+  }
+  else if (strcmp(element_name, "define") == 0){
+    return VisitEnterDefine(element, name_attr);
   }
   else {
     int bits;
@@ -212,6 +222,9 @@ bool FastXMLVisitor::VisitExit (const XMLElement & element)
   }
   else if (strcmp(element_name, "sequence") == 0 ) {
     member_ptr = &FastXMLVisitor::VisitExitSequence;
+  }
+  else if (strcmp(element_name, "define") == 0){
+    return VisitExitDefine(element, name_attr);
   }
   else if (strncmp(element_name, "int",  3) == 0 ||
            strncmp(element_name, "uInt", 4) == 0 ||

@@ -48,7 +48,7 @@ class FastXMLVisitor
     void save_context(const XMLElement & element);
     const char* get_optional_attr(const XMLElement & element, const char* attr_name, const char* default_value) const;
     bool is_mandatory_constant(const XMLElement & element);
-
+    
   public:
     FastXMLVisitor();
     virtual bool VisitEnterTemplates(const XMLElement & /* element */);
@@ -64,7 +64,8 @@ class FastXMLVisitor
     virtual bool VisitDecimal(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t index);
     virtual bool VisitString(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t index);
     virtual bool VisitByteVector(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t index);
-
+    virtual bool VisitEnterDefine(const XMLElement & /* element */, const std::string& /* name_attr */);
+    virtual bool VisitExitDefine(const XMLElement & /* element */, const std::string& /* name_attr */);
 
     virtual bool  VisitEnter (const XMLElement & element, const XMLAttribute* attr);
     virtual bool  VisitExit (const XMLElement & element);

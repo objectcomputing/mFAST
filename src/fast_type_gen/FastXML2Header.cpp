@@ -199,15 +199,22 @@ bool FastXML2Header::VisitEnterGroup (const XMLElement & /* element */,
                                       const std::string& name_attr,
                                       std::size_t /* index */)
 {
+  std::string name = name_attr;
+  
+  if (name.empty()) {
+    name = defined_name_;
+  }
+  
   header_cref_ << "\n"
-               << indent << "typedef mfast::group_cref " << name_attr << "_cref_base;\n"
-               << indent << "class " << name_attr << "_cref\n"
-               << indent << "  : public " << name_attr << "_cref_base\n"
+               << indent << "typedef mfast::group_cref " << name << "_cref_base;\n"
+               << indent << "class " << name << "_cref\n"
+               << indent << "  : public " << name << "_cref_base\n"
                << indent << "{\n"
-               << indent << "  public:\n"
-               << indent << "    typedef mfast::group_instruction_ex<" << name_attr << "_cref> instruction_type;\n"
-               << indent << "    typedef const instruction_type* instruction_cptr;\n"
-               << indent << "    " << name_attr << "_cref(\n"
+               << indent << "  public:\n";
+
+ header_cref_  << indent << "    typedef mfast::group_instruction_ex<" << name_attr << "_cref> instruction_type;\n"
+               << indent << "    typedef const instruction_type* instruction_cptr;\n";
+ header_cref_  << indent << "    " << name_attr << "_cref(\n"
                << indent << "      const mfast::value_storage*   storage,\n"
                << indent << "      instruction_cptr              instruction);\n\n"
                << indent << "    explicit " << name_attr << "_cref(const mfast::field_cref& other);\n\n";
@@ -368,4 +375,16 @@ bool FastXML2Header::VisitTemplateRef(const XMLElement & element, const std::str
     header_mref_ << indent << "mfast::nested_message_mref set_nested_message" << index << "() const;\n";
   }
   return true;
+}
+
+bool FastXML2Header::VisitEnterDefine(const XMLElement & , const std::string& name_attr)
+{
+  defined_name_ = name_attr;
+  return true;
+}
+
+bool FastXML2Header::VisitExitDefine(const XMLElement & , const std::string& )
+{
+  defined_name_.clear();
+  return true;  
 }
