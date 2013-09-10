@@ -101,7 +101,7 @@ bool FastXML2Header::VisitExit( const XMLDocument& /*doc*/ )
   return out_.good();
 }
 
-bool FastXML2Header::VisitEnterTemplate (const XMLElement & element,
+bool FastXML2Header::VisitEnterTemplate (const XMLElement & /*element*/,
                                          const std::string& name_attr,
                                          std::size_t /* index */)
 {
@@ -110,14 +110,11 @@ bool FastXML2Header::VisitEnterTemplate (const XMLElement & element,
                << indent << "  : public mfast::message_cref\n"
                << indent << "{\n"
                << indent << "  public:\n"
-               << indent << "    enum {\n"
-               << indent << "      the_id = " << get_optional_attr(element, "id", "0") << "\n"
-               << indent << "    };\n"
                << indent << "    typedef mfast::template_instruction_ex<" << name_attr << "_cref> instruction_type;\n"
                << indent << "    typedef const instruction_type* instruction_cptr;\n"
                << indent << "    " << name_attr << "_cref(\n"
                << indent << "      const mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr            instruction=&the_instruction);\n\n"
+               << indent << "      instruction_cptr            instruction);\n\n"
                << indent << "    explicit " << name_attr << "_cref(const mfast::field_cref& other);\n\n";
 
   header_mref_ << "\n"
@@ -129,7 +126,7 @@ bool FastXML2Header::VisitEnterTemplate (const XMLElement & element,
                << indent << "    " << name_attr << "_mref(\n"
                << indent << "      mfast::allocator*     alloc,\n"
                << indent << "      mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr      instruction=&the_instruction);\n\n"
+               << indent << "      instruction_cptr      instruction);\n\n"
                << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
 
   cref_scope_ << name_attr << "_cref::";
@@ -148,7 +145,6 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
   header_mref_.dec_indent(2);
 
   header_cref_ << "\n"
-               << indent << "  static const instruction_type the_instruction;\n"
                << indent << "};\n\n";
   header_mref_ << indent << "};\n\n";
 
@@ -167,6 +163,9 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "    enum {\n"
       << "      the_id = " << get_optional_attr(element, "id", "0") << "\n"
       << "    };\n"
+      << "    typedef " << name_attr << "_cref cref_type;\n"
+      << "    typedef " << name_attr << "_mref mref_type;\n"
+      << "    typedef mfast::template_instruction_ex<" << name_attr << "_cref> instruction_type;\n\n"
       << "    " <<   name_attr << "(\n"
       << "      mfast::allocator* alloc=mfast::malloc_allocator::instance());\n"
       << "    " <<   name_attr << "(\n"
@@ -176,6 +175,7 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "    " <<  name_attr << "_cref cref() const;\n"
       << "    " <<  name_attr << "_mref ref();\n"
       << "    " <<  name_attr << "_mref mref();\n"
+      << "    static const instruction_type the_instruction;\n"
       << "  private:\n"
       << "    " << name_attr << "(const " << name_attr << "&);\n"
       << "    " << name_attr << "& operator = (const "  << name_attr << "&);\n"
@@ -200,30 +200,28 @@ bool FastXML2Header::VisitEnterGroup (const XMLElement & /* element */,
                                       std::size_t /* index */)
 {
   std::string name = name_attr;
-  
+
   if (name.empty()) {
     name = defined_name_;
   }
-  
-  header_cref_ << "\n"
-               << indent << "typedef mfast::group_cref " << name << "_cref_base;\n"
-               << indent << "class " << name << "_cref\n"
-               << indent << "  : public " << name << "_cref_base\n"
-               << indent << "{\n"
-               << indent << "  public:\n";
 
- header_cref_  << indent << "    typedef mfast::group_instruction_ex<" << name_attr << "_cref> instruction_type;\n"
-               << indent << "    typedef const instruction_type* instruction_cptr;\n";
- header_cref_  << indent << "    " << name_attr << "_cref(\n"
+  header_cref_ << "\n"
+               << indent << "class " << name << "_cref\n"
+               << indent << "  : public mfast::group_cref\n"
+               << indent << "{\n"
+               << indent << "  public:\n"
+               << indent << "    typedef mfast::group_field_instruction instruction_type;\n"
+               << indent << "    typedef const instruction_type* instruction_cptr;\n"
+               << indent << "    " << name << "_cref(\n"
                << indent << "      const mfast::value_storage*   storage,\n"
                << indent << "      instruction_cptr              instruction);\n\n"
-               << indent << "    explicit " << name_attr << "_cref(const mfast::field_cref& other);\n\n";
+               << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
 
 
   header_mref_ << "\n"
-               << indent << "typedef mfast::make_group_mref<" << cref_scope_.str() << name_attr << "_cref> " << name_attr << "_mref_base;\n"
-               << indent << "class " << name_attr << "_mref\n"
-               << indent << "  : public " << name_attr << "_mref_base\n"
+               << indent << "typedef mfast::make_group_mref<" << cref_scope_.str() << name << "_cref> " << name << "_mref_base;\n"
+               << indent << "class " << name << "_mref\n"
+               << indent << "  : public " << name << "_mref_base\n"
                << indent << "{\n"
                << indent << "  public:\n"
                << indent << "    " << name_attr << "_mref(\n"
@@ -232,7 +230,7 @@ bool FastXML2Header::VisitEnterGroup (const XMLElement & /* element */,
                << indent << "      instruction_cptr              instruction\n\n"
                << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
 
-  cref_scope_ << name_attr << "_cref::";
+  cref_scope_ << name << "_cref::";
   header_cref_.inc_indent(2);
   header_mref_.inc_indent(2);
   return true;
@@ -377,14 +375,14 @@ bool FastXML2Header::VisitTemplateRef(const XMLElement & element, const std::str
   return true;
 }
 
-bool FastXML2Header::VisitEnterDefine(const XMLElement & , const std::string& name_attr)
+bool FastXML2Header::VisitEnterDefine(const XMLElement &, const std::string& name_attr)
 {
   defined_name_ = name_attr;
   return true;
 }
 
-bool FastXML2Header::VisitExitDefine(const XMLElement & , const std::string& )
+bool FastXML2Header::VisitExitDefine(const XMLElement &, const std::string& )
 {
   defined_name_.clear();
-  return true;  
+  return true;
 }

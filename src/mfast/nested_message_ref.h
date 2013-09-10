@@ -107,11 +107,12 @@ class nested_message_mref
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
     
-    template <typename MESSAGE_MREF>
-    MESSAGE_MREF as() const
+    template <typename MESSAGE>
+    typename MESSAGE::mref_type as() const
     {
-      set_target_instruction(&MESSAGE_MREF::the_instruction, true);
-      return MESSAGE_MREF(alloc_, this->storage());
+      typedef typename MESSAGE::mref_type mref_type;
+      set_target_instruction(&MESSAGE::the_instruction, true);
+      return mref_type(alloc_, this->storage(), &MESSAGE::the_instruction);
     }
 
     message_mref rebind(const template_instruction* inst) const

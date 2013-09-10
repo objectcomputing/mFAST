@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   debug_allocator alloc;
   test1::SampleInfo info(&alloc);
   BOOST_CHECK_EQUAL((int)test1::SampleInfo::the_id,                                  1);
-  BOOST_CHECK_EQUAL(test1::SampleInfo_cref::the_instruction.id(),                    1);
-  BOOST_CHECK_EQUAL(test1::SampleInfo_cref::the_instruction.subinstructions_count(), 4);
+  BOOST_CHECK_EQUAL(test1::SampleInfo::the_instruction.id(),                    1);
+  BOOST_CHECK_EQUAL(test1::SampleInfo::the_instruction.subinstructions_count(), 4);
   test1::SampleInfo_cref info_cref = info.cref();
   
   BOOST_CHECK(equal_string(info_cref.get_BeginString(), "FIX4.4"));
@@ -81,12 +81,12 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
 
   test2::MDRefreshSample sample(&alloc);
   BOOST_CHECK_EQUAL((int)test2::MDRefreshSample::the_id,                                  2);
-  BOOST_CHECK_EQUAL(test2::MDRefreshSample_cref::the_instruction.id(),                    2);
-  BOOST_CHECK_EQUAL(test2::MDRefreshSample_cref::the_instruction.subinstructions_count(), 3);
+  BOOST_CHECK_EQUAL(test2::MDRefreshSample::the_instruction.id(),                    2);
+  BOOST_CHECK_EQUAL(test2::MDRefreshSample::the_instruction.subinstructions_count(), 3);
 
   test2::MDRefreshSample_cref sample_cref = sample.cref();
   test1::SampleInfo_cref si = sample_cref.get_SampleInfo();
-  BOOST_CHECK_EQUAL(si.instruction(),                      &test1::SampleInfo_cref::the_instruction);
+  BOOST_CHECK_EQUAL(si.instruction(),                      &test1::SampleInfo::the_instruction);
   BOOST_CHECK_EQUAL(si.instruction()->segment_pmap_size(), 2);
 
 
@@ -121,10 +121,10 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   BOOST_CHECK_EQUAL(mantissa_inst->field_operator(),                            mfast::operator_delta);
 
   mfast::nested_message_mref dynamic_template_mref =  sample.mref().set_nested_message2();
-  test1::SampleInfo_mref d2 = dynamic_template_mref.as<test1::SampleInfo_mref>();
+  test1::SampleInfo_mref d2 = dynamic_template_mref.as<test1::SampleInfo>();
 
-  BOOST_CHECK_EQUAL(sample.mref().get_nested_message2().target_instruction(), &test1::SampleInfo_cref::the_instruction);
-  BOOST_CHECK_EQUAL(d2.instruction(),                                         &test1::SampleInfo_cref::the_instruction);
+  BOOST_CHECK_EQUAL(sample.mref().get_nested_message2().target_instruction(), &test1::SampleInfo::the_instruction);
+  BOOST_CHECK_EQUAL(d2.instruction(),                                         &test1::SampleInfo::the_instruction);
   
 }
 

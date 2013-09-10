@@ -246,7 +246,7 @@ bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
   }
 
   out_ << "const " << name_attr << "_cref::instruction_type\n"
-       << name_attr << "_cref::the_instruction(\n"
+       << name_attr << "::the_instruction(\n"
        << "  " << get_optional_attr(element, "id", "0") << ", // id\n"
        << "  \"" << name_attr << "\", // name\n"
        << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
@@ -257,7 +257,7 @@ bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
        << "  " << reset << ", // reset\n";
 
 
-  template_instructions_ << "  &" << name_attr << "_cref::the_instruction,\n";
+  template_instructions_ << "  &" << name_attr << "::the_instruction,\n";
   return output_typeref(element);
 }
 
@@ -695,7 +695,7 @@ bool FastXML2Source::VisitTemplateRef(const XMLElement & element,
     out_ << "templateref_instruction\n"
          << "templateref" << index << "_instruction(\n"
          << "  " << index << ",\n"
-         << "  &" << cpp_namespace << name_attr << "_cref::the_instruction);\n\n";
+         << "  &" << cpp_namespace << name_attr << "::the_instruction);\n\n";
   }
   else {
     out_ << "templateref_instruction\n"
