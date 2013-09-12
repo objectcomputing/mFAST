@@ -132,9 +132,9 @@ struct MFAST_EXPORT sequence_mref_helper
 
 template <typename ElementType>
 class make_sequence_mref
-  : public make_field_mref<make_sequence_cref<typename ElementType::cref> >
+  : public make_field_mref<make_sequence_cref<typename ElementType::cref_type> >
 {
-  typedef make_field_mref<make_sequence_cref<typename ElementType::cref> > base_type;
+  typedef make_field_mref<make_sequence_cref<typename ElementType::cref_type> > base_type;
 
   public:
     typedef typename ElementType::instruction_cptr instruction_cptr;
@@ -227,7 +227,7 @@ template <typename ElementType>
 inline void
 make_sequence_mref<ElementType>::reserve(size_t n) const
 {
-  detail::sequence_mref_helper::reserve(this->instruction(), this->storage(), this->alloc_, n);
+  detail::sequence_mref_helper::reserve(static_cast<const sequence_field_instruction*>(this->instruction()), this->storage(), this->alloc_, n);
 }
 
 }

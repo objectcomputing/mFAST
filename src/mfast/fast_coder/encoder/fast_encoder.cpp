@@ -248,7 +248,7 @@ fast_encoder_impl::encode_segment(const message_cref& cref, fast_ostreambuf& sb,
 
   template_instruction* instruction = encode_segment_preemble(cref.id(), force_reset);
 
-  message_cref message(storage_ptr_of(cref), instruction);
+  aggregate_cref message(cref.field_storage(0), instruction);
   message.accept_accessor(*this);
 
   pmap.commit();

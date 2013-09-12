@@ -47,29 +47,32 @@ bool FastXML2Inline::VisitEnterTemplate (const XMLElement & /* element */,
 {
   out_ << "\ninline\n"
        << name_attr << "_cref::" << name_attr << "_cref(\n"
-       << "  const mfast::value_storage* storage,\n"
-       << "  instruction_cptr                 instruction)\n"
-       << "  : mfast::message_cref(storage, instruction)\n"
+       << "  const mfast::value_storage* storage_array,\n"
+       << "  instruction_cptr            instruction)\n"
+       << "  : mfast::aggregate_cref(storage_array, instruction)\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name_attr << "_cref::" << name_attr << "_cref(\n"
        << "  const mfast::field_cref& other)\n"
-       << "  : mfast::message_cref(other)\n"
+       << "  : mfast::aggregate_cref(mfast::detail::field_storage_helper::storage_ptr_of(other)->of_group.content_,\n"
+       << "                          static_cast<instruction_cptr>(other.instruction()))\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name_attr << "_mref::" << name_attr << "_mref(\n"
-       << "  mfast::allocator*       alloc,\n"
-       << "  mfast::value_storage* storage,\n"
-       << "  instruction_cptr           instruction)\n"
-       << "  : " << name_attr << "_mref_base(alloc, storage, instruction)\n"
+       << "  mfast::allocator*     alloc,\n"
+       << "  mfast::value_storage* storage_array,\n"
+       << "  instruction_cptr      instruction)\n"
+       << "  : " << name_attr << "_mref_base(alloc, storage_array, instruction)\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name_attr << "_mref::" << name_attr << "_mref(\n"
        << "  const mfast::field_mref_base& other)\n"
-       << "  : " << name_attr << "_mref_base(other)\n"
+       << "  : " << name_attr << "_mref_base(other.allocator(),\n"
+       << "                                  mfast::detail::field_storage_helper::storage_ptr_of(other)->of_group.content_,\n"
+       << "                                  static_cast<instruction_cptr>(other.instruction()))\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
@@ -84,27 +87,27 @@ bool FastXML2Inline::VisitEnterTemplate (const XMLElement & /* element */,
        << "  mfast::allocator* alloc)\n"
        << ": mfast::message_type(alloc, &the_instruction)\n"
        << "{\n"
-       << "  this->instruction()->copy_construct_value(my_storage_, this->data(), alloc, storage_for(other));\n"
+       << "  this->instruction()->copy_construct_value(my_storage_, this->data(), alloc, other.field_storage(0));\n"
        << "}\n\n"
-       << "inline "<< name_attr << "_cref\n"
+       << "inline "<< name_attr << "::cref_type\n"
        << name_attr << "::ref() const\n"
        << "{\n"
-       << "  return " << name_attr << "_cref(&my_storage_, static_cast<"<< name_attr << "_cref::instruction_cptr>(this->instruction()));\n"
+       << "  return " << name_attr << "::cref_type(my_storage_.of_group.content_, &the_instruction);\n"
        << "}\n\n"
-       << "inline "<< name_attr << "_cref\n"
+       << "inline "<< name_attr << "::cref_type\n"
        << name_attr << "::cref() const\n"
        << "{\n"
-       << "  return " << name_attr << "_cref(&my_storage_, static_cast<"<< name_attr << "_cref::instruction_cptr>(this->instruction()));\n"
+       << "  return " << name_attr << "::cref_type(my_storage_.of_group.content_, &the_instruction);\n"
        << "}\n\n"
-       << "inline "<< name_attr << "_mref\n"
+       << "inline "<< name_attr << "::mref_type\n"
        << name_attr << "::ref()\n"
        << "{\n"
-       << "  return " << name_attr << "_mref(alloc_, &my_storage_, static_cast<"<< name_attr << "_cref::instruction_cptr>(this->instruction()));\n"
+       << "  return " << name_attr << "::mref_type(alloc_, my_storage_.of_group.content_, &the_instruction);\n"
        << "}\n\n"
-       << "inline "<< name_attr << "_mref\n"
+       << "inline "<< name_attr << "::mref_type\n"
        << name_attr << "::mref()\n"
        << "{\n"
-       << "  return " << name_attr << "_mref(alloc_, &my_storage_, static_cast<"<< name_attr << "_cref::instruction_cptr>(this->instruction()));\n"
+       << "  return " << name_attr << "::mref_type(alloc_, my_storage_.of_group.content_, &the_instruction);\n"
        << "}\n\n";
 
   cref_scope_ << name_attr << "_cref::";
@@ -122,62 +125,71 @@ bool FastXML2Inline::VisitExitTemplate (const XMLElement & /* element */,
   return out_.good();
 }
 
-bool FastXML2Inline::VisitEnterGroup (const XMLElement & /* element */,
+bool FastXML2Inline::VisitEnterGroup (const XMLElement & element,
                                       const std::string& name_attr,
                                       std::size_t        index)
 {
+  
   out_ << "\ninline " << cref_scope_.str() << name_attr << "_cref\n"
        << cref_scope_.str() << "get_" << name_attr << "() const\n"
        << "{\n"
        << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>((*this)[" << index << "]);\n"
        << "}\n\n"
-       << "inline\n"
-       << cref_scope_.str() << name_attr << "_cref::"<< name_attr << "_cref(\n"
-       << "  const mfast::value_storage*   storage,\n"
-       << "  " << cref_scope_.str() << name_attr << "_cref::instruction_cptr instruction)\n"
-       << "  : mfast::group_cref(storage, instruction)\n"
-       << "{\n"
-       << "}\n\n"
-       << "inline\n"
-       << cref_scope_.str() << name_attr << "_cref::"<< name_attr << "_cref(\n"
-       << "  const mfast::field_cref& other)\n"
-       << "  : " << cref_scope_.str() << name_attr << "_cref_base(other)\n"
-       << "{\n"
-       << "}\n\n"
        << "inline " << mref_scope_.str() << name_attr << "_mref\n"
        << mref_scope_.str() << "set_" << name_attr << "() const\n"
        << "{\n"
        << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
-       << "}\n\n"
-       << "inline\n"
-       << mref_scope_.str() << name_attr << "_mref::"<< name_attr << "_mref(\n"
-       << "  mfast::allocator*               alloc,\n"
-       << "  mfast::value_storage*   storage,\n"
-       << "  " << mref_scope_.str() << name_attr << "_mref::instruction_cptr instruction)\n"
-       << "  : " << mref_scope_.str() << name_attr << "_mref_base(storage, instruction)\n"
-       << "{\n"
-       << "}\n"
-       << "inline\n"
-       << mref_scope_.str() << name_attr << "_mref::"<< name_attr << "_mref(\n"
-       << "  const mfast::field_mref_base& other)\n"
-       << "  : " << mref_scope_.str() << name_attr << "_mref_base(other)\n"
-       << "{\n"
-       << "}\n";
-  cref_scope_ << name_attr << "_cref::";
-  mref_scope_ << name_attr << "_mref::";
-  return true;
+       << "}\n\n";
+  
+  if (only_child_templateRef(element) == 0) {
+
+    out_ << "inline\n"
+         << cref_scope_.str() << name_attr << "_cref::"<< name_attr << "_cref(\n"
+         << "  const mfast::value_storage*   storage,\n"
+         << "  " << cref_scope_.str() << name_attr << "_cref::instruction_cptr instruction)\n"
+         << "  : mfast::group_cref(storage, instruction)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n"
+         << cref_scope_.str() << name_attr << "_cref::"<< name_attr << "_cref(\n"
+         << "  const mfast::field_cref& other)\n"
+         << "  : " << cref_scope_.str() << name_attr << "_cref_base(other)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n"
+         << mref_scope_.str() << name_attr << "_mref::"<< name_attr << "_mref(\n"
+         << "  mfast::allocator*      alloc,\n"
+         << "  mfast::value_storage*  storage,\n"
+         << "  " << mref_scope_.str() << name_attr << "_mref::instruction_cptr instruction)\n"
+         << "  : " << mref_scope_.str() << name_attr << "_mref_base(storage, instruction)\n"
+         << "{\n"
+         << "}\n"
+         << "inline\n"
+         << mref_scope_.str() << name_attr << "_mref::"<< name_attr << "_mref(\n"
+         << "  const mfast::field_mref_base& other)\n"
+         << "  : " << mref_scope_.str() << name_attr << "_mref_base(other)\n"
+         << "{\n"
+         << "}\n";
+    cref_scope_ << name_attr << "_cref::";
+    mref_scope_ << name_attr << "_mref::";
+    return true;
+  }
+
+  return false;
 }
 
-bool FastXML2Inline::VisitExitGroup (const XMLElement & /* element */,
+bool FastXML2Inline::VisitExitGroup (const XMLElement & element,
                                      const std::string& name_attr,
                                      std::size_t /* numFields */,
                                      std::size_t /* index */)
 {
-  restore_scope(name_attr);
+  if (only_child_templateRef(element) == 0) {
+    restore_scope(name_attr);
+  }
   return true;
 }
 
-bool FastXML2Inline::VisitEnterSequence (const XMLElement & /* element */,
+bool FastXML2Inline::VisitEnterSequence (const XMLElement & element,
                                          const std::string& name_attr,
                                          std::size_t        index)
 {
@@ -186,40 +198,47 @@ bool FastXML2Inline::VisitEnterSequence (const XMLElement & /* element */,
        << "{\n"
        << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>((*this)[" << index << "]);\n"
        << "}\n\n"
-       << "inline\n"
-       << cref_scope_.str() << name_attr << "_element_cref::"<< name_attr << "_element_cref(\n"
-       << "  const mfast::value_storage*   storage,\n"
-       << "  " << cref_scope_.str() << name_attr << "_element_cref::instruction_cptr instruction)\n"
-       << "  : " << cref_scope_.str() << name_attr << "_element_cref_base(storage, instruction)\n"
-       << "{\n"
-       << "}\n\n"
        << "inline " << mref_scope_.str() << name_attr << "_mref\n"
        << mref_scope_.str() << "set_" << name_attr << "() const\n"
        << "{\n"
        << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
-       << "}\n\n"
-       << "inline\n"
-       << mref_scope_.str() << name_attr << "_element_mref::"<< name_attr << "_element_mref(\n"
-       << "  mfast::allocator*               alloc,\n"
-       << "  mfast::value_storage*         storage,\n"
-       << "  " << mref_scope_.str() << name_attr << "_element_mref::instruction_cptr instruction)\n"
-       << "  : " << mref_scope_.str() << name_attr << "_element_mref_base(alloc,storage, instruction)\n"
-       << "{\n"
-       << "}\n";
-  cref_scope_ << name_attr << "_element_cref::";
-  mref_scope_ << name_attr << "_element_mref::";
+       << "}\n\n";
+  
+  if (only_child_templateRef(element) == 0) {
+    out_ << "inline\n"
+         << cref_scope_.str() << name_attr << "_element_cref::"<< name_attr << "_element_cref(\n"
+         << "  const mfast::value_storage*   storage,\n"
+         << "  " << cref_scope_.str() << name_attr << "_element_cref::instruction_cptr instruction)\n"
+         << "  : " << cref_scope_.str() << name_attr << "_element_cref_base(storage, instruction)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n"
+         << mref_scope_.str() << name_attr << "_element_mref::"<< name_attr << "_element_mref(\n"
+         << "  mfast::allocator*               alloc,\n"
+         << "  mfast::value_storage*         storage,\n"
+         << "  " << mref_scope_.str() << name_attr << "_element_mref::instruction_cptr instruction)\n"
+         << "  : " << mref_scope_.str() << name_attr << "_element_mref_base(alloc,storage, instruction)\n"
+         << "{\n"
+         << "}\n";
+    cref_scope_ << name_attr << "_element_cref::";
+    mref_scope_ << name_attr << "_element_mref::";
 
-  return true;
+    return true;
+  }
+
+  return false;
 }
 
-bool FastXML2Inline::VisitExitSequence (const XMLElement & /* element */,
+bool FastXML2Inline::VisitExitSequence (const XMLElement & element,
                                         const std::string& name_attr,
                                         std::size_t /* numFields */,
                                         std::size_t /* index */)
 {
-  std::string name(name_attr);
-  name += "_element";
-  restore_scope(name);
+  if (only_child_templateRef(element) == 0) {
+    std::string name(name_attr);
+    name += "_element";
+    restore_scope(name);
+  }
   return true;
 }
 

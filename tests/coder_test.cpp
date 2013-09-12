@@ -90,7 +90,7 @@ class fast_coding_test_case
 BOOST_AUTO_TEST_SUITE( test_encoder )
 
 
-BOOST_AUTO_TEST_CASE(simple_template_test)
+BOOST_AUTO_TEST_CASE(simple_coder_test)
 {
   fast_coding_test_case test_case (
     "<?xml version=\" 1.0 \"?>\n"
@@ -113,7 +113,6 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
 
   BOOST_CHECK(test_case.encoding(msg_ref,"\xB8\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
-
 }
 
 BOOST_AUTO_TEST_CASE(group_coder_test)
@@ -145,7 +144,7 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(sequence_test)
+BOOST_AUTO_TEST_CASE(sequence_coder_test)
 {
   fast_coding_test_case test_case (
     "<?xml version=\" 1.0 \"?>\n"
@@ -182,7 +181,7 @@ BOOST_AUTO_TEST_CASE(sequence_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(static_templateref_test)
+BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
 {
   fast_coding_test_case test_case (
     "<?xml version=\" 1.0 \"?>\n"
@@ -194,7 +193,9 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
     "</template>"
     "<template name=\"Test\" id=\"02\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy/></uInt32>\n"
-    "<templateRef name=\"Nested\" />"
+    // "<group name=\"nested\">"
+    "  <templateRef name=\"Nested\" />"
+    // "</group>"
     "</template>\n"
     "</templates>\n");
 
@@ -206,10 +207,9 @@ BOOST_AUTO_TEST_CASE(static_templateref_test)
 
   msg_ref[0].as(1);
   
-  nested_message_mref nested(msg_ref[1]);
-  BOOST_CHECK(nested.is_static());
-
-  message_mref target(msg_ref[1]);
+  aggregate_mref target(msg_ref[1]);
+  BOOST_CHECK_EQUAL(target.present(), true);
+  
   target[0].as(2);
   target[1].as(3);
                                  // pmap | template id | field1 | field2 | field 3 |
@@ -231,7 +231,9 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
     "</template>"
     "<template name=\"Test\" id=\"02\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy/></uInt32>\n"
-    "<templateRef/>"
+    "<group name=\"nested\">"
+    "  <templateRef/>"
+    "</group>"
     "</template>\n"
     "</templates>\n");
 
@@ -241,7 +243,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
 
 
   msg_ref[0].as(1);
-  nested_message_mref nested(msg_ref[1]);
+  nested_message_mref nested(static_cast<group_mref>(msg_ref[1])[0]);
   BOOST_CHECK(!nested.is_static());
 
   message_mref target = nested.rebind(test_case.template_with_id(1));
@@ -293,7 +295,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
   
 }
 
-BOOST_AUTO_TEST_CASE(auto_reset_test)
+BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
 {
   fast_coding_test_case test_case (
     "<?xml version=\" 1.0 \"?>\n"

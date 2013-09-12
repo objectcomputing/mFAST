@@ -107,26 +107,24 @@ bool FastXML2Header::VisitEnterTemplate (const XMLElement & /*element*/,
 {
   header_cref_ << "\n"
                << indent << "class " << name_attr << "_cref\n"
-               << indent << "  : public mfast::message_cref\n"
+               << indent << "  : public mfast::aggregate_cref\n"
                << indent << "{\n"
                << indent << "  public:\n"
-               << indent << "    typedef mfast::template_instruction_ex<" << name_attr << "_cref> instruction_type;\n"
-               << indent << "    typedef const instruction_type* instruction_cptr;\n"
                << indent << "    " << name_attr << "_cref(\n"
-               << indent << "      const mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr            instruction);\n\n"
+               << indent << "      const mfast::value_storage*           storage,\n"
+               << indent << "      const mfast::group_field_instruction* instruction);\n\n"
                << indent << "    explicit " << name_attr << "_cref(const mfast::field_cref& other);\n\n";
 
   header_mref_ << "\n"
-               << indent << "typedef mfast::make_message_mref<" << name_attr << "_cref> " << name_attr << "_mref_base;\n"
+               << indent << "typedef mfast::make_aggregate_mref<" << name_attr << "_cref> " << name_attr << "_mref_base;\n"
                << indent << "class " << name_attr << "_mref\n"
                << indent << "  : public " << name_attr << "_mref_base\n"
                << indent << "{\n"
                << indent << "  public:\n"
                << indent << "    " << name_attr << "_mref(\n"
-               << indent << "      mfast::allocator*     alloc,\n"
-               << indent << "      mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr      instruction);\n\n"
+               << indent << "      mfast::allocator*                     alloc,\n"
+               << indent << "      mfast::value_storage*                 storage,\n"
+               << indent << "      const mfast::group_field_instruction* instruction);\n\n"
                << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
 
   cref_scope_ << name_attr << "_cref::";
@@ -163,18 +161,18 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "    enum {\n"
       << "      the_id = " << get_optional_attr(element, "id", "0") << "\n"
       << "    };\n"
-      << "    typedef " << name_attr << "_cref cref_type;\n"
-      << "    typedef " << name_attr << "_mref mref_type;\n"
       << "    typedef mfast::template_instruction_ex<" << name_attr << "_cref> instruction_type;\n\n"
+      << "    typedef mfast::make_message_cref<" << name_attr << "_cref, instruction_type> cref_type;\n"
+      << "    typedef mfast::make_message_mref<" << name_attr << "_mref, instruction_type> mref_type;\n"
       << "    " <<   name_attr << "(\n"
       << "      mfast::allocator* alloc=mfast::malloc_allocator::instance());\n"
       << "    " <<   name_attr << "(\n"
       << "      const " <<  name_attr << "_cref& other,\n"
       << "      mfast::allocator* alloc=mfast::malloc_allocator::instance());\n"
-      << "    " <<  name_attr << "_cref ref() const;\n"
-      << "    " <<  name_attr << "_cref cref() const;\n"
-      << "    " <<  name_attr << "_mref ref();\n"
-      << "    " <<  name_attr << "_mref mref();\n"
+      << "    cref_type ref() const;\n"
+      << "    cref_type cref() const;\n"
+      << "    mref_type ref();\n"
+      << "    mref_type mref();\n"
       << "    static const instruction_type the_instruction;\n"
       << "  private:\n"
       << "    " << name_attr << "(const " << name_attr << "&);\n"
@@ -195,116 +193,165 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
   return out_.good();
 }
 
-bool FastXML2Header::VisitEnterGroup (const XMLElement & /* element */,
+bool FastXML2Header::VisitEnterGroup (const XMLElement & element,
                                       const std::string& name_attr,
                                       std::size_t /* index */)
 {
-  std::string name = name_attr;
+  if (only_child_templateRef(element) == 0)
+  {
+    std::string name = name_attr;
 
-  if (name.empty()) {
-    name = defined_name_;
+    header_cref_ << "\n"
+                 << indent << "class " << name << "_cref\n"
+                 << indent << "  : public mfast::group_cref\n"
+                 << indent << "{\n"
+                 << indent << "  public:\n"
+                 << indent << "    typedef mfast::group_field_instruction instruction_type;\n"
+                 << indent << "    typedef const instruction_type* instruction_cptr;\n"
+                 << indent << "    " << name << "_cref(\n"
+                 << indent << "      const mfast::value_storage*   storage,\n"
+                 << indent << "      instruction_cptr              instruction);\n\n"
+                 << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
+
+
+    header_mref_ << "\n"
+                 << indent << "typedef mfast::make_group_mref<" << cref_scope_.str() << name << "_cref> " << name << "_mref_base;\n"
+                 << indent << "class " << name << "_mref\n"
+                 << indent << "  : public " << name << "_mref_base\n"
+                 << indent << "{\n"
+                 << indent << "  public:\n"
+                 << indent << "    " << name_attr << "_mref(\n"
+                 << indent << "      mfast::allocator*             alloc,\n"
+                 << indent << "      mfast::value_storage*         storage,\n"
+                 << indent << "      instruction_cptr              instruction\n\n"
+                 << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
+
+    cref_scope_ << name << "_cref::";
+    header_cref_.inc_indent(2);
+    header_mref_.inc_indent(2);
+    return true;
   }
-
-  header_cref_ << "\n"
-               << indent << "class " << name << "_cref\n"
-               << indent << "  : public mfast::group_cref\n"
-               << indent << "{\n"
-               << indent << "  public:\n"
-               << indent << "    typedef mfast::group_field_instruction instruction_type;\n"
-               << indent << "    typedef const instruction_type* instruction_cptr;\n"
-               << indent << "    " << name << "_cref(\n"
-               << indent << "      const mfast::value_storage*   storage,\n"
-               << indent << "      instruction_cptr              instruction);\n\n"
-               << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
-
-
-  header_mref_ << "\n"
-               << indent << "typedef mfast::make_group_mref<" << cref_scope_.str() << name << "_cref> " << name << "_mref_base;\n"
-               << indent << "class " << name << "_mref\n"
-               << indent << "  : public " << name << "_mref_base\n"
-               << indent << "{\n"
-               << indent << "  public:\n"
-               << indent << "    " << name_attr << "_mref(\n"
-               << indent << "      mfast::allocator*             alloc,\n"
-               << indent << "      mfast::value_storage*         storage,\n"
-               << indent << "      instruction_cptr              instruction\n\n"
-               << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
-
-  cref_scope_ << name << "_cref::";
-  header_cref_.inc_indent(2);
-  header_mref_.inc_indent(2);
-  return true;
+  return false;
 }
 
-bool FastXML2Header::VisitExitGroup (const XMLElement   & /* element */,
+bool FastXML2Header::VisitExitGroup (const XMLElement & element,
                                      const std::string& name_attr,
                                      std::size_t /* numFields */,
                                      std::size_t /* index */)
 {
-  header_cref_.dec_indent(2);
-  header_mref_.dec_indent(2);
+  const XMLElement* templateRef_elem = only_child_templateRef(element);
+  if (templateRef_elem == 0) {
+    header_cref_.dec_indent(2);
+    header_mref_.dec_indent(2);
 
-  header_cref_ << indent << "};\n\n"
-               << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
-  header_mref_ << indent << "};\n\n"
-               << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
+    header_cref_ << indent << "};\n\n";
+    header_cref_ << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
 
-  restore_scope(name_attr);
+    header_mref_ << indent << "};\n\n";
+    header_mref_ << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
+
+    restore_scope(name_attr);
+  }
+  else {
+    const char* templateRef_name = templateRef_elem->Attribute("name", 0);
+    std::string qulified_name = "mfast::group";
+    if (templateRef_name) {
+      std::string ns = get_optional_attr(*templateRef_elem, "ns", current_context().ns_.c_str());
+      templates_registry_t::iterator itr = registry_.find(ns + "||" + templateRef_name);
+      qulified_name = templateRef_name;
+      if (itr != registry_.end()) {
+        qulified_name = itr->second + "::" + templateRef_name;
+      }
+    }
+
+    header_cref_ << indent << "typedef " << qulified_name << "_cref " << name_attr << "_cref;\n"
+                 << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
+    header_mref_ << indent << "typedef " << qulified_name << "_mref " << name_attr << "_mref;\n"
+                 << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
+  }
   return true;
 }
 
-bool FastXML2Header::VisitEnterSequence (const XMLElement   & /* element */,
+bool FastXML2Header::VisitEnterSequence (const XMLElement & element,
                                          const std::string& name_attr,
                                          std::size_t /* index */)
 {
-  std::string name = name_attr + "_element";
-  header_cref_ << "\n"
-               << indent << "typedef mfast::sequence_element_cref " << name << "_cref_base;\n"
-               << indent << "class " << name << "_cref\n"
-               << indent << "  : public " << name << "_cref_base\n"
-               << indent << "{\n"
-               << indent << "  public:\n"
-               << indent << "    typedef mfast::sequence_instruction_ex<" << name << "_cref> instruction_type;\n"
-               << indent << "    typedef const instruction_type* instruction_cptr;\n"
-               << indent << "    " << name << "_cref(\n"
-               << indent << "      const mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr            instruction);\n\n";
+  if (only_child_templateRef(element) == 0)
+  {
+    std::string name = name_attr + "_element";
+    header_cref_ << "\n"
+                 << indent << "typedef mfast::sequence_element_cref " << name << "_cref_base;\n"
+                 << indent << "class " << name << "_cref\n"
+                 << indent << "  : public " << name << "_cref_base\n"
+                 << indent << "{\n"
+                 << indent << "  public:\n"
+                 << indent << "    typedef mfast::sequence_instruction_ex<" << name << "_cref> instruction_type;\n"
+                 << indent << "    typedef const instruction_type* instruction_cptr;\n"
+                 << indent << "    " << name << "_cref(\n"
+                 << indent << "      const mfast::value_storage* storage,\n"
+                 << indent << "      instruction_cptr            instruction);\n\n";
 
-  header_mref_ << "\n"
-               << indent << "typedef mfast::make_aggregate_mref<" << cref_scope_.str() << name << "_cref> " << name << "_mref_base;\n"
-               << indent << "class " << name << "_mref\n"
-               << indent << "  : public " << name << "_mref_base\n"
-               << indent << "{\n"
-               << indent << "  public:\n"
-               << indent << "    " << name << "_mref(\n"
-               << indent << "      mfast::allocator*     alloc,\n"
-               << indent << "      mfast::value_storage* storage,\n"
-               << indent << "      instruction_cptr      instruction);\n\n";
+    header_mref_ << "\n"
+                 << indent << "typedef mfast::make_aggregate_mref<" << cref_scope_.str() << name << "_cref> " << name << "_mref_base;\n"
+                 << indent << "class " << name << "_mref\n"
+                 << indent << "  : public " << name << "_mref_base\n"
+                 << indent << "{\n"
+                 << indent << "  public:\n"
+                 << indent << "    " << name << "_mref(\n"
+                 << indent << "      mfast::allocator*     alloc,\n"
+                 << indent << "      mfast::value_storage* storage,\n"
+                 << indent << "      instruction_cptr      instruction);\n\n";
 
 
-  cref_scope_ << name_attr << "_cref::";
-  header_cref_.inc_indent(2);
-  header_mref_.inc_indent(2);
-  return true;
+    cref_scope_ << name_attr << "_cref::";
+    header_cref_.inc_indent(2);
+    header_mref_.inc_indent(2);
+    return true;
+  }
+  return false;
 }
 
-bool FastXML2Header::VisitExitSequence (const XMLElement & /* element */,
+bool FastXML2Header::VisitExitSequence (const XMLElement & element,
                                         const std::string& name_attr,
                                         std::size_t /* numFields */,
                                         std::size_t /* index */)
 {
-  header_cref_.dec_indent(2);
-  header_mref_.dec_indent(2);
+  const XMLElement* templateRef_elem = only_child_templateRef(element);
+  if (templateRef_elem == 0) {
+    header_cref_.dec_indent(2);
+    header_mref_.dec_indent(2);
 
-  header_cref_ << indent << "};\n\n"
-               << indent << "typedef mfast::make_sequence_cref<" << name_attr << "_element_cref> " << name_attr << "_cref;\n"
-               << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
+    header_cref_ << indent << "};\n\n"
+                 << indent << "typedef mfast::make_sequence_cref<" << name_attr << "_element_cref> " << name_attr << "_cref;\n"
+                 << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
 
-  header_mref_ << indent << "};\n\n"
-               << indent << "typedef mfast::make_sequence_mref<" << name_attr << "_element_mref> " << name_attr << "_mref;\n"
-               << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
+    header_mref_ << indent << "};\n\n"
+                 << indent << "typedef mfast::make_sequence_mref<" << name_attr << "_element_mref> " << name_attr << "_mref;\n"
+                 << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
 
-  restore_scope(name_attr);
+    restore_scope(name_attr);
+  }
+  else {
+    const char* templateRef_name = templateRef_elem->Attribute("name", 0);
+    if (templateRef_name) {
+      std::string ns = get_optional_attr(*templateRef_elem, "ns", current_context().ns_.c_str());
+      templates_registry_t::iterator itr = registry_.find(ns + "||" + templateRef_name);
+      std::string qulified_name = templateRef_name;
+      if (itr != registry_.end()) {
+        qulified_name = itr->second + "::" + templateRef_name;
+      }
+
+      header_cref_ << indent << "typedef mfast::make_sequence_cref<" << qulified_name << "_cref> " << name_attr << "_cref;\n";
+      header_mref_ << indent << "typedef mfast::make_sequence_mref<" << qulified_name << "_mref> " << name_attr << "_mref;\n";
+    }
+    else {
+      header_cref_ << indent << "typedef mfast::sequence_cref " << name_attr << "_cref;\n";
+      header_mref_ << indent << "typedef mfast::sequence_mref " << name_attr << "_mref;\n";
+    }
+
+    header_cref_ << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
+    header_mref_ << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
+  }
   return true;
 }
 

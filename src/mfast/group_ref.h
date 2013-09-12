@@ -137,7 +137,7 @@ class make_group_mref
   private:
     make_group_mref& operator= (const make_group_mref&);
     friend class detail::codec_helper;
-    void ensure_valid() const;
+    // void ensure_valid() const;
 };
 
 typedef make_group_mref<group_cref> group_mref;
@@ -185,16 +185,16 @@ make_group_mref<ConstGroupRef>::operator[](size_t index)  const
   return aggregate_mref(*this)[index];
 }
 
-template <typename ConstGroupRef>
-inline void
-make_group_mref<ConstGroupRef>::ensure_valid() const
-{
-  // To improve efficiency during decoding, when the top level message is resetted,
-  // all subfields' storage are zero-ed instead of properly initialized. Upon the
-  // encoder visit this field, we need to check if the memory for the subfields of this
-  // group is allocated. If not, we need to allocate the memory for the subfields.
-  this->instruction()->ensure_valid_storage(const_cast<value_storage&>(*this->storage_), this->alloc_);
-}
+// template <typename ConstGroupRef>
+// inline void
+// make_group_mref<ConstGroupRef>::ensure_valid() const
+// {
+//   // To improve efficiency during decoding, when the top level message is resetted,
+//   // all subfields' storage are zero-ed instead of properly initialized. Upon the
+//   // encoder visit this field, we need to check if the memory for the subfields of this
+//   // group is allocated. If not, we need to allocate the memory for the subfields.
+//   this->instruction()->ensure_valid_storage(const_cast<value_storage&>(*this->storage_), this->alloc_);
+// }
 
 template <typename ConstGroupRef>
 inline

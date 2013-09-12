@@ -53,7 +53,6 @@ class field_storage_helper
 
 
 class field_cref;
-class message_cref;
 
 class field_cref
 {

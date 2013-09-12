@@ -111,7 +111,7 @@ void fast_decoder_impl::reset_messages()
   if (message_alloc_->reset()) {
     message_map_t::iterator itr;
     for (itr = template_messages_.begin(); itr!= template_messages_.end(); ++itr) {
-      detail::codec_helper::reset(itr->second.ref());
+      itr->second.reset();
     }
   }
 }
@@ -172,7 +172,6 @@ fast_decoder_impl::visit(group_mref& mref, int)
     decode_pmap(state);
     debug_ << "        " << mref.name() << " has group pmap -> " << current_pmap() << "\n";
   }
-  detail::codec_helper::ensure_valid(mref);
 
   mref.accept_mutator(*this);
 
@@ -230,7 +229,6 @@ fast_decoder_impl::visit(nested_message_mref& mref, int)
   message_type* saved_active_message = active_message_;
 
   if (mref.is_static()) {
-    detail::codec_helper::ensure_valid(mref.target());
     debug_ << "decoding template " << mref.name()  << " ...\n";
   }
   else {
@@ -309,7 +307,7 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
   // because after the accept_mutator(), the active_message_
   // may change because of the decoding of dynamic template reference
   message_type* message = active_message_;
-  detail::codec_helper::ensure_valid(message->ref());
+  message->ensure_valid();
   message->ref().accept_mutator(*this);
   return message;
 }

@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
   }
   
   aggregate_mref aggregate1(nested1);
-  BOOST_CHECK_EQUAL(aggregate1.instruction(), static_cast<const aggregate_instruction_base*>(target1.instruction()));
+  BOOST_CHECK_EQUAL(aggregate1.instruction(), target1.instruction());
 
   m2ref[0].as(1);
   nested_message_mref nested2(m2ref[1]);

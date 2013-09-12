@@ -35,12 +35,12 @@ class FastXML2Source
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
 #endif
-    
+
     /// Visit a document.
     virtual bool VisitEnter( const XMLDocument& /*doc*/ );
     /// Visit a document.
     virtual bool VisitExit( const XMLDocument& /*doc*/ );
-    
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -48,7 +48,7 @@ class FastXML2Source
     void add_to_instruction_list(const std::string & name_attr);
 
     virtual bool  VisitExitTemplates (const XMLElement & element,
-                                     std::size_t        numFields);
+                                      std::size_t        numFields);
 
     virtual bool  VisitEnterTemplate (const XMLElement & element,
                                       const std::string& name_attr,
@@ -77,13 +77,14 @@ class FastXML2Source
     virtual bool VisitString (const XMLElement & element, const std::string& name_attr, std::size_t index);
     virtual bool VisitInteger (const XMLElement & element, int bits, const std::string& name_attr, std::size_t index);
     virtual bool VisitDecimal (const XMLElement & element,
-                                    const std::string& name_attr,
-                                    std::size_t        index);
+                               const std::string& name_attr,
+                               std::size_t        index);
     virtual bool VisitByteVector (const XMLElement & element,
-                                       const std::string& name_attr,
-                                       std::size_t        index);
+                                  const std::string& name_attr,
+                                  std::size_t        index);
 
     virtual bool VisitTemplateRef(const XMLElement & element, const std::string& name_attr, std::size_t index);
+
   private:
 
     bool output_typeref(const XMLElement & element);
@@ -96,6 +97,9 @@ class FastXML2Source
     void output_subinstructions(const std::string name_attr);
     void restore_scope(const std::string& name_attr);
 
+    std::string get_subinstructions(const XMLElement & element,
+                                    const std::string& name_attr,
+                                    std::size_t        numFields);
     std::stringstream cref_scope_;
     std::vector<std::string> subinstructions_list_;
     std::stringstream template_instructions_;

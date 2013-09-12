@@ -20,21 +20,33 @@
 #define AGGREGATE_REF_H_J48H7C2R
 
 #include "mfast/field_instruction.h"
-
+#include "mfast/field_ref.h"
 namespace mfast
 {
+
+class unbouned_templateref_error
+  : public virtual boost::exception, public virtual std::exception
+{
+  public:
+    unbouned_templateref_error()
+    {
+    }
+
+};
+
 class aggregate_cref
 {
   public:
+    typedef const group_field_instruction* instruction_cptr;
     typedef boost::false_type is_mutable;
-    // typedef boost::false_type canbe_optional;
-    typedef const aggregate_instruction_base* instruction_cptr;
 
-    aggregate_cref(const value_storage* storage,
-                   instruction_cptr     instruction);
+    aggregate_cref(const value_storage*           storage_array,
+                   const group_field_instruction* instruction);
 
     aggregate_cref(const aggregate_cref& other);
-    
+
+    aggregate_cref(const field_cref& other);
+
     size_t num_fields() const;
 
     field_cref operator[](size_t index) const;
@@ -45,26 +57,50 @@ class aggregate_cref
     /// return -1 if no such field is found
     int field_index_with_name(const char* name) const;
 
-    const aggregate_instruction_base* instruction() const;
+    const group_field_instruction* instruction() const;
 
     const field_instruction* subinstruction(size_t index) const;
 
     const value_storage* field_storage(size_t index) const;
-    
+
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
+    
+    bool absent () const
+    {
+      return instruction_== 0 || (parent_storage() && parent_storage()->is_empty() );
+    }
+
+    bool present() const
+    {
+      return !absent ();
+    }
+    
+    bool operator ! () const
+    {
+      return this->absent();
+    }
+    
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+    explicit bool operator() const 
+    {
+      return this->present();
+    }
+#endif  
 
   protected:
     aggregate_cref& operator= (const aggregate_cref&);
-
-    const value_storage* storage() const
-    {
-      return storage_;
-    }
-    const aggregate_instruction_base* instruction_;
-    const value_storage* storage_;
     
-    friend class detail::field_storage_helper;
+    value_storage* parent_storage() const {
+      if (instruction_ && instruction_->field_type() != field_type_sequence && instruction_->optional()) {
+        return field_storage(num_fields())->of_group.content_;
+      }
+      return 0;
+    }
+
+    const group_field_instruction* instruction_;
+    const value_storage* storage_array_;
+
 };
 
 template <typename ConstRef>
@@ -72,9 +108,9 @@ class make_aggregate_mref
   : public ConstRef
 {
   public:
-    typedef boost::true_type is_mutable;   
+    typedef boost::true_type is_mutable;
+    typedef ConstRef cref_type;
     typedef typename ConstRef::instruction_cptr instruction_cptr;
-    typedef ConstRef cref;
 
     make_aggregate_mref();
 
@@ -85,14 +121,28 @@ class make_aggregate_mref
                         value_storage*    storage,
                         instruction_cptr  instruction);
 
+    make_aggregate_mref(const field_mref_base& other);
+
     field_mref operator[](size_t index) const;
 
     mfast::allocator* allocator() const;
-    
-    
+
+
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
     
+    void as_absent() const
+    {
+      if (this->parent_storage()) {
+        this->parent_storage()->present(0);
+      }
+    }
+    
+    void clear() const
+    {
+      as_absent();
+    }
+
   protected:
     template <class FieldMutator> friend class field_mutator_adaptor;
 
@@ -101,10 +151,7 @@ class make_aggregate_mref
   private:
     make_aggregate_mref& operator= (const make_aggregate_mref&);
     friend struct fast_decoder_impl;
-    void ensure_valid() const;
-
     mfast::allocator* alloc_;
-    friend class detail::field_storage_helper;
 };
 
 typedef make_aggregate_mref<aggregate_cref> aggregate_mref;
@@ -113,18 +160,38 @@ typedef make_aggregate_mref<aggregate_cref> aggregate_mref;
 
 
 inline
-aggregate_cref::aggregate_cref(const value_storage* storage,
-                               instruction_cptr     instruction)
+aggregate_cref::aggregate_cref(const value_storage*           storage_array,
+                               const group_field_instruction* instruction)
   : instruction_(instruction)
-  , storage_(storage)
+  , storage_array_(storage_array)
 {
 }
 
 inline
 aggregate_cref::aggregate_cref(const aggregate_cref& other)
-  : instruction_(other.instruction_)
-  , storage_(other.storage_)
+  : instruction_(other.instruction())
+  , storage_array_(other.storage_array_)
 {
+}
+
+inline
+aggregate_cref::aggregate_cref(const field_cref& other)
+  : storage_array_(detail::field_storage_helper::storage_ptr_of(other)->of_group.content_)
+{
+  if (other.instruction()->field_type() == field_type_templateref)
+  {
+
+    this->instruction_ = static_cast<const group_field_instruction*> (detail::field_storage_helper::storage_of(other).of_templateref.of_instruction.instruction_);
+    if (this->instruction_ == 0)
+      BOOST_THROW_EXCEPTION(unbouned_templateref_error());
+    // if you hit the exeception, you have to use dynamic_nested_message_mref::rebind() to bind a valid
+    // template_instruction intead. If this is a static templateRef, please use the resolved templates
+    // provided by encoder or those generated by fast_type_gen.
+
+  }
+  else {
+    this->instruction_ = static_cast<const group_field_instruction*> (other.instruction());
+  }
 }
 
 inline size_t
@@ -136,10 +203,10 @@ aggregate_cref::num_fields() const
 inline field_cref
 aggregate_cref::operator[](size_t index) const
 {
-  return field_cref(&storage_[index],subinstruction(index));
+  return field_cref(&storage_array_[index],subinstruction(index));
 }
 
-inline const aggregate_instruction_base*
+inline const group_field_instruction*
 aggregate_cref::instruction() const
 {
   return instruction_;
@@ -154,7 +221,7 @@ aggregate_cref::subinstruction(size_t index) const
 inline const value_storage*
 aggregate_cref::field_storage(size_t index) const
 {
-  return &storage_[index];
+  return &storage_array_[index];
 }
 
 /// return -1 if no such field is found
@@ -184,18 +251,26 @@ template <typename ConstRef>
 template <typename U>
 inline
 make_aggregate_mref<ConstRef>::make_aggregate_mref(const make_aggregate_mref<U>& other)
-  : ConstRef(detail::field_storage_helper::storage_ptr_of(other), other.instruction())
+  : ConstRef(other)
   , alloc_(other.allocator())
 {
 }
 
 template <typename ConstRef>
 inline
-make_aggregate_mref<ConstRef>::make_aggregate_mref(mfast::allocator* alloc,
-                                                   value_storage*    storage,
-                                                   instruction_cptr  instruction)
-  : ConstRef(storage, instruction)
+make_aggregate_mref<ConstRef>::make_aggregate_mref(mfast::allocator*                   alloc,
+                                                   value_storage*                      storage_array,
+                                                   typename ConstRef::instruction_cptr instruction)
+  : ConstRef(storage_array, instruction)
   , alloc_(alloc)
+{
+}
+
+template <typename ConstRef>
+inline
+make_aggregate_mref<ConstRef>::make_aggregate_mref(const field_mref_base& other)
+  : ConstRef(other)
+  , alloc_(other.allocator())
 {
 }
 
@@ -222,19 +297,6 @@ make_aggregate_mref<ConstRef>::field_storage(size_t index) const
 {
   return const_cast<value_storage*>(ConstRef::field_storage(index));
 }
-
-template <typename ConstRef>
-inline void
-make_aggregate_mref<ConstRef>::ensure_valid() const
-{
-  // To improve efficiency during decoding, when the top level message is resetted,
-  // all subfields' storage are zero-ed instead of properly initialized. Upon the
-  // encoder visit this field, we need to check if the memory for the subfields of this
-  // group is allocated. If not, we need to allocate the memory for the subfields.
-  this->instruction()->ensure_valid_storage(const_cast<value_storage&>(*this->storage_), this->alloc_);
-}
-
-
 
 }
 

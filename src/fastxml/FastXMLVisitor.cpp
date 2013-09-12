@@ -252,3 +252,14 @@ FastXMLVisitor::instruction_context& FastXMLVisitor::current_context()
 {
   return context_stack_.back();
 }
+
+// if element has only child and the child element is templateRef, it returns
+// the address of the child element; otherwise it returns 0.
+const XMLElement* 
+FastXMLVisitor::only_child_templateRef(const XMLElement & element)
+{
+  const XMLElement* first_elem = element.FirstChildElement();
+  if (strcmp(first_elem->Name(), "templateRef") == 0 && first_elem->NextSibling() == 0) 
+    return first_elem;
+  return 0;
+}

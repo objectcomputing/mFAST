@@ -612,7 +612,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                   0,
                                   string_value_storage(f1_initial));
 
-  field_instruction* instructions[] = {
+  const field_instruction* instructions[] = {
     &inst0,&inst1
   };
 
@@ -716,7 +716,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                        2);
 
 
-  field_instruction* instructions[] = {
+  const field_instruction* instructions[] = {
     &inst0,&inst1
   };
 
@@ -852,7 +852,7 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
 
   mock_field_instruction mock0;
 
-  field_instruction* instructions[] = {
+  const field_instruction* instructions[] = {
     &mock0
   };
 

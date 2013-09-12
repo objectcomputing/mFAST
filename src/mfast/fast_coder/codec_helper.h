@@ -155,17 +155,17 @@ class codec_helper
       }
     }
     
-    template <typename MessageMref>
-    static void reset(const MessageMref& mref)
-    {
-      mref.reset();
-    }
+    // template <typename MessageMref>
+    // static void reset(const MessageMref& mref)
+    // {
+    //   mref.reset();
+    // }
     
-    template <typename MRef>
-    static void ensure_valid(const MRef& mref)
-    {
-      mref.ensure_valid();
-    }
+    // template <typename MRef>
+   //  static void ensure_valid(const MRef& mref)
+   //  {
+   //    mref.ensure_valid();
+   //  }
 };
 
 }

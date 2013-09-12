@@ -161,14 +161,14 @@ void dictionary_builder::build_group(const field_instruction*          fi,
   }
 
   std::size_t instructions_count =  src->subinstructions_count();
-  field_instruction** subinstructions =
-    static_cast<field_instruction**>( alloc_->allocate( instructions_count *
-                                                        sizeof(field_instruction*) ) );
+  const_instruction_ptr_t* subinstructions =
+    static_cast<const_instruction_ptr_t*>( alloc_->allocate( instructions_count *
+                                                             sizeof(field_instruction*) ) );
   for (size_t i = 0; i < instructions_count; ++i) {
     src->subinstruction(i)->accept(*this, &subinstructions[i]);
   }
 
-  dest->set_subinstructions(subinstructions);
+  dest->set_subinstructions(subinstructions, instructions_count);
 
   current_type_ = inherited_type;
   current_ns_ = inherited_ns;
@@ -223,15 +223,54 @@ void dictionary_builder::visit(const templateref_instruction* src_inst, void* de
 void dictionary_builder::visit(const group_field_instruction* src_inst, void* dest_inst)
 {
   group_field_instruction*& dest = *static_cast<group_field_instruction**>(dest_inst);
+
   dest = new (*alloc_)group_field_instruction(*src_inst);
-  this->build_group(src_inst, src_inst, dest);
+
+  if (src_inst->subinstructions_count() == 1 ) {
+    const templateref_instruction* sub_inst = dynamic_cast<const templateref_instruction*>(src_inst->subinstruction(0));
+    if (sub_inst && sub_inst->is_static()) {
+      // this group embeds just one static templateRef instruction
+
+      template_name_map_t::iterator itr = template_name_map_.find( qualified_name(sub_inst->ns(), sub_inst->name()) );
+      if (itr != template_name_map_.end()) {
+        dest->set_subinstructions(itr->second->subinstructions(),
+                                  itr->second->subinstructions_count());
+
+      }
+      else {
+        BOOST_THROW_EXCEPTION(template_not_found_error(sub_inst->name(), current_template_.c_str()));
+      }
+    }
+  }
+  else {
+    this->build_group(src_inst, src_inst, dest);
+  }
 }
 
 void dictionary_builder::visit(const sequence_field_instruction* src_inst, void* dest_inst)
 {
   sequence_field_instruction*& dest = *static_cast<sequence_field_instruction**>(dest_inst);
   dest = new (*alloc_)sequence_field_instruction(*src_inst);
-  this->build_group(src_inst, src_inst, dest);
+  
+  if (src_inst->subinstructions_count() == 1 ) {
+    const templateref_instruction* sub_inst = dynamic_cast<const templateref_instruction*>(src_inst->subinstruction(0));
+    if (sub_inst && sub_inst->is_static()) {
+      // this group embeds just one static templateRef instruction
+
+      template_name_map_t::iterator itr = template_name_map_.find( qualified_name(sub_inst->ns(), sub_inst->name()) );
+      if (itr != template_name_map_.end()) {
+        dest->set_subinstructions(itr->second->subinstructions(),
+                                  itr->second->subinstructions_count());        
+      }
+      else {
+        BOOST_THROW_EXCEPTION(template_not_found_error(sub_inst->name(), current_template_.c_str()));
+      }
+    }
+  }
+  else {
+    this->build_group(src_inst, src_inst, dest);
+  }
+
   if (src_inst->length_instruction()) {
     visit(src_inst->length_instruction(), &dest->sequence_length_instruction_);
   }

@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.fixprotocol.org/ns/templates/test2" ns="http://www.fixprotocol.org/ns/fix">
     <template name="MDRefreshSample" id="2">
-        <templateRef name="SampleInfo" ns="http://www.fixprotocol.org/ns/templates/test1"/>
+        <group name="info">
+            <templateRef name="SampleInfo" ns="http://www.fixprotocol.org/ns/templates/test1"/>
+        </group>
         <sequence name="MDEntries">
             <length name="NoMDEntries" id="268"/>
             <uInt32 name="MDUpdateAction" id="279">
@@ -45,6 +47,8 @@
                 <copy/>
             </byteVector>
         </sequence>
-        <templateRef/>
+        <sequence name="extra" >
+            <templateRef name="SampleInfo" ns="http://www.fixprotocol.org/ns/templates/test1"/>
+        </sequence>
     </template>
 </templates>

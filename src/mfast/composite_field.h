@@ -67,14 +67,23 @@ class composite_field
     const value_storage* storage_for(const cref_type& other) const;
 
   protected:
+    // Used by decoder to indicate this object uses arena allocator,
+    // and the allocator has been resetted. All previously allocated memory
+    // are invalidated. Thus memory for sub-fields needs to be re-allocated.
+
+    void reset();
+    void ensure_valid();
+    
+    friend struct fast_decoder_impl;
+
     mfast::allocator* alloc_;
     instruction_cptr instruction_;
     value_storage my_storage_;
 };
 
 typedef composite_field<message_cref> message_type;
-typedef composite_field<group_cref> group_type;
-typedef composite_field<sequence_cref> sequence_type;
+// typedef composite_field<group_cref> group_type;
+// typedef composite_field<sequence_cref> sequence_type;
 
 ///////////////////////////////////////////////////////
 
@@ -116,47 +125,40 @@ composite_field<CRef>::instruction() const
 
 template <typename CRef>
 inline
-composite_field<CRef>::composite_field(const typename composite_field<CRef>::cref_type& other,
-                                       mfast::allocator*                                alloc)
+composite_field<CRef>::composite_field(const CRef&       other,
+                                       mfast::allocator* alloc)
   : alloc_(alloc)
   , instruction_(other.instruction())
 {
-  this->instruction()->copy_construct_value(my_storage_, 0, alloc, storage_for(other));
+  this->instruction()->copy_construct_value(my_storage_, 0, alloc, other.field_storage(0));
 }
 
 template <typename CRef>
 inline typename composite_field<CRef>::mref_type
 composite_field<CRef>::ref()
 {
-  return message_mref(alloc_, &my_storage_, instruction_);
+  return message_mref(alloc_, my_storage_.of_group.content_, instruction_);
 }
 
 template <typename CRef>
 inline typename composite_field<CRef>::mref_type
 composite_field<CRef>::mref()
 {
-  return message_mref(alloc_, &my_storage_, instruction_);
+  return message_mref(alloc_, my_storage_.of_group.content_, instruction_);
 }
 
 template <typename CRef>
 inline typename composite_field<CRef>::cref_type
 composite_field<CRef>::ref() const
 {
-  return message_cref(&my_storage_, instruction_);
+  return message_cref(my_storage_.of_group.content_, instruction_);
 }
 
 template <typename CRef>
 inline typename composite_field<CRef>::cref_type
 composite_field<CRef>::cref() const
 {
-  return message_cref(&my_storage_, instruction_);
-}
-
-template <typename CRef>
-inline const value_storage*
-composite_field<CRef>::storage_for(const typename composite_field<CRef>::cref_type& other) const
-{
-  return detail::field_storage_helper::storage_ptr_of(other);
+  return message_cref(my_storage_.of_group.content_, instruction_);
 }
 
 template <typename CRef>
@@ -173,7 +175,20 @@ composite_field<CRef>::allocator() const
   return this->alloc_;
 }
 
+template <typename CRef>
+inline void 
+composite_field<CRef>::reset()
+{
+  my_storage_.of_group.content_ = 0;
 }
 
+template <typename CRef>
+inline void 
+composite_field<CRef>::ensure_valid()
+{
+  instruction_->ensure_valid_storage(my_storage_, alloc_);
+}
+
+}
 
 #endif /* end of include guard: COMPOSITE_FIELD_H_EK32RZA0 */

@@ -49,6 +49,10 @@ class FastXMLVisitor
     const char* get_optional_attr(const XMLElement & element, const char* attr_name, const char* default_value) const;
     bool is_mandatory_constant(const XMLElement & element);
     
+    // if element has only child and the child element is templateRef, it returns
+    // the address of the child element; otherwise it returns 0.
+    const XMLElement* only_child_templateRef(const XMLElement & element);
+    
   public:
     FastXMLVisitor();
     virtual bool VisitEnterTemplates(const XMLElement & /* element */);

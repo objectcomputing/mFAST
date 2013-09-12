@@ -128,7 +128,7 @@ inline bool operator == (const sequence_cref& lhs, const sequence_cref& rhs)
   return detail::equal(lhs, rhs);
 }
 
-inline bool operator == (const message_cref& lhs, const message_cref& rhs)
+inline bool operator == (const aggregate_cref& lhs, const aggregate_cref& rhs)
 {
  return detail::equal(lhs, rhs);
 }

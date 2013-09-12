@@ -118,7 +118,7 @@ class nested_message_mref
     message_mref rebind(const template_instruction* inst) const
     {
       set_target_instruction(inst, true);
-      return message_mref(alloc_, this->storage(), inst);
+      return message_mref(alloc_, this->storage()->of_templateref.content_, inst);
     }
 
     void set_target_instruction(const template_instruction* inst, bool construct_subfields = true) const
