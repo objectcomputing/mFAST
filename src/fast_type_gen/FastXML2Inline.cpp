@@ -204,7 +204,7 @@ bool FastXML2Inline::VisitEnterSequence (const XMLElement & element,
        << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
        << "}\n\n";
   
-  if (only_child_templateRef(element) == 0) {
+  if (only_child_templateRef(element) == 0 && element.FirstChildElement()->NextSibling() != 0) {
     out_ << "inline\n"
          << cref_scope_.str() << name_attr << "_element_cref::"<< name_attr << "_element_cref(\n"
          << "  const mfast::value_storage*   storage,\n"
@@ -234,7 +234,7 @@ bool FastXML2Inline::VisitExitSequence (const XMLElement & element,
                                         std::size_t /* numFields */,
                                         std::size_t /* index */)
 {
-  if (only_child_templateRef(element) == 0) {
+  if (only_child_templateRef(element) == 0  && element.FirstChildElement()->NextSibling() != 0) {
     std::string name(name_attr);
     name += "_element";
     restore_scope(name);

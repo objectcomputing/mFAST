@@ -45,12 +45,12 @@ class sequence_element_cref
 
 typedef make_aggregate_mref<sequence_element_cref> sequence_element_mref;
 
-template <typename ElementType>
+template <typename ElementType, typename SequenceInstructionType=mfast::sequence_instruction_ex<ElementType> >
 class make_sequence_cref
   : public field_cref
 {
   public:
-    typedef typename ElementType::instruction_cptr instruction_cptr;
+    typedef const SequenceInstructionType* instruction_cptr;
 
     typedef ElementType reference;
 
@@ -69,13 +69,18 @@ class make_sequence_cref
     {
     }
 
-    reference
-    operator [](size_t index) const
+    
+    reference operator [](size_t index) const
     {
       assert(index < size());
-      //const value_storage* storages =
-      //  static_cast<const value_storage*>(storage_->of_array.content_);
-      return reference(element_storage(index), this->instruction());
+      const field_instruction* inst;
+      if (boost::is_convertible<instruction_cptr, typename ElementType::instruction_cptr>::value) {
+        inst = this->instruction();
+      }
+      else {
+        inst = this->instruction()->subinstruction(0);
+      }
+      return reference(element_storage(index), static_cast<typename ElementType::instruction_cptr>(inst)); 
     }
 
     uint32_t length() const
@@ -113,10 +118,9 @@ class make_sequence_cref
         static_cast<const value_storage*>(storage_->of_array.content_);
       return &storages[index*num_fields()];
     }
-
 };
 
-typedef make_sequence_cref<sequence_element_cref> sequence_cref;
+typedef make_sequence_cref<sequence_element_cref, sequence_field_instruction> sequence_cref;
 
 namespace detail {
 struct MFAST_EXPORT sequence_mref_helper
@@ -130,14 +134,14 @@ struct MFAST_EXPORT sequence_mref_helper
 
 }
 
-template <typename ElementType>
+template <typename ElementType, typename SequenceInstructionType=mfast::sequence_instruction_ex<typename ElementType::cref_type> >
 class make_sequence_mref
-  : public make_field_mref<make_sequence_cref<typename ElementType::cref_type> >
+  : public make_field_mref<make_sequence_cref<typename ElementType::cref_type, SequenceInstructionType> >
 {
-  typedef make_field_mref<make_sequence_cref<typename ElementType::cref_type> > base_type;
+  typedef make_field_mref<make_sequence_cref<typename ElementType::cref_type, SequenceInstructionType> > base_type;
 
   public:
-    typedef typename ElementType::instruction_cptr instruction_cptr;
+    typedef const SequenceInstructionType* instruction_cptr;
     typedef ElementType reference;
 
     make_sequence_mref()
@@ -166,9 +170,16 @@ class make_sequence_mref
     operator [](size_t index) const
     {
       assert(index < this->size());
+      const field_instruction* inst;
+      if (boost::is_convertible<instruction_cptr, typename ElementType::instruction_cptr>::value) {
+        inst = this->instruction();
+      }
+      else {
+        inst = this->instruction()->subinstruction(0);
+      }
       return reference(this->alloc_,
                        element_storage(index),
-                       this->instruction());
+                       static_cast<typename ElementType::instruction_cptr>(inst));
     }
 
     void resize(size_t n) const;
@@ -191,7 +202,7 @@ class make_sequence_mref
 
 };
 
-typedef make_sequence_mref<sequence_element_mref> sequence_mref;
+typedef make_sequence_mref<sequence_element_mref, sequence_field_instruction> sequence_mref;
 
 
 //////////////////////////////////////////////////////////////
@@ -215,17 +226,17 @@ sequence_element_cref::instruction() const
   return static_cast<instruction_cptr>(aggregate_cref::instruction());
 }
 
-template <typename ElementType>
+template <typename ElementType, typename SequenceInstructionType>
 inline void
-make_sequence_mref<ElementType>::resize(size_t n) const
+make_sequence_mref<ElementType, SequenceInstructionType>::resize(size_t n) const
 {
   this->reserve (n);
   this->storage()->array_length(n);
 }
 
-template <typename ElementType>
+template <typename ElementType, typename SequenceInstructionType>
 inline void
-make_sequence_mref<ElementType>::reserve(size_t n) const
+make_sequence_mref<ElementType, SequenceInstructionType>::reserve(size_t n) const
 {
   detail::sequence_mref_helper::reserve(static_cast<const sequence_field_instruction*>(this->instruction()), this->storage(), this->alloc_, n);
 }

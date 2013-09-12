@@ -282,19 +282,19 @@ make_group_mref<ConstFieldRef>::accept_mutator(FieldMutator& mutator) const
   adaptor.visit(*this);
 }
 
-template <typename ElementType>
+template <typename ElementType, typename SequenceInstructionType>
 template <typename FieldAccessor>
 inline void
-make_sequence_cref<ElementType>::accept_accessor(FieldAccessor& accessor) const
+make_sequence_cref<ElementType,SequenceInstructionType>::accept_accessor(FieldAccessor& accessor) const
 {
   detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
   adaptor.visit(*this);
 }
 
-template <typename ElementType>
+template <typename ElementType, typename SequenceInstructionType>
 template <typename FieldMutator>
 inline void
-make_sequence_mref<ElementType>::accept_mutator(FieldMutator& mutator) const
+make_sequence_mref<ElementType,SequenceInstructionType>::accept_mutator(FieldMutator& mutator) const
 {
   detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
   adaptor.visit(*this);

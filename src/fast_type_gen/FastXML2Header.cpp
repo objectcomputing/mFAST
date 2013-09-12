@@ -276,7 +276,7 @@ bool FastXML2Header::VisitEnterSequence (const XMLElement & element,
                                          const std::string& name_attr,
                                          std::size_t /* index */)
 {
-  if (only_child_templateRef(element) == 0)
+  if (only_child_templateRef(element) == 0 && element.FirstChildElement()->NextSibling() != 0)
   {
     std::string name = name_attr + "_element";
     header_cref_ << "\n"
@@ -317,7 +317,7 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element,
                                         std::size_t /* index */)
 {
   const XMLElement* templateRef_elem = only_child_templateRef(element);
-  if (templateRef_elem == 0) {
+  if (templateRef_elem == 0 && element.FirstChildElement()->NextSibling() != 0) {
     header_cref_.dec_indent(2);
     header_mref_.dec_indent(2);
 
@@ -332,23 +332,59 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element,
     restore_scope(name_attr);
   }
   else {
-    const char* templateRef_name = templateRef_elem->Attribute("name", 0);
-    if (templateRef_name) {
-      std::string ns = get_optional_attr(*templateRef_elem, "ns", current_context().ns_.c_str());
-      templates_registry_t::iterator itr = registry_.find(ns + "||" + templateRef_name);
-      std::string qulified_name = templateRef_name;
-      if (itr != registry_.end()) {
-        qulified_name = itr->second + "::" + templateRef_name;
+
+    if (templateRef_elem) {
+      const char* templateRef_name = templateRef_elem->Attribute("name", 0);
+      if (templateRef_name) {
+        std::string ns = get_optional_attr(*templateRef_elem, "ns", current_context().ns_.c_str());
+        templates_registry_t::iterator itr = registry_.find(ns + "||" + templateRef_name);
+        std::string qulified_name = templateRef_name;
+        if (itr != registry_.end()) {
+          qulified_name = itr->second + "::" + templateRef_name;
+        }
+
+        header_cref_ << indent << "typedef mfast::make_sequence_cref<" << qulified_name << "_cref> " << name_attr << "_cref;\n";
+        header_mref_ << indent << "typedef mfast::make_sequence_mref<" << qulified_name << "_mref> " << name_attr << "_mref;\n";
       }
-
-      header_cref_ << indent << "typedef mfast::make_sequence_cref<" << qulified_name << "_cref> " << name_attr << "_cref;\n";
-      header_mref_ << indent << "typedef mfast::make_sequence_mref<" << qulified_name << "_mref> " << name_attr << "_mref;\n";
+      else {
+        header_cref_ << indent << "typedef mfast::sequence_cref " << name_attr << "_cref;\n";
+        header_mref_ << indent << "typedef mfast::sequence_mref " << name_attr << "_mref;\n";
+      }
     }
-    else {
-      header_cref_ << indent << "typedef mfast::sequence_cref " << name_attr << "_cref;\n";
-      header_mref_ << indent << "typedef mfast::sequence_mref " << name_attr << "_mref;\n";
+    else { // we have one element in the sequence
+      const char* seq_element_type = element.FirstChildElement()->Name();
+      std::string cpp_type_name;
+      
+      if (strcmp(seq_element_type, "int32") == 0) {
+        cpp_type_name = "int32";
+      }
+      else if (strcmp(seq_element_type, "uInt32") == 0) {
+        cpp_type_name = "uint32";
+      }
+      else if (strcmp(seq_element_type, "int64") == 0) {
+        cpp_type_name = "int64";
+      }
+      else if (strcmp(seq_element_type, "uInt64") == 0) {
+        cpp_type_name = "uint64";
+      }
+      else if (strcmp(seq_element_type, "decimal") == 0) {
+        cpp_type_name = "decimal";
+      }
+      else if (strcmp(seq_element_type, "string") == 0) {
+        const char* charset = get_optional_attr(*element.FirstChildElement(), "charset", "ascii");
+        cpp_type_name = charset;
+        cpp_type_name += "_string";
+      }
+      else if (strcmp(seq_element_type, "byteVector") == 0) {
+        cpp_type_name = "byte_vector";
+      }
+      
+      header_cref_ << indent << "typedef mfast::make_sequence_cref<mfast::" << cpp_type_name << "_cref> " << name_attr << "_cref;\n";
+      header_mref_ << indent << "typedef mfast::make_sequence_mref<mfast::" << cpp_type_name << "_mref> " << name_attr << "_mref;\n";
+      
     }
-
+  
+    
     header_cref_ << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
     header_mref_ << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
   }
