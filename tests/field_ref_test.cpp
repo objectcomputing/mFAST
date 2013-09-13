@@ -654,6 +654,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     BOOST_CHECK_EQUAL(ref.present(),      false);
     BOOST_CHECK_EQUAL(ref.num_fields(), 2);
 
+    ref.as_present();
     field_mref f0(ref[0] );
     BOOST_CHECK(f0.absent());
 

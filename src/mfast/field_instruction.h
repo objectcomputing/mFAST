@@ -177,20 +177,7 @@ class MFAST_EXPORT field_instruction
                       presence_enum_t optional,
                       uint32_t        id,
                       const char*     name,
-                      const char*     ns)
-      : field_index_(field_index)
-      , operator_id_(operator_id)
-      , is_array_(field_type <= field_type_sequence )
-      , optional_flag_(optional)
-      , nullable_flag_( optional &&  (operator_id != operator_constant) )
-      , has_pmap_bit_(operator_id > operator_delta || ((operator_id == operator_constant) && optional))
-      , mandatory_no_initial_value_(false)
-      , field_type_(field_type)
-      , id_(id)
-      , name_(name)
-      , ns_(ns)
-    {
-    }
+                      const char*     ns);
 
   protected:
 
@@ -376,15 +363,15 @@ class MFAST_EXPORT decimal_field_instruction
     {
     }
 
-    decimal_field_instruction(uint16_t                    field_index,
-                              operator_enum_t             exponent_operator_id,
-                              presence_enum_t             optional,
-                              uint32_t                    id,
-                              const char*                 name,
-                              const char*                 ns,
-                              const op_context_t*         exponent_context,
+    decimal_field_instruction(uint16_t                          field_index,
+                              operator_enum_t                   exponent_operator_id,
+                              presence_enum_t                   optional,
+                              uint32_t                          id,
+                              const char*                       name,
+                              const char*                       ns,
+                              const op_context_t*               exponent_context,
                               mantissa_field_instruction* mantissa_instruction,
-                              decimal_value_storage       initial_value = decimal_value_storage())
+                              decimal_value_storage             initial_value = decimal_value_storage())
       : integer_field_instruction_base(field_index,
                                        exponent_operator_id,
                                        field_type_exponent,
@@ -404,8 +391,8 @@ class MFAST_EXPORT decimal_field_instruction
       }
     }
 
-    decimal_field_instruction(const decimal_field_instruction& other,
-                              mantissa_field_instruction*      mantissa_instruction)
+    decimal_field_instruction(const decimal_field_instruction&  other,
+                              mantissa_field_instruction* mantissa_instruction)
       : integer_field_instruction_base(other)
       , mantissa_instruction_(mantissa_instruction)
     {
@@ -677,11 +664,11 @@ typedef const field_instruction*  const_instruction_ptr_t;
 
 struct MFAST_EXPORT aggregate_instruction_base
 {
-  aggregate_instruction_base(const char*              dictionary,
-                             const_instruction_ptr_t* subinstructions,
-                             uint32_t                 subinstructions_count,
-                             const char*              typeref_name,
-                             const char*              typeref_ns)
+  aggregate_instruction_base(const char*                    dictionary,
+                             const const_instruction_ptr_t* subinstructions,
+                             uint32_t                       subinstructions_count,
+                             const char*                    typeref_name,
+                             const char*                    typeref_ns)
     : dictionary_(dictionary)
     , typeref_name_(typeref_name)
     , typeref_ns_(typeref_ns)
@@ -731,7 +718,7 @@ struct MFAST_EXPORT aggregate_instruction_base
     return segment_pmap_size_;
   }
 
-  void set_subinstructions(const_instruction_ptr_t* subinstructions, uint32_t count)
+  void set_subinstructions(const const_instruction_ptr_t* subinstructions, uint32_t count)
   {
     subinstructions_ = subinstructions;
     subinstructions_count_ = count;
@@ -741,7 +728,7 @@ struct MFAST_EXPORT aggregate_instruction_base
     }
   }
 
-  const_instruction_ptr_t*  subinstructions() const
+  const const_instruction_ptr_t*  subinstructions() const
   {
     return subinstructions_;
   }
@@ -753,7 +740,7 @@ struct MFAST_EXPORT aggregate_instruction_base
   std::size_t segment_pmap_size_;
 
   private:
-    const_instruction_ptr_t* subinstructions_;
+    const const_instruction_ptr_t* subinstructions_;
 };
 
 
@@ -765,16 +752,16 @@ class MFAST_EXPORT group_field_instruction
 {
   public:
 
-    group_field_instruction(uint16_t                 field_index,
-                            presence_enum_t          optional,
-                            uint32_t                 id,
-                            const char*              name,
-                            const char*              ns,
-                            const char*              dictionary,
-                            const_instruction_ptr_t* subinstructions,
-                            uint32_t                 subinstructions_count,
-                            const char*              typeref_name ="",
-                            const char*              typeref_ns="")
+    group_field_instruction(uint16_t                       field_index,
+                            presence_enum_t                optional,
+                            uint32_t                       id,
+                            const char*                    name,
+                            const char*                    ns,
+                            const char*                    dictionary,
+                            const const_instruction_ptr_t* subinstructions,
+                            uint32_t                       subinstructions_count,
+                            const char*                    typeref_name ="",
+                            const char*                    typeref_ns="")
       : field_instruction(field_index,
                           operator_constant,
                           field_type_group,
@@ -811,17 +798,17 @@ class MFAST_EXPORT sequence_field_instruction
   : public group_field_instruction
 {
   public:
-    sequence_field_instruction(uint16_t                  field_index,
-                               presence_enum_t           optional,
-                               uint32_t                  id,
-                               const char*               name,
-                               const char*               ns,
-                               const char*               dictionary,
-                               const_instruction_ptr_t*  subinstructions,
-                               uint32_t                  subinstructions_count,
-                               uint32_field_instruction* sequence_length_instruction,
-                               const char*               typeref_name="",
-                               const char*               typeref_ns="")
+    sequence_field_instruction(uint16_t                       field_index,
+                               presence_enum_t                optional,
+                               uint32_t                       id,
+                               const char*                    name,
+                               const char*                    ns,
+                               const char*                    dictionary,
+                               const const_instruction_ptr_t* subinstructions,
+                               uint32_t                       subinstructions_count,
+                               uint32_field_instruction*      sequence_length_instruction,
+                               const char*                    typeref_name="",
+                               const char*                    typeref_ns="")
       : group_field_instruction(field_index,
                                 optional,
                                 id,
@@ -875,16 +862,16 @@ class MFAST_EXPORT template_instruction
   : public group_field_instruction
 {
   public:
-    template_instruction(uint32_t                 id,
-                         const char*              name,
-                         const char*              ns,
-                         const char*              template_ns,
-                         const char*              dictionary,
-                         const_instruction_ptr_t* subinstructions,
-                         uint32_t                 subinstructions_count,
-                         bool                     reset,
-                         const char*              typeref_name="",
-                         const char*              typeref_ns="")
+    template_instruction(uint32_t                       id,
+                         const char*                    name,
+                         const char*                    ns,
+                         const char*                    template_ns,
+                         const char*                    dictionary,
+                         const const_instruction_ptr_t* subinstructions,
+                         uint32_t                       subinstructions_count,
+                         bool                           reset,
+                         const char*                    typeref_name="",
+                         const char*                    typeref_ns="")
       : group_field_instruction(0, presence_mandatory,
                                 id,
                                 name,
@@ -946,16 +933,16 @@ class group_instruction_ex
   : public group_field_instruction
 {
   public:
-    group_instruction_ex(uint16_t                 field_index,
-                         presence_enum_t          optional,
-                         uint32_t                 id,
-                         const char*              name,
-                         const char*              ns,
-                         const char*              dictionary,
-                         const_instruction_ptr_t* subinstructions,
-                         uint32_t                 subinstructions_count,
-                         const char*              typeref_name ="",
-                         const char*              typeref_ns="")
+    group_instruction_ex(uint16_t                       field_index,
+                         presence_enum_t                optional,
+                         uint32_t                       id,
+                         const char*                    name,
+                         const char*                    ns,
+                         const char*                    dictionary,
+                         const const_instruction_ptr_t* subinstructions,
+                         uint32_t                       subinstructions_count,
+                         const char*                    typeref_name ="",
+                         const char*                    typeref_ns="")
       : group_field_instruction(field_index,
                                 optional,
                                 id,
@@ -999,17 +986,17 @@ class sequence_instruction_ex
   : public sequence_field_instruction
 {
   public:
-    sequence_instruction_ex(uint16_t                  field_index,
-                            presence_enum_t           optional,
-                            uint32_t                  id,
-                            const char*               name,
-                            const char*               ns,
-                            const char*               dictionary,
-                            const_instruction_ptr_t*  subinstructions,
-                            uint32_t                  subinstructions_count,
-                            uint32_field_instruction* sequence_length_instruction,
-                            const char*               typeref_name="",
-                            const char*               typeref_ns="")
+    sequence_instruction_ex(uint16_t                       field_index,
+                            presence_enum_t                optional,
+                            uint32_t                       id,
+                            const char*                    name,
+                            const char*                    ns,
+                            const char*                    dictionary,
+                            const const_instruction_ptr_t* subinstructions,
+                            uint32_t                       subinstructions_count,
+                            uint32_field_instruction*      sequence_length_instruction,
+                            const char*                    typeref_name="",
+                            const char*                    typeref_ns="")
       : sequence_field_instruction(field_index, optional, id, name, ns, dictionary, subinstructions,
                                    subinstructions_count, sequence_length_instruction, typeref_name, typeref_ns)
     {
@@ -1040,16 +1027,16 @@ class template_instruction_ex
   : public template_instruction
 {
   public:
-    template_instruction_ex(uint32_t                 id,
-                            const char*              name,
-                            const char*              ns,
-                            const char*              template_ns,
-                            const char*              dictionary,
-                            const_instruction_ptr_t* subinstructions,
-                            uint32_t                 subinstructions_count,
-                            bool                     reset,
-                            const char*              typeref_name="",
-                            const char*              typeref_ns="")
+    template_instruction_ex(uint32_t                       id,
+                            const char*                    name,
+                            const char*                    ns,
+                            const char*                    template_ns,
+                            const char*                    dictionary,
+                            const const_instruction_ptr_t* subinstructions,
+                            uint32_t                       subinstructions_count,
+                            bool                           reset,
+                            const char*                    typeref_name="",
+                            const char*                    typeref_ns="")
       : template_instruction(id, name, ns, template_ns, dictionary,
                              subinstructions, subinstructions_count, reset, typeref_name, typeref_ns)
     {
@@ -1103,7 +1090,7 @@ class MFAST_EXPORT templateref_instruction
       return name()[0] != 0;
     }
 
-    static field_instruction* the_default_instructions[1];
+    static const const_instruction_ptr_t* default_instructions();
 
   private:
     const template_instruction* target_;

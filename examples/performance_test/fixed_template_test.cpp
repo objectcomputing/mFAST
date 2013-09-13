@@ -108,7 +108,7 @@ int main(int argc, const char** argv)
     if (use_arena)
       alloc = &arena_alloc;
     
-    const mfast::templates_description* descriptions[] = { &example::the_description };
+    const mfast::templates_description* descriptions[] = { example::description() };
 
     mfast::fast_decoder decoder(alloc);
     decoder.include(descriptions);

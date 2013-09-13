@@ -77,13 +77,6 @@ class group_cref
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
-  protected:
-    void as_present() const
-    {
-      if (instruction()->optional())
-        const_cast<value_storage*>(storage_)->present(true);
-    }
-
   private:
     group_cref& operator= (const group_cref&);
 };
@@ -133,6 +126,8 @@ class make_group_mref
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
+    
+    void as_present() const;
 
   private:
     make_group_mref& operator= (const make_group_mref&);
@@ -178,7 +173,6 @@ inline field_mref
 make_group_mref<ConstGroupRef>::operator[](size_t index)  const
 {
   assert(index < this->num_fields());
-  this->as_present();
   // return field_mref(this->alloc_,
   //                   this->field_storage(index),
   //                   this->instruction()->subinstructions_[index]);
@@ -201,6 +195,14 @@ inline
 make_group_mref<ConstGroupRef>::operator aggregate_mref() const
 {
   return aggregate_mref(this->alloc_, const_cast<value_storage*>(this->storage_->of_group.content_), this->instruction());
+}
+
+
+template <typename ConstGroupRef>
+inline void
+make_group_mref<ConstGroupRef>::as_present() const
+{
+  const_cast<value_storage*>(this->storage_)->present(1);
 }
 
 }

@@ -41,12 +41,13 @@ class field_storage_helper
     {
       return *const_cast<value_storage*>(ref.storage());
     }
-    
+
     template <typename Ref>
     static value_storage* storage_ptr_of(const Ref& ref)
     {
       return const_cast<value_storage*>(ref.storage());
     }
+
 };
 
 }
@@ -80,7 +81,7 @@ class field_cref
       , storage_(other.storage_)
     {
     }
-    
+
     template <typename T>
     explicit field_cref(const T& ref)
       : instruction_(ref.instruction())
@@ -97,14 +98,14 @@ class field_cref
     {
       return !absent ();
     }
-    
+
     bool operator ! () const
     {
       return this->absent();
     }
-    
+
 #ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-    explicit bool operator() const 
+    explicit bool operator() const
     {
       return this->present();
     }
@@ -140,7 +141,7 @@ class field_cref
     }
 
   protected:
-    
+
     const value_storage* storage () const
     {
       return storage_;
@@ -171,23 +172,31 @@ class make_field_mref_base
 template <typename T>
 class make_field_mref_base<T, boost::true_type>
 {
-  public:
-    void as_absent() const
-    {
-      const T* ptr = static_cast<const T*>(this);
-      if (ptr->instruction()->optional()) {
-        ptr->storage()->present(0);
-      }
+  private:
+    const field_instruction* my_instruction() const {
+      return static_cast<const T*>(this)->instruction();
     }
     
+    value_storage* my_storage() const {
+      return static_cast<const T*>(this)->storage();
+    }
+  public:
+
+
+    void as_absent() const
+    {
+      if (my_instruction()->optional()) {
+        my_storage()->present(0);
+      }
+    }
+
     void clear() const
     {
-      const T* ptr = static_cast<const T*>(this);
-      if (ptr->instruction()->optional()) {
-        ptr->storage()->present(0);
+      if (my_instruction()->optional()) {
+        my_storage()->present(0);
       }
-      else if (ptr->instruction()->is_array()) {
-        ptr->storage()->array_length(0);
+      else if (my_instruction()->is_array()) {
+        my_storage()->array_length(0);
       }
     }
 
@@ -230,8 +239,7 @@ class make_field_mref
     {
       return alloc_;
     }
-    
- 
+
   protected:
 
     value_storage* storage () const
@@ -265,7 +273,7 @@ struct mref_of;
 
 template <typename T1, typename T2>
 typename boost::disable_if<typename T1::is_mutable, T1>::type
-dynamic_cast_as(const T2& ref) 
+dynamic_cast_as(const T2& ref)
 {
   typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
   if (instruction == 0)
@@ -286,9 +294,9 @@ dynamic_cast_as(const T2& ref)
 namespace detail {
 
 inline field_cref
-field_ref_with_id(const value_storage*        storage,
+field_ref_with_id(const value_storage*              storage,
                   const aggregate_instruction_base* helper,
-                  uint32_t                    id)
+                  uint32_t                          id)
 {
   if (helper) {
 
@@ -300,9 +308,9 @@ field_ref_with_id(const value_storage*        storage,
 }
 
 inline field_cref
-field_ref_with_name(const value_storage*        storage,
+field_ref_with_name(const value_storage*              storage,
                     const aggregate_instruction_base* helper,
-                    const char*                 name)
+                    const char*                       name)
 {
   if (helper) {
     int index = helper->find_subinstruction_index_by_name(name);

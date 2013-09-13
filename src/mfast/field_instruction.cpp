@@ -22,6 +22,27 @@
 
 namespace mfast {
 
+field_instruction::field_instruction(uint16_t        field_index,
+                                     operator_enum_t operator_id,
+                                     int             field_type,
+                                     presence_enum_t optional,
+                                     uint32_t        id,
+                                     const char*     name,
+                                     const char*     ns)
+  : field_index_(field_index)
+  , operator_id_(operator_id)
+  , is_array_(field_type <= field_type_sequence )
+  , optional_flag_(optional)
+  , nullable_flag_( optional &&  (operator_id != operator_constant) )
+  , has_pmap_bit_(operator_id > operator_delta || ((operator_id == operator_constant) && optional))
+  , mandatory_no_initial_value_(false)
+  , field_type_(field_type)
+  , id_(id)
+  , name_(name)
+  , ns_(ns)
+{
+}
+
 void
 field_instruction::destruct_value(value_storage&,
                                   allocator*) const
@@ -488,9 +509,14 @@ std::size_t templateref_instruction::pmap_size() const
   return 0;
 }
 
-static templateref_instruction templateref_instruction_signleton(0);
-field_instruction* templateref_instruction::the_default_instructions[1] = {
-  &templateref_instruction_signleton
-};
+const const_instruction_ptr_t*
+templateref_instruction::default_instructions()
+{
+  static const templateref_instruction templateref_instruction_signleton(0);
+  static const field_instruction* array[] = {
+    &templateref_instruction_signleton
+  };
+  return array;
+}
 
 }

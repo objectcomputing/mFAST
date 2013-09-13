@@ -138,6 +138,13 @@ class make_aggregate_mref
       }
     }
     
+    void as_present() const
+    {
+      if (this->parent_storage()) {
+        this->parent_storage()->present(1);
+      }
+    }
+    
     void clear() const
     {
       as_absent();
@@ -279,6 +286,7 @@ inline field_mref
 make_aggregate_mref<ConstRef>::operator[](size_t index) const
 {
   assert(index < this->num_fields());
+  
   return field_mref(this->alloc_,
                     this->field_storage(index),
                     this->instruction()->subinstruction(index));

@@ -94,7 +94,7 @@ bool FastXML2Header::VisitExit( const XMLDocument& /*doc*/ )
 {
   std::string filebase_upper = boost::to_upper_copy(filebase_);
 
-  out_<< "\nextern mfast::templates_description the_description;\n\n"
+  out_<< "\n mfast::templates_description* description();\n\n"
       << "#include \"" << filebase_ << ".inl\"\n"
       << "}\n\n"
       << "#endif //__" << filebase_upper << "_H__\n";
@@ -173,7 +173,7 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "    cref_type cref() const;\n"
       << "    mref_type ref();\n"
       << "    mref_type mref();\n"
-      << "    static const instruction_type the_instruction;\n"
+      << "    static const instruction_type* instruction();\n"
       << "  private:\n"
       << "    " << name_attr << "(const " << name_attr << "&);\n"
       << "    " << name_attr << "& operator = (const "  << name_attr << "&);\n"
@@ -239,8 +239,8 @@ bool FastXML2Header::VisitExitGroup (const XMLElement & element,
                                      std::size_t /* numFields */,
                                      std::size_t /* index */)
 {
-  const XMLElement* templateRef_elem = only_child_templateRef(element);
-  if (templateRef_elem == 0) {
+  const XMLElement* child = only_child_templateRef(element);
+  if (child == 0) {
     header_cref_.dec_indent(2);
     header_mref_.dec_indent(2);
 
@@ -253,10 +253,10 @@ bool FastXML2Header::VisitExitGroup (const XMLElement & element,
     restore_scope(name_attr);
   }
   else {
-    const char* templateRef_name = templateRef_elem->Attribute("name", 0);
+    const char* templateRef_name = child->Attribute("name", 0);
     std::string qulified_name = "mfast::group";
     if (templateRef_name) {
-      std::string ns = get_optional_attr(*templateRef_elem, "ns", current_context().ns_.c_str());
+      std::string ns = get_optional_attr(*child, "ns", current_context().ns_.c_str());
       templates_registry_t::iterator itr = registry_.find(ns + "||" + templateRef_name);
       qulified_name = templateRef_name;
       if (itr != registry_.end()) {
@@ -276,7 +276,7 @@ bool FastXML2Header::VisitEnterSequence (const XMLElement & element,
                                          const std::string& name_attr,
                                          std::size_t /* index */)
 {
-  if (only_child_templateRef(element) == 0 && element.FirstChildElement()->NextSibling() != 0)
+  if (only_child(element) == 0)
   {
     std::string name = name_attr + "_element";
     header_cref_ << "\n"
@@ -316,8 +316,8 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element,
                                         std::size_t /* numFields */,
                                         std::size_t /* index */)
 {
-  const XMLElement* templateRef_elem = only_child_templateRef(element);
-  if (templateRef_elem == 0 && element.FirstChildElement()->NextSibling() != 0) {
+  const XMLElement* child = only_child(element);
+  if (child == 0) {
     header_cref_.dec_indent(2);
     header_mref_.dec_indent(2);
 
@@ -333,10 +333,10 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element,
   }
   else {
 
-    if (templateRef_elem) {
-      const char* templateRef_name = templateRef_elem->Attribute("name", 0);
+    if (strcmp(child->Name(), "templateRef") == 0) {
+      const char* templateRef_name = child->Attribute("name", 0);
       if (templateRef_name) {
-        std::string ns = get_optional_attr(*templateRef_elem, "ns", current_context().ns_.c_str());
+        std::string ns = get_optional_attr(*child, "ns", current_context().ns_.c_str());
         templates_registry_t::iterator itr = registry_.find(ns + "||" + templateRef_name);
         std::string qulified_name = templateRef_name;
         if (itr != registry_.end()) {
@@ -352,7 +352,7 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element,
       }
     }
     else { // we have one element in the sequence
-      const char* seq_element_type = element.FirstChildElement()->Name();
+      const char* seq_element_type = child->Name();
       std::string cpp_type_name;
       
       if (strcmp(seq_element_type, "int32") == 0) {

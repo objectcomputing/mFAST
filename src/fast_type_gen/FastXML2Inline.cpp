@@ -78,36 +78,36 @@ bool FastXML2Inline::VisitEnterTemplate (const XMLElement & /* element */,
        << "inline\n"
        << name_attr << "::" << name_attr << "(\n"
        << "  mfast::allocator* alloc)\n"
-       << "  : mfast::message_type(alloc, &the_instruction, this->data())\n"
+       << "  : mfast::message_type(alloc, instruction(), this->data())\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name_attr << "::" << name_attr << "(\n"
        << "  const " << name_attr << "_cref& other,\n"
        << "  mfast::allocator* alloc)\n"
-       << ": mfast::message_type(alloc, &the_instruction)\n"
+       << ": mfast::message_type(alloc, instruction())\n"
        << "{\n"
        << "  this->instruction()->copy_construct_value(my_storage_, this->data(), alloc, other.field_storage(0));\n"
        << "}\n\n"
        << "inline "<< name_attr << "::cref_type\n"
        << name_attr << "::ref() const\n"
        << "{\n"
-       << "  return " << name_attr << "::cref_type(my_storage_.of_group.content_, &the_instruction);\n"
+       << "  return " << name_attr << "::cref_type(my_storage_.of_group.content_, instruction());\n"
        << "}\n\n"
        << "inline "<< name_attr << "::cref_type\n"
        << name_attr << "::cref() const\n"
        << "{\n"
-       << "  return " << name_attr << "::cref_type(my_storage_.of_group.content_, &the_instruction);\n"
+       << "  return " << name_attr << "::cref_type(my_storage_.of_group.content_, instruction());\n"
        << "}\n\n"
        << "inline "<< name_attr << "::mref_type\n"
        << name_attr << "::ref()\n"
        << "{\n"
-       << "  return " << name_attr << "::mref_type(alloc_, my_storage_.of_group.content_, &the_instruction);\n"
+       << "  return " << name_attr << "::mref_type(alloc_, my_storage_.of_group.content_, instruction());\n"
        << "}\n\n"
        << "inline "<< name_attr << "::mref_type\n"
        << name_attr << "::mref()\n"
        << "{\n"
-       << "  return " << name_attr << "::mref_type(alloc_, my_storage_.of_group.content_, &the_instruction);\n"
+       << "  return " << name_attr << "::mref_type(alloc_, my_storage_.of_group.content_, instruction());\n"
        << "}\n\n";
 
   cref_scope_ << name_attr << "_cref::";
@@ -204,7 +204,7 @@ bool FastXML2Inline::VisitEnterSequence (const XMLElement & element,
        << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
        << "}\n\n";
   
-  if (only_child_templateRef(element) == 0 && element.FirstChildElement()->NextSibling() != 0) {
+  if (only_child(element) == 0) {
     out_ << "inline\n"
          << cref_scope_.str() << name_attr << "_element_cref::"<< name_attr << "_element_cref(\n"
          << "  const mfast::value_storage*   storage,\n"
@@ -234,7 +234,7 @@ bool FastXML2Inline::VisitExitSequence (const XMLElement & element,
                                         std::size_t /* numFields */,
                                         std::size_t /* index */)
 {
-  if (only_child_templateRef(element) == 0  && element.FirstChildElement()->NextSibling() != 0) {
+  if (only_child(element) == 0) {
     std::string name(name_attr);
     name += "_element";
     restore_scope(name);

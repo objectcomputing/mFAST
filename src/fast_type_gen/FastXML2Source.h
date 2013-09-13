@@ -100,11 +100,15 @@ class FastXML2Source
     std::string get_subinstructions(const XMLElement & element,
                                     const std::string& name_attr,
                                     std::size_t        numFields);
+                                    
+                                    
+    std::string prefix_string() const;
     std::stringstream cref_scope_;
     std::vector<std::string> subinstructions_list_;
     std::stringstream template_instructions_;
     templates_registry_t& registry_;
     std::string templates_ns_;
+    std::vector<std::string> prefixes_;
 };
 
 #endif /* end of include guard: FASTXML2SOURCE_H_DKDUNNEW */

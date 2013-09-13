@@ -126,6 +126,15 @@ void FastXML2Source::restore_scope(const std::string& name_attr)
   cref_scope_.seekp(str.size());
 }
 
+std::string FastXML2Source::prefix_string() const
+{
+  std::stringstream strm;
+  for (std::size_t i = 0; i < prefixes_.size() ; ++i) {
+    strm << prefixes_[i] << "__";
+  }
+  return strm.str();
+}
+
 FastXML2Source::FastXML2Source(const char* filebase, templates_registry_t& registry)
   : FastCodeGenBase(filebase, ".cpp")
   , registry_(registry)
@@ -160,11 +169,15 @@ bool FastXML2Source::VisitExitTemplates (const XMLElement& element,
        << instructions
        << "};\n\n";
 
-  out_ << "mfast::templates_description the_description(\n"
-       << "  \"" << get_optional_attr(element, "ns", "")  << "\", // ns\n"
-       << "  \"" << get_optional_attr(element, "templateNs", "")<< "\", // templateNs\n"
-       << "  \"" << get_optional_attr(element, "dictionary", "") << "\", // dictionary\n"
-       << "  " << filebase_ << "_templates_instructions);\n";
+  out_ << "mfast::templates_description* description()\n"
+       << "{\n"
+       << "  static mfast::templates_description desc(\n"
+       << "    \"" << get_optional_attr(element, "ns", "")  << "\", // ns\n"
+       << "    \"" << get_optional_attr(element, "templateNs", "")<< "\", // templateNs\n"
+       << "    \"" << get_optional_attr(element, "dictionary", "") << "\", // dictionary\n"
+       << "    " << filebase_ << "_templates_instructions);\n"
+       << "  return &desc;\n"
+       << "}\n\n";
 
 
   return out_.good();
@@ -190,24 +203,8 @@ const XMLElement* FastXML2Source::fieldOpElement(const XMLElement & element)
 void FastXML2Source::add_to_instruction_list(const std::string & name_attr)
 {
   std::stringstream strm;
-  strm << "  &" << name_attr << "_instruction,\n";
+  strm << "  &" << prefix_string() << name_attr << "_instruction,\n";
   subinstructions_list_.back() += strm.str();
-}
-
-bool FastXML2Source::VisitEnterTemplate (const XMLElement & /* element */,
-                                         const std::string& name_attr,
-                                         std::size_t /* index */)
-{
-  std::string qulified_name = current_context().ns_ + "||" + name_attr;
-  registry_[qulified_name] = filebase_;
-
-  out_ << "namespace " << name_attr << "_def\n"
-       << "{\n";
-
-  subinstructions_list_.resize(subinstructions_list_.size()+1);
-  cref_scope_ << name_attr << "_cref::";
-
-  return out_.good();
 }
 
 bool FastXML2Source::output_typeref(const XMLElement & element)
@@ -226,14 +223,37 @@ bool FastXML2Source::output_typeref(const XMLElement & element)
   return out_.good();
 }
 
+
+bool FastXML2Source::VisitEnterTemplate (const XMLElement & /* element */,
+                                         const std::string& name_attr,
+                                         std::size_t /* index */)
+{
+  std::string qulified_name = current_context().ns_ + "||" + name_attr;
+  registry_[qulified_name] = filebase_;
+
+  prefixes_.push_back(name_attr);
+  // out_ << "namespace " << name_attr << "_def\n"
+  //      << "{\n";
+
+  subinstructions_list_.resize(subinstructions_list_.size()+1);
+  cref_scope_ << name_attr << "_cref::";
+  
+  out_ << "const " << name_attr << "::instruction_type*\n"
+       << name_attr << "::instruction()\n"
+       << "{\n";
+
+  return out_.good();
+}
+
+
 bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
                                         const std::string& name_attr,
                                         std::size_t        numFields,
                                         std::size_t /* index */)
 {
   restore_scope(name_attr);
-  output_subinstructions(name_attr);
-
+  
+  
   bool reset = false;
   const XMLAttribute* reset_attr = element.FindAttribute("scp:reset");
   if (reset_attr == 0)
@@ -244,20 +264,28 @@ bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
       reset = true;
   }
 
-  out_ << "const " << name_attr << "::instruction_type\n"
-       << name_attr << "::the_instruction(\n"
-       << "  " << get_optional_attr(element, "id", "0") << ", // id\n"
-       << "  \"" << name_attr << "\", // name\n"
-       << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
-       << "  \""<< get_optional_attr(element, "templateNs", "") << "\", // templateNs\n"
-       << "  \""<< get_optional_attr(element, "dictionary", "") << "\", // dictionary\n"
-       << "  "<< name_attr << "_def::subinstructions,\n"
-       << "  "<< numFields << ", // num_fields\n"
-       << "  " << reset << ", // reset\n";
+  output_subinstructions(name_attr);
+  prefixes_.pop_back();
+
+  template_instructions_ << "  " << name_attr << "::instruction(),\n";
 
 
-  template_instructions_ << "  &" << name_attr << "::the_instruction,\n";
-  return output_typeref(element);
+
+  out_ << "  const static " << name_attr << "::instruction_type the_instruction(\n"
+       << "    " << get_optional_attr(element, "id", "0") << ", // id\n"
+       << "    \"" << name_attr << "\", // name\n"
+       << "    \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
+       << "    \""<< get_optional_attr(element, "templateNs", "") << "\", // templateNs\n"
+       << "    \""<< get_optional_attr(element, "dictionary", "") << "\", // dictionary\n"
+       << "    "<< name_attr << "__subinstructions,\n"
+       << "    "<< numFields << ", // num_fields\n"
+       << "    " << reset << ", // reset\n";
+       
+  output_typeref(element);
+  
+  out_ << "  return &the_instruction;\n"
+       << "}\n\n";
+  return out_.good();
 }
 
 bool FastXML2Source::VisitEnterGroup (const XMLElement & element,
@@ -265,11 +293,13 @@ bool FastXML2Source::VisitEnterGroup (const XMLElement & element,
                                       std::size_t /* index */)
 {
   cref_scope_ << name_attr << "_cref::";
-  
-  out_ << "namespace " << name_attr << "_def\n"
-       << "{\n";
+  // prefixes_.push_back(name_attr);
+  // out_ << "namespace " << name_attr << "_def\n"
+  //      << "{\n";
 
   add_to_instruction_list(name_attr);
+  prefixes_.push_back(name_attr);
+  
   if (only_child_templateRef(element) == 0) {
     subinstructions_list_.resize(subinstructions_list_.size()+1);
     return out_.good();
@@ -282,32 +312,37 @@ FastXML2Source::get_subinstructions(const XMLElement & element,
                                     const std::string& name_attr,
                                     std::size_t        numFields)
 {
-  const XMLElement* templateRef_elem = only_child_templateRef(element);
+  const XMLElement* child = only_child_templateRef(element);
 
   std::stringstream subinstruction_arg;
 
-  if (templateRef_elem == 0) {
+  if (child == 0) {
     output_subinstructions(name_attr);
-    subinstruction_arg << "  "<< name_attr << "_def::subinstructions,\n"
+    // out_ << "} // namespace " << name_attr << "\n\n";
+    
+    subinstruction_arg << "  "<< prefix_string() << "subinstructions,\n"
                        << "  "<< numFields << ", // num_fields\n";
+    prefixes_.pop_back();
   }
   else {
-    out_ << "} // namespace " << name_attr << "_def\n\n";
-    const char* templateRef_name = templateRef_elem->Attribute("name", 0);
+    // out_ << "} // namespace " << name_attr << "_def\n\n";
+    prefixes_.pop_back();
+    
+    const char* templateRef_name = child->Attribute("name", 0);
     if (templateRef_name) {
-      std::string ns = get_optional_attr(*templateRef_elem, "ns", current_context().ns_.c_str());
+      std::string ns = get_optional_attr(*child, "ns", current_context().ns_.c_str());
       templates_registry_t::iterator itr = registry_.find(ns + "||" + templateRef_name);
       std::string qulified_name = templateRef_name;
       if (itr != registry_.end()) {
         qulified_name = itr->second + "::" + templateRef_name;
       }
 
-      subinstruction_arg << "  "<< qulified_name << "::the_instruction.subinstructions(),\n"
-                         << "  "<< qulified_name << "::the_instruction.subinstructions_count(),\n";
+      subinstruction_arg << "  "<< qulified_name << "::instruction()->subinstructions(),\n"
+                         << "  "<< qulified_name << "::instruction()->subinstructions_count(),\n";
     }
     else {
       // use templateref instruction singleton
-      subinstruction_arg << "  "<< "mfast::templateref_instruction::the_default_instructions,\n"
+      subinstruction_arg << "  "<< "mfast::templateref_instruction::default_instructions(),\n"
                          << "  1, // num_fields\n";
     }
   }
@@ -321,11 +356,11 @@ bool FastXML2Source::VisitExitGroup (const XMLElement & element,
 {
 
   std::string subinstruction_arg = get_subinstructions(element, name_attr, numFields);
-  
+
   restore_scope(name_attr);
 
-  out_ << "mfast::group_field_instruction\n"
-       << name_attr << "_instruction(\n"
+  out_ << "const static mfast::group_field_instruction\n"
+       << prefix_string() << name_attr << "_instruction(\n"
        << "  "<<  index << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
        << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
@@ -333,7 +368,7 @@ bool FastXML2Source::VisitExitGroup (const XMLElement & element,
        << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
        << "  \""<< get_optional_attr(element, "dictionary", "") << "\", // dictionary\n"
        << subinstruction_arg;
-       
+
   return output_typeref(element);;
 }
 
@@ -343,12 +378,12 @@ bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
 {
 
   cref_scope_ << name_attr << "_element_cref::";
-    
-  out_ << "namespace " << name_attr << "_def\n"
-       << "{\n";
+  
+  // out_ << "namespace " << name_attr << "_def\n"
+  //      << "{\n";
 
   add_to_instruction_list(name_attr);
-  
+  prefixes_.push_back(name_attr);
 
 
   const XMLElement* length_element = element.FirstChildElement("length");
@@ -368,12 +403,12 @@ bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
     ns = get_optional_attr(*length_element, "ns", "");
 
     if (initialValue.size())
-      initialValue += "U"; // add unsigned integer suffix  
+      initialValue += "U"; // add unsigned integer suffix
   }
-  
+
   // length
-  out_ << "uint32_field_instruction\n"
-       << name_attr << "_length_instruction(\n"
+  out_ << "static uint32_field_instruction\n"
+       << prefix_string() << name_attr << "_length_instruction(\n"
        << "  0,"
        << "  "<< "operator_" << fieldOpName << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
@@ -382,7 +417,7 @@ bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
        << "  \""<< ns << "\", // ns\n"
        << "  "<< opContext << ",  // opContext\n"
        << "  int_value_storage<uint32_t>(" << initialValue << ")); // initial_value\n\n";
-       
+
   if (only_child_templateRef(element) == 0) {
     subinstructions_list_.resize(subinstructions_list_.size()+1);
     return out_.good();
@@ -398,15 +433,15 @@ bool FastXML2Source::VisitExitSequence (const XMLElement & element,
                                         std::size_t        index)
 {
   std::string lengthInstruction;
-  
+
   std::stringstream strm;
-  strm << "&" << name_attr << "_def::"  << name_attr <<  "_length_instruction";
+  strm << "&" << prefix_string()  << name_attr <<  "_length_instruction";
   lengthInstruction = strm.str();
 
   std::string subinstruction_arg = get_subinstructions(element, name_attr, numFields);
 
-  out_ << "mfast::sequence_field_instruction\n"
-       << name_attr << "_instruction(\n"
+  out_ << "const static mfast::sequence_field_instruction\n"
+       << prefix_string() << name_attr << "_instruction(\n"
        << "  "<<  index << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
        << "  "<< get_optional_attr(element, "id", "0") << ", // id\n"
@@ -438,7 +473,7 @@ bool FastXML2Source::get_field_attributes(const XMLElement & element,
     std::string opContext_dict = get_optional_attr(*fieldOpElem, "dictionary", "");
     if (!opContext_key.empty() || !opContext_dict.empty()) {
 
-      out_ << "op_context_t " << name_attr << "_opContext ={\n"
+      out_ << "const static " << "op_context_t " << prefix_string() << name_attr << "_opContext ={\n"
            << "  \"" << opContext_key << "\", \n"
            << "  \""<< get_optional_attr(*fieldOpElem, "ns", "") << "\", \n"
            << "  \""<< opContext_dict << "\"};";
@@ -464,8 +499,8 @@ bool FastXML2Source::VisitString (const XMLElement & element,
   get_field_attributes(element, name_attr, fieldOpName, opContext, initialValue);
 
   std::string charset =  get_optional_attr(element, "charset", "ascii");
-  out_ << charset << "_field_instruction\n"
-       << name_attr << "_instruction(\n"
+  out_ << "const static " << charset << "_field_instruction\n"
+       << prefix_string() << name_attr << "_instruction(\n"
        << "  " << index << ",\n"
        << "  "<< "operator_" << fieldOpName << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
@@ -526,8 +561,8 @@ bool FastXML2Source::VisitInteger (const XMLElement & element,
     initialValue += longlong_suffix;
   }
 
-  out_ << cpp_type << "_field_instruction\n"
-       << name_attr << "_instruction(\n"
+  out_ << "const static " << cpp_type << "_field_instruction\n"
+       << prefix_string() << name_attr << "_instruction(\n"
        << "  " << index << ",\n"
        << "  "<< "operator_" << fieldOpName << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
@@ -567,8 +602,8 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
     if (mantissa_initialValue.size())
       mantissa_initialValue += "LL";
 
-    out_ << "mantissa_field_instruction\n"
-         << name_attr << "_mantissa_instruction(\n"
+    out_ << "static mantissa_field_instruction\n"
+         << prefix_string() << name_attr << "_mantissa_instruction(\n"
          << "  "<< "operator_" << mantissa_fieldOpName << ",\n"
          << "  "<< mantissa_opContext << ",  // mantissa opContext\n"
          << "  int_value_storage<int64_t>("<< mantissa_initialValue << "));// mantissa inital value\n\n";
@@ -586,8 +621,8 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
       exponent_initialValue = "decimal_value_storage(";
     }
 
-    out_ << "decimal_field_instruction\n"
-         << name_attr << "_instruction(\n"
+    out_ << "const static "<< "decimal_field_instruction\n"
+         << prefix_string() << name_attr << "_instruction(\n"
          << "  " << index << ",\n"
          << "  "<< "operator_" << exponent_fieldOpName << ", // exponent\n"
          << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
@@ -595,7 +630,7 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
          << "  \""<< name_attr << "\", // name\n"
          << "  \""<< get_optional_attr(element, "ns", "") << "\", // ns\n"
          << "  "<< exponent_opContext << ",  // exponent opContext\n"
-         << "  &" << name_attr << "_mantissa_instruction,\n"
+         << "  &" << prefix_string() << name_attr << "_mantissa_instruction,\n"
          << "  "<< exponent_initialValue << ")); // exponent initial_value\n\n";
 
   }
@@ -615,8 +650,8 @@ bool FastXML2Source::VisitDecimal (const XMLElement & element,
 
     try {
 
-      out_ << "decimal_field_instruction\n"
-           << name_attr << "_instruction(\n"
+      out_ << "const static "<< "decimal_field_instruction\n"
+           << prefix_string() << name_attr << "_instruction(\n"
            << "  " << index << ",\n"
            << "  "<< "operator_" << fieldOpName << ",\n"
            << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
@@ -674,8 +709,8 @@ bool FastXML2Source::VisitByteVector (const XMLElement & element,
     initialValue = hex_string;
   }
 
-  out_ << "byte_vector_field_instruction\n"
-       << name_attr << "_instruction(\n"
+  out_ << "const static byte_vector_field_instruction\n"
+       << prefix_string() << name_attr << "_instruction(\n"
        << "  " << index << ",\n"
        << "operator_" << fieldOpName << ",\n"
        << "  "<< "presence_" << get_optional_attr(element, "presence", "mandatory") << ",\n"
@@ -708,15 +743,14 @@ bool FastXML2Source::VisitByteVector (const XMLElement & element,
   return out_.good();
 }
 
-void FastXML2Source::output_subinstructions(const std::string name_attr)
+void FastXML2Source::output_subinstructions(const std::string /*name_attr*/)
 {
   std::string content = subinstructions_list_.back();
   content.resize(content.size()-1);
 
-  out_ << "const field_instruction* subinstructions[] = {\n"
+  out_ << "const static field_instruction* " << prefix_string() << "subinstructions[] = {\n"
        << content << "\n"
-       << "};\n\n"
-       << "} // namespace " << name_attr << "\n\n";
+       << "};\n\n";
   subinstructions_list_.pop_back();
 }
 
@@ -741,10 +775,10 @@ bool FastXML2Source::VisitTemplateRef(const XMLElement & element,
       throw std::runtime_error(err.str());
     }
 
-    out_ << "templateref_instruction\n"
+    out_ << "const templateref_instruction\n"
          << "templateref" << index << "_instruction(\n"
          << "  " << index << ",\n"
-         << "  &" << cpp_namespace << name_attr << "::the_instruction);\n\n";
+         << "  " << cpp_namespace << name_attr << "::instruction());\n\n";
   }
   else {
     out_ << "templateref_instruction\n"

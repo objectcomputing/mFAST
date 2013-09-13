@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   debug_allocator alloc;
   test1::SampleInfo info(&alloc);
   BOOST_CHECK_EQUAL((int)test1::SampleInfo::the_id,                             1);
-  BOOST_CHECK_EQUAL(test1::SampleInfo::the_instruction.id(),                    1);
-  BOOST_CHECK_EQUAL(test1::SampleInfo::the_instruction.subinstructions_count(), 4);
+  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->id(),                    1);
+  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->subinstructions_count(), 4);
   test1::SampleInfo_cref info_cref = info.cref();
   
   BOOST_CHECK(equal_string(info_cref.get_BeginString(), "FIX4.4"));
@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
 
   test2::MDRefreshSample sample(&alloc);
   BOOST_CHECK_EQUAL((int)test2::MDRefreshSample::the_id,                                  2);
-  BOOST_CHECK_EQUAL(test2::MDRefreshSample::the_instruction.id(),                    2);
-  BOOST_CHECK_EQUAL(test2::MDRefreshSample::the_instruction.subinstructions_count(), 3);
+  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->id(),                    2);
+  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->subinstructions_count(), 3);
 
   test2::MDRefreshSample_cref sample_cref = sample.cref();
   test1::SampleInfo_cref si = sample_cref.get_info();

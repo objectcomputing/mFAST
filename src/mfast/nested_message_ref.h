@@ -112,7 +112,7 @@ class nested_message_mref
     {
       typedef typename MESSAGE::mref_type mref_type;
       set_target_instruction(&MESSAGE::the_instruction, true);
-      return mref_type(alloc_, this->storage(), &MESSAGE::the_instruction);
+      return mref_type(alloc_, this->storage(), MESSAGE::instruction());
     }
 
     message_mref rebind(const template_instruction* inst) const

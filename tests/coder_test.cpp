@@ -136,6 +136,7 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
 
   msg_ref[0].as(1);
   group_mref grp(msg_ref[1]);
+  grp.as_present();
   grp[0].as(2);
   grp[1].as(3);
 
