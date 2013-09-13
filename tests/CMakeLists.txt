@@ -26,7 +26,7 @@ add_executable (mfast_test
 			    fast_type_gen_test.cpp
 			    dictionary_builder_test.cpp)
 
-target_link_libraries (mfast_test mfast_static  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+target_link_libraries (mfast_test mfast_static mfast_coder_static  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 
 

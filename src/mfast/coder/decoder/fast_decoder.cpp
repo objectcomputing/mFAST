@@ -17,19 +17,20 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include <boost/container/map.hpp>
-#include "mfast/fast_decoder.h"
+#include "../fast_decoder.h"
+
 #include "mfast/field_visitor.h"
 #include "mfast/sequence_ref.h"
 #include "mfast/malloc_allocator.h"
-#include "mfast/fast_coder/exceptions.h"
 #include "mfast/output.h"
 #include "mfast/composite_field.h"
-#include "mfast/fast_coder/debug_stream.h"
-#include "mfast/fast_coder/dictionary_builder.h"
-#include "mfast/fast_coder/codec_helper.h"
-#include "mfast/fast_coder/decoder/decoder_presence_map.h"
-#include "mfast/fast_coder/decoder/decoder_field_operator.h"
-#include "mfast/fast_coder/decoder/fast_istream.h"
+#include "../common/exceptions.h"
+#include "../common/debug_stream.h"
+#include "../common/dictionary_builder.h"
+#include "../common/codec_helper.h"
+#include "decoder_presence_map.h"
+#include "decoder_field_operator.h"
+#include "fast_istream.h"
 
 
 namespace mfast {

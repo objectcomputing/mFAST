@@ -21,7 +21,7 @@
 #define FAST_OSTREAMBUF_H_TWEMCH8
 
 #include <stdexcept>
-#include "mfast/fast_coder/exceptions.h"
+#include "../common/exceptions.h"
 
 namespace mfast
 {

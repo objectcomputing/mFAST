@@ -9,3 +9,7 @@ add_executable (fast_type_gen
 			    $<TARGET_OBJECTS:fastxml>)
 
 target_link_libraries (fast_type_gen  ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
+
+
+install(TARGETS fast_type_gen
+        RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)

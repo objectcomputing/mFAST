@@ -17,8 +17,11 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include <mfast.h>
-#include <mfast/dynamic_templates_description.h>
 #include <mfast/field_comparator.h>
+#include <mfast/coder/dynamic_templates_description.h>
+#include <mfast/coder/fast_encoder.h>
+#include <mfast/coder/fast_decoder.h>
+
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>

@@ -5,8 +5,8 @@
 #include <boost/type_traits.hpp>
 
 #include "mfast/field_instruction.h"
-#include "mfast/fast_coder/decoder/fast_istreambuf.h"
-#include "mfast/fast_coder/decoder/decoder_presence_map.h"
+#include "fast_istreambuf.h"
+#include "decoder_presence_map.h"
 
 namespace mfast
 {

@@ -16,24 +16,32 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef TEMPLATE_LOADER_H_L6DO08PL
-#define TEMPLATE_LOADER_H_L6DO08PL
+#include "mfast/output.h"
+#include "fast_istream.h"
 
+#include <boost/io/ios_state.hpp>
 
-#include "field_instruction.h"
-#include "arena_allocator.h"
-namespace mfast
+namespace mfast {
+std::ostream&
+operator << (std::ostream& os, const fast_istream& istream)
 {
-class MFAST_EXPORT dynamic_templates_description
-  : public templates_description
-{
-  public:
-    dynamic_templates_description(const char* xml_content);
+  const char* ptr = istream.gptr();
+  boost::io::ios_flags_saver  ifs( os );
 
-  private:
-    arena_allocator alloc_;
-};
+  for (int i = 0; i < 2; ++i){
+    // Output at most 2 stop bit encoded entities
+    for ( ; ptr != istream.egptr() ; ++ptr) {
+      os << std::hex << std::setw(2)<< std::setfill('0') << (static_cast<unsigned>(*ptr) & 0xFF) << " ";
+      if (*ptr & '\x80') {
+        ++ptr;
+        break;
+      }
+    }
+  }
 
+  if (ptr != istream.egptr()) {
+    os << " ....";
+  }
+  return os;
 }
-
-#endif /* end of include guard: TEMPLATE_LOADER_H_L6DO08PL */
+}

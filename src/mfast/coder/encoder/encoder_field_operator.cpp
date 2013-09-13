@@ -20,12 +20,12 @@
 #include <iterator>
 #include <algorithm>
 
-#include "mfast/fast_coder/codec_helper.h"
-#include "mfast/fast_coder/encoder/fast_ostream.h"
-#include "mfast/fast_coder/encoder/encoder_presence_map.h"
+#include "../common/codec_helper.h"
+#include "fast_ostream.h"
+#include "encoder_presence_map.h"
 
-#include "mfast/fast_coder/encoder/encoder_field_operator.h"
-#include "mfast/fast_coder/encoder/fast_ostream_inserter.h"
+#include "encoder_field_operator.h"
+#include "fast_ostream_inserter.h"
 namespace mfast
 {
 

@@ -16,26 +16,25 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "mfast/fast_coder/decoder/decoder_presence_map.h"
+#ifndef TEMPLATE_LOADER_H_L6DO08PL
+#define TEMPLATE_LOADER_H_L6DO08PL
 
+#include "mfast_coder_export.h"
 
-#ifndef NDEBUG
-
-namespace mfast {
-std::ostream&
-operator << (std::ostream& os, const decoder_presence_map& pmap)
+#include "mfast/field_instruction.h"
+#include "mfast/arena_allocator.h"
+namespace mfast
 {
-  uint64_t mask = pmap.mask_ >> 1;
-  if (mask == 0) {
-    os << "0";
-    return os;
-  }
+class MFAST_CODER_EXPORT dynamic_templates_description
+  : public templates_description
+{
+  public:
+    dynamic_templates_description(const char* xml_content);
 
-  os << (mask & pmap.cur_bitmap_ ? "J" : "Q");
-  while ((mask >>=1)) {
-    os << (mask & pmap.cur_bitmap_ ? "1" : "0");
-  }
-  return os;
+  private:
+    arena_allocator alloc_;
+};
+
 }
-}
-#endif
+
+#endif /* end of include guard: TEMPLATE_LOADER_H_L6DO08PL */

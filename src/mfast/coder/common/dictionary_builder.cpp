@@ -21,7 +21,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "mfast/fast_coder/exceptions.h"
+#include "../common/exceptions.h"
 
 
 namespace mfast {

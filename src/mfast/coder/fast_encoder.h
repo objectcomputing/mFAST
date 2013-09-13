@@ -20,8 +20,10 @@
 #ifndef ENCODER_H_PMUI0TYQ
 #define ENCODER_H_PMUI0TYQ
 
+#include "mfast_coder_export.h"
 #include "mfast/message_ref.h"
 #include "mfast/malloc_allocator.h"
+
 #include <vector>
 
 namespace mfast
@@ -29,7 +31,7 @@ namespace mfast
 struct fast_encoder_impl;
 
 ///
-class MFAST_EXPORT fast_encoder
+class MFAST_CODER_EXPORT fast_encoder
 {
   public:
     /// Consturct a encoder using default memory allocator (i.e. malloc)

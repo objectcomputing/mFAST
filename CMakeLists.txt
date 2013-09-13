@@ -102,13 +102,14 @@ endmacro()
 add_subdirectory (tests)
 
 if (BUILD_SHARED_LIBS)
-  set(MFAST_LIBRARIES mfast)
+  set(MFAST_LIBRARIES mfast mfast_coder)
   add_definitions( -DMFAST_DYN_LINK )
 else()
-  set(MFAST_LIBRARIES mfast_static)
+  set(MFAST_LIBRARIES mfast_static mfast_coder_static)
 endif()
 
 add_subdirectory (examples)
+
 
 # Setting up dist target
 # ===============================

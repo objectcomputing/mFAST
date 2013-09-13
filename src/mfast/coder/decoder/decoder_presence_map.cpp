@@ -16,32 +16,26 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "mfast/output.h"
-#include "mfast/fast_coder/decoder/fast_istream.h"
+#include "decoder_presence_map.h"
 
-#include <boost/io/ios_state.hpp>
+
+#ifndef NDEBUG
 
 namespace mfast {
 std::ostream&
-operator << (std::ostream& os, const fast_istream& istream)
+operator << (std::ostream& os, const decoder_presence_map& pmap)
 {
-  const char* ptr = istream.gptr();
-  boost::io::ios_flags_saver  ifs( os );
-
-  for (int i = 0; i < 2; ++i){
-    // Output at most 2 stop bit encoded entities
-    for ( ; ptr != istream.egptr() ; ++ptr) {
-      os << std::hex << std::setw(2)<< std::setfill('0') << (static_cast<unsigned>(*ptr) & 0xFF) << " ";
-      if (*ptr & '\x80') {
-        ++ptr;
-        break;
-      }
-    }
+  uint64_t mask = pmap.mask_ >> 1;
+  if (mask == 0) {
+    os << "0";
+    return os;
   }
 
-  if (ptr != istream.egptr()) {
-    os << " ....";
+  os << (mask & pmap.cur_bitmap_ ? "J" : "Q");
+  while ((mask >>=1)) {
+    os << (mask & pmap.cur_bitmap_ ? "1" : "0");
   }
   return os;
 }
 }
+#endif

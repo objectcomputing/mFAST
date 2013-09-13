@@ -23,7 +23,7 @@
 #include "mfast/string_ref.h"
 #include "mfast/decimal_ref.h"
 #include "mfast/vector_ref.h"
-#include "mfast/fast_coder/decoder/fast_istream.h"
+#include "fast_istream.h"
 
 namespace mfast {
 

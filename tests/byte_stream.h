@@ -1,7 +1,7 @@
 #ifndef BYTE_STREAM_H_4KE09BNK
 #define BYTE_STREAM_H_4KE09BNK
 
-#include "mfast/fast_coder/encoder/fast_ostreambuf.h"
+#include "mfast/coder/encoder/fast_ostreambuf.h"
 #include <iostream>
 #include <iomanip>
 #include <boost/io/ios_state.hpp>

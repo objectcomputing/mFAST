@@ -18,8 +18,10 @@
 //
 #ifndef FAST_DECODER_H_WYWT9TG7
 #define FAST_DECODER_H_WYWT9TG7
+#include "mfast_coder_export.h"
 #include "mfast/message_ref.h"
 #include "mfast/malloc_allocator.h"
+
 
 namespace mfast
 {
@@ -27,7 +29,7 @@ namespace mfast
 struct fast_decoder_impl;
 
 ///
-class MFAST_EXPORT fast_decoder
+class MFAST_CODER_EXPORT fast_decoder
 {
   public:
     /// Construct a decode using a specified memory allocator
