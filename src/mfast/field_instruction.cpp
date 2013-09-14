@@ -31,7 +31,7 @@ field_instruction::field_instruction(uint16_t        field_index,
                                      const char*     ns)
   : field_index_(field_index)
   , operator_id_(operator_id)
-  , is_array_(field_type <= field_type_sequence )
+  , is_array_(field_type >= field_type_ascii_string && field_type <= field_type_sequence )
   , optional_flag_(optional)
   , nullable_flag_( optional &&  (operator_id != operator_constant) )
   , has_pmap_bit_(operator_id > operator_delta || ((operator_id == operator_constant) && optional))

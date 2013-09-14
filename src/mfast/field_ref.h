@@ -182,7 +182,8 @@ class make_field_mref_base<T, boost::true_type>
     }
   public:
 
-
+    // overloading void present(bool) is not a good ideal. It causes the bool present() 
+    // declared in field_cref being hided because of the overloading rule.
     void as_absent() const
     {
       if (my_instruction()->optional()) {

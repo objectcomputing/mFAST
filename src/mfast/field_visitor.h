@@ -300,13 +300,6 @@ make_sequence_mref<ElementType,SequenceInstructionType>::accept_mutator(FieldMut
   adaptor.visit(*this);
 }
 
-// template <typename FieldAccessor>
-// inline void
-// message_cref::accept_accessor(FieldAccessor& accessor) const
-// {
-//   detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-//   adaptor.visit(*this);
-// }
 
 template <typename FieldAccessor>
 inline void nested_message_cref::accept_accessor(FieldAccessor& accessor) const
@@ -315,14 +308,6 @@ inline void nested_message_cref::accept_accessor(FieldAccessor& accessor) const
   adaptor.visit(*this);
 }
 
-// template <typename ConstFieldRef>
-// template <typename FieldMutator>
-// inline void
-// make_message_mref<ConstFieldRef>::accept_mutator(FieldMutator& mutator) const
-// {
-//   detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
-//   adaptor.visit(*this);
-// }
 
 template <typename FieldMutator>
 inline void nested_message_mref::accept_mutator(FieldMutator& mutator) const

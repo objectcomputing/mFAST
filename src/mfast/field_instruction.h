@@ -45,16 +45,16 @@ enum presence_enum_t {
 };
 
 enum field_type_enum_t {
-  field_type_ascii_string,
-  field_type_unicode_string,
-  field_type_byte_vector,
-  field_type_sequence,
   field_type_int32,
   field_type_uint32,
   field_type_int64,
   field_type_uint64,
   field_type_decimal,
   field_type_exponent,
+  field_type_ascii_string,
+  field_type_unicode_string,
+  field_type_byte_vector,
+  field_type_sequence,
   field_type_group,
   field_type_templateref,
   field_type_template
