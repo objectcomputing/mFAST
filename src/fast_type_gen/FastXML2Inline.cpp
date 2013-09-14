@@ -34,11 +34,14 @@ void FastXML2Inline::restore_scope(const std::string& name_attr)
   str.resize(str.size() - substract_size);
   cref_scope_.clear();
   cref_scope_.str(str);
+  cref_scope_.seekp(str.size());
 
   str = mref_scope_.str();
   str.resize(str.size() - substract_size);
   mref_scope_.clear();
   mref_scope_.str(str);
+  mref_scope_.seekp(str.size());
+  
 }
 
 bool FastXML2Inline::VisitEnterTemplate (const XMLElement & /* element */,
@@ -153,7 +156,7 @@ bool FastXML2Inline::VisitEnterGroup (const XMLElement & element,
          << "inline\n"
          << cref_scope_.str() << name_attr << "_cref::"<< name_attr << "_cref(\n"
          << "  const mfast::field_cref& other)\n"
-         << "  : " << cref_scope_.str() << name_attr << "_cref_base(other)\n"
+         << "  : mfast::group_cref(other)\n"
          << "{\n"
          << "}\n\n"
          << "inline\n"
@@ -161,7 +164,7 @@ bool FastXML2Inline::VisitEnterGroup (const XMLElement & element,
          << "  mfast::allocator*      alloc,\n"
          << "  mfast::value_storage*  storage,\n"
          << "  " << mref_scope_.str() << name_attr << "_mref::instruction_cptr instruction)\n"
-         << "  : " << mref_scope_.str() << name_attr << "_mref_base(storage, instruction)\n"
+         << "  : " << mref_scope_.str() << name_attr << "_mref_base(alloc, storage, instruction)\n"
          << "{\n"
          << "}\n"
          << "inline\n"

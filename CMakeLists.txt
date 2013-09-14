@@ -77,14 +77,18 @@ foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
 	set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
 endforeach(var)
 
+foreach (input ${ARGN})
+	set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
+endforeach(input)
+
 ## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated. 
 ## Not at the time when "make" is called. 
-file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+# file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_command(
   OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
   COMMAND $<TARGET_FILE:fast_type_gen>
-  ARGS ${ARGN}
+  ARGS ${INPUTS}
   DEPENDS ${ARGN} fast_type_gen
   COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

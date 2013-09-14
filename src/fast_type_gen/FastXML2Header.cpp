@@ -69,6 +69,8 @@ void FastXML2Header::restore_scope(const std::string& name_attr)
   str.resize(str.size() - substract_size);
   cref_scope_.clear();
   cref_scope_.str(str);
+  cref_scope_.seekp(str.size());
+  
 }
 
 /// Visit a document.
@@ -128,6 +130,7 @@ bool FastXML2Header::VisitEnterTemplate (const XMLElement & /*element*/,
                << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
 
   cref_scope_ << name_attr << "_cref::";
+  std::cout << "VisitEnterTemplate push scope " << cref_scope_.str() << "\n";
   header_cref_.inc_indent(2);
   header_mref_.inc_indent(2);
 
@@ -178,8 +181,10 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "    " << name_attr << "(const " << name_attr << "&);\n"
       << "    " << name_attr << "& operator = (const "  << name_attr << "&);\n"
       << "};\n\n";
+  
   restore_scope(name_attr);
 
+  std::cout << "After restore_scope\n";
   // const XMLElement* typeRefElem = element.FirstChildElement("typeRef");
   // if (typeRefElem) {
   //   std::string typeRef_name = get_optional_attr(*typeRefElem, "name", "");
@@ -223,10 +228,11 @@ bool FastXML2Header::VisitEnterGroup (const XMLElement & element,
                  << indent << "    " << name_attr << "_mref(\n"
                  << indent << "      mfast::allocator*             alloc,\n"
                  << indent << "      mfast::value_storage*         storage,\n"
-                 << indent << "      instruction_cptr              instruction\n\n"
+                 << indent << "      instruction_cptr              instruction);\n\n"
                  << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
 
     cref_scope_ << name << "_cref::";
+    std::cout << "VisitEnterGroup push_scope" << cref_scope_.str() << "\n";
     header_cref_.inc_indent(2);
     header_mref_.inc_indent(2);
     return true;
@@ -251,6 +257,8 @@ bool FastXML2Header::VisitExitGroup (const XMLElement & element,
     header_mref_ << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
 
     restore_scope(name_attr);
+    std::cout << "VisitExitGroup restore_scope" << cref_scope_.str() << "\n";
+    
   }
   else {
     const char* templateRef_name = child->Attribute("name", 0);
@@ -304,6 +312,8 @@ bool FastXML2Header::VisitEnterSequence (const XMLElement & element,
 
 
     cref_scope_ << name_attr << "_cref::";
+    std::cout << "VisitEnterSequence push_scope" << cref_scope_.str() << "\n";
+    
     header_cref_.inc_indent(2);
     header_mref_.inc_indent(2);
     return true;
@@ -330,6 +340,7 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element,
                  << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
 
     restore_scope(name_attr);
+    std::cout << "VisitExitSequence restore_scope" << cref_scope_.str() << "\n";
   }
   else {
 
