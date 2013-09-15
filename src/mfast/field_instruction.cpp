@@ -374,6 +374,11 @@ void sequence_field_instruction::copy_value(const value_storage& src,
       std::size_t j = i* this->subinstructions_count_;
       copy_group_subfields(&src_elements[j], &dest_elements[j], alloc);
     }
+    // we must zero out the extra memory we reserved; otherwise we may deallocate garbage pointers during destruction.
+    std::size_t unused = dest.of_array.capacity_ - size;
+    if (unused > 0) {
+      memset( static_cast<char*>(dest.of_array.content_) + reserve_size , 0, unused * element_size);
+    }
   }
   else {
     dest.of_array.content_ = 0;
