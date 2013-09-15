@@ -65,37 +65,17 @@ class aggregate_cref
 
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
-    
-    bool absent () const
-    {
-      return instruction_== 0 || (parent_storage() && parent_storage()->is_empty() );
-    }
-
-    bool present() const
-    {
-      return !absent ();
-    }
-    
-    bool operator ! () const
-    {
-      return this->absent();
-    }
-    
-#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-    explicit bool operator() const 
-    {
-      return this->present();
-    }
-#endif  
 
   protected:
     aggregate_cref& operator= (const aggregate_cref&);
+
+    value_storage* parent_storage() const
+    {
+      return field_storage(num_fields())->of_group.content_;
+    }
     
-    value_storage* parent_storage() const {
-      if (instruction_ && instruction_->field_type() != field_type_sequence && instruction_->optional()) {
-        return field_storage(num_fields())->of_group.content_;
-      }
-      return 0;
+    const value_storage* storage() const {
+      return storage_array_;
     }
 
     const group_field_instruction* instruction_;
@@ -130,25 +110,6 @@ class make_aggregate_mref
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
-    
-    void as_absent() const
-    {
-      if (this->parent_storage()) {
-        this->parent_storage()->present(0);
-      }
-    }
-    
-    void as_present() const
-    {
-      if (this->parent_storage()) {
-        this->parent_storage()->present(1);
-      }
-    }
-    
-    void clear() const
-    {
-      as_absent();
-    }
 
   protected:
     template <class FieldMutator> friend class field_mutator_adaptor;
@@ -162,6 +123,114 @@ class make_aggregate_mref
 };
 
 typedef make_aggregate_mref<aggregate_cref> aggregate_mref;
+
+
+
+template <typename T>
+class make_optional_cref
+  : public T
+{
+  public:
+    make_optional_cref(const value_storage*           storage_array,
+                       const group_field_instruction* instruction)
+      : T(storage_array, instruction)
+    {
+    }
+
+    explicit make_optional_cref(const field_cref& other)
+      : T (other)
+    {
+    }
+
+    bool absent () const
+    {
+      return this->parent_storage()->is_empty();
+    }
+
+    bool present() const
+    {
+      return !absent ();
+    }
+
+    bool operator ! () const
+    {
+      return this->absent();
+    }
+
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+    explicit bool operator() const
+    {
+      return this->present();
+    }
+#endif
+
+};
+
+template <typename T>
+class make_optional_mref
+  : public T
+{
+  public:
+    typedef typename T::instruction_cptr instruction_cptr;
+
+    make_optional_mref(mfast::allocator*    alloc,
+                       const value_storage* storage_array,
+                       instruction_cptr     instruction)
+      : T(alloc, storage_array, instruction)
+    {
+    }
+
+    explicit make_optional_mref(const field_mref& other)
+      : T(other)
+    {
+    }
+
+    typedef make_optional_cref<typename T::cref_type> cref_type;
+
+    operator cref_type() const
+    {
+      return cref_type(this->storage(), this->instruction());
+    }
+
+    bool absent () const
+    {
+      return this->parent_storage()->is_empty();
+    }
+
+    bool present() const
+    {
+      return !absent ();
+    }
+
+    bool operator ! () const
+    {
+      return this->absent();
+    }
+
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+    explicit bool operator() const
+    {
+      return this->present();
+    }
+#endif
+
+    void as_absent() const
+    {
+      this->parent_storage()->present(0);
+    }
+
+    void as_present() const
+    {
+      this->parent_storage()->present(1);
+    }
+
+    void clear() const
+    {
+      as_absent();
+    }
+    
+};
+
 
 /////////////////////////////////////////////////////////////////
 
@@ -286,7 +355,7 @@ inline field_mref
 make_aggregate_mref<ConstRef>::operator[](size_t index) const
 {
   assert(index < this->num_fields());
-  
+
   return field_mref(this->alloc_,
                     this->field_storage(index),
                     this->instruction()->subinstruction(index));

@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
   msg_ref[0].as(1);
   
   aggregate_mref target(msg_ref[1]);
-  BOOST_CHECK_EQUAL(target.present(), true);
+  // BOOST_CHECK_EQUAL(target.present(), true);
   
   target[0].as(2);
   target[1].as(3);

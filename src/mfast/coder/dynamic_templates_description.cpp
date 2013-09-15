@@ -300,7 +300,6 @@ class templates_loader
           get_templateNs(element));
       }
       else {
-        // TODO: We need to handle the situation the templateRef is enclosed by a optional group
         presence_enum_t optional = presence_mandatory;
         
         if (element.NextSibling() == 0 && element.PreviousSibling() == 0) {

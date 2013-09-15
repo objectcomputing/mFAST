@@ -8,7 +8,7 @@
 
 
 
-FASTTYPEGEN_TARGET(test_types test1.xml test2.xml)
+FASTTYPEGEN_TARGET(test_types test1.xml test2.xml test3.xml)
 
 
 add_executable (mfast_test
@@ -24,7 +24,8 @@ add_executable (mfast_test
 				value_storage_test.cpp				
 			    ${FASTTYPEGEN_test_types_OUTPUTS}
 			    fast_type_gen_test.cpp
-			    dictionary_builder_test.cpp)
+			    dictionary_builder_test.cpp
+                json_test.cpp)
 
 target_link_libraries (mfast_test mfast_static mfast_coder_static  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 

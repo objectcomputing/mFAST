@@ -363,15 +363,15 @@ class MFAST_EXPORT decimal_field_instruction
     {
     }
 
-    decimal_field_instruction(uint16_t                          field_index,
-                              operator_enum_t                   exponent_operator_id,
-                              presence_enum_t                   optional,
-                              uint32_t                          id,
-                              const char*                       name,
-                              const char*                       ns,
-                              const op_context_t*               exponent_context,
+    decimal_field_instruction(uint16_t                    field_index,
+                              operator_enum_t             exponent_operator_id,
+                              presence_enum_t             optional,
+                              uint32_t                    id,
+                              const char*                 name,
+                              const char*                 ns,
+                              const op_context_t*         exponent_context,
                               mantissa_field_instruction* mantissa_instruction,
-                              decimal_value_storage             initial_value = decimal_value_storage())
+                              decimal_value_storage       initial_value = decimal_value_storage())
       : integer_field_instruction_base(field_index,
                                        exponent_operator_id,
                                        field_type_exponent,
@@ -391,8 +391,8 @@ class MFAST_EXPORT decimal_field_instruction
       }
     }
 
-    decimal_field_instruction(const decimal_field_instruction&  other,
-                              mantissa_field_instruction* mantissa_instruction)
+    decimal_field_instruction(const decimal_field_instruction& other,
+                              mantissa_field_instruction*      mantissa_instruction)
       : integer_field_instruction_base(other)
       , mantissa_instruction_(mantissa_instruction)
     {
@@ -1058,8 +1058,8 @@ class MFAST_EXPORT templateref_instruction
       // I used empty string instead of null pointer for name to represent dynamic templateRef because I wanted
       // to be able to print the name of dynamic templateRef directly (albeit empty) without using an if branch.
     }
-    
-    templateref_instruction(uint16_t    field_index,
+
+    templateref_instruction(uint16_t        field_index,
                             presence_enum_t optional)
       : field_instruction(field_index, operator_none, field_type_templateref, optional, 0, "", "")
       , target_(0)
@@ -1070,12 +1070,12 @@ class MFAST_EXPORT templateref_instruction
 
     templateref_instruction(uint16_t                    field_index,
                             const template_instruction* ref)
-      : field_instruction(field_index, operator_none, 
-                            field_type_templateref, 
-                            ref->optional() ? presence_optional : presence_mandatory, 
-                            0, 
-                            ref->name(), 
-                            ref->ns())
+      : field_instruction(field_index, operator_none,
+                          field_type_templateref,
+                          ref->optional() ? presence_optional : presence_mandatory,
+                          0,
+                          ref->name(),
+                          ref->ns())
       , target_(ref)
     {
     }
@@ -1084,6 +1084,11 @@ class MFAST_EXPORT templateref_instruction
                                  allocator*     alloc) const;
     virtual void destruct_value(value_storage& storage,
                                 allocator*     alloc) const;
+
+    void  construct_value(value_storage&              storage,
+                          allocator*                  alloc,
+                          const template_instruction* from_inst,
+                          bool                        construct_subfields) const;
 
     virtual std::size_t pmap_size() const;
 

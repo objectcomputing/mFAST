@@ -246,11 +246,10 @@ inline std::size_t
 group_field_instruction::content_allocation_size() const
 {
   std::size_t result = this->group_content_byte_count();
-  if (optional()) {
-    // for optional group, we need an extra storage used for storing the
-    // pointer back to its parent so we have way to set the field as absent.
-    result += sizeof(value_storage);
-  }
+  // for optional group, we need an extra storage used for storing the
+  // pointer back to its parent so we have way to set the field as absent.
+  // For simplicity, always allocate the extra storage
+  result += sizeof(value_storage);
   return result;
 }
 
@@ -266,7 +265,7 @@ void group_field_instruction::construct_value(value_storage& storage,
   storage.of_group.own_content_ = true;
   construct_group_subfields(storage.of_group.content_,
                             alloc,
-                            optional() ? &storage : 0);
+                            &storage);
 }
 
 void group_field_instruction::destruct_value(value_storage& storage,
@@ -289,7 +288,7 @@ void group_field_instruction::copy_value(const value_storage& src,
   dest.of_group.content_ =
     static_cast<value_storage*>(alloc->allocate( content_allocation_size() ));
 
-  copy_group_subfields(src.of_group.content_, dest.of_group.content_, alloc);
+  copy_group_subfields(src.of_group.content_, dest.of_group.content_, alloc, &dest);
 }
 
 void group_field_instruction::accept(field_instruction_visitor& visitor,
@@ -456,12 +455,23 @@ void template_instruction::accept(field_instruction_visitor& visitor,
 void templateref_instruction::construct_value(value_storage& storage,
                                               allocator*     alloc) const
 {
-  storage.of_templateref.of_instruction.instruction_ = target_;
-  if (target_) {
-    storage.of_templateref.content_ = static_cast<value_storage*>(
-      alloc->allocate(target_->group_content_byte_count()));
+  this->construct_value(storage, alloc, target_, true);
+}
 
-    target_->construct_group_subfields(storage.of_templateref.content_, alloc);
+void templateref_instruction::construct_value(value_storage&        storage,
+                                              allocator*            alloc,
+                                              const template_instruction* from_inst,
+                                              bool                  construct_subfields) const
+{
+  storage.of_templateref.of_instruction.instruction_ = from_inst;
+  if (from_inst) {
+    storage.of_templateref.content_ = static_cast<value_storage*>(
+      alloc->allocate(from_inst->content_allocation_size()));
+
+    if (construct_subfields)
+      from_inst->construct_group_subfields(storage.of_templateref.content_, alloc);
+    else 
+      memset(storage.of_templateref.content_, 0, from_inst->content_allocation_size());
   }
   else {
     storage.of_templateref.content_ = 0;
@@ -475,7 +485,7 @@ void templateref_instruction::destruct_value(value_storage& storage,
     storage.of_templateref.of_instruction.instruction_->destruct_group_subfields(
       static_cast<value_storage*>(storage.of_templateref.content_),
       alloc);
-    alloc->deallocate(storage.of_templateref.content_, storage.of_templateref.of_instruction.instruction_->group_content_byte_count());
+    alloc->deallocate(storage.of_templateref.content_, storage.of_templateref.of_instruction.instruction_->content_allocation_size());
   }
 }
 
@@ -486,7 +496,7 @@ void templateref_instruction::copy_value(const value_storage& src,
   dest.of_templateref.of_instruction.instruction_ = src.of_templateref.of_instruction.instruction_;
   if (src.of_templateref.of_instruction.instruction_) {
     dest.of_templateref.content_ =
-      static_cast<value_storage*>(alloc->allocate( dest.of_templateref.of_instruction.instruction_->group_content_byte_count() ));
+      static_cast<value_storage*>(alloc->allocate( dest.of_templateref.of_instruction.instruction_->content_allocation_size() ));
 
     dest.of_templateref.of_instruction.instruction_->copy_group_subfields(
       src.of_templateref.content_,

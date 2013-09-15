@@ -129,7 +129,7 @@ void FastXML2Source::restore_scope(const std::string& name_attr)
 std::string FastXML2Source::prefix_string() const
 {
   std::stringstream strm;
-  for (std::size_t i = 0; i < prefixes_.size() ; ++i) {
+  for (std::size_t i = 0; i < prefixes_.size(); ++i) {
     strm << prefixes_[i] << "__";
   }
   return strm.str();
@@ -223,7 +223,6 @@ bool FastXML2Source::output_typeref(const XMLElement & element)
   return out_.good();
 }
 
-
 bool FastXML2Source::VisitEnterTemplate (const XMLElement & /* element */,
                                          const std::string& name_attr,
                                          std::size_t /* index */)
@@ -237,7 +236,7 @@ bool FastXML2Source::VisitEnterTemplate (const XMLElement & /* element */,
 
   subinstructions_list_.resize(subinstructions_list_.size()+1);
   cref_scope_ << name_attr << "_cref::";
-  
+
   out_ << "const " << name_attr << "::instruction_type*\n"
        << name_attr << "::instruction()\n"
        << "{\n";
@@ -245,15 +244,14 @@ bool FastXML2Source::VisitEnterTemplate (const XMLElement & /* element */,
   return out_.good();
 }
 
-
 bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
                                         const std::string& name_attr,
                                         std::size_t        numFields,
                                         std::size_t /* index */)
 {
   restore_scope(name_attr);
-  
-  
+
+
   bool reset = false;
   const XMLAttribute* reset_attr = element.FindAttribute("scp:reset");
   if (reset_attr == 0)
@@ -280,9 +278,9 @@ bool FastXML2Source::VisitExitTemplate (const XMLElement & element,
        << "    "<< name_attr << "__subinstructions,\n"
        << "    "<< numFields << ", // num_fields\n"
        << "    " << reset << ", // reset\n";
-       
+
   output_typeref(element);
-  
+
   out_ << "  return &the_instruction;\n"
        << "}\n\n";
   return out_.good();
@@ -299,7 +297,7 @@ bool FastXML2Source::VisitEnterGroup (const XMLElement & element,
 
   add_to_instruction_list(name_attr);
   prefixes_.push_back(name_attr);
-  
+
   if (only_child_templateRef(element) == 0) {
     subinstructions_list_.resize(subinstructions_list_.size()+1);
     return out_.good();
@@ -319,7 +317,7 @@ FastXML2Source::get_subinstructions(const XMLElement & element,
   if (child == 0) {
     output_subinstructions(name_attr);
     // out_ << "} // namespace " << name_attr << "\n\n";
-    
+
     subinstruction_arg << "  "<< prefix_string() << "subinstructions,\n"
                        << "  "<< numFields << ", // num_fields\n";
     prefixes_.pop_back();
@@ -327,7 +325,7 @@ FastXML2Source::get_subinstructions(const XMLElement & element,
   else {
     // out_ << "} // namespace " << name_attr << "_def\n\n";
     prefixes_.pop_back();
-    
+
     const char* templateRef_name = child->Attribute("name", 0);
     if (templateRef_name) {
       std::string ns = get_optional_attr(*child, "ns", current_context().ns_.c_str());
@@ -341,7 +339,12 @@ FastXML2Source::get_subinstructions(const XMLElement & element,
                          << "  "<< qulified_name << "::instruction()->subinstructions_count(),\n";
     }
     else {
-      const char*  presence_str = get_optional_attr(element, "presence", "mandatory");
+      const char*  presence_str = "mandatory";
+
+      if (strcmp(element.Name(), "group") == 0) {
+        presence_str = get_optional_attr(element, "presence", "mandatory");
+      }
+
       // use templateref instruction singleton
       subinstruction_arg << "  "<< "mfast::templateref_instruction::default_instructions( presence_" << presence_str << "),\n"
                          << "  1, // num_fields\n";
@@ -379,7 +382,7 @@ bool FastXML2Source::VisitEnterSequence (const XMLElement & element,
 {
 
   cref_scope_ << name_attr << "_element_cref::";
-  
+
   // out_ << "namespace " << name_attr << "_def\n"
   //      << "{\n";
 

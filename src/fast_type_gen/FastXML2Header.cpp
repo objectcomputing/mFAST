@@ -70,7 +70,7 @@ void FastXML2Header::restore_scope(const std::string& name_attr)
   cref_scope_.clear();
   cref_scope_.str(str);
   cref_scope_.seekp(str.size());
-  
+
 }
 
 /// Visit a document.
@@ -181,7 +181,7 @@ bool FastXML2Header::VisitExitTemplate (const XMLElement & element,
       << "    " << name_attr << "(const " << name_attr << "&);\n"
       << "    " << name_attr << "& operator = (const "  << name_attr << "&);\n"
       << "};\n\n";
-  
+
   restore_scope(name_attr);
 
   std::cout << "After restore_scope\n";
@@ -258,7 +258,7 @@ bool FastXML2Header::VisitExitGroup (const XMLElement & element,
 
     restore_scope(name_attr);
     std::cout << "VisitExitGroup restore_scope" << cref_scope_.str() << "\n";
-    
+
   }
   else {
     const char* templateRef_name = child->Attribute("name", 0);
@@ -272,10 +272,20 @@ bool FastXML2Header::VisitExitGroup (const XMLElement & element,
       }
     }
 
-    header_cref_ << indent << "typedef " << qulified_name << "_cref " << name_attr << "_cref;\n"
-                 << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
-    header_mref_ << indent << "typedef " << qulified_name << "_mref " << name_attr << "_mref;\n"
-                 << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
+    if (strcmp(get_optional_attr(element, "presence", "mandatory"), "optional") == 0 ) {
+      
+      header_cref_ << indent << "typedef mfast::make_optional_cref<" << qulified_name << "_cref> " << name_attr << "_cref;\n"
+                   << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
+      header_mref_ << indent << "typedef mfast::make_optional_mref<" << qulified_name << "_mref> " << name_attr << "_mref;\n"
+                   << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
+    }
+    else {
+
+      header_cref_ << indent << "typedef " << qulified_name << "_cref " << name_attr << "_cref;\n"
+                   << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
+      header_mref_ << indent << "typedef " << qulified_name << "_mref " << name_attr << "_mref;\n"
+                   << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
+    }
   }
   return true;
 }
@@ -313,7 +323,7 @@ bool FastXML2Header::VisitEnterSequence (const XMLElement & element,
 
     cref_scope_ << name_attr << "_cref::";
     std::cout << "VisitEnterSequence push_scope" << cref_scope_.str() << "\n";
-    
+
     header_cref_.inc_indent(2);
     header_mref_.inc_indent(2);
     return true;
@@ -358,14 +368,15 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element,
         header_mref_ << indent << "typedef mfast::make_sequence_mref<" << qulified_name << "_mref> " << name_attr << "_mref;\n";
       }
       else {
-        header_cref_ << indent << "typedef mfast::sequence_cref " << name_attr << "_cref;\n";
-        header_mref_ << indent << "typedef mfast::sequence_mref " << name_attr << "_mref;\n";
+        header_cref_ << indent << "typedef mfast::make_sequence_cref<mfast::nested_message_cref> " << name_attr << "_cref;\n";
+        header_mref_ << indent << "typedef mfast::make_sequence_mref<mfast::nested_message_mref> " << name_attr << "_mref;\n";
+        
       }
     }
     else { // we have one element in the sequence
       const char* seq_element_type = child->Name();
       std::string cpp_type_name;
-      
+
       if (strcmp(seq_element_type, "int32") == 0) {
         cpp_type_name = "int32";
       }
@@ -389,13 +400,13 @@ bool FastXML2Header::VisitExitSequence (const XMLElement & element,
       else if (strcmp(seq_element_type, "byteVector") == 0) {
         cpp_type_name = "byte_vector";
       }
-      
+
       header_cref_ << indent << "typedef mfast::make_sequence_cref<mfast::" << cpp_type_name << "_cref> " << name_attr << "_cref;\n";
       header_mref_ << indent << "typedef mfast::make_sequence_mref<mfast::" << cpp_type_name << "_mref> " << name_attr << "_mref;\n";
-      
+
     }
-  
-    
+
+
     header_cref_ << indent << name_attr << "_cref get_" << name_attr << "() const;\n";
     header_mref_ << indent << name_attr << "_mref set_" << name_attr << "() const;\n";
   }
