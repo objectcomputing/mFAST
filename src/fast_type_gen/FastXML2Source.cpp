@@ -341,8 +341,9 @@ FastXML2Source::get_subinstructions(const XMLElement & element,
                          << "  "<< qulified_name << "::instruction()->subinstructions_count(),\n";
     }
     else {
+      const char*  presence_str = get_optional_attr(element, "presence", "mandatory");
       // use templateref instruction singleton
-      subinstruction_arg << "  "<< "mfast::templateref_instruction::default_instructions(),\n"
+      subinstruction_arg << "  "<< "mfast::templateref_instruction::default_instructions( presence_" << presence_str << "),\n"
                          << "  1, // num_fields\n";
     }
   }

@@ -1050,9 +1050,18 @@ class MFAST_EXPORT templateref_instruction
   public:
 
     templateref_instruction(uint16_t    field_index,
-                            const char* name = "",
-                            const char* ns = "")
+                            const char* name,
+                            const char* ns)
       : field_instruction(field_index, operator_none, field_type_templateref, presence_mandatory, 0, name, ns)
+      , target_(0)
+    {
+      // I used empty string instead of null pointer for name to represent dynamic templateRef because I wanted
+      // to be able to print the name of dynamic templateRef directly (albeit empty) without using an if branch.
+    }
+    
+    templateref_instruction(uint16_t    field_index,
+                            presence_enum_t optional)
+      : field_instruction(field_index, operator_none, field_type_templateref, optional, 0, "", "")
       , target_(0)
     {
       // I used empty string instead of null pointer for name to represent dynamic templateRef because I wanted
@@ -1061,7 +1070,12 @@ class MFAST_EXPORT templateref_instruction
 
     templateref_instruction(uint16_t                    field_index,
                             const template_instruction* ref)
-      : field_instruction(field_index, operator_none, field_type_templateref, presence_mandatory, 0, ref->name(), ref->ns())
+      : field_instruction(field_index, operator_none, 
+                            field_type_templateref, 
+                            ref->optional() ? presence_optional : presence_mandatory, 
+                            0, 
+                            ref->name(), 
+                            ref->ns())
       , target_(ref)
     {
     }
@@ -1090,7 +1104,7 @@ class MFAST_EXPORT templateref_instruction
       return name()[0] != 0;
     }
 
-    static const const_instruction_ptr_t* default_instructions();
+    static const const_instruction_ptr_t* default_instructions(presence_enum_t optional);
 
   private:
     const template_instruction* target_;

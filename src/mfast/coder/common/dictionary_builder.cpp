@@ -216,7 +216,8 @@ void dictionary_builder::visit(const templateref_instruction* src_inst, void* de
   }
   else {
     // this is dynamic templateRef, it can only be binded at decoding time
-    dest = new (*alloc_)templateref_instruction( src_inst->field_index() );
+    dest = new (*alloc_)templateref_instruction( src_inst->field_index(), 
+                                                 src_inst->optional() ? presence_optional : presence_mandatory  );
   }
 }
 

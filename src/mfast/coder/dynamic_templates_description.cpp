@@ -300,8 +300,21 @@ class templates_loader
           get_templateNs(element));
       }
       else {
+        // TODO: We need to handle the situation the templateRef is enclosed by a optional group
+        presence_enum_t optional = presence_mandatory;
+        
+        if (element.NextSibling() == 0 && element.PreviousSibling() == 0) {
+          const XMLElement* parent = element.Parent()->ToElement();
+          if (strcmp(parent->Name(), "group") == 0 &&
+              strcmp("optional", get_optional_attr(*parent, "presence", "mandatory")) ==0) 
+          {
+            optional = presence_optional;
+          }
+        }
+        
         instruction = new (*alloc_)templateref_instruction(
-          static_cast<uint16_t>(index));
+          static_cast<uint16_t>(index),
+          optional);
       }
 
       current().push_back(instruction);

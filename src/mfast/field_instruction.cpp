@@ -510,13 +510,15 @@ std::size_t templateref_instruction::pmap_size() const
 }
 
 const const_instruction_ptr_t*
-templateref_instruction::default_instructions()
+templateref_instruction::default_instructions(presence_enum_t optional)
 {
-  static const templateref_instruction templateref_instruction_signleton(0);
+  static const templateref_instruction mandatory_instruction(0, presence_mandatory);
+  static const templateref_instruction optional_instruction(0, presence_optional);
   static const field_instruction* array[] = {
-    &templateref_instruction_signleton
+    &mandatory_instruction,
+    &optional_instruction
   };
-  return array;
+  return &array[optional];
 }
 
 }

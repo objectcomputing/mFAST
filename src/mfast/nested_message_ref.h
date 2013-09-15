@@ -111,7 +111,7 @@ class nested_message_mref
     typename MESSAGE::mref_type as() const
     {
       typedef typename MESSAGE::mref_type mref_type;
-      set_target_instruction(&MESSAGE::the_instruction, true);
+      set_target_instruction(MESSAGE::instruction(), true);
       return mref_type(alloc_, this->storage(), MESSAGE::instruction());
     }
 

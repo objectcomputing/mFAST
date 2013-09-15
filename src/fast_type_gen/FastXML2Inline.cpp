@@ -41,7 +41,7 @@ void FastXML2Inline::restore_scope(const std::string& name_attr)
   mref_scope_.clear();
   mref_scope_.str(str);
   mref_scope_.seekp(str.size());
-  
+
 }
 
 bool FastXML2Inline::VisitEnterTemplate (const XMLElement & /* element */,
@@ -132,19 +132,37 @@ bool FastXML2Inline::VisitEnterGroup (const XMLElement & element,
                                       const std::string& name_attr,
                                       std::size_t        index)
 {
+
+  std::string only_templateRef_subindex;
+  const XMLElement * templateRef_child = only_child_templateRef(element);
   
-  out_ << "\ninline " << cref_scope_.str() << name_attr << "_cref\n"
-       << cref_scope_.str() << "get_" << name_attr << "() const\n"
-       << "{\n"
-       << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>((*this)[" << index << "]);\n"
-       << "}\n\n"
-       << "inline " << mref_scope_.str() << name_attr << "_mref\n"
-       << mref_scope_.str() << "set_" << name_attr << "() const\n"
-       << "{\n"
-       << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
-       << "}\n\n";
-  
-  if (only_child_templateRef(element) == 0) {
+  if (templateRef_child && get_optional_attr(*templateRef_child, "name",0) == 0) {
+    out_ << "\ninline " << cref_scope_.str() << name_attr << "_cref\n"
+         << cref_scope_.str() << "get_" << name_attr << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>( mfast::aggregate_cref((*this)[" << index << "])[0] );\n"
+         << "}\n\n"
+         << "inline " << mref_scope_.str() << name_attr << "_mref\n"
+         << mref_scope_.str() << "set_" << name_attr << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>( mfast::aggregate_mref((*this)[" << index << "])[0] );\n"
+         << "}\n\n";
+    
+  }
+  else {
+    out_ << "\ninline " << cref_scope_.str() << name_attr << "_cref\n"
+         << cref_scope_.str() << "get_" << name_attr << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << cref_scope_.str() << name_attr << "_cref>((*this)[" << index << "]);\n"
+         << "}\n\n"
+         << "inline " << mref_scope_.str() << name_attr << "_mref\n"
+         << mref_scope_.str() << "set_" << name_attr << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
+         << "}\n\n";
+  }
+
+  if (templateRef_child == 0) {
 
     out_ << "inline\n"
          << cref_scope_.str() << name_attr << "_cref::"<< name_attr << "_cref(\n"
@@ -206,7 +224,7 @@ bool FastXML2Inline::VisitEnterSequence (const XMLElement & element,
        << "{\n"
        << "  return static_cast<" << mref_scope_.str() << name_attr << "_mref>((*this)[" << index << "]);\n"
        << "}\n\n";
-  
+
   if (only_child(element) == 0) {
     out_ << "inline\n"
          << cref_scope_.str() << name_attr << "_element_cref::"<< name_attr << "_element_cref(\n"

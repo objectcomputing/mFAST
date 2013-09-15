@@ -262,7 +262,7 @@ bool FastXML2Header::VisitExitGroup (const XMLElement & element,
   }
   else {
     const char* templateRef_name = child->Attribute("name", 0);
-    std::string qulified_name = "mfast::group";
+    std::string qulified_name = "mfast::nested_message";
     if (templateRef_name) {
       std::string ns = get_optional_attr(*child, "ns", current_context().ns_.c_str());
       templates_registry_t::iterator itr = registry_.find(ns + "||" + templateRef_name);
