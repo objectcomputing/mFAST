@@ -22,22 +22,22 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   tags.resize(2);
   tags[0].as("Bar with \"quote\"");
   tags[1].as("Eek with \\");
-  // 
-  // Product_mref::stock_mref stock = product_ref.set_stock();
-  // stock.as_present();
-  // stock.set_warehouse().as(300);
-  // stock.set_retail().as(20);
-  // 
-  // std::stringstream strm;
-  // mfast::json_encode(strm, product_ref);
+  
+  Product_mref::stock_mref stock = product_ref.set_stock();
+  stock.as_present();
+  stock.set_warehouse().as(300);
+  stock.set_retail().as(20);
+  
+  std::stringstream strm;
+  mfast::json::encode(strm, product_ref);
     
   
   const char* result = "{\"id\":1,\"name\":\"Foo\",\"price\":123,\"tags\":[\"Bar with \\\"quote\\\"\",\"Eek with \\\\\"],\"stock\":{\"warehouse\":300,\"retail\":20}}";
   // std::cout << strm.str() << "\n";
   // std::cout << result << "\n";
   
-  // BOOST_CHECK_EQUAL(strm.str(),
-  //                   std::string(result));
+  BOOST_CHECK_EQUAL(strm.str(),
+                    std::string(result));
                     
   
   Product product2_holder(product_ref);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
   acct1.set_routingNumber().as(87654321); 
   
   std::stringstream strm;
-  mfast::json_encode(strm, person_ref);
+  mfast::json::encode(strm, person_ref);
   const char* result = "{\"firstName\":\"John\",\"lastName\":\"Smith\",\"age\":25,"
                        "\"phoneNumbers\":[{\"type\":\"home\",\"number\":\"212 555-1234\"},{\"type\":\"fax\",\"number\":\"646 555-4567\"}],"
                        "\"emails\":[],\"login\":{\"userName\":\"John\",\"password\":\"J0hnsm1th\"},\"bankAccounts\":[{\"number\":12345678,\"routingNumber\":87654321}]}";
@@ -81,6 +81,9 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
   
   BOOST_CHECK_EQUAL(strm.str(),
                     std::string(result));
+                    
+  Person person_holder2(person_ref);    
+      
   
 }
 

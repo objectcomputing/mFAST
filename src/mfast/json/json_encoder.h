@@ -5,8 +5,9 @@
 #include <iostream>
 
 namespace mfast {
-namespace detail {
-
+namespace json {
+namespace encode_detail {
+  
 struct quoted_string {
   quoted_string(const char* str)
     : str_(str)
@@ -40,8 +41,6 @@ bool is_empty(const mfast::aggregate_cref& ref)
   return true;
 }
 
-}
-
 
 class json_value_visitor
 {
@@ -71,19 +70,19 @@ class json_value_visitor
 
     void visit(const mfast::ascii_string_cref& ref)
     {
-      strm_ <<  separator_ << detail::quoted_string(ref.c_str());
+      strm_ <<  separator_ << quoted_string(ref.c_str());
       separator_[0] = ',';
     }
 
     void visit(const mfast::unicode_string_cref& ref)
     {
-      strm_ <<  separator_ << detail::quoted_string(ref.c_str());
+      strm_ <<  separator_ << quoted_string(ref.c_str());
       separator_[0] = ',';
     }
 
     void visit(const mfast::byte_vector_cref& ref)
     { // json doesn't have byte vector, treat it as string now
-      strm_ <<  separator_ << detail::quoted_string(reinterpret_cast<const char*>(ref.data()));
+      strm_ <<  separator_ << quoted_string(reinterpret_cast<const char*>(ref.data()));
       separator_[0] = ',';
     }
 
@@ -124,33 +123,33 @@ class json_object_visitor
     template <typename NumericTypeRef>
     void visit(const NumericTypeRef& ref)
     {
-      strm_ << separator_ << detail::quoted_string(ref.name()) << ":" << ref.value();
+      strm_ << separator_ << quoted_string(ref.name()) << ":" << ref.value();
       separator_[0] = ',';
     }
 
     void visit(const mfast::ascii_string_cref& ref)
     {
-      strm_ << separator_ << detail::quoted_string(ref.name()) << ":" << detail::quoted_string(ref.c_str());
+      strm_ << separator_ << quoted_string(ref.name()) << ":" << quoted_string(ref.c_str());
       separator_[0] = ',';
     }
 
     void visit(const mfast::unicode_string_cref& ref)
     {
-      strm_ << separator_<< detail::quoted_string(ref.name()) << ":" << detail::quoted_string(ref.c_str());
+      strm_ << separator_<< quoted_string(ref.name()) << ":" << quoted_string(ref.c_str());
       separator_[0] = ',';
     }
 
     void visit(const mfast::byte_vector_cref& ref)
     { // json doesn't have byte vector, treat it as string now
-      strm_ << separator_<< detail::quoted_string(ref.name()) << ":" << detail::quoted_string(reinterpret_cast<const char*>(ref.data()));
+      strm_ << separator_<< quoted_string(ref.name()) << ":" << quoted_string(reinterpret_cast<const char*>(ref.data()));
       separator_[0] = ',';
     }
 
     void visit(const mfast::group_cref& ref, int)
     {
-      if (detail::is_empty(ref))
+      if (is_empty(ref))
         return;
-      strm_ << separator_ << detail::quoted_string(ref.name()) << ":{";
+      strm_ << separator_ << quoted_string(ref.name()) << ":{";
 
       separator_[0] = '\0';
       ref.accept_accessor(*this);
@@ -161,7 +160,7 @@ class json_object_visitor
     
     void visit(const mfast::nested_message_cref&  ref, int)
     {
-      if (detail::is_empty(ref))
+      if (is_empty(ref))
         return;
 
       ref.accept_accessor(*this);
@@ -170,7 +169,7 @@ class json_object_visitor
 
     void visit(const mfast::sequence_cref& ref, int)
     {
-      strm_ << separator_ << detail::quoted_string(ref.name()) << ":[";
+      strm_ << separator_ << quoted_string(ref.name()) << ":[";
       if (ref.num_fields() > 1) {
         separator_[0] = '\0';
         ref.accept_accessor(*this);
@@ -185,17 +184,6 @@ class json_object_visitor
 
     void visit(const mfast::sequence_element_cref& ref, int);
 };
-
-
-
-inline bool json_encode(std::ostream& os, const mfast::aggregate_cref& msg)
-{
-  os << "{";
-  json_object_visitor visitor(os);
-  msg.accept_accessor(visitor);
-  os << "}";
-  return os.good();
-}
 
 inline 
 void json_value_visitor::visit(const mfast::sequence_cref& ref, int)
@@ -214,18 +202,33 @@ void json_value_visitor::visit(const mfast::sequence_cref& ref, int)
   strm_ << "]";
   separator_[0] = ',';
 }
+} // namspace encode_detail
 
-void json_value_visitor::visit(const mfast::nested_message_cref& ref, int)
+inline bool encode(std::ostream& os, const mfast::aggregate_cref& msg)
 {
-  json_encode(strm_, ref);
+  os << "{";
+  encode_json_object_visitor visitor(os);
+  msg.accept_accessor(visitor);
+  os << "}";
+  return os.good();
+}
+
+namespace encode_detail {
+
+inline void 
+json_value_visitor::visit(const mfast::nested_message_cref& ref, int)
+{
+  encode(strm_, ref);
 }
 
 inline void 
 json_object_visitor::visit(const mfast::sequence_element_cref& ref, int)
 {
   strm_ << separator_ ;
-  json_encode(strm_, ref);
+  encode(strm_, ref);
   separator_[0] = ',';
 }
-}
+} // namspace encode_detail
+} // namespace json
+} // namespace mfast
 #endif /* end of include guard: JSON_ENCODER_H_DHG4BF3O */
