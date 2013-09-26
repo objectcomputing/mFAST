@@ -1,0 +1,111 @@
+\documentclass[crop,tikz,convert=pdf2svg]{standalone}
+% \documentclass[crop,tikz]{standalone}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathabx}
+% \usepackage{relsize}
+\usepackage{tikz-uml}
+
+\begin{document}
+    
+    \begin{tikzpicture}
+
+    \umlclass[width=25ex]{field\_cref}{}{
+        + id() : uint32\_t \\
+        + name() : const char* \\
+        + present() : bool
+    }
+    
+    \umlclass[width=25ex, x=-12,y=6]{int32\_cref}{}{
+        + value() : int32\_t
+    }
+    \umlclass[width=25ex, x=-12,y=3]{uint32\_cref}{}{
+        + value() : uint32\_t
+    }
+    \umlclass[width=25ex, x=-12,y=0]{int64\_cref}{}{
+         + value() : int64\_t
+    }
+    \umlclass[width=25ex, x=-12,y=-3]{uint64\_cref}{}{
+         + value() : uint64\_t
+    }
+    \umlclass[width=25ex, x=-12,y=-6]{decimal\_cref}{}{
+     + value() : decimal
+    }
+    
+    \umlclass[width=32ex, x=-6,y=4.5]{ascii\_string\_cref}{}{
+      + size() : size\_t \\
+      + c\_str() : const char* \\
+      + value() : string
+    }
+    \umlclass[width=32ex, x=-6,y=1.5]{unicode\_string\_cref}{}{
+      + size() : size\_t \\
+      + c\_str() : const char* \\
+      + value() : string
+    }
+    \umlclass[width=32ex, x=-6,y=-1.5]{byte\_vector\_cref}{}{
+      + size() : size\_t \\
+      + data() : const char* \\
+      + value() : vector<uchar\_t>
+    }
+    
+    \umlclass[width=40ex, x=7,y=5]{group\_cref}{}{
+        + num\_fields() : size\_t\\
+        + operator[] (i : size\_t) : field\_cref
+    }
+    \umlclass[width=40ex, x=7,y=-2]{sequence\_cref}{}{
+         + size() : size\_t \\
+         + operator[] (i : size\_t) : sequence\_element\_cref
+     }
+     
+    \umlclass[width=40ex, x=15,y=-4]{sequence\_element\_cref}{}{
+         + num\_fields() : size\_t\\
+         + operator[] (i : size\_t) : field\_cref
+     }
+     
+    \umlclass[width=40ex, x=7,y=1.5]{nested\_message\_cref}{}{
+        + is\_static() : bool\\
+        + target() : message\_cref
+     }
+     \umlclass[width=40ex, x=15,y=0]{message\_cref}{}{
+         + id() : uint32\_t \\
+         + name() : const char* \\
+         + num\_fields() : size\_t\\
+         + operator[] (i : size\_t) : field\_cref
+     }
+    
+     \umlclass[width=40ex, x=15,y=5]{aggregate\_cref}{}{
+          + num\_fields() : size\_t\\
+          + operator[] (i : size\_t) : field\_cref
+      }
+      
+    \umlinherit[arm1=9cm, geometry=-|-]{int32\_cref}{field\_cref}
+    \umlinherit[arm1=9cm, geometry=-|-]{uint32\_cref}{field\_cref}
+    \umlinherit[arm1=9cm, geometry=-|-]{int64\_cref}{field\_cref}
+    \umlinherit[arm1=9cm, geometry=-|-]{uint64\_cref}{field\_cref}
+    \umlinherit[arm1=9cm, geometry=-|-]{decimal\_cref}{field\_cref}
+    
+    \umlinherit[arm1=3cm, geometry=-|-]{ascii\_string\_cref}{field\_cref}
+    \umlinherit[arm1=3cm, geometry=-|-]{unicode\_string\_cref}{field\_cref}
+    \umlinherit[arm1=3cm, geometry=-|-]{byte\_vector\_cref}{field\_cref}
+    
+    \umlinherit[anchors=190 and 60, geometry=-|]{group\_cref}{field\_cref}
+    \umlinherit[anchors=0 and -60, geometry=-|]{sequence\_cref}{field\_cref}
+    \umlinherit[anchor2=60, geometry=-|]{nested\_message\_cref}{field\_cref}
+    
+    \umldep [geometry=-|, anchors=170 and 120]{group\_cref}{field\_cref}
+    \umldep [geometry=|-,arg1={\guillemotleft create\guillemotright}, pos1=1.5]{sequence\_cref}{sequence\_element\_cref}
+    \umldep [arm1=-2cm, geometry=|-|,arg1={\guillemotleft create\guillemotright}, pos1=1.5]{sequence\_element\_cref}{field\_cref}
+    
+    \umldep [anchor1=10,geometry=-|,arg1={\guillemotleft create\guillemotright}, pos1=0.5]{nested\_message\_cref}{message\_cref}
+    \umldep [arg1={\guillemotleft create\guillemotright}, pos1=0.5]{message\_cref}{field\_cref}
+    
+    \umluniassoc [arm1=-1.5cm, geometry=|-|, arg1={convertible to $\blacktriangleright$}, pos1=1.5] {group\_cref}{aggregate\_cref}
+    
+     \umlinherit [arm1=4cm, geometry=-|-] {message\_cref}{aggregate\_cref}
+     \umlinherit [arm1=4cm, geometry=-|-] {sequence\_element\_cref}{aggregate\_cref}
+     
+     \umldep [arm1=1.5cm, anchor2=120,geometry=|-|, arg1={\guillemotleft create\guillemotright}, pos1=1.8]{aggregate\_cref}{field\_cref}
+    \end{tikzpicture}
+    
+\end{document}
+
