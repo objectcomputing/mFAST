@@ -7,7 +7,7 @@
 namespace mfast {
 namespace json {
 namespace encode_detail {
-  
+
 struct quoted_string {
   quoted_string(const char* str)
     : str_(str)
@@ -31,18 +31,8 @@ std::ostream& operator << (std::ostream& os, quoted_string str)
   return os;
 }
 
-bool is_empty(const mfast::aggregate_cref& ref)
-{
-  for (std::size_t i = 0; i < ref.num_fields(); ++i)
-  {
-    if (ref[i].present())
-      return false;
-  }
-  return true;
-}
 
-
-class json_value_visitor
+class json_visitor
 {
   private:
     std::ostream& strm_;
@@ -54,7 +44,7 @@ class json_value_visitor
       visit_absent = 0
     };
 
-    json_value_visitor(std::ostream& strm)
+    json_visitor(std::ostream& strm)
       : strm_(strm)
     {
       separator_[0] = 0;
@@ -65,170 +55,86 @@ class json_value_visitor
     void visit(const NumericTypeRef& ref)
     {
       strm_ <<  separator_ << ref.value();
-      separator_[0] = ',';
     }
 
     void visit(const mfast::ascii_string_cref& ref)
     {
       strm_ <<  separator_ << quoted_string(ref.c_str());
-      separator_[0] = ',';
     }
 
     void visit(const mfast::unicode_string_cref& ref)
     {
       strm_ <<  separator_ << quoted_string(ref.c_str());
-      separator_[0] = ',';
     }
 
     void visit(const mfast::byte_vector_cref& ref)
     { // json doesn't have byte vector, treat it as string now
       strm_ <<  separator_ << quoted_string(reinterpret_cast<const char*>(ref.data()));
-      separator_[0] = ',';
     }
 
-    void visit(const mfast::group_cref&, int)
+    void visit(const mfast::aggregate_cref& ref, int)
     {
-    }
-
-    void visit(const mfast::sequence_cref& ref, int);
-
-    void visit(const mfast::sequence_element_cref& ref, int)
-    {
-      ref.accept_accessor(*this);
-    }
-
-    void visit(const mfast::nested_message_cref& ref, int);
-};
-
-
-class json_object_visitor
-{
-  private:
-    std::ostream& strm_;
-    char separator_[2];
-
-  public:
-
-    enum {
-      visit_absent = 0
-    };
-
-    json_object_visitor(std::ostream& strm)
-      : strm_(strm)
-    {
-      separator_[0] = 0;
-      separator_[1] = 0;
-    }
-
-    template <typename NumericTypeRef>
-    void visit(const NumericTypeRef& ref)
-    {
-      strm_ << separator_ << quoted_string(ref.name()) << ":" << ref.value();
-      separator_[0] = ',';
-    }
-
-    void visit(const mfast::ascii_string_cref& ref)
-    {
-      strm_ << separator_ << quoted_string(ref.name()) << ":" << quoted_string(ref.c_str());
-      separator_[0] = ',';
-    }
-
-    void visit(const mfast::unicode_string_cref& ref)
-    {
-      strm_ << separator_<< quoted_string(ref.name()) << ":" << quoted_string(ref.c_str());
-      separator_[0] = ',';
-    }
-
-    void visit(const mfast::byte_vector_cref& ref)
-    { // json doesn't have byte vector, treat it as string now
-      strm_ << separator_<< quoted_string(ref.name()) << ":" << quoted_string(reinterpret_cast<const char*>(ref.data()));
-      separator_[0] = ',';
-    }
-
-    void visit(const mfast::group_cref& ref, int)
-    {
-      if (is_empty(ref))
-        return;
-      strm_ << separator_ << quoted_string(ref.name()) << ":{";
-
+      if (ref.num_fields()  == 1) {
+        field_cref f0 = ref[0];
+        if (f0.instruction()->field_type() == mfast::field_type_templateref) {
+          if (f0.present())
+            this->visit(mfast::nested_message_cref(f0),0);
+          return;
+        }
+      }
+      
+      strm_ << separator_ <<  "{";
       separator_[0] = '\0';
-      ref.accept_accessor(*this);
+      
+      for (std::size_t i = 0; i < ref.num_fields(); ++i) {
+        if (ref[i].present()) {          
+          strm_ << separator_ << quoted_string(ref[i].name()) << ":";
+          separator_[0] = '\0';
+          ref[i].accept_accessor(*this);
+        }
+        separator_[0] = ',';
+      }
 
       strm_ << "}";
-      separator_[0] = ',';
-    }
-    
-    void visit(const mfast::nested_message_cref&  ref, int)
-    {
-      if (is_empty(ref))
-        return;
-
-      ref.accept_accessor(*this);
-      separator_[0] = ',';
     }
 
     void visit(const mfast::sequence_cref& ref, int)
     {
-      strm_ << separator_ << quoted_string(ref.name()) << ":[";
-      if (ref.num_fields() > 1) {
+      strm_ << separator_  << "[";
+      if (ref.size()) {
         separator_[0] = '\0';
-        ref.accept_accessor(*this);
-      }
-      else {
-        json_value_visitor sub_visitor(strm_);
-        ref.accept_accessor(sub_visitor);
+        ref.accept_accessor(*this);        
       }
       strm_ << "]";
+    }
+
+    void visit(const mfast::sequence_element_cref& ref, int)
+    {
+      if (ref.num_fields() == 1) {
+        ref[0].accept_accessor(*this);
+      }
+      else {
+        this->visit(mfast::aggregate_cref(ref), 0);
+      }
       separator_[0] = ',';
     }
 
-    void visit(const mfast::sequence_element_cref& ref, int);
+    void visit(const mfast::nested_message_cref& ref, int)
+    {
+      this->visit(mfast::aggregate_cref(ref), 0);
+    }
+
 };
 
-inline 
-void json_value_visitor::visit(const mfast::sequence_cref& ref, int)
-{
-
-  // should only be called for sequence of sequence
-  strm_ << separator_ <<  "[";
-  if (ref.num_fields() > 1) {
-    json_object_visitor sub_visitor(strm_);
-    ref.accept_accessor(sub_visitor);
-  }
-  else {
-    separator_[0] = '\0';
-    ref.accept_accessor(*this);
-  }
-  strm_ << "]";
-  separator_[0] = ',';
-}
 } // namspace encode_detail
 
 inline bool encode(std::ostream& os, const mfast::aggregate_cref& msg)
 {
-  os << "{";
-  encode_json_object_visitor visitor(os);
-  msg.accept_accessor(visitor);
-  os << "}";
+  encode_detail::json_visitor visitor(os);
+  visitor.visit(msg, 0);
   return os.good();
 }
 
-namespace encode_detail {
-
-inline void 
-json_value_visitor::visit(const mfast::nested_message_cref& ref, int)
-{
-  encode(strm_, ref);
-}
-
-inline void 
-json_object_visitor::visit(const mfast::sequence_element_cref& ref, int)
-{
-  strm_ << separator_ ;
-  encode(strm_, ref);
-  separator_[0] = ',';
-}
-} // namspace encode_detail
 } // namespace json
 } // namespace mfast
 #endif /* end of include guard: JSON_ENCODER_H_DHG4BF3O */

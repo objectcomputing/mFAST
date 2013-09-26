@@ -119,6 +119,13 @@ int main(int argc, const char** argv)
 
     const mfast::templates_description* descriptions[] = { &description };
     coder.include(descriptions);
+    
+#ifdef WITH_ENCODE 
+    mfast::fast_encoder encoder(alloc);
+    encoder.include(descriptions);
+    std::vector<char> buffer;
+    buffer.reserve(message_contents.size());
+#endif
 
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
     {
@@ -129,7 +136,10 @@ int main(int argc, const char** argv)
         const char *last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
-          coder.decode(first, last, force_reset || first_message ); 
+          mfast::message_cref  msg = coder.decode(first, last, force_reset || first_message ); 
+#ifdef WITH_ENCODE       
+          encoder.encode(msg, buffer, force_reset || first_message);
+#endif
           first_message = false;
           first += skip_header_bytes;
         }

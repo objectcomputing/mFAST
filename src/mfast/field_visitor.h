@@ -247,6 +247,24 @@ class field_mutator_adaptor
 
 ///////////////////////////////////////////////////////////
 
+template <typename FieldAccessor>
+inline void
+field_cref::accept_accessor(FieldAccessor& accessor) const
+{
+  detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
+  this->instruction()->accept(adaptor, const_cast<value_storage *>(this->storage()));
+}
+
+template <typename FieldMutator>
+inline void
+field_mref::accept_mutator(FieldMutator& mutator) const
+{
+  detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
+  this->instruction()->accept(adaptor, this->storage());
+}
+
+//////////////////////////////////////////////////////////
+
 
 template <typename FieldAccessor>
 inline void

@@ -58,6 +58,10 @@ class field_mref
     void as(unsigned char (&value)[SIZE]);
 
     void as(const std::vector<unsigned char>& value);
+    
+    
+    template <typename FieldMutator>
+    void accept_mutator(FieldMutator&) const;
 };
 
 template <>

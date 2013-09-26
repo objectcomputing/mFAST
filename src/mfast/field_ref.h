@@ -139,6 +139,10 @@ class field_cref
     {
       return instruction_;
     }
+    
+    template <typename FieldAccesor>
+    void accept_accessor(FieldAccesor&) const;
+    
 
   protected:
 
