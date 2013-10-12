@@ -21,7 +21,7 @@
 
 #include <cmath>
 #include <cfloat>
-
+#include "mfast_export.h"
 #include "mfast/field_ref.h"
 #include "mfast/int_ref.h"
 
@@ -74,7 +74,7 @@ class exponent_cref
 
     bool is_initial_value() const
     {
-      return (this->absent() == instruction()->initial_value().is_empty()) && 
+      return (this->absent() == instruction()->initial_value().is_empty()) &&
         ( this->absent() || this->value() == instruction()->initial_value().of_decimal.exponent_);
     }
 
@@ -208,10 +208,10 @@ inline bool operator != (const decimal_cref& lhs, const decimal_cref& rhs)
   return !(lhs == rhs);
 }
 
-inline 
+inline
 bool decimal_cref::is_initial_value() const
 {
-  return *this == decimal_cref(&this->instruction()->initial_value(), this->instruction()); 
+  return *this == decimal_cref(&this->instruction()->initial_value(), this->instruction());
 }
 
 class exponent_mref

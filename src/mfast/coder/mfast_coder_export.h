@@ -11,7 +11,7 @@
 #    define MFAST_CODER_EXPORT BOOST_SYMBOL_EXPORT 
 #    define MFAST_DYN_LINK // we are using shared variant of mfast
 #    define MFAST_CODER_BUILD_SHARED_LIBS
-#  elif defined(MFAST_CODER_DYN_LINK)
+#  elif defined(MFAST_DYN_LINK)
      /* We are using the shared variant of this library */
 #    define MFAST_CODER_EXPORT BOOST_SYMBOL_IMPORT 
 #    define MFAST_CODER_USE_SHARED_LIBS
