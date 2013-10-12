@@ -1,8 +1,4 @@
-#ifndef JSON_ENCODER_H_DHG4BF3O
-#define JSON_ENCODER_H_DHG4BF3O
-
-#include <mfast.h>
-#include <iostream>
+#include "json.h"
 
 namespace mfast {
 namespace json {
@@ -82,12 +78,12 @@ class json_visitor
           return;
         }
       }
-      
+
       strm_ << separator_ <<  "{";
       separator_[0] = '\0';
-      
+
       for (std::size_t i = 0; i < ref.num_fields(); ++i) {
-        if (ref[i].present()) {          
+        if (ref[i].present()) {
           strm_ << separator_ << quoted_string(ref[i].name()) << ":";
           separator_[0] = '\0';
           ref[i].accept_accessor(*this);
@@ -103,7 +99,7 @@ class json_visitor
       strm_ << separator_  << "[";
       if (ref.size()) {
         separator_[0] = '\0';
-        ref.accept_accessor(*this);        
+        ref.accept_accessor(*this);
       }
       strm_ << "]";
     }
@@ -128,7 +124,7 @@ class json_visitor
 
 } // namspace encode_detail
 
-inline bool encode(std::ostream& os, const mfast::aggregate_cref& msg)
+bool encode(std::ostream& os, const mfast::aggregate_cref& msg)
 {
   encode_detail::json_visitor visitor(os);
   visitor.visit(msg, 0);
@@ -137,4 +133,3 @@ inline bool encode(std::ostream& os, const mfast::aggregate_cref& msg)
 
 } // namespace json
 } // namespace mfast
-#endif /* end of include guard: JSON_ENCODER_H_DHG4BF3O */

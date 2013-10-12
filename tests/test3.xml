@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.ociweb.com/ns/templates/mfast_json" ns="http://www.ociweb.com/ns/mfast">
-    
+
     <template name="Stock">
         <uInt32 name="warehouse" />
         <uInt32 name="retail" />
     </template>
-    
+
     <template name="Product" >
         <uInt32 name="id" />
         <string name="name" />
-        <uInt32 name="price" />
+        <decimal name="price" />
         <sequence name="tags" presence="optional">
             <string name="tag_item" />
         </sequence>
@@ -17,19 +17,19 @@
             <templateRef name="Stock" />
         </group>
     </template>
-    
+
     <template name="LoginAccount">
         <string name="userName" />
         <string name="password" />
     </template>
-    
+
     <template name="BankAccount">
         <uInt64 name="number" />
         <uInt64 name="routingNumber" />
         <string name="bank" presence="optional"/>
         <string name="alias" presence="optional"/>
     </template>
-    
+
     <template name="Person" >
         <string name="firstName" />
         <string name="lastName" />
@@ -54,6 +54,6 @@
             <templateRef />
         </sequence>
     </template>
-    
+
 </templates>
 
