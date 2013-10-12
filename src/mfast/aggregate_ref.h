@@ -73,7 +73,7 @@ class aggregate_cref
     {
       return field_storage(num_fields())->of_group.content_;
     }
-    
+
     const value_storage* storage() const {
       return storage_array_;
     }
@@ -82,6 +82,8 @@ class aggregate_cref
     const value_storage* storage_array_;
 
 };
+
+class message_mref;
 
 template <typename ConstRef>
 class make_aggregate_mref
@@ -119,6 +121,7 @@ class make_aggregate_mref
   private:
     make_aggregate_mref& operator= (const make_aggregate_mref&);
     friend struct fast_decoder_impl;
+    friend class message_mref;
     mfast::allocator* alloc_;
 };
 
@@ -228,7 +231,7 @@ class make_optional_mref
     {
       as_absent();
     }
-    
+
 };
 
 

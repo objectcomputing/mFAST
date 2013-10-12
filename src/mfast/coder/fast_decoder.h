@@ -32,7 +32,7 @@ struct fast_decoder_impl;
 class MFAST_CODER_EXPORT fast_decoder
 {
   public:
-    /// Construct a decode using a specified memory allocator
+    /// Construct a decoder using a specified memory allocator
     fast_decoder(allocator* alloc=  malloc_allocator::instance());
     ~fast_decoder();
 
