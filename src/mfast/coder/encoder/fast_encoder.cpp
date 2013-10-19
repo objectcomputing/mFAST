@@ -37,11 +37,11 @@ namespace mfast
 struct fast_encoder_impl
   : detail::field_storage_helper
 {
-  
+
   enum {
     visit_absent = 1
   };
-  
+
   fast_ostream strm_;
   dictionary_resetter resetter_;
   dictionary_value_destroyer value_destroyer_;
@@ -56,20 +56,21 @@ struct fast_encoder_impl
   fast_encoder_impl(allocator* alloc);
   ~fast_encoder_impl();
   encoder_presence_map& current_pmap();
-  
-  
+
+
   struct pmap_state
   {
     encoder_presence_map pmap_;
     encoder_presence_map* prev_pmap_;
-  
+
     pmap_state()
       : prev_pmap_(0)
     {
     }
+
   };
-  
-  
+
+
   void setup_pmap(pmap_state& state, std::size_t sz)
   {
     state.prev_pmap_ = this->current_;
@@ -84,7 +85,6 @@ struct fast_encoder_impl
       this->current_ = state.prev_pmap_;
     }
   }
-  
 
   template <typename SimpleCRef>
   void visit(SimpleCRef &cref);
@@ -143,15 +143,15 @@ fast_encoder_impl::visit(group_cref& cref, int)
     if (cref.absent())
       return;
   }
-  
+
   pmap_state state;
 
   if (cref.instruction()->segment_pmap_size() > 0) {
     setup_pmap(state, cref.instruction()->segment_pmap_size() );
   }
-  
+
   cref.accept_accessor(*this);
-  
+
   commit_pmap(state);
 }
 
@@ -187,25 +187,22 @@ fast_encoder_impl::visit(sequence_element_cref& cref, int)
   commit_pmap(state);
 }
 
-
 inline void
 fast_encoder_impl::visit(nested_message_cref& cref, int)
 {
   pmap_state state;
   int64_t saved_message_id = active_message_id_;
-  
-  if (!cref.is_static()) {
-    state.prev_pmap_ = this->current_;
-    this->current_ = &state.pmap_;
-    
-    // we have to replace the target instruction in cref so that the previous values of
-    // the inner fields can be accessed.
-    const template_instruction*& target_inst = detail::field_storage_helper::storage_of(cref).of_templateref.of_instruction.instruction_;
-    target_inst = encode_segment_preemble(target_inst->id(), false);
-  }
-  
+
+  state.prev_pmap_ = this->current_;
+  this->current_ = &state.pmap_;
+
+  // we have to replace the target instruction in cref so that the previous values of
+  // the inner fields can be accessed.
+  const template_instruction*& target_inst = detail::field_storage_helper::storage_of(cref).of_templateref.of_instruction.instruction_;
+  target_inst = encode_segment_preemble(target_inst->id(), false);
+
   cref.accept_accessor(*this);
-  
+
   commit_pmap(state);
   active_message_id_ = saved_message_id;
 }
@@ -226,8 +223,8 @@ fast_encoder_impl::encode_segment_preemble(uint32_t template_id, bool force_rese
 
   if ( force_reset ||  instruction->has_reset_attribute())
     resetter_.reset();
-  
-  
+
+
   bool need_encode_template_id = (active_message_id_ != template_id);
   current_pmap().set_next_bit(need_encode_template_id);
 
@@ -283,9 +280,9 @@ fast_encoder::include(const templates_description** descriptions, std::size_t de
 
 std::size_t
 fast_encoder::encode(const message_cref& message,
-                char*               buffer,
-                std::size_t         buffer_size,
-                bool                force_reset)
+                     char*               buffer,
+                     std::size_t         buffer_size,
+                     bool                force_reset)
 {
   assert(buffer_size > 0);
 
@@ -296,8 +293,8 @@ fast_encoder::encode(const message_cref& message,
 
 void
 fast_encoder::encode(const message_cref& message,
-                std::vector<char>&  buffer,
-                bool                force_reset)
+                     std::vector<char>&  buffer,
+                     bool                force_reset)
 {
   resizable_fast_ostreambuf sb(buffer);
   impl_->encode_segment(message, sb, force_reset);

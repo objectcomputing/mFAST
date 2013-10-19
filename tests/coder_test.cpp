@@ -205,21 +205,17 @@ BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
 
   debug_allocator alloc;
   message_type msg(&alloc, test_case.template_with_id(2));
-  
+
   BOOST_CHECK_EQUAL(test_case.template_with_id(2)->segment_pmap_size(), 3);
   message_mref msg_ref = msg.mref();
 
   msg_ref[0].as(1);
-  
-  aggregate_mref target(msg_ref[1]);
-  // BOOST_CHECK_EQUAL(target.present(), true);
-  
-  target[0].as(2);
-  target[1].as(3);
+  msg_ref[1].as(2);
+  msg_ref[2].as(3);
                                  // pmap | template id | field1 | field2 | field 3 |
-                                 //  F8         82        81        82       83     
+                                 //  F8         82        81        82       83
   BOOST_CHECK(test_case.encoding(msg_ref,"\xF8\x82\x81\x82\x83"));
-  BOOST_CHECK(test_case.decoding("\xF8\x82\x81\x82\x83", msg_ref));  
+  BOOST_CHECK(test_case.decoding("\xF8\x82\x81\x82\x83", msg_ref));
 }
 
 
@@ -248,11 +244,10 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
 
   msg_ref[0].as(1);
   nested_message_mref nested(static_cast<group_mref>(msg_ref[1])[0]);
-  BOOST_CHECK(!nested.is_static());
 
   message_mref target = nested.rebind(test_case.template_with_id(1));
-  
-    
+
+
   target[0].as(2);
   target[1].as(3);
 
@@ -283,7 +278,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
 
   BOOST_CHECK(test_case.encoding(msg_ref, "\xB8\x81\x82\x83", false));
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref, false));
-  
+
 
   // message not changed
   BOOST_CHECK(test_case.encoding(msg_ref, "\x80", false));
@@ -296,7 +291,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
   // encoding with reset, all values are initial
   BOOST_CHECK(test_case.encoding(msg_ref, "\x80", true));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref, true));
-  
+
 }
 
 BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
@@ -331,7 +326,7 @@ BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
   BOOST_CHECK(test_case.decoding("\x80", msg_ref));
 
   BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
-  BOOST_CHECK(test_case.decoding("\x80", msg_ref));  
+  BOOST_CHECK(test_case.decoding("\x80", msg_ref));
 }
 
 

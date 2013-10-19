@@ -104,94 +104,99 @@ class field_instruction_visitor;
 
 class MFAST_EXPORT field_instruction
 {
-  public:
-    virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const=0;
-    virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const;
+public:
+  virtual void construct_value(value_storage& storage,
+                               allocator*     alloc) const=0;
+  virtual void destruct_value(value_storage& storage,
+                              allocator*     alloc) const;
 
-    /// Perform deep copy
-    virtual void copy_value(const value_storage& src,
-                            value_storage&       dest,
-                            allocator*           alloc) const;
+  /// Perform deep copy
+  virtual void copy_value(const value_storage& src,
+                          value_storage&       dest,
+                          allocator*           alloc) const;
 
-    virtual void accept(field_instruction_visitor&, void*) const=0;
-    virtual std::size_t pmap_size() const;
+  virtual void accept(field_instruction_visitor&, void*) const=0;
+  virtual std::size_t pmap_size() const;
 
-    bool is_nullable() const
-    {
-      return nullable_flag_;
-    }
+  bool is_nullable() const
+  {
+    return nullable_flag_;
+  }
 
-    bool optional() const
-    {
-      return optional_flag_;
-    }
+  bool optional() const
+  {
+    return optional_flag_;
+  }
 
-    uint32_t id() const
-    {
-      return id_;
-    }
+  uint32_t id() const
+  {
+    return id_;
+  }
 
-    const char* name() const
-    {
-      return name_;
-    }
+  const char* name() const
+  {
+    return name_;
+  }
 
-    const char* ns() const
-    {
-      return ns_;
-    }
+  const char* ns() const
+  {
+    return ns_;
+  }
 
-    field_type_enum_t field_type() const
-    {
-      return static_cast<field_type_enum_t>(field_type_);
-    }
+  field_type_enum_t field_type() const
+  {
+    return static_cast<field_type_enum_t>(field_type_);
+  }
 
-    operator_enum_t field_operator() const
-    {
-      return static_cast<operator_enum_t>(operator_id_);
-    }
+  operator_enum_t field_operator() const
+  {
+    return static_cast<operator_enum_t>(operator_id_);
+  }
 
-    uint16_t field_index() const
-    {
-      return field_index_;
-    }
+  uint16_t field_index() const
+  {
+    return field_index_;
+  }
 
-    bool mandatory_without_initial_value() const
-    {
-      return mandatory_no_initial_value_;
-    }
+  void field_index(uint16_t i)
+  {
+    field_index_ = i;
+  }
 
-    /// @returns true if the field type is string, byteVector or sequence.
-    bool is_array() const
-    {
-      return is_array_;
-    }
+  bool mandatory_without_initial_value() const
+  {
+    return mandatory_no_initial_value_;
+  }
 
-    const char* field_type_name() const;
+  /// @returns true if the field type is string, byteVector or sequence.
+  bool is_array() const
+  {
+    return is_array_;
+  }
 
-    field_instruction(uint16_t        field_index,
-                      operator_enum_t operator_id,
-                      int             field_type,
-                      presence_enum_t optional,
-                      uint32_t        id,
-                      const char*     name,
-                      const char*     ns);
+  const char* field_type_name() const;
 
-  protected:
+  field_instruction(uint16_t        field_index,
+                    operator_enum_t operator_id,
+                    int             field_type,
+                    presence_enum_t optional,
+                    uint32_t        id,
+                    const char*     name,
+                    const char*     ns);
 
-    uint16_t field_index_;
-    uint16_t operator_id_ : 3;
-    uint16_t is_array_ : 1;
-    uint16_t optional_flag_ : 1;
-    uint16_t nullable_flag_ : 1;
-    uint16_t has_pmap_bit_ : 1;
-    uint16_t mandatory_no_initial_value_ : 1;
-    uint16_t field_type_ : 8;
-    uint32_t id_;
-    const char* name_;
-    const char* ns_;
+protected:
+
+  uint16_t field_index_;
+  uint16_t operator_id_ : 3;
+  uint16_t is_array_ : 1;
+  uint16_t optional_flag_ : 1;
+  uint16_t nullable_flag_ : 1;
+  uint16_t has_pmap_bit_ : 1;
+  uint16_t mandatory_no_initial_value_ : 1;
+  uint16_t field_type_ : 8;
+  uint32_t id_;
+  const char* name_;
+  const char* ns_;
 };
 
 class dictionary_builder;
@@ -199,104 +204,104 @@ class dictionary_builder;
 class MFAST_EXPORT integer_field_instruction_base
   : public field_instruction
 {
-  public:
-    integer_field_instruction_base(uint16_t             field_index,
-                                   operator_enum_t      operator_id,
-                                   int                  field_type,
-                                   presence_enum_t      optional,
-                                   uint32_t             id,
-                                   const char*          name,
-                                   const char*          ns,
-                                   const op_context_t*  context,
-                                   const value_storage& initial_storage)
-      : field_instruction(field_index, operator_id, field_type, optional, id, name, ns)
-      , op_context_(context)
-      , initial_value_(initial_storage)
-      , prev_value_(&prev_storage_)
-      , initial_or_default_value_(initial_storage.is_empty() ? &default_value_ : &initial_value_)
-    {
-      mandatory_no_initial_value_ = !optional && initial_storage.is_empty();
-    }
+public:
+  integer_field_instruction_base(uint16_t             field_index,
+                                 operator_enum_t      operator_id,
+                                 int                  field_type,
+                                 presence_enum_t      optional,
+                                 uint32_t             id,
+                                 const char*          name,
+                                 const char*          ns,
+                                 const op_context_t*  context,
+                                 const value_storage& initial_storage)
+    : field_instruction(field_index, operator_id, field_type, optional, id, name, ns)
+    , op_context_(context)
+    , initial_value_(initial_storage)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_storage.is_empty() ? &default_value_ : &initial_value_)
+  {
+    mandatory_no_initial_value_ = !optional && initial_storage.is_empty();
+  }
 
-    integer_field_instruction_base(const integer_field_instruction_base& other)
-      : field_instruction(other)
-      , op_context_(other.op_context_)
-      , initial_value_(other.initial_value_)
-      , prev_value_(&prev_storage_)
-      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
-    {
-    }
+  integer_field_instruction_base(const integer_field_instruction_base& other)
+    : field_instruction(other)
+    , op_context_(other.op_context_)
+    , initial_value_(other.initial_value_)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+  {
+  }
 
-    virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
+  virtual void construct_value(value_storage& storage,
+                               allocator*     alloc) const;
 
-    value_storage& prev_value()
-    {
-      return *prev_value_;
-    }
+  value_storage& prev_value()
+  {
+    return *prev_value_;
+  }
 
-    const value_storage& prev_value() const
-    {
-      return *prev_value_;
-    }
+  const value_storage& prev_value() const
+  {
+    return *prev_value_;
+  }
 
-    const op_context_t* op_context() const
-    {
-      return op_context_;
-    }
+  const op_context_t* op_context() const
+  {
+    return op_context_;
+  }
 
-    const value_storage& initial_value() const
-    {
-      return initial_value_;
-    }
+  const value_storage& initial_value() const
+  {
+    return initial_value_;
+  }
 
-    const value_storage& initial_or_default_value() const
-    {
-      return *initial_or_default_value_;
-    }
+  const value_storage& initial_or_default_value() const
+  {
+    return *initial_or_default_value_;
+  }
 
-  protected:
+protected:
 
-    friend class dictionary_builder;
-    const op_context_t* op_context_;
-    value_storage initial_value_;
-    value_storage* prev_value_;
-    value_storage prev_storage_;
-    const value_storage* initial_or_default_value_;
-    static const value_storage default_value_;
+  friend class dictionary_builder;
+  const op_context_t* op_context_;
+  value_storage initial_value_;
+  value_storage* prev_value_;
+  value_storage prev_storage_;
+  const value_storage* initial_or_default_value_;
+  static const value_storage default_value_;
 };
 
 template <typename T>
 class int_field_instruction
   : public integer_field_instruction_base
 {
-  public:
-    int_field_instruction(uint16_t             field_index,
-                          operator_enum_t      operator_id,
-                          presence_enum_t      optional,
-                          uint32_t             id,
-                          const char*          name,
-                          const char*          ns,
-                          const op_context_t*  context,
-                          int_value_storage<T> initial_value = int_value_storage<T>())
-      : integer_field_instruction_base(field_index,
-                                       operator_id,
-                                       field_type_trait<T>::id,
-                                       optional,
-                                       id,
-                                       name,
-                                       ns,
-                                       context,
-                                       initial_value.storage_)
-    {
-    }
+public:
+  int_field_instruction(uint16_t             field_index,
+                        operator_enum_t      operator_id,
+                        presence_enum_t      optional,
+                        uint32_t             id,
+                        const char*          name,
+                        const char*          ns,
+                        const op_context_t*  context,
+                        int_value_storage<T> initial_value = int_value_storage<T>())
+    : integer_field_instruction_base(field_index,
+                                     operator_id,
+                                     field_type_trait<T>::id,
+                                     optional,
+                                     id,
+                                     name,
+                                     ns,
+                                     context,
+                                     initial_value.storage_)
+  {
+  }
 
-    int_field_instruction(const int_field_instruction& other)
-      : integer_field_instruction_base(other)
-    {
-    }
+  int_field_instruction(const int_field_instruction& other)
+    : integer_field_instruction_base(other)
+  {
+  }
 
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
+  virtual void accept(field_instruction_visitor& visitor, void* context) const;
 
 };
 
@@ -320,19 +325,19 @@ typedef int_field_instruction<uint64_t> uint64_field_instruction;
 class MFAST_EXPORT mantissa_field_instruction
   : public int64_field_instruction
 {
-  public:
+public:
 
-    mantissa_field_instruction(operator_enum_t            operator_id,
-                               const op_context_t*        context,
-                               int_value_storage<int64_t> initial_value)
-      : int64_field_instruction(0, operator_id, presence_mandatory, 0, 0, 0, context, initial_value)
-    {
-    }
+  mantissa_field_instruction(operator_enum_t            operator_id,
+                             const op_context_t*        context,
+                             int_value_storage<int64_t> initial_value)
+    : int64_field_instruction(0, operator_id, presence_mandatory, 0, 0, 0, context, initial_value)
+  {
+  }
 
-    mantissa_field_instruction(const mantissa_field_instruction& other)
-      : int64_field_instruction(other)
-    {
-    }
+  mantissa_field_instruction(const mantissa_field_instruction& other)
+    : int64_field_instruction(other)
+  {
+  }
 
 };
 
@@ -340,264 +345,264 @@ class MFAST_EXPORT mantissa_field_instruction
 class MFAST_EXPORT decimal_field_instruction
   : public integer_field_instruction_base
 {
-  public:
+public:
 
-    decimal_field_instruction(uint16_t              field_index,
-                              operator_enum_t       decimal_operator_id,
-                              presence_enum_t       optional,
-                              uint32_t              id,
-                              const char*           name,
-                              const char*           ns,
-                              const op_context_t*   decimal_context,
-                              decimal_value_storage initial_value = decimal_value_storage())
-      : integer_field_instruction_base(field_index,
-                                       decimal_operator_id,
-                                       field_type_decimal,
-                                       optional,
-                                       id,
-                                       name,
-                                       ns,
-                                       decimal_context,
-                                       initial_value.storage_)
-      , mantissa_instruction_(0)
-    {
+  decimal_field_instruction(uint16_t              field_index,
+                            operator_enum_t       decimal_operator_id,
+                            presence_enum_t       optional,
+                            uint32_t              id,
+                            const char*           name,
+                            const char*           ns,
+                            const op_context_t*   decimal_context,
+                            decimal_value_storage initial_value = decimal_value_storage())
+    : integer_field_instruction_base(field_index,
+                                     decimal_operator_id,
+                                     field_type_decimal,
+                                     optional,
+                                     id,
+                                     name,
+                                     ns,
+                                     decimal_context,
+                                     initial_value.storage_)
+    , mantissa_instruction_(0)
+  {
+  }
+
+  decimal_field_instruction(uint16_t                    field_index,
+                            operator_enum_t             exponent_operator_id,
+                            presence_enum_t             optional,
+                            uint32_t                    id,
+                            const char*                 name,
+                            const char*                 ns,
+                            const op_context_t*         exponent_context,
+                            mantissa_field_instruction* mantissa_instruction,
+                            decimal_value_storage       initial_value = decimal_value_storage())
+    : integer_field_instruction_base(field_index,
+                                     exponent_operator_id,
+                                     field_type_exponent,
+                                     optional,
+                                     id,
+                                     name,
+                                     ns,
+                                     exponent_context,
+                                     initial_value.storage_)
+    , mantissa_instruction_(mantissa_instruction)
+  {
+    assert(mantissa_instruction);
+    this->initial_value_.of_decimal.mantissa_ = mantissa_instruction->initial_value().get<int64_t>();
+
+    if (has_pmap_bit_ == 0) {
+      has_pmap_bit_ = mantissa_instruction->pmap_size();
     }
+  }
 
-    decimal_field_instruction(uint16_t                    field_index,
-                              operator_enum_t             exponent_operator_id,
-                              presence_enum_t             optional,
-                              uint32_t                    id,
-                              const char*                 name,
-                              const char*                 ns,
-                              const op_context_t*         exponent_context,
-                              mantissa_field_instruction* mantissa_instruction,
-                              decimal_value_storage       initial_value = decimal_value_storage())
-      : integer_field_instruction_base(field_index,
-                                       exponent_operator_id,
-                                       field_type_exponent,
-                                       optional,
-                                       id,
-                                       name,
-                                       ns,
-                                       exponent_context,
-                                       initial_value.storage_)
-      , mantissa_instruction_(mantissa_instruction)
-    {
-      assert(mantissa_instruction);
-      this->initial_value_.of_decimal.mantissa_ = mantissa_instruction->initial_value().get<int64_t>();
+  decimal_field_instruction(const decimal_field_instruction& other,
+                            mantissa_field_instruction*      mantissa_instruction)
+    : integer_field_instruction_base(other)
+    , mantissa_instruction_(mantissa_instruction)
+  {
+  }
 
-      if (has_pmap_bit_ == 0) {
-        has_pmap_bit_ = mantissa_instruction->pmap_size();
-      }
+  /// Perform deep copy
+  virtual void copy_value(const value_storage& src,
+                          value_storage&       dest,
+                          allocator*           alloc) const;
+
+
+  virtual void construct_value(value_storage& storage,
+                               allocator*     alloc) const;
+
+
+  virtual void accept(field_instruction_visitor&, void*) const;
+
+  const mantissa_field_instruction* mantissa_instruction() const
+  {
+    return mantissa_instruction_;
+  }
+
+  const value_storage& initial_or_default_value() const
+  {
+    if (initial_value_.is_empty()) {
+      static const decimal_value_storage default_value(0,0);
+      return default_value.storage_;
     }
+    return initial_value_;
+  }
 
-    decimal_field_instruction(const decimal_field_instruction& other,
-                              mantissa_field_instruction*      mantissa_instruction)
-      : integer_field_instruction_base(other)
-      , mantissa_instruction_(mantissa_instruction)
-    {
-    }
+protected:
 
-    /// Perform deep copy
-    virtual void copy_value(const value_storage& src,
-                            value_storage&       dest,
-                            allocator*           alloc) const;
-
-
-    virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
-
-
-    virtual void accept(field_instruction_visitor&, void*) const;
-
-    const mantissa_field_instruction* mantissa_instruction() const
-    {
-      return mantissa_instruction_;
-    }
-
-    const value_storage& initial_or_default_value() const
-    {
-      if (initial_value_.is_empty()) {
-        static const decimal_value_storage default_value(0,0);
-        return default_value.storage_;
-      }
-      return initial_value_;
-    }
-
-  protected:
-
-    friend class dictionary_builder;
-    mantissa_field_instruction* mantissa_instruction_;
+  friend class dictionary_builder;
+  mantissa_field_instruction* mantissa_instruction_;
 };
 
 
 class MFAST_EXPORT string_field_instruction
   : public field_instruction
 {
-  public:
+public:
 
-    string_field_instruction(uint16_t             field_index,
-                             operator_enum_t      operator_id,
-                             field_type_enum_t    field_type,
-                             presence_enum_t      optional,
-                             uint32_t             id,
-                             const char*          name,
-                             const char*          ns,
-                             const op_context_t*  context,
-                             string_value_storage initial_value)
-      : field_instruction(field_index, operator_id, field_type, optional,
-                          id,
-                          name,
-                          ns)
-      , op_context_(context)
-      , initial_value_(initial_value.storage_)
-      , prev_value_(&prev_storage_)
-      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
-    {
-      mandatory_no_initial_value_ = !optional && initial_value.storage_.is_empty();
-    }
+  string_field_instruction(uint16_t             field_index,
+                           operator_enum_t      operator_id,
+                           field_type_enum_t    field_type,
+                           presence_enum_t      optional,
+                           uint32_t             id,
+                           const char*          name,
+                           const char*          ns,
+                           const op_context_t*  context,
+                           string_value_storage initial_value)
+    : field_instruction(field_index, operator_id, field_type, optional,
+                        id,
+                        name,
+                        ns)
+    , op_context_(context)
+    , initial_value_(initial_value.storage_)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+  {
+    mandatory_no_initial_value_ = !optional && initial_value.storage_.is_empty();
+  }
 
-    string_field_instruction(const string_field_instruction& other)
-      : field_instruction(other)
-      , op_context_(other.op_context_)
-      , initial_value_(other.initial_value_)
-      , prev_value_(&prev_storage_)
-      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
-    {
-    }
+  string_field_instruction(const string_field_instruction& other)
+    : field_instruction(other)
+    , op_context_(other.op_context_)
+    , initial_value_(other.initial_value_)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+  {
+  }
 
-    virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
-    virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const;
-
-
-    // perform deep copy
-    virtual void copy_value(const value_storage& src,
-                            value_storage&       dest,
-                            allocator*           alloc) const;
+  virtual void construct_value(value_storage& storage,
+                               allocator*     alloc) const;
+  virtual void destruct_value(value_storage& storage,
+                              allocator*     alloc) const;
 
 
-    value_storage& prev_value()
-    {
-      return *prev_value_;
-    }
+  // perform deep copy
+  virtual void copy_value(const value_storage& src,
+                          value_storage&       dest,
+                          allocator*           alloc) const;
 
-    const value_storage& prev_value() const
-    {
-      return *prev_value_;
-    }
 
-    const op_context_t* op_context() const
-    {
-      return op_context_;
-    }
+  value_storage& prev_value()
+  {
+    return *prev_value_;
+  }
 
-    const value_storage& initial_value() const
-    {
-      return initial_value_;
-    }
+  const value_storage& prev_value() const
+  {
+    return *prev_value_;
+  }
 
-    const value_storage& initial_or_default_value() const
-    {
-      return *initial_or_default_value_;
-    }
+  const op_context_t* op_context() const
+  {
+    return op_context_;
+  }
 
-  protected:
-    friend class dictionary_builder;
-    const op_context_t* op_context_;
-    value_storage initial_value_;
-    value_storage* prev_value_;
-    value_storage prev_storage_;
-    const value_storage* initial_or_default_value_;
-    static const value_storage default_value_;
+  const value_storage& initial_value() const
+  {
+    return initial_value_;
+  }
+
+  const value_storage& initial_or_default_value() const
+  {
+    return *initial_or_default_value_;
+  }
+
+protected:
+  friend class dictionary_builder;
+  const op_context_t* op_context_;
+  value_storage initial_value_;
+  value_storage* prev_value_;
+  value_storage prev_storage_;
+  const value_storage* initial_or_default_value_;
+  static const value_storage default_value_;
 };
 
 
 class MFAST_EXPORT ascii_field_instruction
   : public string_field_instruction
 {
-  public:
-    ascii_field_instruction(uint16_t             field_index,
+public:
+  ascii_field_instruction(uint16_t             field_index,
+                          operator_enum_t      operator_id,
+                          presence_enum_t      optional,
+                          uint32_t             id,
+                          const char*          name,
+                          const char*          ns,
+                          const op_context_t*  context,
+                          string_value_storage initial_value = string_value_storage())
+    : string_field_instruction(field_index,
+                               operator_id,
+                               field_type_ascii_string,
+                               optional,
+                               id, name, ns, context,
+                               initial_value)
+  {
+  }
+
+  ascii_field_instruction(const ascii_field_instruction& other)
+    : string_field_instruction(other)
+  {
+  }
+
+  virtual void accept(field_instruction_visitor& visitor, void* context) const;
+};
+
+class MFAST_EXPORT unicode_field_instruction
+  : public string_field_instruction
+{
+public:
+  unicode_field_instruction(uint16_t             field_index,
                             operator_enum_t      operator_id,
                             presence_enum_t      optional,
                             uint32_t             id,
                             const char*          name,
                             const char*          ns,
                             const op_context_t*  context,
-                            string_value_storage initial_value = string_value_storage())
-      : string_field_instruction(field_index,
-                                 operator_id,
-                                 field_type_ascii_string,
-                                 optional,
-                                 id, name, ns, context,
-                                 initial_value)
-    {
-    }
+                            string_value_storage initial_value = string_value_storage(),
+                            uint32_t             length_id = 0,
+                            const char*          length_name = "",
+                            const char*          length_ns = "")
+    : string_field_instruction(field_index,
+                               operator_id,
+                               field_type_unicode_string,
+                               optional,
+                               id, name, ns, context, initial_value)
+    , length_id_(length_id)
+    , length_name_(length_name)
+    , length_ns_(length_ns)
+  {
+  }
 
-    ascii_field_instruction(const ascii_field_instruction& other)
-      : string_field_instruction(other)
-    {
-    }
+  unicode_field_instruction(const unicode_field_instruction& other)
+    : string_field_instruction(other)
+    , length_id_(other.length_id_)
+    , length_name_(other.length_name_)
+    , length_ns_(other.length_ns_)
+  {
+  }
 
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
-};
+  virtual void accept(field_instruction_visitor& visitor, void* context) const;
 
-class MFAST_EXPORT unicode_field_instruction
-  : public string_field_instruction
-{
-  public:
-    unicode_field_instruction(uint16_t             field_index,
-                              operator_enum_t      operator_id,
-                              presence_enum_t      optional,
-                              uint32_t             id,
-                              const char*          name,
-                              const char*          ns,
-                              const op_context_t*  context,
-                              string_value_storage initial_value = string_value_storage(),
-                              uint32_t             length_id = 0,
-                              const char*          length_name = "",
-                              const char*          length_ns = "")
-      : string_field_instruction(field_index,
-                                 operator_id,
-                                 field_type_unicode_string,
-                                 optional,
-                                 id, name, ns, context, initial_value)
-      , length_id_(length_id)
-      , length_name_(length_name)
-      , length_ns_(length_ns)
-    {
-    }
+  uint32_t length_id() const
+  {
+    return length_id_;
+  }
 
-    unicode_field_instruction(const unicode_field_instruction& other)
-      : string_field_instruction(other)
-      , length_id_(other.length_id_)
-      , length_name_(other.length_name_)
-      , length_ns_(other.length_ns_)
-    {
-    }
+  const char* length_name() const
+  {
+    return length_name_;
+  }
 
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
+  const char* length_ns() const
+  {
+    return length_ns_;
+  }
 
-    uint32_t length_id() const
-    {
-      return length_id_;
-    }
-
-    const char* length_name() const
-    {
-      return length_name_;
-    }
-
-    const char* length_ns() const
-    {
-      return length_ns_;
-    }
-
-  protected:
-    uint32_t length_id_;
-    const char* length_name_;
-    const char* length_ns_;
+protected:
+  uint32_t length_id_;
+  const char* length_name_;
+  const char* length_ns_;
 };
 
 
@@ -605,59 +610,59 @@ class MFAST_EXPORT unicode_field_instruction
 class MFAST_EXPORT byte_vector_field_instruction
   : public string_field_instruction
 {
-  public:
-    byte_vector_field_instruction(uint16_t                  field_index,
-                                  operator_enum_t           operator_id,
-                                  presence_enum_t           optional,
-                                  uint32_t                  id,
-                                  const char*               name,
-                                  const char*               ns,
-                                  const op_context_t*       value_context,
-                                  byte_vector_value_storage initial_value = byte_vector_value_storage(),
-                                  uint32_t                  length_id = 0,
-                                  const char*               length_name = "",
-                                  const char*               length_ns = "")
-      : string_field_instruction(field_index,
-                                 operator_id,
-                                 field_type_byte_vector,
-                                 optional,
-                                 id, name, ns, value_context,
-                                 initial_value)
-      , length_id_(length_id)
-      , length_name_(length_name)
-      , length_ns_(length_ns)
-    {
-    }
+public:
+  byte_vector_field_instruction(uint16_t                  field_index,
+                                operator_enum_t           operator_id,
+                                presence_enum_t           optional,
+                                uint32_t                  id,
+                                const char*               name,
+                                const char*               ns,
+                                const op_context_t*       value_context,
+                                byte_vector_value_storage initial_value = byte_vector_value_storage(),
+                                uint32_t                  length_id = 0,
+                                const char*               length_name = "",
+                                const char*               length_ns = "")
+    : string_field_instruction(field_index,
+                               operator_id,
+                               field_type_byte_vector,
+                               optional,
+                               id, name, ns, value_context,
+                               initial_value)
+    , length_id_(length_id)
+    , length_name_(length_name)
+    , length_ns_(length_ns)
+  {
+  }
 
-    byte_vector_field_instruction(const byte_vector_field_instruction& other)
-      : string_field_instruction(other)
-      , length_id_(other.length_id_)
-      , length_name_(other.length_name_)
-      , length_ns_(other.length_ns_)
-    {
-    }
+  byte_vector_field_instruction(const byte_vector_field_instruction& other)
+    : string_field_instruction(other)
+    , length_id_(other.length_id_)
+    , length_name_(other.length_name_)
+    , length_ns_(other.length_ns_)
+  {
+  }
 
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
+  virtual void accept(field_instruction_visitor& visitor, void* context) const;
 
-    uint32_t length_id() const
-    {
-      return length_id_;
-    }
+  uint32_t length_id() const
+  {
+    return length_id_;
+  }
 
-    const char* length_name() const
-    {
-      return length_name_;
-    }
+  const char* length_name() const
+  {
+    return length_name_;
+  }
 
-    const char* length_ns() const
-    {
-      return length_ns_;
-    }
+  const char* length_ns() const
+  {
+    return length_ns_;
+  }
 
-  protected:
-    uint32_t length_id_;
-    const char* length_name_;
-    const char* length_ns_;
+protected:
+  uint32_t length_id_;
+  const char* length_name_;
+  const char* length_ns_;
 };
 
 typedef const field_instruction*  const_instruction_ptr_t;
@@ -739,192 +744,213 @@ struct MFAST_EXPORT aggregate_instruction_base
   const char* typeref_ns_;
   std::size_t segment_pmap_size_;
 
-  private:
-    const const_instruction_ptr_t* subinstructions_;
+private:
+  const const_instruction_ptr_t* subinstructions_;
 };
 
 
-
+class template_instruction;
 
 class MFAST_EXPORT group_field_instruction
   : public field_instruction
   , public aggregate_instruction_base
 {
-  public:
+public:
 
-    group_field_instruction(uint16_t                       field_index,
-                            presence_enum_t                optional,
-                            uint32_t                       id,
-                            const char*                    name,
-                            const char*                    ns,
-                            const char*                    dictionary,
-                            const const_instruction_ptr_t* subinstructions,
-                            uint32_t                       subinstructions_count,
-                            const char*                    typeref_name ="",
-                            const char*                    typeref_ns="")
-      : field_instruction(field_index,
-                          operator_constant,
-                          field_type_group,
-                          optional,
-                          id,
-                          name, ns)
-      , aggregate_instruction_base(dictionary, subinstructions,
-                                   subinstructions_count,
-                                   typeref_name,
-                                   typeref_ns)
-    {
-      has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
-    }
+  group_field_instruction(uint16_t                       field_index,
+                          presence_enum_t                optional,
+                          uint32_t                       id,
+                          const char*                    name,
+                          const char*                    ns,
+                          const char*                    dictionary,
+                          const const_instruction_ptr_t* subinstructions,
+                          uint32_t                       subinstructions_count,
+                          const char*                    typeref_name ="",
+                          const char*                    typeref_ns="")
+    : field_instruction(field_index,
+                        operator_constant,
+                        field_type_group,
+                        optional,
+                        id,
+                        name, ns)
+    , aggregate_instruction_base(dictionary, subinstructions,
+                                 subinstructions_count,
+                                 typeref_name,
+                                 typeref_ns)
+    , ref_template_(0)
+  {
+    has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
+  }
 
-    virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
-    virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const;
+  virtual void construct_value(value_storage& storage,
+                               allocator*     alloc) const;
+  virtual void destruct_value(value_storage& storage,
+                              allocator*     alloc) const;
 
-    // perform deep copy
-    virtual void copy_value(const value_storage& src,
-                            value_storage&       dest,
-                            allocator*           alloc) const;
+  // perform deep copy
+  virtual void copy_value(const value_storage& src,
+                          value_storage&       dest,
+                          allocator*           alloc) const;
 
-    virtual void accept(field_instruction_visitor&, void*) const;
+  virtual void accept(field_instruction_visitor&, void*) const;
 
 
-    std::size_t content_allocation_size() const;
+  std::size_t content_allocation_size() const;
 
+  const template_instruction* ref_template() const
+  {
+    return ref_template_;
+  }
+
+  void ref_template(const template_instruction* r)
+  {
+    ref_template_ = r;
+  }
+
+private:
+  const template_instruction* ref_template_;
 };
 
 
 class MFAST_EXPORT sequence_field_instruction
   : public group_field_instruction
 {
-  public:
-    sequence_field_instruction(uint16_t                       field_index,
-                               presence_enum_t                optional,
-                               uint32_t                       id,
-                               const char*                    name,
-                               const char*                    ns,
-                               const char*                    dictionary,
-                               const const_instruction_ptr_t* subinstructions,
-                               uint32_t                       subinstructions_count,
-                               uint32_field_instruction*      sequence_length_instruction,
-                               const char*                    typeref_name="",
-                               const char*                    typeref_ns="")
-      : group_field_instruction(field_index,
-                                optional,
-                                id,
-                                name,
-                                ns,
-                                dictionary,
-                                subinstructions,
-                                subinstructions_count,
-                                typeref_name,
-                                typeref_ns)
-      , sequence_length_instruction_(sequence_length_instruction)
-    {
-      field_type_ = field_type_sequence;
-      has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
-    }
+public:
+  sequence_field_instruction(uint16_t                       field_index,
+                             presence_enum_t                optional,
+                             uint32_t                       id,
+                             const char*                    name,
+                             const char*                    ns,
+                             const char*                    dictionary,
+                             const const_instruction_ptr_t* subinstructions,
+                             uint32_t                       subinstructions_count,
+                             uint32_field_instruction*      sequence_length_instruction,
+                             const char*                    typeref_name="",
+                             const char*                    typeref_ns="")
+    : group_field_instruction(field_index,
+                              optional,
+                              id,
+                              name,
+                              ns,
+                              dictionary,
+                              subinstructions,
+                              subinstructions_count,
+                              typeref_name,
+                              typeref_ns)
+    , sequence_length_instruction_(sequence_length_instruction)
+  {
+    field_type_ = field_type_sequence;
+    has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
+  }
 
-    virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
-    virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const;
+  virtual void construct_value(value_storage& storage,
+                               allocator*     alloc) const;
+  virtual void destruct_value(value_storage& storage,
+                              allocator*     alloc) const;
 
-    void construct_sequence_elements(value_storage& storage,
-                                     std::size_t    start,
-                                     std::size_t    length,
-                                     allocator*     alloc) const;
-    void destruct_sequence_elements(value_storage& storage,
-                                    std::size_t    start,
-                                    std::size_t    length,
-                                    allocator*     alloc) const;
+  void construct_sequence_elements(value_storage& storage,
+                                   std::size_t    start,
+                                   std::size_t    length,
+                                   allocator*     alloc) const;
+  void destruct_sequence_elements(value_storage& storage,
+                                  std::size_t    start,
+                                  std::size_t    length,
+                                  allocator*     alloc) const;
 
-    // perform deep copy
-    virtual void copy_value(const value_storage& src,
-                            value_storage&       dest,
-                            allocator*           alloc) const;
+  // perform deep copy
+  virtual void copy_value(const value_storage& src,
+                          value_storage&       dest,
+                          allocator*           alloc) const;
 
-    virtual void accept(field_instruction_visitor&, void*) const;
-    const uint32_field_instruction* length_instruction() const
-    {
-      return sequence_length_instruction_;
-    }
+  virtual void accept(field_instruction_visitor&, void*) const;
+  const uint32_field_instruction* length_instruction() const
+  {
+    return sequence_length_instruction_;
+  }
 
-  private:
+private:
 
 
-    friend class dictionary_builder;
-    uint32_field_instruction* sequence_length_instruction_;
+  friend class dictionary_builder;
+  uint32_field_instruction* sequence_length_instruction_;
 };
 
 
 class MFAST_EXPORT template_instruction
   : public group_field_instruction
 {
-  public:
-    template_instruction(uint32_t                       id,
-                         const char*                    name,
-                         const char*                    ns,
-                         const char*                    template_ns,
-                         const char*                    dictionary,
-                         const const_instruction_ptr_t* subinstructions,
-                         uint32_t                       subinstructions_count,
-                         bool                           reset,
-                         const char*                    typeref_name="",
-                         const char*                    typeref_ns="")
-      : group_field_instruction(0, presence_mandatory,
-                                id,
-                                name,
-                                ns,
-                                dictionary,
-                                subinstructions,
-                                subinstructions_count,
-                                typeref_name,
-                                typeref_ns)
-      , template_ns_(template_ns)
-      , reset_(reset)
-    {
-      field_type_ = field_type_template;
-    }
+public:
+  template_instruction(uint32_t                       id,
+                       const char*                    name,
+                       const char*                    ns,
+                       const char*                    template_ns,
+                       const char*                    dictionary,
+                       const const_instruction_ptr_t* subinstructions,
+                       uint32_t                       subinstructions_count,
+                       bool                           reset,
+                       const char*                    typeref_name="",
+                       const char*                    typeref_ns="",
+                       const char*                    cpp_ns="")
+    : group_field_instruction(0, presence_mandatory,
+                              id,
+                              name,
+                              ns,
+                              dictionary,
+                              subinstructions,
+                              subinstructions_count,
+                              typeref_name,
+                              typeref_ns)
+    , template_ns_(template_ns)
+    , cpp_ns_(cpp_ns)
+    , reset_(reset)
+  {
+    field_type_ = field_type_template;
+  }
 
-    const char* template_ns() const
-    {
-      return template_ns_;
-    }
+  const char* template_ns() const
+  {
+    return template_ns_;
+  }
+
+  const char* cpp_ns() const
+  {
+    return cpp_ns_;
+  }
 
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
 #endif
 
-    void construct_value(value_storage& storage,
-                         value_storage* fields_storage,
-                         allocator*     alloc,
-                         bool           construct_subfields=true) const;
+  void construct_value(value_storage& storage,
+                       value_storage* fields_storage,
+                       allocator*     alloc,
+                       bool           construct_subfields=true) const;
 
 
-    void copy_construct_value(value_storage&       storage,
-                              value_storage*       fields_storage,
-                              allocator*           alloc,
-                              const value_storage* src_fields_storage) const;
+  void copy_construct_value(value_storage&       storage,
+                            value_storage*       fields_storage,
+                            allocator*           alloc,
+                            const value_storage* src_fields_storage) const;
 
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 
-    virtual void accept(field_instruction_visitor&, void*) const;
+  virtual void accept(field_instruction_visitor&, void*) const;
 
-    bool has_reset_attribute() const
-    {
-      return reset_;
-    }
+  bool has_reset_attribute() const
+  {
+    return reset_;
+  }
 
-    void ensure_valid_storage(value_storage& storage,
-                              allocator*     alloc) const;
+  void ensure_valid_storage(value_storage& storage,
+                            allocator*     alloc) const;
 
-  private:
-    const char* template_ns_;
-    bool reset_;
+private:
+  const char* template_ns_;
+  const char* cpp_ns_;
+  bool reset_;
 };
 
 
@@ -932,51 +958,51 @@ template <typename T>
 class group_instruction_ex
   : public group_field_instruction
 {
-  public:
-    group_instruction_ex(uint16_t                       field_index,
-                         presence_enum_t                optional,
-                         uint32_t                       id,
-                         const char*                    name,
-                         const char*                    ns,
-                         const char*                    dictionary,
-                         const const_instruction_ptr_t* subinstructions,
-                         uint32_t                       subinstructions_count,
-                         const char*                    typeref_name ="",
-                         const char*                    typeref_ns="")
-      : group_field_instruction(field_index,
-                                optional,
-                                id,
-                                name,
-                                ns,
-                                dictionary,
-                                subinstructions,
-                                subinstructions_count,
-                                typeref_name,
-                                typeref_ns)
-    {
-    }
+public:
+  group_instruction_ex(uint16_t                       field_index,
+                       presence_enum_t                optional,
+                       uint32_t                       id,
+                       const char*                    name,
+                       const char*                    ns,
+                       const char*                    dictionary,
+                       const const_instruction_ptr_t* subinstructions,
+                       uint32_t                       subinstructions_count,
+                       const char*                    typeref_name ="",
+                       const char*                    typeref_ns="")
+    : group_field_instruction(field_index,
+                              optional,
+                              id,
+                              name,
+                              ns,
+                              dictionary,
+                              subinstructions,
+                              subinstructions_count,
+                              typeref_name,
+                              typeref_ns)
+  {
+  }
 
-    group_instruction_ex(uint16_t                    field_index,
-                         presence_enum_t             optional,
-                         uint32_t                    id,
-                         const char*                 name,
-                         const char*                 ns,
-                         const char*                 dictionary,
-                         const template_instruction* ref_template,
-                         const char*                 typeref_name ="",
-                         const char*                 typeref_ns="")
-      : group_field_instruction(field_index,
-                                optional,
-                                id,
-                                name,
-                                ns,
-                                dictionary,
-                                ref_template->subinstructions(),
-                                ref_template->subinstructions_count(),
-                                typeref_name,
-                                typeref_ns)
-    {
-    }
+  group_instruction_ex(uint16_t                    field_index,
+                       presence_enum_t             optional,
+                       uint32_t                    id,
+                       const char*                 name,
+                       const char*                 ns,
+                       const char*                 dictionary,
+                       const template_instruction* ref_template,
+                       const char*                 typeref_name ="",
+                       const char*                 typeref_ns="")
+    : group_field_instruction(field_index,
+                              optional,
+                              id,
+                              name,
+                              ns,
+                              dictionary,
+                              ref_template->subinstructions(),
+                              ref_template->subinstructions_count(),
+                              typeref_name,
+                              typeref_ns)
+  {
+  }
 
 };
 
@@ -985,39 +1011,39 @@ template <typename T>
 class sequence_instruction_ex
   : public sequence_field_instruction
 {
-  public:
-    sequence_instruction_ex(uint16_t                       field_index,
-                            presence_enum_t                optional,
-                            uint32_t                       id,
-                            const char*                    name,
-                            const char*                    ns,
-                            const char*                    dictionary,
-                            const const_instruction_ptr_t* subinstructions,
-                            uint32_t                       subinstructions_count,
-                            uint32_field_instruction*      sequence_length_instruction,
-                            const char*                    typeref_name="",
-                            const char*                    typeref_ns="")
-      : sequence_field_instruction(field_index, optional, id, name, ns, dictionary, subinstructions,
-                                   subinstructions_count, sequence_length_instruction, typeref_name, typeref_ns)
-    {
-    }
+public:
+  sequence_instruction_ex(uint16_t                       field_index,
+                          presence_enum_t                optional,
+                          uint32_t                       id,
+                          const char*                    name,
+                          const char*                    ns,
+                          const char*                    dictionary,
+                          const const_instruction_ptr_t* subinstructions,
+                          uint32_t                       subinstructions_count,
+                          uint32_field_instruction*      sequence_length_instruction,
+                          const char*                    typeref_name="",
+                          const char*                    typeref_ns="")
+    : sequence_field_instruction(field_index, optional, id, name, ns, dictionary, subinstructions,
+                                 subinstructions_count, sequence_length_instruction, typeref_name, typeref_ns)
+  {
+  }
 
-    sequence_instruction_ex(uint16_t                    field_index,
-                            presence_enum_t             optional,
-                            uint32_t                    id,
-                            const char*                 name,
-                            const char*                 ns,
-                            const char*                 dictionary,
-                            const template_instruction* ref_template,
-                            uint32_field_instruction*   sequence_length_instruction,
-                            const char*                 typeref_name="",
-                            const char*                 typeref_ns="")
-      : sequence_field_instruction(field_index, optional, id, name, ns, dictionary,
-                                   ref_template->subinstructions(),
-                                   ref_template->subinstructions_count(),
-                                   sequence_length_instruction, typeref_name, typeref_ns)
-    {
-    }
+  sequence_instruction_ex(uint16_t                    field_index,
+                          presence_enum_t             optional,
+                          uint32_t                    id,
+                          const char*                 name,
+                          const char*                 ns,
+                          const char*                 dictionary,
+                          const template_instruction* ref_template,
+                          uint32_field_instruction*   sequence_length_instruction,
+                          const char*                 typeref_name="",
+                          const char*                 typeref_ns="")
+    : sequence_field_instruction(field_index, optional, id, name, ns, dictionary,
+                                 ref_template->subinstructions(),
+                                 ref_template->subinstructions_count(),
+                                 sequence_length_instruction, typeref_name, typeref_ns)
+  {
+  }
 
 };
 
@@ -1026,188 +1052,174 @@ template <typename T>
 class template_instruction_ex
   : public template_instruction
 {
-  public:
-    template_instruction_ex(uint32_t                       id,
-                            const char*                    name,
-                            const char*                    ns,
-                            const char*                    template_ns,
-                            const char*                    dictionary,
-                            const const_instruction_ptr_t* subinstructions,
-                            uint32_t                       subinstructions_count,
-                            bool                           reset,
-                            const char*                    typeref_name="",
-                            const char*                    typeref_ns="")
-      : template_instruction(id, name, ns, template_ns, dictionary,
-                             subinstructions, subinstructions_count, reset, typeref_name, typeref_ns)
-    {
-    }
+public:
+  template_instruction_ex(uint32_t                       id,
+                          const char*                    name,
+                          const char*                    ns,
+                          const char*                    template_ns,
+                          const char*                    dictionary,
+                          const const_instruction_ptr_t* subinstructions,
+                          uint32_t                       subinstructions_count,
+                          bool                           reset,
+                          const char*                    typeref_name="",
+                          const char*                    typeref_ns="")
+    : template_instruction(id, name, ns, template_ns, dictionary,
+                           subinstructions, subinstructions_count, reset, typeref_name, typeref_ns)
+  {
+  }
 
 };
 
 class MFAST_EXPORT templateref_instruction
   : public field_instruction
 {
-  public:
+public:
 
-    templateref_instruction(uint16_t    field_index,
-                            const char* name,
-                            const char* ns)
-      : field_instruction(field_index, operator_none, field_type_templateref, presence_mandatory, 0, name, ns)
-      , target_(0)
-    {
-      // I used empty string instead of null pointer for name to represent dynamic templateRef because I wanted
-      // to be able to print the name of dynamic templateRef directly (albeit empty) without using an if branch.
-    }
+  templateref_instruction(uint16_t        field_index,
+                          presence_enum_t optional)
+    : field_instruction(field_index, operator_none, field_type_templateref, optional, 0, "", "")
+    , target_(0)
+  {
+    // I used empty string instead of null pointer for name to represent dynamic templateRef because I wanted
+    // to be able to print the name of dynamic templateRef directly (albeit empty) without using an if branch.
+  }
 
-    templateref_instruction(uint16_t        field_index,
-                            presence_enum_t optional)
-      : field_instruction(field_index, operator_none, field_type_templateref, optional, 0, "", "")
-      , target_(0)
-    {
-      // I used empty string instead of null pointer for name to represent dynamic templateRef because I wanted
-      // to be able to print the name of dynamic templateRef directly (albeit empty) without using an if branch.
-    }
+  templateref_instruction(uint16_t                    field_index,
+                          const template_instruction* ref)
+    : field_instruction(field_index, operator_none,
+                        field_type_templateref,
+                        ref->optional() ? presence_optional : presence_mandatory,
+                        0,
+                        ref->name(),
+                        ref->ns())
+    , target_(ref)
+  {
+  }
 
-    templateref_instruction(uint16_t                    field_index,
-                            const template_instruction* ref)
-      : field_instruction(field_index, operator_none,
-                          field_type_templateref,
-                          ref->optional() ? presence_optional : presence_mandatory,
-                          0,
-                          ref->name(),
-                          ref->ns())
-      , target_(ref)
-    {
-    }
+  virtual void construct_value(value_storage& storage,
+                               allocator*     alloc) const;
+  virtual void destruct_value(value_storage& storage,
+                              allocator*     alloc) const;
 
-    virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
-    virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const;
+  void  construct_value(value_storage&              storage,
+                        allocator*                  alloc,
+                        const template_instruction* from_inst,
+                        bool                        construct_subfields) const;
 
-    void  construct_value(value_storage&              storage,
-                          allocator*                  alloc,
-                          const template_instruction* from_inst,
-                          bool                        construct_subfields) const;
+  virtual std::size_t pmap_size() const;
 
-    virtual std::size_t pmap_size() const;
+  /// Perform deep copy
+  virtual void copy_value(const value_storage& src,
+                          value_storage&       dest,
+                          allocator*           alloc) const;
 
-    /// Perform deep copy
-    virtual void copy_value(const value_storage& src,
-                            value_storage&       dest,
-                            allocator*           alloc) const;
+  virtual void accept(field_instruction_visitor&, void*) const;
 
-    virtual void accept(field_instruction_visitor&, void*) const;
+  const template_instruction* target() const
+  {
+    return target_;
+  }
 
-    const template_instruction* target() const
-    {
-      return target_;
-    }
 
-    bool is_static() const
-    {
-      return name()[0] != 0;
-    }
+  static const const_instruction_ptr_t* default_instructions(presence_enum_t optional);
 
-    static const const_instruction_ptr_t* default_instructions(presence_enum_t optional);
-
-  private:
-    const template_instruction* target_;
+private:
+  const template_instruction* target_;
 };
 
 class templates_loader;
 class MFAST_EXPORT templates_description
 {
-  public:
-    template <unsigned SIZE>
-    templates_description(
-      const char* ns,
-      const char* template_ns,
-      const char* dictionary,
-      const template_instruction* (&instructions)[SIZE])
-      : ns_(ns)
-      , template_ns_(template_ns)
-      , dictionary_(dictionary)
-      , instructions_(instructions)
-      , instructions_count_(SIZE)
-    {
+public:
+  template <unsigned SIZE>
+  templates_description(
+    const char* ns,
+    const char* template_ns,
+    const char* dictionary,
+    const template_instruction* (&instructions)[SIZE])
+    : ns_(ns)
+    , template_ns_(template_ns)
+    , dictionary_(dictionary)
+    , instructions_(instructions)
+    , instructions_count_(SIZE)
+  {
+  }
+
+  typedef const template_instruction** iterator;
+
+  const char* ns() const
+  {
+    return ns_;
+  }
+
+  const char* template_ns() const
+  {
+    return template_ns_;
+  }
+
+  const char* dictionary() const
+  {
+    return dictionary_;
+  }
+
+  const template_instruction* operator[](std::size_t i) const
+  {
+    return instructions_[i];
+  }
+
+  iterator begin() const
+  {
+    return instructions_;
+  }
+
+  iterator end() const
+  {
+    return instructions_+ size();
+  }
+
+  const template_instruction* instruction_with_id(uint32_t id) const
+  {
+    for (uint32_t i = 0; i <  instructions_count_; ++i) {
+      if (instructions_[i]->id() == id)
+        return instructions_[i];
     }
+    return 0;
+  }
 
-    typedef const template_instruction** iterator;
+  uint32_t size() const
+  {
+    return instructions_count_;
+  }
 
-    const char* ns() const
-    {
-      return ns_;
-    }
+protected:
+  templates_description()
+  {
+  }
 
-    const char* template_ns() const
-    {
-      return template_ns_;
-    }
-
-    const char* dictionary() const
-    {
-      return dictionary_;
-    }
-
-    const template_instruction* operator[](std::size_t i) const
-    {
-      return instructions_[i];
-    }
-
-    iterator begin() const
-    {
-      return instructions_;
-    }
-
-    iterator end() const
-    {
-      return instructions_+ size();
-    }
-
-    const template_instruction* instruction_with_id(uint32_t id) const
-    {
-      for (uint32_t i = 0; i <  instructions_count_; ++i) {
-        if (instructions_[i]->id() == id)
-          return instructions_[i];
-      }
-      return 0;
-    }
-
-    uint32_t size() const
-    {
-      return instructions_count_;
-    }
-
-  protected:
-    templates_description()
-    {
-    }
-
-    friend class templates_loader;
-    const char* ns_;
-    const char* template_ns_;
-    const char* dictionary_;
-    const template_instruction** instructions_;
-    uint32_t instructions_count_;
+  friend class templates_loader;
+  const char* ns_;
+  const char* template_ns_;
+  const char* dictionary_;
+  const template_instruction** instructions_;
+  uint32_t instructions_count_;
 };
 
 
 class MFAST_EXPORT field_instruction_visitor
 {
-  public:
-    virtual void visit(const int32_field_instruction*, void*)=0;
-    virtual void visit(const uint32_field_instruction*, void*)=0;
-    virtual void visit(const int64_field_instruction*, void*)=0;
-    virtual void visit(const uint64_field_instruction*, void*)=0;
-    virtual void visit(const decimal_field_instruction*, void*)=0;
-    virtual void visit(const ascii_field_instruction*, void*)=0;
-    virtual void visit(const unicode_field_instruction*, void*)=0;
-    virtual void visit(const byte_vector_field_instruction*, void*)=0;
-    virtual void visit(const group_field_instruction*, void*)=0;
-    virtual void visit(const sequence_field_instruction*, void*)=0;
-    virtual void visit(const template_instruction*, void*)=0;
-    virtual void visit(const templateref_instruction*, void*)=0;
+public:
+  virtual void visit(const int32_field_instruction*, void*)=0;
+  virtual void visit(const uint32_field_instruction*, void*)=0;
+  virtual void visit(const int64_field_instruction*, void*)=0;
+  virtual void visit(const uint64_field_instruction*, void*)=0;
+  virtual void visit(const decimal_field_instruction*, void*)=0;
+  virtual void visit(const ascii_field_instruction*, void*)=0;
+  virtual void visit(const unicode_field_instruction*, void*)=0;
+  virtual void visit(const byte_vector_field_instruction*, void*)=0;
+  virtual void visit(const group_field_instruction*, void*)=0;
+  virtual void visit(const sequence_field_instruction*, void*)=0;
+  virtual void visit(const template_instruction*, void*)=0;
+  virtual void visit(const templateref_instruction*, void*)=0;
 };
 
 

@@ -49,26 +49,21 @@ class nested_message_cref
       return static_cast<const templateref_instruction*> (instruction_);
     }
 
-    bool is_static() const
-    {
-      return instruction()->is_static();
-    }
-    
-    message_cref target() const 
+    message_cref target() const
     {
       return message_cref(*this);
     }
-    
+
     const template_instruction* target_instruction() const
     {
       return storage()->of_templateref.of_instruction.instruction_;
     }
-    
+
     operator aggregate_cref() const
     {
       return aggregate_cref(storage()->of_group.content_, target_instruction());
     }
-    
+
     template <typename FieldAccessor>
     void accept_accessor(FieldAccessor&) const;
   protected:
@@ -97,12 +92,12 @@ class nested_message_mref
       : make_field_mref<nested_message_cref>(other)
     {
     }
-    
-    message_mref target() const 
+
+    message_mref target() const
     {
       return message_mref(alloc_, this->storage()->of_templateref.content_, this->target_instruction());
     }
-    
+
     operator aggregate_mref() const
     {
       return aggregate_mref(alloc_, storage()->of_templateref.content_, this->target_instruction());
@@ -110,7 +105,7 @@ class nested_message_mref
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
-    
+
     template <typename MESSAGE>
     typename MESSAGE::mref_type as() const
     {
@@ -129,8 +124,8 @@ class nested_message_mref
     {
       const templateref_instruction* templateRef_inst = static_cast<const templateref_instruction*>(this->instruction_);
       const template_instruction*& target_inst = this->storage()->of_templateref.of_instruction.instruction_;
-      
-      assert(!is_static() || target_inst == 0);
+
+      assert(target_inst == 0);
 
       if (inst == target_inst)
         return;
@@ -139,11 +134,11 @@ class nested_message_mref
         templateRef_inst->destruct_value(*this->storage(), alloc_);
       }
       templateRef_inst->construct_value(*this->storage(), alloc_, inst, construct_subfields);
-      
+
       if (this->optional()) {
         // The templateref instruction can only be optional when it is enclosed by an optional group and the
         // instruction is the only one in that group. This optional attribute is enforced during XML parsing phase.
-        // 
+        //
         // When the templateref instruction is optional, this->storage()[1] would be setup to point
         // to the origin storage for the group; when we construct a new template value from inst, we must have
         // the back pointer to the original group storage as well; otherwise, we are unable to set the group as absent.

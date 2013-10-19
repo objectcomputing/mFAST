@@ -26,33 +26,6 @@
 
 namespace mfast {
 
-struct tag_template_name;
-typedef boost::error_info<tag_template_name,std::string> template_name_info;
-
-class MFAST_EXPORT duplicate_template_id_error
-  : public fast_static_error
-{
-  public:
-    duplicate_template_id_error(unsigned tid)
-    {
-      *this << template_id_info(tid);
-    }
-
-};
-
-class MFAST_EXPORT template_not_found_error
-  : public fast_dynamic_error
-{
-  public:
-    template_not_found_error(const char* template_name, const char* referenced_by)
-      : fast_dynamic_error("D8")
-    {
-      *this << template_name_info(template_name) << referenced_by_info(referenced_by);
-    }
-
-};
-
-
 inline bool is_empty_string(const char* str)
 {
   return str == 0 || str[0] == '\0';
@@ -73,27 +46,27 @@ typedef boost::error_info<tag_second_type,std::string> second_type_info;
 class MFAST_EXPORT key_type_mismatch_error
   : public fast_dynamic_error
 {
-  public:
-    key_type_mismatch_error(const std::string& keyname,
-                            field_type_enum_t  first_type,
-                            field_type_enum_t  second_type)
-      : fast_dynamic_error("D4")
-    {
-      const char* field_type_name [] = {
-        "int32",
-        "uInt32",
-        "int64",
-        "uInt64",
-        "decimal",
-        "exponent",
-        "ascii string",
-        "unicode string",
-        "byteVector"
-      };
-      *this << key_info(keyname)
-            << first_type_info(field_type_name[first_type] )
-            << second_type_info(field_type_name[second_type] );
-    }
+public:
+  key_type_mismatch_error(const std::string& keyname,
+                          field_type_enum_t  first_type,
+                          field_type_enum_t  second_type)
+    : fast_dynamic_error("D4")
+  {
+    const char* field_type_name [] = {
+      "int32",
+      "uInt32",
+      "int64",
+      "uInt64",
+      "decimal",
+      "exponent",
+      "ascii string",
+      "unicode string",
+      "byteVector"
+    };
+    *this << key_info(keyname)
+          << first_type_info(field_type_name[first_type] )
+          << second_type_info(field_type_name[second_type] );
+  }
 
 };
 
@@ -203,22 +176,10 @@ void dictionary_builder::visit(const template_instruction* src_inst, void* dest_
 void dictionary_builder::visit(const templateref_instruction* src_inst, void* dest_inst)
 {
   templateref_instruction*& dest = *static_cast<templateref_instruction**>(dest_inst);
-  if (src_inst->is_static())
-  {
-    // this is static templateRef, we have to bind to the right template instruction
-    template_name_map_t::iterator itr = template_name_map_.find( qualified_name(src_inst->ns(), src_inst->name()) );
-    if (itr != template_name_map_.end()) {
-      dest = new (*alloc_)templateref_instruction( src_inst->field_index(), itr->second);
-    }
-    else {
-      BOOST_THROW_EXCEPTION(template_not_found_error(src_inst->name(), current_template_.c_str()));
-    }
-  }
-  else {
-    // this is dynamic templateRef, it can only be binded at decoding time
-    dest = new (*alloc_)templateref_instruction( src_inst->field_index(), 
-                                                 src_inst->optional() ? presence_optional : presence_mandatory  );
-  }
+
+  // this is dynamic templateRef, it can only be binded at decoding time
+  dest = new (*alloc_)templateref_instruction( src_inst->field_index(),
+                                               src_inst->optional() ? presence_optional : presence_mandatory  );
 }
 
 void dictionary_builder::visit(const group_field_instruction* src_inst, void* dest_inst)
@@ -227,50 +188,15 @@ void dictionary_builder::visit(const group_field_instruction* src_inst, void* de
 
   dest = new (*alloc_)group_field_instruction(*src_inst);
 
-  if (src_inst->subinstructions_count() == 1 ) {
-    const templateref_instruction* sub_inst = dynamic_cast<const templateref_instruction*>(src_inst->subinstruction(0));
-    if (sub_inst && sub_inst->is_static()) {
-      // this group embeds just one static templateRef instruction
-
-      template_name_map_t::iterator itr = template_name_map_.find( qualified_name(sub_inst->ns(), sub_inst->name()) );
-      if (itr != template_name_map_.end()) {
-        dest->set_subinstructions(itr->second->subinstructions(),
-                                  itr->second->subinstructions_count());
-
-      }
-      else {
-        BOOST_THROW_EXCEPTION(template_not_found_error(sub_inst->name(), current_template_.c_str()));
-      }
-    }
-  }
-  else {
-    this->build_group(src_inst, src_inst, dest);
-  }
+  this->build_group(src_inst, src_inst, dest);
 }
 
 void dictionary_builder::visit(const sequence_field_instruction* src_inst, void* dest_inst)
 {
   sequence_field_instruction*& dest = *static_cast<sequence_field_instruction**>(dest_inst);
   dest = new (*alloc_)sequence_field_instruction(*src_inst);
-  
-  if (src_inst->subinstructions_count() == 1 ) {
-    const templateref_instruction* sub_inst = dynamic_cast<const templateref_instruction*>(src_inst->subinstruction(0));
-    if (sub_inst && sub_inst->is_static()) {
-      // this group embeds just one static templateRef instruction
 
-      template_name_map_t::iterator itr = template_name_map_.find( qualified_name(sub_inst->ns(), sub_inst->name()) );
-      if (itr != template_name_map_.end()) {
-        dest->set_subinstructions(itr->second->subinstructions(),
-                                  itr->second->subinstructions_count());        
-      }
-      else {
-        BOOST_THROW_EXCEPTION(template_not_found_error(sub_inst->name(), current_template_.c_str()));
-      }
-    }
-  }
-  else {
-    this->build_group(src_inst, src_inst, dest);
-  }
+  this->build_group(src_inst, src_inst, dest);
 
   if (src_inst->length_instruction()) {
     visit(src_inst->length_instruction(), &dest->sequence_length_instruction_);

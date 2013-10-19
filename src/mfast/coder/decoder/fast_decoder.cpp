@@ -229,34 +229,30 @@ fast_decoder_impl::visit(nested_message_mref& mref, int)
   pmap_state state;
   message_type* saved_active_message = active_message_;
 
-  if (mref.is_static()) {
-    debug_ << "decoding template " << mref.name()  << " ...\n";
-  }
-  else {
-    debug_ << "decoding dynamic templateRef ...\n";
 
-    decode_pmap(state);
+  debug_ << "decoding dynamic templateRef ...\n";
 
-    debug_ << "   decoded pmap -> " << current_pmap() << "\n";
+  decode_pmap(state);
 
-    decoder_presence_map& pmap = current_pmap();
+  debug_ << "   decoded pmap -> " << current_pmap() << "\n";
 
-    if (pmap.is_next_bit_set()) {
-      uint32_t template_id;
+  decoder_presence_map& pmap = current_pmap();
 
-      strm_.decode(template_id, false);
-      debug_ << "   decoded template id -> " << template_id << "\n";
+  if (pmap.is_next_bit_set()) {
+    uint32_t template_id;
 
-      // find the message with corresponding template id
-      message_map_t::iterator itr = template_messages_.find(template_id);
-      if (itr != template_messages_.end())
-      {
-        active_message_ = &itr->second;
-      }
-      else {
-        BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
-                                                       << referenced_by_info(active_message_->name()));
-      }
+    strm_.decode(template_id, false);
+    debug_ << "   decoded template id -> " << template_id << "\n";
+
+    // find the message with corresponding template id
+    message_map_t::iterator itr = template_messages_.find(template_id);
+    if (itr != template_messages_.end())
+    {
+      active_message_ = &itr->second;
+    }
+    else {
+      BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
+                                                     << referenced_by_info(active_message_->name()));
     }
     mref.set_target_instruction(active_message_->instruction(), false);
   }

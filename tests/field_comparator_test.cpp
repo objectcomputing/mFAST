@@ -58,8 +58,8 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   m1ref[1].as(1);
   m1ref[2].as(2);
   m1ref[3].as("abcd");
-  
-  
+
+
   for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
   {
     BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
@@ -111,8 +111,8 @@ BOOST_AUTO_TEST_CASE(group_compare_test)
   group_mref m1group(m1ref[1]);
   m1group[0].as(1);
   m1group[1].as(2);
-  
-  
+
+
   for (std::size_t i = 0; i < m1group.num_fields(); ++i)
   {
     BOOST_CHECK_EQUAL(m1group[i].instruction()->field_index(), i);
@@ -167,8 +167,8 @@ BOOST_AUTO_TEST_CASE(sequence_compare_test)
   m1seq[0][1].as(2);
   m1seq[1][0].as(3);
   m1seq[1][1].as(4);
-  
-  
+
+
   for (std::size_t i = 0; i < m1seq[0].num_fields(); ++i)
   {
     BOOST_CHECK_EQUAL(m1seq[0][i].instruction()->field_index(), i);
@@ -222,27 +222,17 @@ BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
   message_mref m2ref = m2.ref();
 
   m1ref[0].as(1);
-
-  // static templateRef won't be resolved by dynamic_templates_description constructor
-  // we have to manual resolve the reference manually.
-  nested_message_mref nested1(m1ref[1]);
-  message_mref target1 = nested1.rebind(description[0]);
-  target1[0].as(2);
-  target1[1].as(3);
+  m1ref[1].as(2);
+  m1ref[2].as(3);
 
   for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
   {
     BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
   }
-  
-  aggregate_mref aggregate1(nested1);
-  BOOST_CHECK_EQUAL(aggregate1.instruction(), target1.instruction());
 
   m2ref[0].as(1);
-  nested_message_mref nested2(m2ref[1]);
-  message_mref target2 = nested2.rebind(description[0]);
-  target2[0].as(2);
-  target2[1].as(3);
+  m2ref[1].as(2);
+  m2ref[2].as(3);
 
   BOOST_CHECK(m1ref == m2ref);
 
@@ -282,15 +272,15 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
   m1ref[0].as(1);
 
   nested_message_mref nested1(m1ref[1]);
-  BOOST_CHECK(!nested1.is_static());
+
   message_mref target1 = nested1.rebind(description[0]);
   target1[0].as(2);
   target1[1].as(3);
-  
+
   for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
   {
     BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
-  } 
+  }
 
 
   m2ref[0].as(1);

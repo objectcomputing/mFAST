@@ -22,10 +22,10 @@
 #include <boost/exception/all.hpp>
 #include "mfast/mfast_export.h"
 
-#ifdef BOOST_MSVC 
-# pragma warning(push) 
-# pragma warning(disable : 4275) 
-#endif 
+#ifdef BOOST_MSVC
+# pragma warning(push)
+# pragma warning(disable : 4275)
+#endif
 
 namespace mfast
 {
@@ -83,25 +83,51 @@ public:
 
 struct tag_referenced_by;
 struct tag_template_id;
+struct tag_template_name;
 }
 
 namespace  boost {
-  // For Clang, we must use extern template and explicit template instantiation; 
+  // For Clang, we must use extern template and explicit template instantiation;
   //     otherwise, we will have duplicated definition link error when building shared library.
   // For GCC, we must nest the explicit instantiation statement inside their original namespace;
   //     otherwise, the code won't compile.
 extern template class error_info<mfast::tag_referenced_by,std::string>;
 extern template class error_info<mfast::tag_template_id,unsigned>;
+extern template class error_info<mfast::tag_template_name,std::string>;
 }
 
 namespace mfast {
-typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info; 
+typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info;
 typedef boost::error_info<tag_template_id,unsigned> template_id_info;
+typedef boost::error_info<tag_template_name,std::string> template_name_info;
+
+class MFAST_EXPORT duplicate_template_id_error
+  : public fast_static_error
+{
+  public:
+    duplicate_template_id_error(unsigned tid)
+    {
+      *this << template_id_info(tid);
+    }
+
+};
+
+class MFAST_EXPORT template_not_found_error
+  : public fast_dynamic_error
+{
+  public:
+    template_not_found_error(const char* template_name, const char* referenced_by)
+      : fast_dynamic_error("D8")
+    {
+      *this << template_name_info(template_name) << referenced_by_info(referenced_by);
+    }
+
+};
 }
 
 
-#ifdef BOOST_MSVC 
-#pragma warning(pop) 
-#endif 
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
 
 #endif /* end of include guard: EXCEPTIONS_H_87B9JUIK */

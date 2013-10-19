@@ -23,16 +23,32 @@
 
 #include "mfast/field_instruction.h"
 #include "mfast/arena_allocator.h"
+#include <map>
 namespace mfast
 {
+class MFAST_CODER_EXPORT template_registry
+{
+private:
+  typedef std::map<std::string, template_instruction*> map_type;
+  map_type templates_;
+  std::string get_key(const char* ns, const char* name) const;
+  arena_allocator alloc_;
+public:
+  template_instruction* find(const char* ns, const char* name) const;
+  void add(const char* ns, template_instruction* inst);
+  arena_allocator* allocator();
+
+  static template_registry* instance();
+};
+
+
 class MFAST_CODER_EXPORT dynamic_templates_description
   : public templates_description
 {
-  public:
-    dynamic_templates_description(const char* xml_content);
-
-  private:
-    arena_allocator alloc_;
+public:
+  dynamic_templates_description(const char*        xml_content,
+                                const char*        cpp_ns="",
+                                template_registry* registry = template_registry::instance());
 };
 
 }

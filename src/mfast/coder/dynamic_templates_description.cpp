@@ -31,6 +31,7 @@ using namespace boost::assign; // bring 'map_list_of()' into scope
 
 namespace mfast
 {
+typedef std::deque<field_instruction*> instruction_list_t;
 
 struct tag_reason;
 typedef boost::error_info<tag_referenced_by,std::string> reason_info;
@@ -83,357 +84,718 @@ struct cstr_compare
 
 };
 
+
+
+std::string template_registry::get_key(const char* ns, const char* name) const
+{
+  return std::string(ns) + "||" + name;
+}
+
+template_instruction*
+template_registry::find(const char* ns, const char* name) const
+{
+  // std::cerr << "template_registry::find(" << ns << "," << name << ")\n";
+
+  map_type::const_iterator itr = templates_.find(get_key(ns, name));
+  if (itr != templates_.end()) {
+    return itr->second;
+  }
+  return 0;
+}
+
+void template_registry::add(const char* ns, template_instruction* inst)
+{
+  // std::cerr << "template_registry::add(" << ns << "," << inst->name() << ")\n";
+  templates_[get_key(ns, inst->name())] = inst;
+}
+
+template_registry*
+template_registry::instance()
+{
+  static template_registry inst;
+  return &inst;
+}
+
+arena_allocator*
+template_registry::allocator()
+{
+  return &alloc_;
+}
+
+class instruction_cloner
+  : public field_instruction_visitor
+{
+public:
+
+  instruction_cloner(instruction_list_t& list,
+                     arena_allocator&    alloc)
+    : list_(list)
+    , alloc_(alloc)
+  {
+  }
+
+private:
+  instruction_list_t& list_;
+  arena_allocator&    alloc_;
+
+  virtual void visit(const int32_field_instruction* inst, void*)
+  {
+    int32_field_instruction* new_inst = new (alloc_) int32_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const uint32_field_instruction* inst, void*)
+  {
+    uint32_field_instruction* new_inst = new (alloc_) uint32_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const int64_field_instruction* inst, void*)
+  {
+    int64_field_instruction* new_inst = new (alloc_) int64_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const uint64_field_instruction* inst, void*)
+  {
+    uint64_field_instruction* new_inst = new (alloc_) uint64_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const decimal_field_instruction* inst, void*)
+  {
+    decimal_field_instruction* new_inst = new (alloc_) decimal_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const ascii_field_instruction* inst, void*)
+  {
+    ascii_field_instruction* new_inst = new (alloc_) ascii_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const unicode_field_instruction* inst, void*)
+  {
+    unicode_field_instruction* new_inst = new (alloc_) unicode_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const byte_vector_field_instruction* inst, void*)
+  {
+    byte_vector_field_instruction* new_inst = new (alloc_) byte_vector_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const group_field_instruction* inst, void*)
+  {
+    group_field_instruction* new_inst = new (alloc_) group_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const sequence_field_instruction* inst, void*)
+  {
+    sequence_field_instruction* new_inst = new (alloc_) sequence_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const templateref_instruction* inst, void*)
+  {
+    templateref_instruction* new_inst = new (alloc_) templateref_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const template_instruction* inst, void*)
+  {
+    for (std::size_t i = 0; i < inst->subinstructions_count(); ++i) {
+      inst->subinstruction(i)->accept(*this, 0);
+    }
+  }
+
+};
+
 class templates_loader
   : public FastXMLVisitor
 {
-  typedef std::deque<field_instruction*> instruction_list_t;
   std::deque<instruction_list_t> stack_;
   typedef const field_instruction* instruction_cptr;
   templates_description* definition_;
   arena_allocator* alloc_;
+  const char* cpp_ns_;
+  template_registry* registry_;
 
-  public:
-    templates_loader(templates_description* definition, arena_allocator* alloc)
-      : definition_(definition)
-      , alloc_(alloc)
-    {
-    }
+public:
+  templates_loader(templates_description* definition,
+                   const char*            cpp_ns,
+                   template_registry*     registry)
+    : definition_(definition)
+    , alloc_(registry->allocator())
+    , cpp_ns_(new_string(cpp_ns))
+    , registry_(registry)
+  {
+  }
 
-    instruction_list_t& current()
-    {
-      return stack_.back();
-    }
+  instruction_list_t& current()
+  {
+    return stack_.back();
+  }
 
-    const char* new_string(const char* src)
-    {
-      if (src == 0)
-        return 0;
-      int len = strlen(src);
-      if (len == 0)
-        return "";
-      char* dst = new (*alloc_) char[len+1];
-      std::strcpy(dst, src);
-      return dst;
-    }
+  uint16_t current_index() const
+  {
+    return stack_.back().size();
+  }
 
-    instruction_cptr* current_instructions()
-    {
-      instruction_cptr* instructions = new (*alloc_)instruction_cptr[current().size()];
-      std::copy(current().begin(), current().end(), instructions);
-      return instructions;
-    }
-
-    uint32_t get_id(const XMLElement & element)
-    {
-      return boost::lexical_cast<uint32_t>(get_optional_attr(element, "id", "0"));
-    }
-
-    presence_enum_t get_presence(const XMLElement & element)
-    {
-      const char* presence_str = get_optional_attr(element, "presence", "");
-      if (strcmp(presence_str, "optional") ==0)
-        return presence_optional;
-      return presence_mandatory;
-    }
-
-    const char* get_typeRef_name(const XMLElement & element)
-    {
-      const XMLElement* typeRefElem = element.FirstChildElement("typeRef");
-      if (typeRefElem) {
-        return new_string(get_optional_attr(*typeRefElem, "name", ""));
-      }
-      return "";
-    }
-
-    const char* get_typeRef_ns(const XMLElement & element)
-    {
-      const XMLElement* typeRefElem = element.FirstChildElement("typeRef");
-      if (typeRefElem) {
-        return new_string(get_optional_attr(*typeRefElem, "ns", ""));
-      }
-      return "";
-    }
-
-    const char* get_ns(const XMLElement & element)
-    {
-      return new_string(get_optional_attr(element, "ns", ""));
-    }
-
-    const char* get_dictionary(const XMLElement & element)
-    {
-      return new_string(get_optional_attr(element, "dictionary", ""));
-    }
-
-    const char* get_templateNs(const XMLElement & element)
-    {
-      return new_string(get_optional_attr(element, "templateNs", ""));
-    }
-
-    const XMLElement* field_op_element(const XMLElement & element)
-    {
-      static const char* field_op_names[] = {
-        "constant","default","copy","increment","delta","tail"
-      };
-
-      static std::set<const char*, cstr_compare> field_op_set (field_op_names, field_op_names + 6);
-
-      for (const XMLElement* child = element.FirstChildElement(); child != 0; child = child->NextSiblingElement())
-      {
-        if (field_op_set.count(child->Name())) {
-          return child;
-        }
-      }
+  const char* new_string(const char* src)
+  {
+    if (src == 0)
       return 0;
+    int len = strlen(src);
+    if (len == 0)
+      return "";
+    char* dst = new (*alloc_) char[len+1];
+    std::strcpy(dst, src);
+    return dst;
+  }
+
+  instruction_cptr* current_instructions()
+  {
+    instruction_cptr* instructions = new (*alloc_)instruction_cptr[current().size()];
+    std::copy(current().begin(), current().end(), instructions);
+    return instructions;
+  }
+
+  uint32_t get_id(const XMLElement & element)
+  {
+    return boost::lexical_cast<uint32_t>(get_optional_attr(element, "id", "0"));
+  }
+
+  presence_enum_t get_presence(const XMLElement & element)
+  {
+    const char* presence_str = get_optional_attr(element, "presence", "");
+    if (strcmp(presence_str, "optional") ==0)
+      return presence_optional;
+    return presence_mandatory;
+  }
+
+  const char* get_typeRef_name(const XMLElement & element)
+  {
+    const XMLElement* typeRefElem = element.FirstChildElement("typeRef");
+    if (typeRefElem) {
+      return new_string(get_optional_attr(*typeRefElem, "name", ""));
     }
+    return "";
+  }
 
-    bool get_field_attributes(const XMLElement & element,
-                              const std::string& /* name_attr */,
-                              operator_enum_t&   fieldOp,
-                              op_context_t*&     opContext,
-                              std::string&       initialValue)
+  const char* get_typeRef_ns(const XMLElement & element)
+  {
+    const XMLElement* typeRefElem = element.FirstChildElement("typeRef");
+    if (typeRefElem) {
+      return new_string(get_optional_attr(*typeRefElem, "ns", ""));
+    }
+    return "";
+  }
+
+  const char* get_ns(const XMLElement & element)
+  {
+    return new_string(get_optional_attr(element, "ns", ""));
+  }
+
+  const char* get_dictionary(const XMLElement & element)
+  {
+    return new_string(get_optional_attr(element, "dictionary", ""));
+  }
+
+  const char* get_templateNs(const XMLElement & element)
+  {
+    return new_string(get_optional_attr(element, "templateNs", ""));
+  }
+
+  const XMLElement* field_op_element(const XMLElement & element)
+  {
+    static const char* field_op_names[] = {
+      "constant","default","copy","increment","delta","tail"
+    };
+
+    static std::set<const char*, cstr_compare> field_op_set (field_op_names, field_op_names + 6);
+
+    for (const XMLElement* child = element.FirstChildElement(); child != 0; child = child->NextSiblingElement())
     {
-      fieldOp = operator_none;
-      opContext = 0;
-      initialValue = "";
-
-      const XMLElement* fieldOpElem = field_op_element(element);
-
-      if (fieldOpElem) {
-        static std::map<std::string,operator_enum_t> operator_map =
-          map_list_of("none",operator_none)
-            ("constant",operator_constant)
-            ("delta",operator_delta)
-            ("default",operator_default)
-            ("copy",operator_copy)
-            ("increment", operator_increment)
-            ("tail",operator_tail);
-
-        std::map<std::string,operator_enum_t>::iterator itr = operator_map.find(fieldOpElem->Name());
-        if (itr == operator_map.end())
-        {
-          BOOST_THROW_EXCEPTION(fast_static_error("S1") << reason_info(std::string("Invalid field operator ") + fieldOpElem->Name()));
-        }
-        fieldOp = operator_map[fieldOpElem->Name()];
-
-        std::string opContext_key = get_optional_attr(*fieldOpElem, "key", "");
-        std::string opContext_dict = get_optional_attr(*fieldOpElem, "dictionary", "");
-        if (!opContext_key.empty() || !opContext_dict.empty()) {
-          opContext = new (*alloc_)op_context_t;
-          opContext->key_ = new_string(opContext_key.c_str());
-          opContext->ns_ = new_string(get_optional_attr(*fieldOpElem, "ns", ""));
-          opContext->dictionary_ = new_string(opContext_dict.c_str());
-        }
-        initialValue = get_optional_attr(*fieldOpElem, "value", "");
-        return true;
+      if (field_op_set.count(child->Name())) {
+        return child;
       }
-      return false;
     }
+    return 0;
+  }
 
-  public:
-    virtual bool VisitEnterTemplates(const XMLElement & /* element */)
-    {
-      stack_.push_back(instruction_list_t());
+  bool get_field_attributes(const XMLElement & element,
+                            const std::string& /* name_attr */,
+                            operator_enum_t&   fieldOp,
+                            op_context_t*&     opContext,
+                            const char*&       initialValue)
+  {
+    fieldOp = operator_none;
+    opContext = 0;
+    initialValue = 0;
+
+    const XMLElement* fieldOpElem = field_op_element(element);
+
+    if (fieldOpElem) {
+      static std::map<std::string,operator_enum_t> operator_map =
+        map_list_of("none",operator_none)
+          ("constant",operator_constant)
+          ("delta",operator_delta)
+          ("default",operator_default)
+          ("copy",operator_copy)
+          ("increment", operator_increment)
+          ("tail",operator_tail);
+
+      std::map<std::string,operator_enum_t>::iterator itr = operator_map.find(fieldOpElem->Name());
+      if (itr == operator_map.end())
+      {
+        BOOST_THROW_EXCEPTION(fast_static_error("S1") << reason_info(std::string("Invalid field operator ") + fieldOpElem->Name()));
+      }
+      fieldOp = operator_map[fieldOpElem->Name()];
+
+      std::string opContext_key = get_optional_attr(*fieldOpElem, "key", "");
+      std::string opContext_dict = get_optional_attr(*fieldOpElem, "dictionary", "");
+      if (!opContext_key.empty() || !opContext_dict.empty()) {
+        opContext = new (*alloc_)op_context_t;
+        opContext->key_ = new_string(opContext_key.c_str());
+        opContext->ns_ = new_string(get_optional_attr(*fieldOpElem, "ns", ""));
+        opContext->dictionary_ = new_string(opContext_dict.c_str());
+      }
+      initialValue = get_optional_attr(*fieldOpElem, "value", 0);
       return true;
     }
+    return false;
+  }
 
-    virtual bool VisitExitTemplates(const XMLElement & element,
-                                    std::size_t /* numFields */)
-    {
-      definition_->ns_ = get_ns(element);
-      definition_->template_ns_ = get_templateNs(element);
-      definition_->dictionary_ = get_dictionary(element);
-      definition_->instructions_ = reinterpret_cast<template_instruction const**>(current_instructions());
-      definition_->instructions_count_ = current().size();
-      return true;
+public:
+  virtual bool VisitEnterTemplates(const XMLElement & /* element */)
+  {
+    stack_.push_back(instruction_list_t());
+    return true;
+  }
+
+  virtual bool VisitExitTemplates(const XMLElement & element,
+                                  std::size_t /* numFields */)
+  {
+    definition_->ns_ = get_ns(element);
+    definition_->template_ns_ = get_templateNs(element);
+    definition_->dictionary_ = get_dictionary(element);
+    definition_->instructions_ = reinterpret_cast<template_instruction const**>(current_instructions());
+    definition_->instructions_count_ = current().size();
+    return true;
+  }
+
+  virtual bool VisitEnterTemplate(const XMLElement & /* element */,
+                                  const std::string& /* name_attr */,
+                                  std::size_t /* index */)
+  {
+    stack_.push_back(instruction_list_t());
+    return true;
+  }
+
+  virtual bool VisitExitTemplate(const XMLElement & element,
+                                 const std::string& name_attr,
+                                 std::size_t /* numFields */,
+                                 std::size_t /* index */)
+  {
+    bool reset = false;
+    const XMLAttribute* reset_attr = element.FindAttribute("scp:reset");
+    if (reset_attr == 0)
+      reset_attr = element.FindAttribute("reset");
+
+    if (reset_attr) {
+      if (strcmp(reset_attr->Value(), "true") == 0 || strcmp(reset_attr->Value(), "yes") == 0)
+        reset = true;
     }
 
-    virtual bool VisitEnterTemplate(const XMLElement & /* element */,
-                                    const std::string& /* name_attr */,
-                                    std::size_t /* index */)
-    {
-      stack_.push_back(instruction_list_t());
-      return true;
-    }
+    template_instruction* instruction = new (*alloc_)template_instruction(
+      get_id(element),
+      new_string(name_attr.c_str()),
+      get_ns(element),
+      get_templateNs(element),
+      get_dictionary(element),
+      current_instructions(),
+      current().size(),
+      reset,
+      get_typeRef_name(element),
+      get_typeRef_ns(element),
+      cpp_ns_
+      );
+    stack_.pop_back();
+    current().push_back(instruction);
+    registry_->add(current_context().ns_.c_str() , instruction);
+    return true;
+  }
 
-    virtual bool VisitExitTemplate(const XMLElement & element,
-                                   const std::string& name_attr,
-                                   std::size_t /* numFields */,
-                                   std::size_t /* index */)
-    {
-      bool reset = false;
-      const XMLAttribute* reset_attr = element.FindAttribute("scp:reset");
-      if (reset_attr == 0)
-        reset_attr = element.FindAttribute("reset");
+  virtual bool VisitTemplateRef(const XMLElement & element,
+                                const std::string& name_attr,
+                                std::size_t /*index*/)
+  {
+    templateref_instruction* instruction;
+    const XMLElement* parent = element.Parent()->ToElement();
 
-      if (reset_attr) {
-        if (strcmp(reset_attr->Value(), "true") == 0 || strcmp(reset_attr->Value(), "yes") == 0)
-          reset = true;
+    if (name_attr.size()) {
+      std::string ns = get_optional_attr(element, "ns", current_context().ns_.c_str());
+      template_instruction* target =
+        registry_->find( ns.c_str(), name_attr.c_str());
+
+      if (target == 0) {
+        BOOST_THROW_EXCEPTION(template_not_found_error(name_attr.c_str(),
+                                                       get_optional_attr(*parent, "name", "")));
       }
 
-      template_instruction* instruction = new (*alloc_)template_instruction(
-        get_id(element),
-        new_string(name_attr.c_str()),
-        get_ns(element),
-        get_templateNs(element),
-        get_dictionary(element),
-        current_instructions(),
-        current().size(),
-        reset,
-        get_typeRef_name(element),
-        get_typeRef_ns(element)
-        );
-      stack_.pop_back();
-      current().push_back(instruction);
-      return true;
-    }
-
-    virtual bool VisitTemplateRef(const XMLElement & element,
-                                  const std::string& name_attr,
-                                  std::size_t        index)
-    {
-      templateref_instruction* instruction;
-
-      if (name_attr.size()) {
-        instruction = new (*alloc_)templateref_instruction(
-          static_cast<uint16_t>(index),
-          new_string(name_attr.c_str()),
-          get_templateNs(element));
+      // instruction = new (*alloc_)templateref_instruction(
+      //   current_index(),
+      //   new_string(name_attr.c_str()),
+      //   get_ns(element));
+      if (current_index() == 0) {
+        // if the templateRef is the first in a group or sequence, we don't need the clone the
+        // individual field because the field_index remains the same
+        for (size_t i = 0; i < target->subinstructions_count(); ++i) {
+          const field_instruction* sub_inst = target->subinstruction(i);
+          current().push_back(const_cast<field_instruction*>(sub_inst));
+        }
       }
       else {
-        presence_enum_t optional = presence_mandatory;
-        
-        if (element.NextSibling() == 0 && element.PreviousSibling() == 0) {
-          const XMLElement* parent = element.Parent()->ToElement();
-          if (strcmp(parent->Name(), "group") == 0 &&
-              strcmp("optional", get_optional_attr(*parent, "presence", "mandatory")) ==0) 
-          {
-            optional = presence_optional;
-          }
-        }
-        
-        instruction = new (*alloc_)templateref_instruction(
-          static_cast<uint16_t>(index),
-          optional);
+        // In this case, we do need the clone the subfield instructions because the field
+        // index would be different from those in the referenced template.
+        instruction_cloner cloner(current(), *alloc_);
+        target->accept(cloner, 0);
       }
-
-      current().push_back(instruction);
-      return true;
     }
+    else {
+      presence_enum_t optional = presence_mandatory;
 
-    virtual bool VisitEnterGroup(const XMLElement & /* element */,
-                                 const std::string& /* name_attr */,
-                                 std::size_t /* index */)
-    {
-      stack_.push_back(instruction_list_t());
-      return true;
-    }
+      if (element.NextSibling() == 0 && element.PreviousSibling() == 0) {
 
-    virtual bool VisitExitGroup(const XMLElement & element,
-                                const std::string& name_attr,
-                                std::size_t /* numFields */,
-                                std::size_t        index)
-    {
-      group_field_instruction* instruction = new (*alloc_)group_field_instruction (
-        static_cast<uint16_t>(index),
-        get_presence(element),
-        get_id(element),
-        new_string(name_attr.c_str()),
-        get_ns(element),
-        get_dictionary(element),
-        current_instructions(),
-        current().size(),
-        get_typeRef_name(element),
-        get_typeRef_ns(element)
-        );
-
-      stack_.pop_back();
-      current().push_back(instruction);
-      return true;
-    }
-
-    virtual bool VisitEnterSequence(const XMLElement & /* element */,
-                                    const std::string& /* name_attr */,
-                                    std::size_t /* index */)
-    {
-      stack_.push_back(instruction_list_t());
-      return true;
-    }
-
-    virtual bool VisitExitSequence(const XMLElement & element,
-                                   const std::string& name_attr,
-                                   std::size_t /* numFields */,
-                                   std::size_t        index)
-    {
-      const XMLElement* length_element = element.FirstChildElement("length");
-      uint32_field_instruction* length_instruction = 0;
-
-      operator_enum_t fieldOp= operator_none;
-      uint32_t id = 0;
-      op_context_t* opContext=0;
-      std::string initial_value_str;
-      std::string length_name = name_attr + "___length___";
-      std::string ns;
-      int_value_storage<uint32_t> initial_value;
-
-      if (length_element) {
-        id = get_id(*length_element);
-        get_field_attributes(*length_element, name_attr, fieldOp, opContext, initial_value_str );
-
-        length_name = get_optional_attr(*length_element, "name", "");
-        ns = get_ns(*length_element);
-        if (initial_value_str.size()) {
-          initial_value = int_value_storage<uint32_t>(boost::lexical_cast<uint32_t>(initial_value_str));
+        if (strcmp(parent->Name(), "group") == 0 &&
+            strcmp("optional", get_optional_attr(*parent, "presence", "mandatory")) ==0)
+        {
+          optional = presence_optional;
         }
       }
 
-      length_instruction = new (*alloc_)uint32_field_instruction(
-        0,
-        fieldOp,
-        get_presence(element),
-        id,
-        new_string(length_name.c_str()),
-        new_string(ns.c_str()),
-        opContext,
-        initial_value);
+      instruction = new (*alloc_)templateref_instruction(
+        current_index(),
+        optional);
 
-      sequence_field_instruction* instruction = new (*alloc_)sequence_field_instruction(
-        static_cast<uint16_t>(index),
-        get_presence(element),
-        get_id(element),
-        new_string(name_attr.c_str()),
-        get_ns(element),
-        get_dictionary(element),
-        current_instructions(),
-        current().size(),
-        length_instruction,
-        get_typeRef_name(element),
-        get_typeRef_ns(element));
-
-      stack_.pop_back();
       current().push_back(instruction);
-      return true;
+
     }
 
-    template <typename INT_TYPE>
-    void gen_integer_instruction(const XMLElement & element,
+    return true;
+  }
+
+  virtual bool VisitEnterGroup(const XMLElement & /* element */,
+                               const std::string& /* name_attr */,
+                               std::size_t /* index */)
+  {
+    stack_.push_back(instruction_list_t());
+    return true;
+  }
+
+  virtual bool VisitExitGroup(const XMLElement & element,
+                              const std::string& name_attr,
+                              std::size_t /* numFields */,
+                              std::size_t /*index*/)
+  {
+    instruction_cptr* subinstructions =  current_instructions();
+    std::size_t subinstructions_count = current().size();
+    stack_.pop_back();
+
+    group_field_instruction* instruction = new (*alloc_)group_field_instruction (
+      current_index(),
+      get_presence(element),
+      get_id(element),
+      new_string(name_attr.c_str()),
+      get_ns(element),
+      get_dictionary(element),
+      subinstructions,
+      subinstructions_count,
+      get_typeRef_name(element),
+      get_typeRef_ns(element)
+      );
+
+    const XMLElement* child = only_child_templateRef(element);
+    if (child) {
+      const char* target_name = child->Attribute("name", 0);
+      if (target_name) {
+        const char* target_ns = get_optional_attr(*child, "ns",  current_context().ns_.c_str());
+
+        template_instruction* target =
+          registry_->find(target_ns, target_name);
+
+        if (target == 0)
+          BOOST_THROW_EXCEPTION(template_not_found_error(target_name, name_attr.c_str()));
+
+        instruction->ref_template(target);
+      }
+    }
+
+    current().push_back(instruction);
+    return true;
+  }
+
+  virtual bool VisitEnterSequence(const XMLElement & /* element */,
+                                  const std::string& /* name_attr */,
+                                  std::size_t /* index */)
+  {
+    stack_.push_back(instruction_list_t());
+    return true;
+  }
+
+  virtual bool VisitExitSequence(const XMLElement & element,
                                  const std::string& name_attr,
-                                 std::size_t        index)
-    {
+                                 std::size_t /* numFields */,
+                                 std::size_t /*index*/)
+  {
+    const XMLElement* length_element = element.FirstChildElement("length");
+    uint32_field_instruction* length_instruction = 0;
+
+    operator_enum_t fieldOp= operator_none;
+    uint32_t id = 0;
+    op_context_t* opContext=0;
+    const char* initial_value_str;
+    std::string length_name = name_attr + "___length___";
+    std::string ns;
+    int_value_storage<uint32_t> initial_value;
+
+    if (length_element) {
+      id = get_id(*length_element);
+      get_field_attributes(*length_element, name_attr, fieldOp, opContext, initial_value_str );
+
+      length_name = get_optional_attr(*length_element, "name", "");
+      ns = get_ns(*length_element);
+      if (initial_value_str) {
+        initial_value = int_value_storage<uint32_t>(boost::lexical_cast<uint32_t>(initial_value_str));
+      }
+    }
+
+    length_instruction = new (*alloc_)uint32_field_instruction(
+      0,
+      fieldOp,
+      get_presence(element),
+      id,
+      new_string(length_name.c_str()),
+      new_string(ns.c_str()),
+      opContext,
+      initial_value);
+
+    instruction_cptr* subinstructions =  current_instructions();
+    std::size_t subinstructions_count = current().size();
+    stack_.pop_back();
+
+    sequence_field_instruction* instruction = new (*alloc_)sequence_field_instruction(
+      current_index(),
+      get_presence(element),
+      get_id(element),
+      new_string(name_attr.c_str()),
+      get_ns(element),
+      get_dictionary(element),
+      subinstructions,
+      subinstructions_count,
+      length_instruction,
+      get_typeRef_name(element),
+      get_typeRef_ns(element));
+
+    const XMLElement* child = only_child_templateRef(element);
+    if (child) {
+      const char* target_name = child->Attribute("name", 0);
+      if (target_name) {
+        const char* target_ns = get_optional_attr(*child, "ns", current_context().ns_.c_str());
+        template_instruction* target =
+          registry_->find(target_ns, target_name);
+
+        if (target == 0)
+          BOOST_THROW_EXCEPTION(template_not_found_error(target_name, name_attr.c_str()));
+
+        instruction->ref_template(target);
+      }
+    }
+
+    current().push_back(instruction);
+    return true;
+  }
+
+  template <typename INT_TYPE>
+  void gen_integer_instruction(const XMLElement & element,
+                               const std::string& name_attr,
+                               std::size_t /*index*/)
+  {
+    operator_enum_t fieldOp;
+    op_context_t* opContext;
+    const char* initial_value_str;
+
+    int_value_storage<INT_TYPE> initial_value;
+
+    get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
+
+    if (initial_value_str) {
+      initial_value = int_value_storage<INT_TYPE>(boost::lexical_cast<INT_TYPE>(initial_value_str));
+    }
+
+    typedef typename instruction_trait<INT_TYPE>::type intruction_t;
+    intruction_t* instruction= new (*alloc_)intruction_t  (
+      current_index(),
+      fieldOp,
+      get_presence(element),
+      get_id(element),
+      new_string(name_attr.c_str()),
+      get_ns(element),
+      opContext,
+      initial_value
+      );
+
+    current().push_back(instruction);
+  }
+
+  virtual bool VisitInteger(const XMLElement & element,
+                            int                integer_bits,
+                            const std::string& name_attr,
+                            std::size_t /*index*/)
+  {
+    bool is_unsigned = element.Name()[0] == 'u';
+    if (is_unsigned) {
+      if (integer_bits == 64)
+        gen_integer_instruction<uint64_t>(element, name_attr, current_index());
+      else
+        gen_integer_instruction<uint32_t>(element, name_attr, current_index());
+    }
+    else {
+      if (integer_bits == 64)
+        gen_integer_instruction<int64_t>(element, name_attr, current_index());
+      else
+        gen_integer_instruction<int32_t>(element, name_attr, current_index());
+    }
+    return true;
+  }
+
+  virtual bool VisitDecimal(const XMLElement & element,
+                            const std::string& name_attr,
+                            std::size_t /*index*/)
+  {
+    decimal_field_instruction* instruction;
+    const XMLElement* mantissa_element = element.FirstChildElement("mantissa");
+    const XMLElement* exponent_element = element.FirstChildElement("exponent");
+
+    if (mantissa_element || exponent_element) {
+
+      mantissa_field_instruction* mantissa_instruction =0;
+
+      if (mantissa_element)
+      {
+        operator_enum_t mantissa_fieldOp;
+        op_context_t* mantissa_opContext;
+        const char* mantissa_initial_value_str;
+
+        get_field_attributes(*mantissa_element,
+                             name_attr + "_mantissa",
+                             mantissa_fieldOp,
+                             mantissa_opContext,
+                             mantissa_initial_value_str);
+
+
+        int_value_storage<int64_t> mantissa_initial_value;
+
+        if (mantissa_initial_value_str) {
+          mantissa_initial_value = int_value_storage<int64_t>(boost::lexical_cast<int64_t>(mantissa_initial_value_str));
+        }
+
+        mantissa_instruction = new (*alloc_)mantissa_field_instruction(
+          mantissa_fieldOp,
+          mantissa_opContext,
+          mantissa_initial_value
+          );
+      }
+
+      operator_enum_t exponent_fieldOp = operator_none;
+      op_context_t* exponent_opContext = 0;
+      decimal_value_storage exponent_initial_value;
+
+      if (exponent_element) {
+
+        const char* exponent_initial_value_str;
+        get_field_attributes(*exponent_element, name_attr + "_exponent",
+                             exponent_fieldOp,
+                             exponent_opContext,
+                             exponent_initial_value_str);
+
+        if (exponent_initial_value_str) {
+          exponent_initial_value = decimal_value_storage(0, boost::lexical_cast<int8_t>(exponent_initial_value_str));
+        }
+      }
+
+      instruction = new (*alloc_)decimal_field_instruction(
+        current_index(),
+        exponent_fieldOp,
+        get_presence(element),
+        get_id(element),
+        new_string(name_attr.c_str()),
+        get_ns(element),
+        exponent_opContext,
+        mantissa_instruction,
+        exponent_initial_value);
+    }
+    else {
+
       operator_enum_t fieldOp;
       op_context_t* opContext;
-      std::string initial_value_str;
+      const char* initial_value_str;
+      decimal_value_storage initial_value;
 
-      int_value_storage<INT_TYPE> initial_value;
+      get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str);
 
-      get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
-
-      if (initial_value_str.size()) {
-        initial_value = int_value_storage<INT_TYPE>(boost::lexical_cast<INT_TYPE>(initial_value_str));
+      if (initial_value_str) {
+        initial_value = decimal_value_storage(boost::lexical_cast<decimal_value_storage>(initial_value_str));
       }
 
-      typedef typename instruction_trait<INT_TYPE>::type intruction_t;
-      intruction_t* instruction= new (*alloc_)intruction_t  (
-        static_cast<uint16_t>(index),
+      instruction = new (*alloc_)decimal_field_instruction(
+        current_index(),
+        fieldOp,
+        get_presence(element),
+        get_id(element),
+        new_string(name_attr.c_str()),
+        get_ns(element),
+        opContext,
+        initial_value);
+    }
+    current().push_back(instruction);
+    return true;
+  }
+
+  virtual bool VisitString(const XMLElement & element,
+                           const std::string& name_attr,
+                           std::size_t /*index*/)
+  {
+    const char* charset =  get_optional_attr(element, "charset", "ascii");
+    operator_enum_t fieldOp;
+    op_context_t* opContext;
+    const char* initial_value_str;
+
+    get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
+
+    string_value_storage initial_value;
+    if (initial_value_str)
+      initial_value = string_value_storage(new_string(initial_value_str));
+
+    field_instruction* instruction = 0;
+
+    if (strcmp(charset, "ascii") == 0) {
+      instruction= new (*alloc_)ascii_field_instruction  (
+        current_index(),
         fieldOp,
         get_presence(element),
         get_id(element),
@@ -443,232 +805,8 @@ class templates_loader
         initial_value
         );
 
-      current().push_back(instruction);
     }
-
-    virtual bool VisitInteger(const XMLElement & element,
-                              int                integer_bits,
-                              const std::string& name_attr,
-                              std::size_t        index)
-    {
-      bool is_unsigned = element.Name()[0] == 'u';
-      if (is_unsigned) {
-        if (integer_bits == 64)
-          gen_integer_instruction<uint64_t>(element, name_attr, index);
-        else
-          gen_integer_instruction<uint32_t>(element, name_attr, index);
-      }
-      else {
-        if (integer_bits == 64)
-          gen_integer_instruction<int64_t>(element, name_attr, index);
-        else
-          gen_integer_instruction<int32_t>(element, name_attr, index);
-      }
-      return true;
-    }
-
-    virtual bool VisitDecimal(const XMLElement & element,
-                              const std::string& name_attr,
-                              std::size_t        index)
-    {
-      decimal_field_instruction* instruction;
-      const XMLElement* mantissa_element = element.FirstChildElement("mantissa");
-      const XMLElement* exponent_element = element.FirstChildElement("exponent");
-
-      if (mantissa_element || exponent_element) {
-
-        mantissa_field_instruction* mantissa_instruction =0;
-
-        if (mantissa_element)
-        {
-          operator_enum_t mantissa_fieldOp;
-          op_context_t* mantissa_opContext;
-          std::string mantissa_initial_value_str;
-
-          get_field_attributes(*mantissa_element,
-                               name_attr + "_mantissa",
-                               mantissa_fieldOp,
-                               mantissa_opContext,
-                               mantissa_initial_value_str);
-
-
-          int_value_storage<int64_t> mantissa_initial_value;
-
-          if (mantissa_initial_value_str.size()) {
-            mantissa_initial_value = int_value_storage<int64_t>(boost::lexical_cast<int64_t>(mantissa_initial_value_str.c_str()));
-          }
-
-          mantissa_instruction = new (*alloc_)mantissa_field_instruction(
-            mantissa_fieldOp,
-            mantissa_opContext,
-            mantissa_initial_value
-            );
-        }
-
-        operator_enum_t exponent_fieldOp = operator_none;
-        op_context_t* exponent_opContext = 0;
-        decimal_value_storage exponent_initial_value;
-
-        if (exponent_element) {
-
-          std::string exponent_initial_value_str;
-          get_field_attributes(*exponent_element, name_attr + "_exponent",
-                               exponent_fieldOp,
-                               exponent_opContext,
-                               exponent_initial_value_str);
-
-          if (exponent_initial_value_str.size()) {
-            exponent_initial_value = decimal_value_storage(0, boost::lexical_cast<int8_t>(exponent_initial_value_str.c_str()));
-          }
-        }
-
-        instruction = new (*alloc_)decimal_field_instruction(
-          static_cast<uint16_t>(index),
-          exponent_fieldOp,
-          get_presence(element),
-          get_id(element),
-          new_string(name_attr.c_str()),
-          get_ns(element),
-          exponent_opContext,
-          mantissa_instruction,
-          exponent_initial_value);
-      }
-      else {
-
-        operator_enum_t fieldOp;
-        op_context_t* opContext;
-        std::string initial_value_str;
-        decimal_value_storage initial_value;
-
-        get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str);
-
-        if (initial_value_str.size()) {
-          initial_value = decimal_value_storage(boost::lexical_cast<decimal_value_storage>(initial_value_str.c_str()));
-        }
-
-        instruction = new (*alloc_)decimal_field_instruction(
-          static_cast<uint16_t>(index),
-          fieldOp,
-          get_presence(element),
-          get_id(element),
-          new_string(name_attr.c_str()),
-          get_ns(element),
-          opContext,
-          initial_value);
-      }
-      current().push_back(instruction);
-      return true;
-    }
-
-    virtual bool VisitString(const XMLElement & element,
-                             const std::string& name_attr,
-                             std::size_t        index)
-    {
-      const char* charset =  get_optional_attr(element, "charset", "ascii");
-      operator_enum_t fieldOp;
-      op_context_t* opContext;
-      std::string initial_value_str;
-
-      get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
-      string_value_storage initial_value(new_string(initial_value_str.c_str()));
-
-      field_instruction* instruction = 0;
-
-      if (strcmp(charset, "ascii") == 0) {
-        instruction= new (*alloc_)ascii_field_instruction  (
-          static_cast<uint16_t>(index),
-          fieldOp,
-          get_presence(element),
-          get_id(element),
-          new_string(name_attr.c_str()),
-          get_ns(element),
-          opContext,
-          initial_value
-          );
-
-      }
-      else {
-
-        uint32_t length_id =0;
-        const char* length_name=0;
-        const char* length_ns=0;
-        const XMLElement* length_element = element.FirstChildElement("length");
-        if (length_element) {
-          length_id = get_id(*length_element);
-          length_name = new_string(get_optional_attr(*length_element, "name", ""));
-          length_ns = get_ns(*length_element);
-        }
-
-
-        instruction= new (*alloc_) unicode_field_instruction  (
-          static_cast<uint16_t>(index),
-          fieldOp,
-          get_presence(element),
-          get_id(element),
-          new_string(name_attr.c_str()),
-          get_ns(element),
-          opContext,
-          initial_value,
-          length_id,
-          length_name,
-          length_ns
-          );
-      }
-
-      current().push_back(instruction);
-      return true;
-    }
-
-    ptrdiff_t hex2binary(const char* src, unsigned char* target)
-    {
-      unsigned char* dest = target;
-      char c = 0;
-      int shift_bits = 4;
-
-      for (; *src != '\0'; ++src) {
-
-        char tmp =0;
-
-        if (*src >= '0' && *src <= '9') {
-          tmp = (*src - '0');
-        }
-        else if (*src >= 'A' && *src <= 'F') {
-          tmp = (*src - 'A') + '\x0A';
-        }
-        else if (*src >= 'a' && *src <= 'f') {
-          tmp = (*src - 'a') + '\x0a';
-        }
-        else if (*src == ' ')
-          continue;
-        else
-          return -1;
-
-        c |= (tmp << shift_bits);
-
-        if (shift_bits == 0) {
-          *dest++ = c;
-          c = 0;
-          shift_bits = 4;
-        }
-        else
-          shift_bits = 0;
-      }
-
-      if (shift_bits == 0)
-        return -1;
-
-      return dest - target;
-    }
-
-    virtual bool VisitByteVector(const XMLElement & element,
-                                 const std::string& name_attr,
-                                 std::size_t        index)
-    {
-      operator_enum_t fieldOp;
-      op_context_t* opContext;
-      std::string initial_value_str;
-
-      get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
+    else {
 
       uint32_t length_id =0;
       const char* length_name=0;
@@ -680,20 +818,9 @@ class templates_loader
         length_ns = get_ns(*length_element);
       }
 
-      unsigned char* initial_value_buffer=0;
-      int32_t initial_value_len=0;
 
-      if (initial_value_str.size()) {
-        initial_value_buffer = static_cast<unsigned char*>(alloc_->allocate(initial_value_str.size()/2+1));
-        initial_value_len = hex2binary(initial_value_str.c_str(), initial_value_buffer);
-        if (initial_value_len == -1) {
-          BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid byteVector initial value: ") +  initial_value_str ) );
-        }
-      }
-
-      byte_vector_value_storage initial_value(initial_value_buffer, initial_value_len);
-      byte_vector_field_instruction* instruction = new (*alloc_)byte_vector_field_instruction(
-        static_cast<uint16_t>(index),
+      instruction= new (*alloc_)unicode_field_instruction  (
+        current_index(),
         fieldOp,
         get_presence(element),
         get_id(element),
@@ -705,19 +832,115 @@ class templates_loader
         length_name,
         length_ns
         );
-
-      current().push_back(instruction);
-      return true;
     }
+
+    current().push_back(instruction);
+    return true;
+  }
+
+  ptrdiff_t hex2binary(const char* src, unsigned char* target)
+  {
+    unsigned char* dest = target;
+    char c = 0;
+    int shift_bits = 4;
+
+    for (; *src != '\0'; ++src) {
+
+      char tmp =0;
+
+      if (*src >= '0' && *src <= '9') {
+        tmp = (*src - '0');
+      }
+      else if (*src >= 'A' && *src <= 'F') {
+        tmp = (*src - 'A') + '\x0A';
+      }
+      else if (*src >= 'a' && *src <= 'f') {
+        tmp = (*src - 'a') + '\x0a';
+      }
+      else if (*src == ' ')
+        continue;
+      else
+        return -1;
+
+      c |= (tmp << shift_bits);
+
+      if (shift_bits == 0) {
+        *dest++ = c;
+        c = 0;
+        shift_bits = 4;
+      }
+      else
+        shift_bits = 0;
+    }
+
+    if (shift_bits == 0)
+      return -1;
+
+    return dest - target;
+  }
+
+  virtual bool VisitByteVector(const XMLElement & element,
+                               const std::string& name_attr,
+                               std::size_t /*index*/)
+  {
+    operator_enum_t fieldOp;
+    op_context_t* opContext;
+    const char* initial_value_str;
+
+    get_field_attributes(element, name_attr, fieldOp, opContext, initial_value_str );
+
+    uint32_t length_id =0;
+    const char* length_name=0;
+    const char* length_ns=0;
+    const XMLElement* length_element = element.FirstChildElement("length");
+    if (length_element) {
+      length_id = get_id(*length_element);
+      length_name = new_string(get_optional_attr(*length_element, "name", ""));
+      length_ns = get_ns(*length_element);
+    }
+
+    unsigned char* initial_value_buffer=0;
+    int32_t initial_value_len=0;
+
+    if (initial_value_str) {
+      initial_value_buffer = static_cast<unsigned char*>(alloc_->allocate(strlen(initial_value_str)/2+1));
+      initial_value_len = hex2binary(initial_value_str, initial_value_buffer);
+      if (initial_value_len == -1) {
+        BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid byteVector initial value: ") +  initial_value_str ) );
+      }
+    }
+
+    byte_vector_value_storage initial_value;
+    if (initial_value_str)
+      initial_value = byte_vector_value_storage(initial_value_buffer, initial_value_len);
+    byte_vector_field_instruction* instruction = new (*alloc_)byte_vector_field_instruction(
+      current_index(),
+      fieldOp,
+      get_presence(element),
+      get_id(element),
+      new_string(name_attr.c_str()),
+      get_ns(element),
+      opContext,
+      initial_value,
+      length_id,
+      length_name,
+      length_ns
+      );
+
+    current().push_back(instruction);
+    return true;
+  }
 
 };
 
 
-dynamic_templates_description::dynamic_templates_description(const char* xml_content)
+dynamic_templates_description::dynamic_templates_description(const char*        xml_content,
+                                                             const char*        cpp_ns,
+                                                             template_registry* registry)
 {
   tinyxml2::XMLDocument document;
   if (document.Parse(xml_content) == 0) {
-    templates_loader loader(this, &this->alloc_);
+    templates_loader loader(this, cpp_ns, registry);
     document.Accept(&loader);
   }
   else {

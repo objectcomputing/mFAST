@@ -271,11 +271,7 @@ struct decode_visitor
 
   void visit(const mfast::nested_message_mref& ref, int)
   {
-    if (ref.is_static())
-      visit_impl(ref);
-    else {
-      // unsupported;
-    }
+    // unsupported;
   }
 
 };
