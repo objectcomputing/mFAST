@@ -269,7 +269,7 @@ struct decode_visitor
     }
   }
 
-  void visit(const mfast::nested_message_mref& ref, int)
+  void visit(const mfast::nested_message_mref&, int)
   {
     // unsupported;
   }
