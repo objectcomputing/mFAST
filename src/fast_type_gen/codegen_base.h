@@ -16,13 +16,14 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef FASTCODEGEN_H_RV7SDOTE
-#define FASTCODEGEN_H_RV7SDOTE
+#ifndef CODEGEN_BASE_H_JZ0IUHN2
+#define CODEGEN_BASE_H_JZ0IUHN2
 
-#include "../fastxml/FastXMLVisitor.h"
-#include <map>
 #include <string>
 #include <boost/exception/all.hpp>
+#include <mfast.h>
+#include <mfast/coder/dynamic_templates_description.h>
+#include <fstream>
 
 class file_open_error
   : public virtual boost::exception, public virtual std::exception
@@ -36,30 +37,25 @@ class file_open_error
     {
       *this << boost::errinfo_file_name(filename) << boost::errinfo_errno(errno);
     }
-
 };
 
-
-
-
-class FastCodeGenBase
-  : public FastXMLVisitor
+class codegen_base
+  : public mfast::field_instruction_visitor
 {
 protected:
   std::string filebase_;
   std::ofstream out_;
+  std::stringstream cref_scope_;
 public:
-  FastCodeGenBase(const char* filebase, const char* fileext)
-    : filebase_(filebase)
-    , out_((filebase_+fileext).c_str(), std::ofstream::trunc)
-  {
-    if (!out_.is_open()) {
-      filebase_ += fileext;
-      throw file_open_error(filebase_);
-    }
-  }
+  codegen_base(const char* filebase, const char* fileext);
+protected:
+  void traverse(mfast::dynamic_templates_description& desc);
+  virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix="");
+
+  bool contains_only_templateRef(const mfast::group_field_instruction* inst);
+
+  void reset_scope(std::stringstream& strm, const std::string& str);
 };
 
-typedef std::map<std::string, std::string> templates_registry_t;
 
-#endif /* end of include guard: FASTCODEGEN_H_RV7SDOTE */
+#endif /* end of include guard: CODEGEN_BASE_H_JZ0IUHN2 */

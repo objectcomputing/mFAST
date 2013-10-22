@@ -17,7 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "dynamic_templates_description.h"
-#include "../../fastxml/FastXMLVisitor.h"
+#include "common/FastXMLVisitor.h"
 #include <deque>
 #include <boost/assign/list_of.hpp> // for 'map_list_of()'
 #include <boost/assert.hpp>

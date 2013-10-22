@@ -19,41 +19,48 @@
 #include <iostream>
 #include <string>
 
-#include "FastXML2Header.h"
-#include "FastXML2Inline.h"
-#include "FastXML2Source.h"
+#include "hpp_gen.h"
+#include "inl_gen.h"
+#include "cpp_gen.h"
 #include <boost/filesystem.hpp>
+#include <fstream>
+#include <iterator>
 using namespace boost::filesystem;
 
-using namespace tinyxml2;
 
 int main(int argc, const char** argv)
 {
-  std::cout << "fast_type_gen message\n";
-
-  templates_registry_t registry;
+  mfast::template_registry registry;
 
   try {
     for (int i = 1; i < argc; ++i) {
-      XMLDocument doc;
-      if (doc.LoadFile( argv[i] ) != 0)
-      {
+
+      std::ifstream ifs(argv[i]);
+
+      if (!ifs) {
         std::cerr << argv[i] << " load failed\n";
-        return doc.ErrorID();
+        return -1;
       }
 
+      std::string xml((std::istreambuf_iterator<char>(ifs)),
+                      std::istreambuf_iterator<char>());
+
       path f(path(argv[i]).stem());
-	  std::string filebase = f.string();
-	  std::cout << filebase.c_str() << "\n";
+      std::string filebase = f.string();
+      std::cout << filebase.c_str() << "\n";
 
-      FastXML2Header header_producer(filebase.c_str(),registry);
-      doc.Accept(&header_producer);
+      mfast::dynamic_templates_description desc(xml.c_str(),
+                                                filebase.c_str(),
+                                                &registry);
 
-      FastXML2Inline inline_producer(filebase.c_str(),registry);
-      doc.Accept(&inline_producer);
+      hpp_gen header_gen(filebase.c_str());
+      header_gen.generate(desc);
 
-      FastXML2Source source_producer(filebase.c_str(),registry);
-      doc.Accept(&source_producer);
+      inl_gen inline_gen(filebase.c_str());
+      inline_gen.generate(desc);
+
+      cpp_gen source_gen(filebase.c_str());
+      source_gen.generate(desc);
     }
   }
   catch( boost::exception & e ) {
