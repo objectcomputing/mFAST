@@ -266,7 +266,7 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
        << "  return " << name_attr << "::mref_type(alloc_, my_storage_.of_group.content_, instruction());\n"
        << "}\n\n";
 
-  traverse(inst, "");
+  this->traverse(inst, "");
 }
 
 void inl_gen::visit(const mfast::templateref_instruction* inst, void*)

@@ -39,6 +39,7 @@ void codegen_base::traverse(const mfast::group_field_instruction* inst, const ch
 {
   std::string saved_cref_scope = cref_scope_.str();
   cref_scope_ << inst->name() << name_suffix << "_cref::";
+
   for (std::size_t i = 0; i < inst->subinstructions_count(); ++i)
   {
     inst->subinstruction(i)->accept(*this, 0);
@@ -48,9 +49,8 @@ void codegen_base::traverse(const mfast::group_field_instruction* inst, const ch
 
 void codegen_base::reset_scope(std::stringstream& strm, const std::string& str)
 {
-  strm.clear();
-  strm.str(str);
-  strm.seekp(str.size());
+  strm.str("");
+  strm << str;
 }
 
 bool codegen_base::contains_only_templateRef(const mfast::group_field_instruction* inst)
