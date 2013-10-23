@@ -110,7 +110,7 @@ struct mref_of<message_cref>
 template <typename AggregateCRef, typename TemplateType>
 inline
 make_message_cref<AggregateCRef,TemplateType>::make_message_cref(const value_storage* storage_array,
-                                                                 make_message_cref<AggregateCRef,TemplateType>::instruction_cptr instruction)
+                                                                 typename make_message_cref<AggregateCRef,TemplateType>::instruction_cptr instruction)
   : AggregateCRef(storage_array, instruction)
 {
 }
@@ -170,7 +170,7 @@ template <typename AggregateMRef, typename TemplateType>
 inline
 make_message_mref<AggregateMRef,TemplateType>::make_message_mref(mfast::allocator* alloc,
                                                                  value_storage* storage_array,
-                                                                 make_message_mref<AggregateMRef,TemplateType>::instruction_cptr instruction)
+                                                                 typename make_message_mref<AggregateMRef,TemplateType>::instruction_cptr instruction)
   : AggregateMRef(alloc, storage_array, instruction)
 {
 }
