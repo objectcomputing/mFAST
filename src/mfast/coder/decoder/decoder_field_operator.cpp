@@ -16,7 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-
+#include "../mfast_coder_export.h"
 #include "../common/codec_helper.h"
 #include "fast_istream.h"
 #include "decoder_presence_map.h"
@@ -114,7 +114,7 @@ class no_operator
 {
   public:
     no_operator(){}
-    
+
     template <typename T>
     void decode_impl(const T&      mref,
                      fast_istream& stream,
@@ -198,7 +198,7 @@ class constant_operator
 {
   public:
     constant_operator(){}
-    
+
     template <typename T>
     void decode_impl(const T&              mref,
                      fast_istream& /* stream */,
@@ -304,12 +304,12 @@ class copy_or_increment_operator_impl
         {
           // if the previous value is undefined – the value of the field is the initial value
           // that also becomes the new previous value.
-          
+
           // If the field has optional presence and no initial value, the field is considered
           // absent and the state of the previous value is changed to empty.
           mref.as_initial_value();
           save_previous_value(mref);
-          
+
           if (mref.instruction()->mandatory_without_initial_value()) {
             // Unless the field has optional presence, it is a dynamic error [ERR D5]
             // if the instruction context has no initial value.
@@ -354,7 +354,7 @@ class copy_operator
 
   public:
     copy_operator(){}
-    
+
     virtual void decode(const int32_mref&     mref,
                         fast_istream&         stream,
                         decoder_presence_map& pmap) const
@@ -430,7 +430,7 @@ class increment_operator
 
   public:
     increment_operator(){}
-    
+
     virtual void decode(const int32_mref&     mref,
                         fast_istream&         stream,
                         decoder_presence_map& pmap) const
@@ -469,7 +469,7 @@ class default_operator
 {
   public:
     default_operator(){}
-    
+
     template <typename T>
     void decode_impl(const T&              mref,
                      fast_istream&         stream,
@@ -487,7 +487,7 @@ class default_operator
       else {
         // If the field has optional presence and no initial value, the field is considered absent
         // when there is no value in the stream.
-        
+
         //  The default operator specifies that the value of a field is either present in the stream
         //  or it will be the initial value.
         mref.as_initial_value();
@@ -616,7 +616,7 @@ class delta_operator
 
   public:
     delta_operator(){}
-    
+
     virtual void decode(const int32_mref& mref,
                         fast_istream&     stream,
                         decoder_presence_map      & /* pmap */) const
@@ -732,10 +732,10 @@ class tail_operator
 
         if (!prev.is_defined()) {
           //  * undefined – the value of the field is the initial value that also becomes the new previous value.
-          
+
          // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
           mref.as_initial_value();
-          
+
           if (mref.instruction()->mandatory_without_initial_value()) {
             // Unless the field has optional presence, it is a dynamic error [ERR D6] if the instruction context has no initial value.
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));

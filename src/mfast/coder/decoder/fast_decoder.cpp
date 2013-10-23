@@ -17,8 +17,8 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include <boost/container/map.hpp>
+#include "../mfast_coder_export.h"
 #include "../fast_decoder.h"
-
 #include "mfast/field_visitor.h"
 #include "mfast/sequence_ref.h"
 #include "mfast/malloc_allocator.h"

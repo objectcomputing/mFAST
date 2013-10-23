@@ -16,12 +16,12 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
+#include "../common/exceptions.h"
 #include "dictionary_builder.h"
 #include <cstring>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include "../common/exceptions.h"
 
 
 namespace mfast {
@@ -43,7 +43,7 @@ struct tag_second_type {};
 
 typedef boost::error_info<tag_second_type,std::string> second_type_info;
 
-class MFAST_EXPORT key_type_mismatch_error
+class MFAST_CODER_EXPORT key_type_mismatch_error
   : public fast_dynamic_error
 {
 public:

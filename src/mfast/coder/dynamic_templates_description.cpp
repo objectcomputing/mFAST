@@ -16,6 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
+#include "common/exceptions.h"
 #include "dynamic_templates_description.h"
 #include "common/FastXMLVisitor.h"
 #include <deque>
@@ -25,7 +26,6 @@
 #include <map>
 #include <set>
 
-#include "common/exceptions.h"
 using namespace std;
 using namespace boost::assign; // bring 'map_list_of()' into scope
 
@@ -85,28 +85,46 @@ struct cstr_compare
 };
 
 
-
-std::string template_registry::get_key(const char* ns, const char* name) const
+struct template_registry_impl
 {
-  return std::string(ns) + "||" + name;
-}
+  typedef std::map<std::string, template_instruction*> map_type;
+  map_type templates_;
+  arena_allocator alloc_;
 
-template_instruction*
-template_registry::find(const char* ns, const char* name) const
-{
-  // std::cerr << "template_registry::find(" << ns << "," << name << ")\n";
 
-  map_type::const_iterator itr = templates_.find(get_key(ns, name));
-  if (itr != templates_.end()) {
-    return itr->second;
+  std::string get_key(const char* ns, const char* name) const
+  {
+    return std::string(ns) + "||" + name;
   }
-  return 0;
+
+  template_instruction*
+  find(const char* ns, const char* name) const
+  {
+    // std::cerr << "template_registry::find(" << ns << "," << name << ")\n";
+
+    map_type::const_iterator itr = templates_.find(get_key(ns, name));
+    if (itr != templates_.end()) {
+      return itr->second;
+    }
+    return 0;
+  }
+
+  void add(const char* ns, template_instruction* inst)
+  {
+    // std::cerr << "template_registry::add(" << ns << "," << inst->name() << ")\n";
+    templates_[get_key(ns, inst->name())] = inst;
+  }
+};
+
+
+template_registry::template_registry()
+  : impl_(new template_registry_impl)
+{
 }
 
-void template_registry::add(const char* ns, template_instruction* inst)
+template_registry::~template_registry()
 {
-  // std::cerr << "template_registry::add(" << ns << "," << inst->name() << ")\n";
-  templates_[get_key(ns, inst->name())] = inst;
+  delete impl_;
 }
 
 template_registry*
@@ -116,11 +134,6 @@ template_registry::instance()
   return &inst;
 }
 
-arena_allocator*
-template_registry::allocator()
-{
-  return &alloc_;
-}
 
 class instruction_cloner
   : public field_instruction_visitor
@@ -239,7 +252,7 @@ public:
                    const char*            cpp_ns,
                    template_registry*     registry)
     : definition_(definition)
-    , alloc_(registry->allocator())
+    , alloc_(&registry->impl_->alloc_)
     , cpp_ns_(new_string(cpp_ns))
     , registry_(registry)
   {
@@ -436,7 +449,7 @@ public:
       );
     stack_.pop_back();
     current().push_back(instruction);
-    registry_->add(current_context().ns_.c_str() , instruction);
+    registry_->impl_->add(current_context().ns_.c_str() , instruction);
     return true;
   }
 
@@ -450,7 +463,7 @@ public:
     if (name_attr.size()) {
       std::string ns = get_optional_attr(element, "ns", current_context().ns_.c_str());
       template_instruction* target =
-        registry_->find( ns.c_str(), name_attr.c_str());
+        registry_->impl_->find( ns.c_str(), name_attr.c_str());
 
       if (target == 0) {
         BOOST_THROW_EXCEPTION(template_not_found_error(name_attr.c_str(),
@@ -536,7 +549,7 @@ public:
         const char* target_ns = get_optional_attr(*child, "ns",  current_context().ns_.c_str());
 
         template_instruction* target =
-          registry_->find(target_ns, target_name);
+          registry_->impl_->find(target_ns, target_name);
 
         if (target == 0)
           BOOST_THROW_EXCEPTION(template_not_found_error(target_name, name_attr.c_str()));
@@ -617,7 +630,7 @@ public:
       if (target_name) {
         const char* target_ns = get_optional_attr(*child, "ns", current_context().ns_.c_str());
         template_instruction* target =
-          registry_->find(target_ns, target_name);
+          registry_->impl_->find(target_ns, target_name);
 
         if (target == 0)
           BOOST_THROW_EXCEPTION(template_not_found_error(target_name, name_attr.c_str()));

@@ -26,17 +26,15 @@
 #include <map>
 namespace mfast
 {
+struct template_registry_impl;
 class MFAST_CODER_EXPORT template_registry
 {
 private:
-  typedef std::map<std::string, template_instruction*> map_type;
-  map_type templates_;
-  std::string get_key(const char* ns, const char* name) const;
-  arena_allocator alloc_;
+  template_registry_impl* impl_;
+  friend class templates_loader;
 public:
-  template_instruction* find(const char* ns, const char* name) const;
-  void add(const char* ns, template_instruction* inst);
-  arena_allocator* allocator();
+  template_registry();
+  ~template_registry();
 
   static template_registry* instance();
 };
