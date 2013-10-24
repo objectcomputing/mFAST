@@ -59,18 +59,18 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     uint64_cref cref(&storage, &inst);
 
     BOOST_CHECK(!cref.present() );
-    BOOST_CHECK_EQUAL(cref.id(), 1);
+    BOOST_CHECK_EQUAL(cref.id(), 1U);
     BOOST_CHECK( strcmp(cref.name(), "test_uint64") == 0);
 
     uint64_mref ref(&allocator, &storage, &inst);
 
     BOOST_CHECK(!ref.present() );
-    BOOST_CHECK_EQUAL(ref.id(), 1);
+    BOOST_CHECK_EQUAL(ref.id(), 1U);
     BOOST_CHECK( strcmp(ref.name(), "test_uint64") == 0);
 
     ref.as(5);
     BOOST_CHECK( ref.present() );
-    BOOST_CHECK_EQUAL(ref.value(), 5);
+    BOOST_CHECK_EQUAL(ref.value(), 5U);
 
     ref.as_initial_value();
     BOOST_CHECK( ref.present() );
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
       value_storage base_value = helper.delta_base_value_of(ref);
       uint64_cref base_cref(&base_value, &inst);
       BOOST_CHECK( base_cref.present() );
-      BOOST_CHECK_EQUAL(base_cref.value(), 4);
+      BOOST_CHECK_EQUAL(base_cref.value(), 4U);
     }
   }
 
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     uint64_cref cref(&storage, &inst);
 
     BOOST_CHECK(cref.present() );
-    BOOST_CHECK_EQUAL(cref.id(), 1);
+    BOOST_CHECK_EQUAL(cref.id(), 1U);
     BOOST_CHECK( strcmp(cref.name(), "test_uint64") == 0);
     BOOST_CHECK_EQUAL( cref.value(), UINT64_MAX);
 
@@ -239,13 +239,13 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     decimal_cref cref(&storage, &inst);
 
     BOOST_CHECK(!cref.present() );
-    BOOST_CHECK_EQUAL(cref.id(), 1);
+    BOOST_CHECK_EQUAL(cref.id(), 1U);
     BOOST_CHECK( strcmp(cref.name(), "test_decimal") == 0);
 
     decimal_mref ref(&allocator, &storage, &inst);
 
     BOOST_CHECK(!ref.present() );
-    BOOST_CHECK_EQUAL(ref.id(), 1);
+    BOOST_CHECK_EQUAL(ref.id(), 1U);
     BOOST_CHECK( strcmp(ref.name(), "test_decimal") == 0);
 
     ref.as(5, 20);
@@ -270,7 +270,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     ref.set_exponent(5);
     BOOST_CHECK(ref.present() );
     BOOST_CHECK_EQUAL(ref.exponent(), 5);
-    
+
 
     // test convertion from field_mref to field_cref
     decimal_cref another_cref(ref);
@@ -312,14 +312,14 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
       BOOST_CHECK_EQUAL(base_cref.exponent(), 0);
 
     }
-    
+
     // test conversion from decimal value
-  
-    ref.as(decimal(500));   
+
+    ref.as(decimal(500));
     BOOST_CHECK_EQUAL(ref.mantissa(), 5);
     BOOST_CHECK_EQUAL(ref.exponent(), 2);
-    
-    ref.as(decimal("0.05"));   
+
+    ref.as(decimal("0.05"));
     BOOST_CHECK_EQUAL(ref.mantissa(), 5);
     BOOST_CHECK_EQUAL(ref.exponent(), -2);
   }
@@ -345,13 +345,13 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     decimal_cref cref(&storage, &inst);
 
     BOOST_CHECK(!cref.present() );
-    BOOST_CHECK_EQUAL(cref.id(), 1);
+    BOOST_CHECK_EQUAL(cref.id(), 1U);
     BOOST_CHECK( strcmp(cref.name(), "test_decimal2") == 0);
 
     decimal_mref ref(&allocator, &storage, &inst);
 
     BOOST_CHECK(!ref.present() );
-    BOOST_CHECK_EQUAL(ref.id(), 1);
+    BOOST_CHECK_EQUAL(ref.id(), 1U);
     BOOST_CHECK( strcmp(ref.name(), "test_decimal2") == 0);
 
     ref.as(5, 20);
@@ -428,12 +428,12 @@ BOOST_AUTO_TEST_CASE(string_field_test)
   inst.construct_value(storage, &alloc);
   BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
 
-  BOOST_CHECK_EQUAL(storage.of_array.capacity_, 0);
+  BOOST_CHECK_EQUAL(storage.of_array.capacity_,      0U);
 
   {
     ascii_string_cref cref(&storage, &inst);
     BOOST_CHECK(!cref.present() );
-    BOOST_CHECK_EQUAL(cref.id(), 1);
+    BOOST_CHECK_EQUAL(cref.id(), 1U);
     BOOST_CHECK( strcmp(cref.name(), "test_ascii") == 0);
   }
 
@@ -469,11 +469,11 @@ BOOST_AUTO_TEST_CASE(string_field_test)
 
     ref.replace(4, 2, "aaaa", 4);
     BOOST_CHECK(ref == "xxxxaaaa");
-    
+
     ref.shallow_assign("abcde");
     BOOST_CHECK(ref == "abcde");
-    BOOST_CHECK_EQUAL(storage.of_array.capacity_, 0);
-    
+    BOOST_CHECK_EQUAL(storage.of_array.capacity_, 0U);
+
     ref.as_absent();
     BOOST_CHECK(ref.absent());
 
@@ -481,7 +481,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     detail::codec_helper helper;
 
     BOOST_CHECK(!helper.previous_value_of(ref).is_defined() );
-    
+
     // testing delta base value
 
     // The base value depends on the state of the previous value in the following way:
@@ -538,7 +538,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "initial_string" );
     }
-    
+
   }
 
   inst.destruct_value(storage, &alloc);
@@ -602,7 +602,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                       1,
                                       "test_byte_vector","",
                                       0,
-                                      byte_vector_value_storage(f0_initial,sizeof(f0_initial)), 
+                                      byte_vector_value_storage(f0_initial,sizeof(f0_initial)),
                                       0, 0, 0);
 
   unicode_field_instruction inst1(1, operator_copy,
@@ -625,12 +625,12 @@ BOOST_AUTO_TEST_CASE(group_field_test)
   BOOST_CHECK_EQUAL(group_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
   group_inst.construct_value(storage, &alloc);
-  
+
   BOOST_CHECK(storage.of_group.content_ != 0);
   {
     group_cref ref(&storage, &group_inst);
-    BOOST_CHECK_EQUAL(ref.present(),         false);
-    BOOST_CHECK_EQUAL(ref.num_fields(),    2);
+    BOOST_CHECK_EQUAL(ref.present(),                         false);
+    BOOST_CHECK_EQUAL(ref.num_fields(),                      2U);
 
     BOOST_CHECK_EQUAL(aggregate_cref(ref).subinstruction(0), &inst0);
     BOOST_CHECK_EQUAL(aggregate_cref(ref).subinstruction(1), &inst1);
@@ -651,8 +651,8 @@ BOOST_AUTO_TEST_CASE(group_field_test)
 
   {
     group_mref ref(&alloc, &storage, &group_inst);
-    BOOST_CHECK_EQUAL(ref.present(),      false);
-    BOOST_CHECK_EQUAL(ref.num_fields(), 2);
+    BOOST_CHECK_EQUAL(ref.present(),    false);
+    BOOST_CHECK_EQUAL(ref.num_fields(), 2U);
 
     ref.as_present();
     field_mref f0(ref[0] );
@@ -678,10 +678,10 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     unsigned char bytes[] = "test";
     mf0.assign(bytes, bytes+4);
 
-    BOOST_CHECK_EQUAL(mf0.size(),                            4);
+    BOOST_CHECK_EQUAL(mf0.size(),                            4U);
     BOOST_CHECK_EQUAL(memcmp(mf0.data(), bytes, mf0.size()), 0);
   }
-  
+
   group_inst.destruct_value(storage, &alloc);
 
 }
@@ -699,7 +699,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                       1,
                                       "test_byte_vector","",
                                       0,
-                                      byte_vector_value_storage(f0_initial,sizeof(f0_initial)), 
+                                      byte_vector_value_storage(f0_initial,sizeof(f0_initial)),
                                       0, 0, 0);
 
   unicode_field_instruction inst1(1, operator_copy,
@@ -728,24 +728,24 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                            2, // subinstructions_count
                                            &length_inst);
 
-  BOOST_CHECK_EQUAL(sequence_inst.subinstructions_count(),    2);
+  BOOST_CHECK_EQUAL(sequence_inst.subinstructions_count(),    2U);
   BOOST_CHECK_EQUAL(sequence_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
   sequence_inst.construct_value(storage, &alloc);
-  
+
   {
     sequence_mref ref(&alloc, &storage, &sequence_inst);
-    BOOST_CHECK_EQUAL(ref.present(),      false);
-    BOOST_CHECK_EQUAL(ref.num_fields(), 2);
+    BOOST_CHECK_EQUAL(ref.present(),    false);
+    BOOST_CHECK_EQUAL(ref.num_fields(), 2U);
 
     ref.resize(2);
-    BOOST_CHECK_EQUAL(ref.present(),      true);
+    BOOST_CHECK_EQUAL(ref.present(),    true);
 
     ref.as_absent();
-    BOOST_CHECK_EQUAL(ref.present(),      false);
+    BOOST_CHECK_EQUAL(ref.present(),    false);
 
     ref.resize(2);
-    BOOST_CHECK_EQUAL(ref.present(),      true);
+    BOOST_CHECK_EQUAL(ref.present(),    true);
 
     sequence_element_mref e0ref(ref[0]);
     sequence_element_cref e0cref(ref[0]);
@@ -772,12 +772,12 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
       unsigned char bytes[] = "test";
       mf0.assign(bytes, bytes+4);
 
-      BOOST_CHECK_EQUAL(mf0.size(),                            4);
+      BOOST_CHECK_EQUAL(mf0.size(),                            4U);
       BOOST_CHECK_EQUAL(memcmp(mf0.data(), bytes, mf0.size()), 0);
     }
 
     ref.resize(4);
-    BOOST_CHECK_EQUAL(ref.size(), 4);
+    BOOST_CHECK_EQUAL(ref.size(), 4U);
     {
       field_mref e3f1(ref[3][1] );
       BOOST_CHECK(e3f1.absent());
@@ -795,7 +795,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
       BOOST_CHECK(cstr == str);
     }
   }
-  
+
   sequence_inst.destruct_value(storage, &alloc);
 
 }
@@ -804,45 +804,45 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
 class mock_field_instruction
   : public field_instruction
 {
-  public:
+public:
 
 
-    mock_field_instruction()
-      : field_instruction (0, operator_none,field_type_int32,presence_mandatory,0,"","")
-      , construct_value_called_(0)
-      , destruct_value_called_(0)
-      , copy_value_deep_called_(0)
-    {
-    }
+  mock_field_instruction()
+    : field_instruction (0, operator_none,field_type_int32,presence_mandatory,0,"","")
+    , construct_value_called_(0)
+    , destruct_value_called_(0)
+    , copy_value_deep_called_(0)
+  {
+  }
 
-    mutable int construct_value_called_;
-    mutable int destruct_value_called_;
-    mutable int copy_value_deep_called_;
+  mutable int construct_value_called_;
+  mutable int destruct_value_called_;
+  mutable int copy_value_deep_called_;
 
 
-    virtual void construct_value(value_storage& /* storage */,
-                                 allocator*       /* alloc */) const
-    {
-      construct_value_called_++;
-    }
+  virtual void construct_value(value_storage& /* storage */,
+                               allocator*       /* alloc */) const
+  {
+    construct_value_called_++;
+  }
 
-    virtual void destruct_value(value_storage& /* storage */,
-                                allocator*       /* alloc */) const
-    {
-      destruct_value_called_++;
-    }
+  virtual void destruct_value(value_storage& /* storage */,
+                              allocator*       /* alloc */) const
+  {
+    destruct_value_called_++;
+  }
 
-    /// Perform deep copy
-    virtual void copy_value(const value_storage& /* src */,
-                            value_storage      & /* dest */,
-                            allocator*             /* alloc */) const
-    {
-      copy_value_deep_called_++;
-    }
+  /// Perform deep copy
+  virtual void copy_value(const value_storage& /* src */,
+                          value_storage      & /* dest */,
+                          allocator*             /* alloc */) const
+  {
+    copy_value_deep_called_++;
+  }
 
-    virtual void accept(field_instruction_visitor&, void*) const
-    {
-    }
+  virtual void accept(field_instruction_visitor&, void*) const
+  {
+  }
 
 };
 
@@ -877,17 +877,17 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
   {
     sequence_mref ref(&alloc, &storage, &sequence_inst);
     BOOST_CHECK_EQUAL(ref.present(),                 false);
-    BOOST_CHECK_EQUAL(ref.num_fields(),            1);
+    BOOST_CHECK_EQUAL(ref.num_fields(),              1U);
 
     ref.reserve(2);
-    BOOST_CHECK_EQUAL(ref.size(),                    0);
+    BOOST_CHECK_EQUAL(ref.size(),                    0U);
     BOOST_CHECK_EQUAL(mock0.construct_value_called_, 2);
     BOOST_CHECK_EQUAL(mock0.destruct_value_called_,  0);
 
 
     ref.resize(2);
     BOOST_CHECK_EQUAL(ref.present(),                 true);
-    BOOST_CHECK_EQUAL(ref.size(),                    2);
+    BOOST_CHECK_EQUAL(ref.size(),                    2U);
 
     BOOST_CHECK_EQUAL(mock0.construct_value_called_, 2);
     BOOST_CHECK_EQUAL(mock0.destruct_value_called_,  0);

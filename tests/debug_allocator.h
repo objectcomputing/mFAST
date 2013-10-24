@@ -34,7 +34,7 @@ class debug_allocator
 
     ~debug_allocator()
     {
-      BOOST_CHECK_EQUAL(leased_addresses_.size(), 0);
+      BOOST_CHECK_EQUAL(leased_addresses_.size(), 0U);
     }
 
     virtual void* allocate(std::size_t s)
