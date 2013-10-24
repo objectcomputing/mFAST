@@ -25,7 +25,7 @@
 #include <cstring>
 
 
-namespace mfast 
+namespace mfast
 {
   class template_instruction;
 
@@ -79,7 +79,7 @@ namespace mfast
     // construct an undefined value
     value_storage()
     {
-      of_templateref.content_ = 0;
+      of_uint.content_ = 0;
       of_templateref.of_instruction.dummy_ = 0;
     };
 
@@ -91,14 +91,14 @@ namespace mfast
       of_uint.defined_bit_ = 1;
       of_uint.present_ = 1;
     };
-    
+
     // construct a default zero length string value
     value_storage(const char*)
     {
       of_array.content_ = const_cast<char*>("");
       of_array.len_ = 1;
       of_array.capacity_ = 0;
-      of_array.defined_bit_ = 1;  
+      of_array.defined_bit_ = 1;
     };
 
     bool is_defined() const
@@ -130,26 +130,26 @@ namespace mfast
     {
       of_array.len_ = n+1;
     }
-    
+
     template <typename T>
-    T get() const 
+    T get() const
     {
       return reinterpret_cast<const T&>(of_uint.content_);
     }
-    
+
     template <typename T>
-    void set(T v) 
+    void set(T v)
     {
       reinterpret_cast<T&>(of_uint.content_) = v;
     }
   };
-  
+
 
   template <typename IntType>
   struct int_value_storage
   {
     value_storage storage_;
-    
+
     int_value_storage(){
       storage_.of_uint.defined_bit_ = 1;
     }
@@ -157,15 +157,15 @@ namespace mfast
     {
       storage_.of_uint.defined_bit_ = 1;
       storage_.of_uint.present_ = 1;
-      
+
       storage_.set<IntType>(v);
     }
   };
-  
+
   struct decimal_value_storage
   {
     value_storage storage_;
-    
+
     decimal_value_storage(){
       storage_.of_decimal.defined_bit_ = 1;
     }
@@ -177,15 +177,15 @@ namespace mfast
       storage_.of_decimal.exponent_ = exponent;
     }
   };
-  
+
   struct string_value_storage
   {
     value_storage storage_;
-    
+
     string_value_storage(){
       storage_.of_array.defined_bit_ = 1;
     }
-    
+
     string_value_storage(const char* v)
     {
       storage_.of_array.defined_bit_ = 1;
@@ -193,7 +193,7 @@ namespace mfast
       storage_.of_array.content_ = const_cast<char*>(v);
       storage_.of_array.capacity_ = 0;
     }
-    
+
     string_value_storage(const char* v, std::size_t n)
     {
       storage_.of_array.defined_bit_ = 1;
@@ -202,18 +202,18 @@ namespace mfast
       storage_.of_array.capacity_ = 0;
     }
   };
-  
+
   struct byte_vector_value_storage
     : string_value_storage
   {
-    
+
     byte_vector_value_storage(){}
     byte_vector_value_storage(const unsigned char* v, std::size_t n)
       : string_value_storage(reinterpret_cast<const char*>(v), n)
     {
     }
   };
-  
+
 }
 
 #endif /* end of include guard: VALUE_STORAGE_H_OMNNMOZX */
