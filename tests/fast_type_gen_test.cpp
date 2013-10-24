@@ -53,63 +53,63 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   debug_allocator alloc;
   test1::SampleInfo info(&alloc);
   BOOST_CHECK_EQUAL((int)test1::SampleInfo::the_id,                             1);
-  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->id(),                    1);
-  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->subinstructions_count(), 4);
+  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->id(),                    1U);
+  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->subinstructions_count(), 4U);
   test1::SampleInfo_cref info_cref = info.cref();
-  
+
   BOOST_CHECK(equal_string(info_cref.get_BeginString(), "FIX4.4"));
   BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->field_index(),        0);
   BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->field_type(),     mfast::field_type_ascii_string);
-  BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->id(),                 8);
+  BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->id(),                 8U);
   BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->field_operator(), mfast::operator_constant);
 
   BOOST_CHECK(equal_string(info_cref.get_MessageType(), "X"));
   BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->field_index(),             1);
   BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->field_type(),          mfast::field_type_ascii_string);
-  BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->id(),                     35);
+  BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->id(),                     35U);
   BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->field_operator(),      mfast::operator_constant);
 
   BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->field_index(),            2);
   BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->field_type(),         mfast::field_type_ascii_string);
-  BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->id(),                    49);
+  BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->id(),                    49U);
   BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->field_operator(),     mfast::operator_copy);
 
   BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->field_index(),               3);
   BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->field_type(),            mfast::field_type_uint32);
-  BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->id(),                       34);
+  BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->id(),                       34U);
   BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->field_operator(),        mfast::operator_increment);
 
   test2::MDRefreshSample sample(&alloc);
   BOOST_CHECK_EQUAL((int)test2::MDRefreshSample::the_id,                                  2);
-  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->id(),                    2);
-  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->subinstructions_count(), 3);
+  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->id(),                    2U);
+  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->subinstructions_count(), 3U);
 
   test2::MDRefreshSample_cref sample_cref = sample.cref();
   test1::SampleInfo_cref si = sample_cref.get_info();
   // BOOST_CHECK_EQUAL(si.present(), true);
-  BOOST_CHECK_EQUAL(si.instruction()->segment_pmap_size(), 2);
+  BOOST_CHECK_EQUAL(si.instruction()->segment_pmap_size(), 2U);
 
   BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->field_index(),           1);
   BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->field_type(),        mfast::field_type_sequence);
-  BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->subinstructions_count(), 11);
+  BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->subinstructions_count(), 11U);
 
   const mfast::uint32_field_instruction* len_inst = sample.cref().get_MDEntries().instruction()->length_instruction();
 
   BOOST_CHECK(len_inst != 0);
   BOOST_CHECK(equal_string(len_inst->name(), "NoMDEntries"));
-  BOOST_CHECK_EQUAL(len_inst->id(),268);
+  BOOST_CHECK_EQUAL(len_inst->id(),268U);
 
   sample.mref().set_MDEntries().resize(2);
   typedef test2::MDRefreshSample_cref::MDEntries_element_cref MDEntries_element_cref;
   MDEntries_element_cref elem0 = sample.cref().get_MDEntries()[0];
 
   BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->field_index(),        0);
-  BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->id(),               279);
+  BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->id(),               279U);
   BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->field_type(),     mfast::field_type_uint32);
   BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->field_operator(), mfast::operator_copy);
 
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_index(),           5);
-  BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->id(),                  271);
+  BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->id(),                  271U);
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_type(),        mfast::field_type_exponent);
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_operator(),    mfast::operator_delta);
 
@@ -121,10 +121,10 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   extra_mref.resize(1);
   BOOST_CHECK(equal_string(extra_mref[0].get_BeginString(), "FIX4.4"));
   // test1::SampleInfo_mref d2 = dynamic_template_mref.as<test1::SampleInfo>();
-  // 
+  //
   // BOOST_CHECK_EQUAL(sample.mref().get_nested_message2().target_instruction(), &test1::SampleInfo::the_instruction);
   // BOOST_CHECK_EQUAL(d2.instruction(),                                         &test1::SampleInfo::the_instruction);
-  
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
