@@ -111,9 +111,10 @@ public:
                               allocator*     alloc) const;
 
   /// Perform deep copy
-  virtual void copy_value(const value_storage& src,
-                          value_storage&       dest,
-                          allocator*           alloc) const;
+  virtual void copy_construct_value(const value_storage& src,
+                                    value_storage&       dest,
+                                    allocator*           alloc,
+                                    value_storage*       fields_storage=0) const;
 
   virtual void accept(field_instruction_visitor&, void*) const=0;
   virtual std::size_t pmap_size() const;
@@ -404,9 +405,10 @@ public:
   }
 
   /// Perform deep copy
-  virtual void copy_value(const value_storage& src,
-                          value_storage&       dest,
-                          allocator*           alloc) const;
+  virtual void copy_construct_value(const value_storage& src,
+                                    value_storage&       dest,
+                                    allocator*           alloc,
+                                    value_storage*       fields_storage=0) const;
 
 
   virtual void construct_value(value_storage& storage,
@@ -478,9 +480,10 @@ public:
 
 
   // perform deep copy
-  virtual void copy_value(const value_storage& src,
-                          value_storage&       dest,
-                          allocator*           alloc) const;
+  virtual void copy_construct_value(const value_storage& src,
+                                    value_storage&       dest,
+                                    allocator*           alloc,
+                                    value_storage*       fields_storage=0) const;
 
 
   value_storage& prev_value()
@@ -788,9 +791,10 @@ public:
                               allocator*     alloc) const;
 
   // perform deep copy
-  virtual void copy_value(const value_storage& src,
-                          value_storage&       dest,
-                          allocator*           alloc) const;
+  virtual void copy_construct_value(const value_storage& src,
+                                    value_storage&       dest,
+                                    allocator*           alloc,
+                                    value_storage*       fields_storage=0) const;
 
   virtual void accept(field_instruction_visitor&, void*) const;
 
@@ -858,9 +862,10 @@ public:
                                   allocator*     alloc) const;
 
   // perform deep copy
-  virtual void copy_value(const value_storage& src,
-                          value_storage&       dest,
-                          allocator*           alloc) const;
+  virtual void copy_construct_value(const value_storage& src,
+                                    value_storage&       dest,
+                                    allocator*           alloc,
+                                    value_storage*       fields_storage=0) const;
 
   virtual void accept(field_instruction_visitor&, void*) const;
   const uint32_field_instruction* length_instruction() const
@@ -932,6 +937,11 @@ public:
                             value_storage*       fields_storage,
                             allocator*           alloc,
                             const value_storage* src_fields_storage) const;
+
+  virtual void copy_construct_value(const value_storage& src,
+                                    value_storage&       dest,
+                                    allocator*           alloc,
+                                    value_storage*       fields_storage=0) const;
 
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -1109,9 +1119,10 @@ public:
   virtual std::size_t pmap_size() const;
 
   /// Perform deep copy
-  virtual void copy_value(const value_storage& src,
-                          value_storage&       dest,
-                          allocator*           alloc) const;
+  virtual void copy_construct_value(const value_storage& src,
+                                    value_storage&       dest,
+                                    allocator*           alloc,
+                                    value_storage*       fields_storage=0) const;
 
   virtual void accept(field_instruction_visitor&, void*) const;
 
@@ -1119,7 +1130,6 @@ public:
   {
     return target_;
   }
-
 
   static const const_instruction_ptr_t* default_instructions(presence_enum_t optional);
 

@@ -50,9 +50,10 @@ field_instruction::destruct_value(value_storage&,
 }
 
 void
-field_instruction::copy_value(const value_storage& src,
-                              value_storage&       dest,
-                              allocator* /* alloc */) const
+field_instruction::copy_construct_value(const value_storage& src,
+                                        value_storage&       dest,
+                                        allocator* /* alloc */,
+                                        value_storage*) const
 {
   dest.of_array.content_ = src.of_array.content_;
   dest.of_array.len_ = src.of_array.len_;
@@ -113,9 +114,10 @@ void decimal_field_instruction::construct_value(value_storage& storage,
 }
 
 void
-decimal_field_instruction::copy_value(const value_storage& src,
-                                      value_storage&       dest,
-                                      allocator* /* alloc */) const
+decimal_field_instruction::copy_construct_value(const value_storage& src,
+                                                value_storage&       dest,
+                                                allocator* /* alloc */,
+                                                value_storage*) const
 {
   dest.of_decimal.present_ =  src.of_decimal.present_;
   dest.of_decimal.mantissa_ = src.of_decimal.mantissa_;
@@ -146,9 +148,10 @@ void string_field_instruction::destruct_value(value_storage& storage,
   }
 }
 
-void string_field_instruction::copy_value(const value_storage& src,
-                                          value_storage&       dest,
-                                          allocator*           alloc) const
+void string_field_instruction::copy_construct_value(const value_storage& src,
+                                                    value_storage&       dest,
+                                                    allocator*           alloc,
+                                                    value_storage*) const
 {
   size_t len = src.of_array.len_;
   if (len && src.of_array.content_ != initial_value_.of_array.content_) {
@@ -232,7 +235,7 @@ void aggregate_instruction_base::copy_group_subfields(const value_storage* src_s
                                                       value_storage*       parent) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
-    this->subinstructions_[i]->copy_value(src_subfields[i], dest_subfields[i], alloc);
+    this->subinstructions_[i]->copy_construct_value(src_subfields[i], dest_subfields[i], alloc);
   }
 
   if (parent) {
@@ -279,9 +282,10 @@ void group_field_instruction::destruct_value(value_storage& storage,
   }
 }
 
-void group_field_instruction::copy_value(const value_storage& src,
-                                         value_storage&       dest,
-                                         allocator*           alloc) const
+void group_field_instruction::copy_construct_value(const value_storage& src,
+                                                   value_storage&       dest,
+                                                   allocator*           alloc,
+                                                   value_storage*) const
 {
   dest.of_group.present_ = src.of_group.present_;
   dest.of_group.own_content_ = true;
@@ -349,9 +353,10 @@ void sequence_field_instruction::destruct_value(value_storage& storage,
   }
 }
 
-void sequence_field_instruction::copy_value(const value_storage& src,
-                                            value_storage&       dest,
-                                            allocator*           alloc) const
+void sequence_field_instruction::copy_construct_value(const value_storage& src,
+                                                      value_storage&       dest,
+                                                      allocator*           alloc,
+                                                      value_storage*) const
 {
   std::size_t size = src.of_array.len_;
 
@@ -377,7 +382,7 @@ void sequence_field_instruction::copy_value(const value_storage& src,
     // we must zero out the extra memory we reserved; otherwise we may deallocate garbage pointers during destruction.
     std::size_t unused = dest.of_array.capacity_ - size;
     if (unused > 0) {
-      memset( static_cast<char*>(dest.of_array.content_) + reserve_size , 0, unused * element_size);
+      memset( static_cast<char*>(dest.of_array.content_) + reserve_size, 0, unused * element_size);
     }
   }
   else {
@@ -417,21 +422,21 @@ void template_instruction::construct_value(value_storage& storage,
     memset(fields_storage, 0, this->group_content_byte_count());
 }
 
-void template_instruction::copy_construct_value(value_storage&       storage,
-                                                value_storage*       dest_fields_storage,
+void template_instruction::copy_construct_value(const value_storage& src,
+                                                value_storage&       dest,
                                                 allocator*           alloc,
-                                                const value_storage* src_fields_storage) const
+                                                value_storage*       dest_fields_storage) const
 {
   if (dest_fields_storage) {
-    storage.of_group.own_content_ = false;
+    dest.of_group.own_content_ = false;
   }
   else {
-    storage.of_group.own_content_ = true;
+    dest.of_group.own_content_ = true;
     dest_fields_storage = static_cast<value_storage*>(
       alloc->allocate(this->group_content_byte_count()));
   }
-  storage.of_group.content_ = dest_fields_storage;
-  copy_group_subfields(src_fields_storage,
+  dest.of_group.content_ = dest_fields_storage;
+  copy_group_subfields(src.of_group.content_,
                        dest_fields_storage,
                        alloc);
 
@@ -463,10 +468,10 @@ void templateref_instruction::construct_value(value_storage& storage,
   this->construct_value(storage, alloc, target_, true);
 }
 
-void templateref_instruction::construct_value(value_storage&        storage,
-                                              allocator*            alloc,
+void templateref_instruction::construct_value(value_storage&              storage,
+                                              allocator*                  alloc,
                                               const template_instruction* from_inst,
-                                              bool                  construct_subfields) const
+                                              bool                        construct_subfields) const
 {
   storage.of_templateref.of_instruction.instruction_ = from_inst;
   if (from_inst) {
@@ -475,7 +480,7 @@ void templateref_instruction::construct_value(value_storage&        storage,
 
     if (construct_subfields)
       from_inst->construct_group_subfields(storage.of_templateref.content_, alloc);
-    else 
+    else
       memset(storage.of_templateref.content_, 0, from_inst->content_allocation_size());
   }
   else {
@@ -494,9 +499,10 @@ void templateref_instruction::destruct_value(value_storage& storage,
   }
 }
 
-void templateref_instruction::copy_value(const value_storage& src,
-                                         value_storage&       dest,
-                                         allocator*           alloc) const
+void templateref_instruction::copy_construct_value(const value_storage& src,
+                                                   value_storage&       dest,
+                                                   allocator*           alloc,
+                                                   value_storage*) const
 {
   dest.of_templateref.of_instruction.instruction_ = src.of_templateref.of_instruction.instruction_;
   if (src.of_templateref.of_instruction.instruction_) {
