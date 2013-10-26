@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(default_constructor_test)
   BOOST_CHECK_EQUAL(value.of_group.content_,                          NULLPTR);
 
   BOOST_CHECK_EQUAL(value.of_array.len_,                                   0U);
-  BOOST_CHECK_EQUAL(value.of_array.capacity_,                              0U);
+  BOOST_CHECK_EQUAL(value.of_array.capacity_in_bytes_,                              0U);
   BOOST_CHECK_EQUAL(value.of_array.defined_bit_,                           0U);
   BOOST_CHECK_EQUAL(value.of_array.content_,                          NULLPTR);
 
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(non_empty_constructor_test)
   BOOST_CHECK_EQUAL(value.of_group.content_, NULLPTR);
 
   BOOST_CHECK(value.of_array.len_ != 0);
-  BOOST_CHECK_EQUAL(value.of_array.capacity_,     0U);
+  BOOST_CHECK_EQUAL(value.of_array.capacity_in_bytes_,     0U);
   BOOST_CHECK_EQUAL(value.of_array.defined_bit_,  1U);
   BOOST_CHECK_EQUAL(value.of_array.content_, NULLPTR);
 }

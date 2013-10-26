@@ -32,13 +32,18 @@ class codec_helper;
 }
 
 template <typename T>
-struct vector_instruction_trait;
+struct vector_instruction_trait
+{
+  typedef vector_field_instruction<T> type;
+};
+
 
 template <>
 struct vector_instruction_trait<unsigned char>
 {
   typedef byte_vector_field_instruction type;
 };
+
 
 template <typename T, typename InstructionType>
 class vector_cref_base
@@ -162,7 +167,7 @@ protected:
   {
     v.of_array.content_ = this->storage()->of_array.content_;
     v.of_array.len_ = this->storage()->of_array.len_;
-    v.of_array.capacity_ = 0;
+    v.of_array.capacity_in_bytes_ = 0;
     v.defined(true);
   }
 
@@ -217,6 +222,10 @@ public:
 };
 
 typedef vector_cref<unsigned char> byte_vector_cref;
+typedef vector_cref<int32_t> int32_vector_cref;
+typedef vector_cref<uint32_t> uint32_vector_cref;
+typedef vector_cref<int64_t> int64_vector_cref;
+typedef vector_cref<uint64_t> uint64_vector_cref;
 
 template <typename T>
 class vector_mref_base
@@ -276,7 +285,7 @@ public:
   }
 
   template <int SIZE>
-  void as (T (&array)[SIZE]) const
+  void as (const T (&array)[SIZE]) const
   {
     assign(array, array+SIZE);
   }
@@ -368,15 +377,16 @@ public:
 
   void shallow_assign(const value_type* addr, size_t n) const
   {
+
     assert( n < static_cast<size_t>((std::numeric_limits<int32_t>::max)()) );
-    if (this->storage()->of_array.capacity_ > 0 &&
+    if (this->storage()->of_array.capacity_in_bytes_ > 0 &&
         this->storage()->of_array.content_ != 0) {
       this->allocator()->deallocate(this->storage()->of_array.content_,
-                                    this->storage()->of_array.capacity_);
+                                    this->storage()->of_array.capacity_in_bytes_);
     }
     this->storage()->of_array.content_ = const_cast<char*>(addr);
     this->storage()->array_length(n);
-    this->storage()->of_array.capacity_ = 0;
+    this->storage()->of_array.capacity_in_bytes_ = 0;
   }
 
   void replace(size_t pos, size_t count,
@@ -426,7 +436,7 @@ private:
   // This behavior is different from the @c std::vector::capacity().
   size_t capacity() const
   {
-    return this->storage()->of_array.capacity_;
+    return this->storage()->of_array.capacity_in_bytes_ / sizeof(T);
   }
 
   iterator shift(iterator position, size_t n) const;
@@ -466,6 +476,10 @@ public:
 };
 
 typedef vector_mref<unsigned char> byte_vector_mref;
+typedef vector_mref<int32_t> int32_vector_mref;
+typedef vector_mref<uint32_t> uint32_vector_mref;
+typedef vector_mref<int64_t> int64_vector_mref;
+typedef vector_mref<uint64_t> uint64_vector_mref;
 
 template <typename T>
 struct mref_of<vector_cref<T> >
@@ -484,14 +498,14 @@ const
   std::size_t reserve_size = (n+1)*sizeof(value_type);
 
   if (capacity() > 0) {
-    this->storage()->of_array.capacity_
-      = this->alloc_->reallocate(this->storage()->of_array.content_, capacity()*sizeof(value_type), reserve_size)/sizeof(value_type);
+    this->storage()->of_array.capacity_in_bytes_
+      = this->alloc_->reallocate(this->storage()->of_array.content_, capacity(), reserve_size);
   }
   else {
     void* old_addr = this->storage()->of_array.content_;
     this->storage()->of_array.content_ = 0;
-    this->storage()->of_array.capacity_
-      = this->alloc_->reallocate(this->storage()->of_array.content_, 0, reserve_size)/sizeof(value_type);
+    this->storage()->of_array.capacity_in_bytes_
+      = this->alloc_->reallocate(this->storage()->of_array.content_, 0, reserve_size);
     // Copy the old content to the new buffer.
     // In the case when the this->capacity == 0 && this->size() > 0,
     // reserve() could be invoked with n < this->size(). Thus, we can

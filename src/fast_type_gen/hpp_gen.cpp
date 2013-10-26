@@ -81,6 +81,26 @@ void hpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
   gen_primitive("byte_vector", inst);
 }
 
+void hpp_gen::visit(const mfast::int32_vector_field_instruction* inst, void*)
+{
+  gen_primitive("int32_vector", inst);
+}
+
+void hpp_gen::visit(const mfast::uint32_vector_field_instruction* inst, void*)
+{
+  gen_primitive("uint32_vector", inst);
+}
+
+void hpp_gen::visit(const mfast::int64_vector_field_instruction* inst, void*)
+{
+  gen_primitive("int64_vector", inst);
+}
+
+void hpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
+{
+  gen_primitive("uint64_vector", inst);
+}
+
 void hpp_gen::visit(const mfast::group_field_instruction* inst, void*)
 {
   if (contains_only_templateRef(inst)) {

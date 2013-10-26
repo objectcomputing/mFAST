@@ -56,7 +56,8 @@ encode_mref(const byte_stream&       result_stream,
   typename MREF::instruction_cptr instruction = value.instruction();
   value_storage& prev_storage = const_cast<value_storage&>(instruction->prev_value());
   value_storage old_prev_storage;
-  instruction->copy_construct_value(prev_storage, old_prev_storage, alloc);
+  if (prev_storage.is_defined())
+    instruction->copy_construct_value(prev_storage, old_prev_storage, alloc);
 
   typename MREF::cref_type old_prev( &old_prev_storage, instruction);
 
@@ -92,7 +93,7 @@ encode_mref(const byte_stream&       result_stream,
 
   instruction->destruct_value(prev_storage,alloc);
   instruction->destruct_value(old_prev_storage,alloc);
-  prev_storage.of_array.capacity_ = 0;
+  prev_storage.of_array.capacity_in_bytes_ = 0;
 
   return res;
 }

@@ -16,36 +16,36 @@
         + present() : bool
     }
 
-    \umlclass[width=25ex, x=-12,y=6]{int32\_cref}{}{
+    \umlclass[width=25ex, x=-12,y=7]{int32\_cref}{}{
         + value() : int32\_t
     }
-    \umlclass[width=25ex, x=-12,y=3]{uint32\_cref}{}{
+    \umlclass[width=25ex, x=-12,y=3.5]{uint32\_cref}{}{
         + value() : uint32\_t
     }
     \umlclass[width=25ex, x=-12,y=0]{int64\_cref}{}{
          + value() : int64\_t
     }
-    \umlclass[width=25ex, x=-12,y=-3]{uint64\_cref}{}{
+    \umlclass[width=25ex, x=-12,y=-3.5]{uint64\_cref}{}{
          + value() : uint64\_t
     }
-    \umlclass[width=25ex, x=-12,y=-6]{decimal\_cref}{}{
+    \umlclass[width=25ex, x=-12,y=-7]{decimal\_cref}{}{
      + value() : decimal
     }
 
-    \umlclass[width=32ex, x=-6,y=4.5]{ascii\_string\_cref}{}{
+    \umlclass[width=32ex, x=-6,y=5.25]{ascii\_string\_cref}{}{
       + size() : size\_t \\
       + c\_str() : const char* \\
       + value() : string
     }
-    \umlclass[width=32ex, x=-6,y=1.5]{unicode\_string\_cref}{}{
+    \umlclass[width=32ex, x=-6,y=1.75]{unicode\_string\_cref}{}{
       + size() : size\_t \\
       + c\_str() : const char* \\
       + value() : string
     }
-    \umlclass[width=32ex, x=-6,y=-1.5]{byte\_vector\_cref}{}{
+    \umlclass[template={T},width=32ex, x=-6,y=-1.75]{vector\_cref}{}{
       + size() : size\_t \\
-      + data() : const char* \\
-      + value() : vector<uchar\_t>
+      + data() : const T* \\
+      + value() : std::vector<T>
     }
 
     \umlclass[width=40ex, x=7,y=5]{group\_cref}{}{
@@ -63,6 +63,7 @@
      }
 
     \umlclass[width=40ex, x=7,y=1.5]{nested\_message\_cref}{}{
+        + is\_static() : bool\\
         + target() : message\_cref
      }
      \umlclass[width=40ex, x=15,y=0]{message\_cref}{}{
@@ -85,7 +86,7 @@
 
     \umlinherit[arm1=3cm, geometry=-|-]{ascii\_string\_cref}{field\_cref}
     \umlinherit[arm1=3cm, geometry=-|-]{unicode\_string\_cref}{field\_cref}
-    \umlinherit[arm1=3cm, geometry=-|-]{byte\_vector\_cref}{field\_cref}
+    \umlinherit[arm1=3cm, geometry=-|-]{vector\_cref}{field\_cref}
 
     \umlinherit[anchors=190 and 60, geometry=-|]{group\_cref}{field\_cref}
     \umlinherit[anchors=0 and -60, geometry=-|]{sequence\_cref}{field\_cref}

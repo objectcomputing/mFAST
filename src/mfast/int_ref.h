@@ -34,7 +34,7 @@ class int_cref
 {
   public:
     typedef T value_type;
-    typedef typename instruction_trait<T,false>::type instruction_type;
+    typedef typename instruction_trait<T>::type instruction_type;
     typedef const instruction_type* instruction_cptr;
 
     int_cref()
@@ -65,7 +65,7 @@ class int_cref
 
     bool is_initial_value() const
     {
-      return (this->absent() == this->instruction()->initial_value().is_empty() && 
+      return (this->absent() == this->instruction()->initial_value().is_empty() &&
               (this->absent() || value() == this->instruction()->initial_value().template get<T>()));
     }
 
@@ -120,7 +120,7 @@ class int_mref
   typedef make_field_mref<int_cref<T> > base_type;
 
   public:
-    typedef const typename instruction_trait<T,false>::type* instruction_cptr;
+    typedef const typename instruction_trait<T>::type* instruction_cptr;
 
     int_mref()
     {
@@ -156,7 +156,7 @@ class int_mref
     void as(T v) const
     {
       this->storage()->present(1);
-      this->storage()->template set<T>(v);   
+      this->storage()->template set<T>(v);
     }
 
     void as_initial_value() const

@@ -43,6 +43,10 @@ public:
   virtual void visit(const mfast::ascii_field_instruction*, void*);
   virtual void visit(const mfast::unicode_field_instruction*, void*);
   virtual void visit(const mfast::byte_vector_field_instruction*, void*);
+  virtual void visit(const mfast::int32_vector_field_instruction*, void*);
+  virtual void visit(const mfast::uint32_vector_field_instruction*, void*);
+  virtual void visit(const mfast::int64_vector_field_instruction*, void*);
+  virtual void visit(const mfast::uint64_vector_field_instruction*, void*);
   virtual void visit(const mfast::group_field_instruction*, void*);
   virtual void visit(const mfast::sequence_field_instruction*, void*);
   virtual void visit(const mfast::template_instruction*, void*);

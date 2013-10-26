@@ -48,7 +48,10 @@ class debug_allocator
     virtual std::size_t reallocate(void*& pointer, std::size_t /* old_size */, std::size_t new_size)
     {
       void* old_ptr = pointer;
-      pointer = std::realloc(pointer, new_size);
+      if (pointer)
+        pointer = std::realloc(pointer, new_size);
+      else
+        pointer = std::malloc(new_size);
       leased_addresses_.erase(old_ptr);
       if (pointer == 0) {
         std::free(old_ptr);

@@ -112,6 +112,30 @@ class field_accessor_adaptor
       accssor_.visit(ref);
     }
 
+    virtual void visit(const int32_vector_field_instruction* inst, void* storage)
+    {
+      int32_vector_cref ref(static_cast<value_storage*>(storage), inst);
+      accssor_.visit(ref);
+    }
+
+    virtual void visit(const uint32_vector_field_instruction* inst, void* storage)
+    {
+      uint32_vector_cref ref(static_cast<value_storage*>(storage), inst);
+      accssor_.visit(ref);
+    }
+
+    virtual void visit(const int64_vector_field_instruction* inst, void* storage)
+    {
+      int64_vector_cref ref(static_cast<value_storage*>(storage), inst);
+      accssor_.visit(ref);
+    }
+
+    virtual void visit(const uint64_vector_field_instruction* inst, void* storage)
+    {
+      uint64_vector_cref ref(static_cast<value_storage*>(storage), inst);
+      accssor_.visit(ref);
+    }
+
     virtual void visit(const group_field_instruction* inst, void* storage)
     {
       group_cref ref(static_cast<value_storage*>(storage), inst);
@@ -216,6 +240,30 @@ class field_mutator_adaptor
     virtual void visit(const byte_vector_field_instruction* inst, void* storage)
     {
       byte_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+      mutator_.visit(ref);
+    }
+
+    virtual void visit(const int32_vector_field_instruction* inst, void* storage)
+    {
+      int32_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+      mutator_.visit(ref);
+    }
+
+    virtual void visit(const uint32_vector_field_instruction* inst, void* storage)
+    {
+      uint32_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+      mutator_.visit(ref);
+    }
+
+    virtual void visit(const int64_vector_field_instruction* inst, void* storage)
+    {
+      int64_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+      mutator_.visit(ref);
+    }
+
+    virtual void visit(const uint64_vector_field_instruction* inst, void* storage)
+    {
+      uint64_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
       mutator_.visit(ref);
     }
 

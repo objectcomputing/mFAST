@@ -59,9 +59,10 @@ decode_mref(const byte_stream&       input_stream,
   instruction->construct_value(storage, alloc);
 
   value_storage old_prev_storage;
-  instruction->copy_construct_value(instruction->prev_value(),
-                                    old_prev_storage,
-                                    alloc);
+  if (instruction->prev_value().is_defined())
+    instruction->copy_construct_value(instruction->prev_value(),
+                                      old_prev_storage,
+                                      alloc);
 
   typename MREF::cref_type old_prev( &old_prev_storage, instruction);
 

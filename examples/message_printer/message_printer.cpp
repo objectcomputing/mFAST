@@ -49,14 +49,14 @@ class message_printer
 {
   std::ostream& os_;
   indenter indent_;
-  
+
   public:
-    
+
     enum {
       visit_absent = 0
     };
-        
-    
+
+
     message_printer(std::ostream& os)
       : os_(os)
     {
@@ -67,6 +67,20 @@ class message_printer
     {
       os_ << indent_ << ref.name() << ": " << ref
           << "\n";
+    }
+
+    template <typename IntType>
+    typename boost::enable_if_c< (sizeof(IntType)>1) >::type
+    visit(const vector_cref<IntType>& ref)
+    {
+      char sep[2]= { '\x0', '\x0'};
+      os_ << indent_ << ref.name() << ": {";
+      for (std::size_t i = 0; i < ref.size(); ++i)
+      {
+        os_ << sep << ref[i];
+        sep[0] = ',';
+      }
+      os_ << "}\n";
     }
 
     template <typename CompositeTypeRef>

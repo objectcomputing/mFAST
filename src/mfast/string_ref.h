@@ -184,7 +184,7 @@ public:
 
   const char* c_str() const
   {
-    if (this->storage()->of_array.capacity_ > 0) {
+    if (this->storage()->of_array.capacity_in_bytes_ > 0) {
       const_cast<char&>(*this->end()) = '\0';
     }
     return this->data();
@@ -330,7 +330,7 @@ private:
 
 public:
 
-  typedef typename base_type::instruction_cptr instruction_cptr;
+  typedef base_type::instruction_cptr instruction_cptr;
   vector_mref()
     : base_type()
   {
@@ -426,7 +426,7 @@ private:
   typedef string_mref_base<utf8_char> base_type;
 
 public:
-  typedef typename base_type::instruction_cptr instruction_cptr;
+  typedef base_type::instruction_cptr instruction_cptr;
 
   vector_mref()
     : base_type()

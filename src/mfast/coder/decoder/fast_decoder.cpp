@@ -91,6 +91,10 @@ struct fast_decoder_impl
   template <typename SimpleMRef>
   void visit(SimpleMRef &mref);
 
+  template <typename IntType>
+  typename boost::enable_if_c< (sizeof(IntType)> 1) >::type
+  visit(vector_mref<IntType> &mref);
+
   void visit(group_mref& mref, int);
   void visit(sequence_mref& mref, int);
   void visit(nested_message_mref& mref, int);
@@ -145,6 +149,24 @@ fast_decoder_impl::visit(SimpleMRef& mref)
     debug_ << "   decoded " << mref.name() << " = " << mref << "\n";
   else
     debug_ << "   decoded " << mref.name() << " is absent\n";
+}
+
+template <typename IntType>
+typename boost::enable_if_c< (sizeof(IntType)> 1) >::type
+fast_decoder_impl::visit(vector_mref<IntType> &mref)
+{
+  debug_ << "decoding int vector " << mref.name();
+
+  uint32_t length=0;
+  if (!strm_.decode(length, mref.optional())) {
+    mref.as_absent();
+    return;
+  }
+
+  mref.resize(length);
+  for (uint32_t i = 0; i < length; ++i) {
+    strm_.decode(mref[i], false);
+  }
 }
 
 inline void

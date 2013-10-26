@@ -411,4 +411,29 @@ void dictionary_builder::visit(const byte_vector_field_instruction* src_inst, vo
   }
 }
 
+void dictionary_builder::visit(const int32_vector_field_instruction* src_inst, void* dest_inst)
+{
+  int32_vector_field_instruction*& dest = *static_cast<int32_vector_field_instruction**>(dest_inst);
+  dest = new (*alloc_)int32_vector_field_instruction(*src_inst);
+}
+
+void dictionary_builder::visit(const uint32_vector_field_instruction* src_inst, void* dest_inst)
+{
+  uint32_vector_field_instruction*& dest = *static_cast<uint32_vector_field_instruction**>(dest_inst);
+  dest = new (*alloc_)uint32_vector_field_instruction(*src_inst);
+}
+
+void dictionary_builder::visit(const int64_vector_field_instruction* src_inst, void* dest_inst)
+{
+  int64_vector_field_instruction*& dest = *static_cast<int64_vector_field_instruction**>(dest_inst);
+  dest = new (*alloc_)int64_vector_field_instruction(*src_inst);
+}
+
+void dictionary_builder::visit(const uint64_vector_field_instruction* src_inst, void* dest_inst)
+{
+  uint64_vector_field_instruction*& dest = *static_cast<uint64_vector_field_instruction**>(dest_inst);
+  dest = new (*alloc_)uint64_vector_field_instruction(*src_inst);
+}
+
+
 }

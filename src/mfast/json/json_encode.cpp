@@ -68,6 +68,19 @@ class json_visitor
       strm_ <<  separator_ << quoted_string(reinterpret_cast<const char*>(ref.data()));
     }
 
+    template <typename IntType>
+    void visit(const mfast::vector_cref<IntType>& ref)
+    {
+      strm_ << separator_  << "[";
+      separator_[0] = '\0';
+
+      for (std::size_t i = 0; i < ref.size(); ++i) {
+        strm_ << separator_ << ref[i];
+        separator_[0] = ',';
+      }
+      strm_ << "]";
+    }
+
     void visit(const mfast::aggregate_cref& ref, int)
     {
       if (ref.num_fields()  == 1) {
