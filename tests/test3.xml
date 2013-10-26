@@ -9,7 +9,9 @@
     <template name="Product" >
         <uInt32 name="id" />
         <string name="name" />
-        <decimal name="price" />
+        <decimal name="price">
+          <delta value="0" />
+        </decimal>
         <sequence name="tags" presence="optional">
             <string name="tag_item" />
         </sequence>

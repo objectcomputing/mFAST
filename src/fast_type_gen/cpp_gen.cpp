@@ -162,7 +162,7 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
 
   out_ << "  decimal_value_storage(";
   if (!init_value.is_empty())
-    out_ <<  init_value.of_decimal.mantissa_ << "LL, " << init_value.of_decimal.exponent_;
+    out_ <<  init_value.of_decimal.mantissa_ << "LL, " << static_cast<int> (init_value.of_decimal.exponent_);
   out_ << ")); // initial_value\n\n";
 
 }
