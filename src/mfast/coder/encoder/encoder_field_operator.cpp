@@ -355,19 +355,10 @@ struct is_same
     return v.absent() == prev.is_empty() && v.mantissa() == prev.of_decimal.mantissa_ && v.exponent() == prev.of_decimal.exponent_;
   }
 
-  bool operator() (const string_cref<false>& v, const value_storage& prev) const
+  template <typename T>
+  bool operator() (const vector_cref<T>& v, const value_storage& prev) const
   {
-    return v.size() == prev.of_array.len_-1 && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
-  }
-
-  bool operator() (const string_cref<true>& v, const value_storage& prev) const
-  {
-    return v.size() == prev.of_array.len_-1 && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
-  }
-
-  bool operator() (const byte_vector_cref& v, const value_storage& prev) const
-  {
-    return v.size() == prev.of_array.len_-1 && memcmp(v.data(),prev.of_array.content_, v.size()) == 0;
+    return v.size() == prev.of_array.len_-1 && memcmp(v.data(),prev.of_array.content_, v.size()*sizeof(T)) == 0;
   }
 
 };
