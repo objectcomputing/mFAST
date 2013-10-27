@@ -120,11 +120,14 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   test2::MDRefreshSample_mref::extra_mref extra_mref =  sample.mref().set_extra();
   extra_mref.resize(1);
   BOOST_CHECK(equal_string(extra_mref[0].get_BeginString(), "FIX4.4"));
-  // test1::SampleInfo_mref d2 = dynamic_template_mref.as<test1::SampleInfo>();
-  //
-  // BOOST_CHECK_EQUAL(sample.mref().get_nested_message2().target_instruction(), &test1::SampleInfo::the_instruction);
-  // BOOST_CHECK_EQUAL(d2.instruction(),                                         &test1::SampleInfo::the_instruction);
 
+  mfast::message_cref generic_cref(sample_cref.field_storage(0), test2::MDRefreshSample::instruction());
+  test2::MDRefreshSample_cref specific_cref(generic_cref);
+
+  mfast::message_mref generic_mref(&alloc,
+                                   const_cast<mfast::value_storage*>(sample_cref.field_storage(0)),
+                                   test2::MDRefreshSample::instruction());
+  test2::MDRefreshSample_mref specific_mref(generic_mref);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

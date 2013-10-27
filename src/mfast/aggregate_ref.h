@@ -119,6 +119,8 @@ class make_aggregate_mref
     value_storage* field_storage(size_t index) const;
 
   private:
+    template <typename U> friend class  make_aggregate_mref;
+
     make_aggregate_mref& operator= (const make_aggregate_mref&);
     friend struct fast_decoder_impl;
     friend class message_mref;
@@ -330,7 +332,7 @@ template <typename ConstRef>
 template <typename U>
 inline
 make_aggregate_mref<ConstRef>::make_aggregate_mref(const make_aggregate_mref<U>& other)
-  : ConstRef(other)
+  : ConstRef(other.field_storage(0), static_cast<instruction_cptr>(other.instruction()))
   , alloc_(other.allocator())
 {
 }

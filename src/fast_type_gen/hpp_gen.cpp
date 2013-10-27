@@ -237,6 +237,7 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "    " << name_attr << "_cref(\n"
                << indent << "      const mfast::value_storage*           storage,\n"
                << indent << "      const mfast::group_field_instruction* instruction);\n\n"
+               << indent << "    " << name_attr << "_cref(const mfast::message_cref& other);\n\n"
                << indent << "    explicit " << name_attr << "_cref(const mfast::field_cref& other);\n\n";
 
   header_mref_ << "\n"
@@ -249,7 +250,9 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "      mfast::allocator*                     alloc,\n"
                << indent << "      mfast::value_storage*                 storage,\n"
                << indent << "      const mfast::group_field_instruction* instruction);\n\n"
+               << indent << "   " << name_attr << "_mref(const mfast::message_mref& other);\n\n"
                << indent << "    explicit " << name_attr << "_mref(const mfast::field_mref_base& other);\n\n";
+
 
   this->traverse(inst, "");
 

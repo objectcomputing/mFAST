@@ -102,7 +102,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void*)
   std::stringstream cref_strm;
   std::stringstream mref_strm;
 
-  if (embed_only_dyn_tempateref){
+  if (embed_only_dyn_tempateref) {
     cref_strm << "mfast::aggregate_cref((*this)[" << index << "])[0]";
     mref_strm << "mfast::aggregate_mref((*this)[" << index << "])[0]";
   }
@@ -210,6 +210,12 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
        << "}\n\n"
        << "inline\n"
        << name_attr << "_cref::" << name_attr << "_cref(\n"
+       << "  const mfast::message_cref& other)\n"
+       << "  : mfast::aggregate_cref(other)\n"
+       << "{\n"
+       << "}\n\n"
+       << "inline\n"
+       << name_attr << "_cref::" << name_attr << "_cref(\n"
        << "  const mfast::field_cref& other)\n"
        << "  : mfast::aggregate_cref(mfast::detail::field_storage_helper::storage_ptr_of(other)->of_group.content_,\n"
        << "                          static_cast<instruction_cptr>(other.instruction()))\n"
@@ -221,6 +227,12 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
        << "  mfast::value_storage* storage_array,\n"
        << "  instruction_cptr      instruction)\n"
        << "  : " << name_attr << "_mref_base(alloc, storage_array, instruction)\n"
+       << "{\n"
+       << "}\n\n"
+       << "inline\n"
+       << name_attr << "_mref::" << name_attr << "_mref(\n"
+       << "  const mfast::message_mref& other)\n"
+       << "  : " << name_attr << "_mref_base(other)\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
