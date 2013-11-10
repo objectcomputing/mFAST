@@ -747,7 +747,17 @@ public:
                              exponent_initial_value_str);
 
         if (exponent_initial_value_str) {
-          exponent_initial_value = decimal_value_storage(0, boost::lexical_cast<int8_t>(exponent_initial_value_str));
+          short exp  = 128;
+          try {
+            exp = boost::lexical_cast<short>(exponent_initial_value_str);
+          }
+          catch (...){
+          }
+
+          if (exp > 63 || exp < -63) {
+            BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid exponent initial value: ") +  exponent_initial_value_str ) );
+          }
+          exponent_initial_value = decimal_value_storage(0, exp);
         }
       }
 

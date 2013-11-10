@@ -23,7 +23,7 @@
             </decimal>
             <decimal name="MDEntrySize" id="271">
                 <exponent>
-                    <delta/>
+                    <copy value="-2"/>
                 </exponent>
                 <mantissa>
                     <delta/>
