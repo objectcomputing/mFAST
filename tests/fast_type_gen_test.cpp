@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_index(),           5);
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->id(),                  271U);
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_type(),        mfast::field_type_exponent);
-  BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_operator(),    mfast::operator_delta);
+  BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_operator(),    mfast::operator_copy);
 
   const mfast::mantissa_field_instruction* mantissa_inst = elem0.get_MDEntrySize().instruction()->mantissa_instruction();
   BOOST_CHECK_EQUAL(mantissa_inst->field_type(),                                mfast::field_type_int64);
