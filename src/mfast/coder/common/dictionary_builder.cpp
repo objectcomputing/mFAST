@@ -99,11 +99,13 @@ void dictionary_builder::build(const templates_description* def)
     template_instruction* inst = new (*alloc_)template_instruction(*(*def)[i]);
     build_template(inst, inst);
 
-    if (template_id_map_.count(inst->id())) {
-      BOOST_THROW_EXCEPTION(duplicate_template_id_error(inst->id()) << template_name_info(inst->name()));
-    }
+    if (inst->id() > 0) {
+      if (template_id_map_.count(inst->id())) {
+        BOOST_THROW_EXCEPTION(duplicate_template_id_error(inst->id()) << template_name_info(inst->name()));
+      }
 
-    template_id_map_[inst->id()] = inst;
+      template_id_map_[inst->id()] = inst;
+    }
 
     template_name_map_[qualified_name(inst->ns(), inst->name())] = inst;
   }

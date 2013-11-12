@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(simple_coder_test)
     "<?xml version=\" 1.0 \"?>\n"
     "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
     "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
-    "<template name=\"Test\">\n"
+    "<template name=\"Test\" id=\"1\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy/></uInt32>\n"
     "<uInt32 name=\"field2\" id=\"12\"><copy/></uInt32>\n"
     "<uInt32 name=\"field3\" id=\"13\"><copy/></uInt32>\n"
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(simple_coder_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_type msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(1));
   message_mref msg_ref = msg.mref();
 
   msg_ref[0].as(1);
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
     "<?xml version=\" 1.0 \"?>\n"
     "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
     "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
-    "<template name=\"Test\">\n"
+    "<template name=\"Test\" id=\"1\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy/></uInt32>\n"
     "<group name=\"group1\" presence=\"optional\">"
     "<uInt32 name=\"field2\" id=\"12\"><copy/></uInt32>\n"
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_type msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(1));
   message_mref msg_ref = msg.mref();
 
   msg_ref[0].as(1);
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(sequence_coder_test)
     "<?xml version=\" 1.0 \"?>\n"
     "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
     "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
-    "<template name=\"Test\">\n"
+    "<template name=\"Test\" id=\"1\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy/></uInt32>\n"
     "<sequence name=\"sequence1\" presence=\"optional\">"
     "<uInt32 name=\"field2\" id=\"12\"><copy/></uInt32>\n"
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(sequence_coder_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_type msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(1));
   message_mref msg_ref = msg.mref();
 
   msg_ref[0].as(1);
@@ -191,9 +191,15 @@ BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
     "<?xml version=\" 1.0 \"?>\n"
     "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
     "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
-    "<template name=\"Nested\" id=\"01\">\n"
+    "<template name=\"Nested\">\n"
     "<uInt32 name=\"field2\" id=\"12\"><copy/></uInt32>\n"
     "<uInt32 name=\"field3\" id=\"13\"><copy/></uInt32>\n"
+    "</template>"
+    "<template name=\"Unused0\">\n"
+      "<uInt32 name=\"field4\" id=\"15\"><copy/></uInt32>\n"
+    "</template>"
+    "<template name=\"Unused1\" id=\"01\">\n"
+      "<uInt32 name=\"field4\" id=\"15\"><copy/></uInt32>\n"
     "</template>"
     "<template name=\"Test\" id=\"02\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy/></uInt32>\n"
@@ -261,7 +267,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
     "<?xml version=\" 1.0 \"?>\n"
     "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
     "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
-    "<template name=\"Test\">\n"
+    "<template name=\"Test\"  id=\"1\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy value=\"11\"/></uInt32>\n"
     "<uInt32 name=\"field2\" id=\"12\"><copy value=\"12\"/></uInt32>\n"
     "<uInt32 name=\"field3\" id=\"13\"><copy value=\"13\"/></uInt32>\n"
@@ -269,7 +275,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_type msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(1));
   message_mref msg_ref = msg.mref();
 
   msg_ref[0].as(1);
@@ -300,7 +306,7 @@ BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
     "<?xml version=\" 1.0 \"?>\n"
     "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
     "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
-    "<template name=\"Test\" scp:reset=\"yes\">\n"
+    "<template name=\"Test\" id=\"1\" scp:reset=\"yes\">\n"
     "<uInt32 name=\"field1\" id=\"11\"><copy value=\"11\"/></uInt32>\n"
     "<uInt32 name=\"field2\" id=\"12\"><copy value=\"12\"/></uInt32>\n"
     "<uInt32 name=\"field3\" id=\"13\"><copy value=\"13\"/></uInt32>\n"
@@ -308,7 +314,7 @@ BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
     "</templates>\n");
 
   debug_allocator alloc;
-  message_type msg(&alloc, test_case.template_with_id(0));
+  message_type msg(&alloc, test_case.template_with_id(1));
   message_mref msg_ref = msg.mref();
 
   msg_ref[0].as(1);
