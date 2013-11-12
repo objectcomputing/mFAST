@@ -356,6 +356,9 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
 
 void cpp_gen::visit(const mfast::template_instruction* inst, void*)
 {
+  if (inst->subinstructions_count() == 0)
+    return;
+
   const char* name = inst->name();
 
   prefixes_.push_back(name);

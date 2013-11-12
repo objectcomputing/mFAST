@@ -228,6 +228,9 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
 
 void hpp_gen::visit(const mfast::template_instruction* inst, void*)
 {
+  if (inst->subinstructions_count() == 0)
+    return;
+
   const char* name_attr = inst->name();
   header_cref_ << "\n"
                << indent << "class " << name_attr << "_cref\n"

@@ -114,6 +114,7 @@ struct template_registry_impl
     // std::cerr << "template_registry::add(" << ns << "," << inst->name() << ")\n";
     templates_[get_key(ns, inst->name())] = inst;
   }
+
 };
 
 
@@ -133,7 +134,6 @@ template_registry::instance()
   static template_registry inst;
   return &inst;
 }
-
 
 class instruction_cloner
   : public field_instruction_visitor
@@ -449,7 +449,7 @@ public:
       );
     stack_.pop_back();
     current().push_back(instruction);
-    registry_->impl_->add(current_context().ns_.c_str() , instruction);
+    registry_->impl_->add(current_context().ns_.c_str(), instruction);
     return true;
   }
 
@@ -470,10 +470,6 @@ public:
                                                        get_optional_attr(*parent, "name", "")));
       }
 
-      // instruction = new (*alloc_)templateref_instruction(
-      //   current_index(),
-      //   new_string(name_attr.c_str()),
-      //   get_ns(element));
       if (current_index() == 0) {
         // if the templateRef is the first in a group or sequence, we don't need the clone the
         // individual field because the field_index remains the same
@@ -482,7 +478,7 @@ public:
           current().push_back(const_cast<field_instruction*>(sub_inst));
         }
       }
-      else {
+      else if (target->subinstructions_count() > 0) {
         // In this case, we do need the clone the subfield instructions because the field
         // index would be different from those in the referenced template.
         instruction_cloner cloner(current(), *alloc_);
@@ -751,7 +747,7 @@ public:
           try {
             exp = boost::lexical_cast<short>(exponent_initial_value_str);
           }
-          catch (...){
+          catch (...) {
           }
 
           if (exp > 63 || exp < -63) {
