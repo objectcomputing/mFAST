@@ -55,18 +55,18 @@ class MFAST_CODER_EXPORT fast_decoder
     {
       include(descriptions, N);
     }
-    /// Decode a  message.
-    // message_cref decode(fast_istreambuf& sb, bool force_reset = false);
-    
+
     /// Decode a  message.
     ///
     /// @param[in,out] first The initial position of the buffer to be decoded. After decoding
     ///                the parameter is set to position of the first unconsumed data byte.
     /// @param[in] last The last position of the buffer to be decoded.
     /// @param[in] force_reset Force the decoder to reset and discard all exisiting history values.
+    ///            Notice that the reset is done before the decoding of the input buffer rather than
+    ///            after.
     message_cref decode(const char*& first, const char* last, bool force_reset = false);
 
-    void debug_log(std::ostream* os);    
+    void debug_log(std::ostream* os);
     void warning_log(std::ostream* os);
 
   private:
