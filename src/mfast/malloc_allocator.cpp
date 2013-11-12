@@ -42,7 +42,7 @@ malloc_allocator::reallocate(void*&      pointer,
                              std::size_t new_size)
 {
   // make the new_size at least 64 bytes
-  new_size = std::max(2UL*new_size, 64UL) & (~63);
+  new_size = std::max<std::size_t>(2*new_size, 64) & (~63);
   void* old_ptr = pointer;
   pointer = std::realloc(pointer, new_size);
   if (pointer == 0) {

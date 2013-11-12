@@ -85,6 +85,7 @@ struct tag_template_id;
 struct tag_template_name;
 }
 
+#if !defined(_MSC_VER) || (_MSC_VER >= 1700)
 namespace  boost {
   // For Clang, we must use extern template and explicit template instantiation;
   //     otherwise, we will have duplicated definition link error when building shared library.
@@ -94,6 +95,7 @@ extern template class error_info<mfast::tag_referenced_by,std::string>;
 extern template class error_info<mfast::tag_template_id,unsigned>;
 extern template class error_info<mfast::tag_template_name,std::string>;
 }
+#endif
 
 namespace mfast {
 typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info;

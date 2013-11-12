@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(int32_test)
   BOOST_CHECK(decode_integer( "\x80",  false, UINT32_C(0)));
   BOOST_CHECK(decode_integer( "\x81",  false, UINT32_C(1)));
   BOOST_CHECK(decode_integer( "\x39\x45\xa3",  false, UINT32_C(942755)));
-  BOOST_CHECK(decode_integer("\x10\x00\x00\x00\x80",  true, UINT32_C(4294967295)));
+  BOOST_CHECK(decode_integer("\x10\x00\x00\x00\x80",  true, std::numeric_limits<uint32_t>::max()));
 
   BOOST_CHECK(decode_integer( "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80",  true, std::numeric_limits<int64_t>::max()));
   BOOST_CHECK(decode_integer( "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80",  true, std::numeric_limits<uint64_t>::max()));
@@ -170,9 +170,9 @@ extract_from_stream(const byte_stream& bs, const T& result)
 
   debug_allocator alloc;
   value_storage storage;
-  
+
   result.instruction()->construct_value(storage, &alloc);
-  
+
   T mref(&alloc, &storage, result.instruction());
   strm >> mref;
 
@@ -246,24 +246,24 @@ decode_pmap(const byte_stream& bs, const char* result_bits, std::size_t maxbits)
 
   char bits[16];
   memset(bits, 16, 0);
-  
+
   char* pos = bits;
-  
+
   for (std::size_t i = 0; i < maxbits; ++i) {
     pos[0] <<=1;
-    pos[0] |= static_cast<int>(pmap.is_next_bit_set()); 
-    
+    pos[0] |= static_cast<int>(pmap.is_next_bit_set());
+
     if ( (i % 8) == 7) {
       pos += 1;
     }
   }
 
   pos[0] <<= ( 8 - (maxbits%8) );
-  
+
   int nbytes = (maxbits + 7)/8; // i.e. ceiling(maxbits/8)
   if (memcmp(bits, result_bits, nbytes) == 0)
     return true;
-  
+
   boost::test_tools::predicate_result res( false );
   res.message() << "Got \"" << byte_stream(bits, nbytes) << "\" instead.";
   return res;
