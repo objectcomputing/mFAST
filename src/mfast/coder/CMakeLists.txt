@@ -16,6 +16,7 @@ endif()
 set_target_properties(mfast_coder_static PROPERTIES COMPILE_FLAGS -DMFAST_CODER_STATIC_DEFINE)
 
 install(TARGETS mfast_coder_static
+        EXPORT  mFASTTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
 		ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
 
@@ -28,8 +29,13 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries(mfast_coder mfast)
 
   install(TARGETS mfast_coder
+          EXPORT  mFASTTargets
           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
   	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+
+  SET(MFAST_COMPONENTS ${MFAST_COMPONENTS} coder CACHE INTERNAL "mFast Components")
+else()
+  SET(MFAST_COMPONENTS ${MFAST_COMPONENTS} coder_static CACHE INTERNAL "mFast Components")
 endif()
 
 
