@@ -21,11 +21,11 @@
 #include <algorithm>
 
 namespace mfast {
-  
+
 inline std::size_t align(std::size_t n, std::size_t x)
 {
   const std::size_t y = x-1;
-  return (n + y) & ~y; 
+  return (n + y) & ~y;
 }
 
 void arena_allocator::free_list(memory_chunk_base* head)
@@ -74,6 +74,8 @@ void* arena_allocator::allocate(std::size_t n)
                                          default_chunk_size); // make the size multiple of default_chunk_size
 
       void* block = malloc(new_chunk_size);
+      if (block == 0)
+        throw std::bad_alloc();
       current_list_head_ = new (block) memory_chunk(new_chunk_size, current_list_head_);
     }
   }
@@ -92,7 +94,6 @@ arena_allocator::reallocate(void*& pointer, std::size_t old_size, std::size_t ne
   std::memcpy(pointer, old_pointer, old_size);
   return new_size;
 }
-
 
 bool arena_allocator::reset()
 {
@@ -113,7 +114,8 @@ bool arena_allocator::reset()
   return true;
 }
 
-void  arena_allocator::deallocate(void* /* pointer */, std::size_t)
+void arena_allocator::deallocate(void* /* pointer */, std::size_t)
 {
 }
+
 }
