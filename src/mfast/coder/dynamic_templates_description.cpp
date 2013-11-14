@@ -753,7 +753,7 @@ public:
           if (exp > 63 || exp < -63) {
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid exponent initial value: ") +  exponent_initial_value_str ) );
           }
-          exponent_initial_value = decimal_value_storage(0, exp);
+          exponent_initial_value = decimal_value_storage(0, static_cast<uint8_t>(exp));
         }
       }
 
