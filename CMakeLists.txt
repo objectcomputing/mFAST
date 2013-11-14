@@ -20,8 +20,21 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH
 set(INSTALL_DATA_DIR share CACHE PATH
 "Installation directory for data files")
 
+# determine default path for CMake files
+if(WIN32 AND NOT CYGWIN)
+  set(DEF_INSTALL_CMAKE_DIR CMake)
+else()
+  if(${CMAKE_LIBRARY_ARCHITECTURE}) #support for multiarch debian-based distros, need cmake>=2.8.5
+    set(DEF_INSTALL_CMAKE_DIR     lib/${CMAKE_LIBRARY_ARCHITECTURE}/cmake/mFAST)
+  else()
+    set(DEF_INSTALL_CMAKE_DIR     lib/cmake/mFAST)
+  endif()
+endif()
+set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH 
+"Installation directory for CMake files")
+
 # Make relative paths absolute (needed later on)
-foreach(p LIB BIN DATA)
+foreach(p LIB BIN DATA CMAKE)
 set(var INSTALL_${p}_DIR)
 if(NOT IS_ABSOLUTE "${${var}}")
  set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
@@ -51,14 +64,15 @@ elseif (MSVC)
 	add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+# variables to be used later
+set(MFAST_COMPONENTS CACHE INTERNAL "")
+set(MFAST_LIBRARY CACHE INTERNAL "")
+
 include_directories ("${PROJECT_BINARY_DIR}"
                      "${PROJECT_SOURCE_DIR}/src")
 add_subdirectory (src)
 
 link_directories (${PROJECT_BINARY_DIR}/src)
-
-
-
 
 #============================================================
 # FASTTYPEGEN_TARGET (public macro)
@@ -123,3 +137,36 @@ add_custom_target(dist
     COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
         | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+# Provide mfast-config.cmake and mfast-config.version to be used by other applications 
+# ===============================
+
+export(PACKAGE ${CMAKE_PROJECT_NAME})
+export(TARGETS fast_type_gen ${MFAST_LIBRARIES} FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
+
+# Create the mFASTConfig.cmake for the build tree
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+configure_file(mFASTConfig.cmake.in
+               "${PROJECT_BINARY_DIR}/mFASTConfig.cmake" 
+               @ONLY)
+
+# Create the mFASTConfig.cmake for the install tree
+file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
+set(CONF_INCLUDE_DIRS "\${MFAST_CMAKE_DIR}/${REL_INCLUDE_DIR}")
+configure_file(mFASTConfig.cmake.in
+               "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/mFASTConfig.cmake" 
+               @ONLY)
+
+# Create the mFASTConfigVersion.cmake for both
+configure_file(mFASTConfigVersion.cmake.in
+               "${PROJECT_BINARY_DIR}/mFASTConfigVersion.cmake" 
+               @ONLY)
+
+# Install the mFASTConfig.cmake and mFASTConfigVersion.cmake
+install(FILES
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/mFASTConfig.cmake"
+  "${PROJECT_BINARY_DIR}/mFASTConfigVersion.cmake"
+  DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+# Install the export set for use with the install-tree
+install(EXPORT mFASTTargets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)

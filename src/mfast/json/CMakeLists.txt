@@ -16,6 +16,7 @@ endif()
 set_target_properties(mfast_json_static PROPERTIES COMPILE_FLAGS -DMFAST_JSON_STATIC_DEFINE)
 
 install(TARGETS mfast_json_static
+        EXPORT  mFASTTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
 		ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
 
@@ -28,9 +29,15 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries(mfast_json mfast)
 
   install(TARGETS mfast_json
+          EXPORT  mFASTTargets
           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
   	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+  
+  SET(MFAST_COMPONENTS ${MFAST_COMPONENTS} json CACHE INTERNAL "mFast Components")
+else()
+  SET(MFAST_COMPONENTS ${MFAST_COMPONENTS} json_static CACHE INTERNAL "mFast Components")
 endif()
+
 
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
