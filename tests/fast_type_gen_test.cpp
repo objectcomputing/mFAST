@@ -96,8 +96,10 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   const mfast::uint32_field_instruction* len_inst = sample.cref().get_MDEntries().instruction()->length_instruction();
 
   BOOST_CHECK(len_inst != 0);
-  BOOST_CHECK(equal_string(len_inst->name(), "NoMDEntries"));
-  BOOST_CHECK_EQUAL(len_inst->id(),268U);
+  if (len_inst) {
+	BOOST_CHECK(equal_string(len_inst->name(), "NoMDEntries"));
+	BOOST_CHECK_EQUAL(len_inst->id(),268U);
+  }
 
   sample.mref().set_MDEntries().resize(2);
   typedef test2::MDRefreshSample_cref::MDEntries_element_cref MDEntries_element_cref;
