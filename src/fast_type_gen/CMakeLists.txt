@@ -15,4 +15,5 @@ target_link_libraries (fast_type_gen
                        ${Boost_FILESYSTEM_LIBRARY})
 
 install(TARGETS fast_type_gen
+        EXPORT  mFASTTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
