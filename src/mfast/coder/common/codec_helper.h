@@ -117,7 +117,7 @@ class codec_helper
 
     template <typename STRING_MREF>
     void apply_string_delta(const STRING_MREF&                      mref,
-                            const value_storage&                  base_value,
+                            const value_storage&                    base_value,
                             int32_t                                 substraction_length,
                             const typename STRING_MREF::value_type* delta_str,
                             uint32_t                                delta_len) const
@@ -130,6 +130,13 @@ class codec_helper
       if (substraction_length >=0) {
         // The subtraction length of the delta specifies the number of characters
         // to remove from the front or back of the base value.
+        if (base_len < static_cast<std::size_t>(substraction_length))
+        {
+          //It is a dynamic error [ERR D7] if the subtraction length is larger than the number of characters in the base
+          // value, or if it does not fall in the value range of an int32.
+          BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
+        }
+
         base_len -= substraction_length;
         delta_start_index = base_len;
         base_start_index = 0;
@@ -154,13 +161,13 @@ class codec_helper
         copy_string_raw(mref, delta_start_index, delta_str, delta_len);
       }
     }
-    
+
     // template <typename MessageMref>
     // static void reset(const MessageMref& mref)
     // {
     //   mref.reset();
     // }
-    
+
     // template <typename MRef>
    //  static void ensure_valid(const MRef& mref)
    //  {

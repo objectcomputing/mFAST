@@ -112,82 +112,84 @@ class no_operator
   , public mfast::detail::codec_helper
   , public decimal_decoder<no_operator>
 {
-  public:
-    no_operator(){}
+public:
+  no_operator()
+  {
+  }
 
-    template <typename T>
-    void decode_impl(const T&      mref,
-                     fast_istream& stream,
-                     decoder_presence_map  & /* pmap */) const
-    {
-      stream >> mref;
+  template <typename T>
+  void decode_impl(const T&      mref,
+                   fast_istream& stream,
+                   decoder_presence_map  & /* pmap */) const
+  {
+    stream >> mref;
 
-      // Fast Specification 1.1, page 22
-      //
-      // If a field is mandatory and has no field operator, it will not occupy any
-      // bit in the presence map and its value must always appear in the stream.
-      //
-      // If a field is optional and has no field operator, it is encoded with a
-      // nullable representation and the NULL is used to represent absence of a
-      // value. It will not occupy any bits in the presence map.
-      save_previous_value(mref);
-    }
+    // Fast Specification 1.1, page 22
+    //
+    // If a field is mandatory and has no field operator, it will not occupy any
+    // bit in the presence map and its value must always appear in the stream.
+    //
+    // If a field is optional and has no field operator, it is encoded with a
+    // nullable representation and the NULL is used to represent absence of a
+    // value. It will not occupy any bits in the presence map.
+    save_previous_value(mref);
+  }
 
-    virtual void decode(const int32_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int32_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint32_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint32_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const int64_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int64_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint64_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint64_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const ascii_string_mref& mref,
-                        fast_istream&            stream,
-                        decoder_presence_map&    pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const ascii_string_mref& mref,
+                      fast_istream&            stream,
+                      decoder_presence_map&    pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const unicode_string_mref& mref,
-                        fast_istream&              stream,
-                        decoder_presence_map&      pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const unicode_string_mref& mref,
+                      fast_istream&              stream,
+                      decoder_presence_map&      pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const byte_vector_mref& mref,
-                        fast_istream&           stream,
-                        decoder_presence_map&   pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const byte_vector_mref& mref,
+                      fast_istream&           stream,
+                      decoder_presence_map&   pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const decimal_mref&   mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_decimal(mref, stream,pmap);
-    }
+  virtual void decode(const decimal_mref&   mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_decimal(mref, stream,pmap);
+  }
 
 };
 
@@ -196,88 +198,90 @@ class constant_operator
   , public mfast::detail::codec_helper
   , public decimal_decoder<constant_operator>
 {
-  public:
-    constant_operator(){}
+public:
+  constant_operator()
+  {
+  }
 
-    template <typename T>
-    void decode_impl(const T&              mref,
-                     fast_istream& /* stream */,
-                     decoder_presence_map& pmap) const
-    {
+  template <typename T>
+  void decode_impl(const T&              mref,
+                   fast_istream& /* stream */,
+                   decoder_presence_map& pmap) const
+  {
 
-      // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
-      // An optional field with the constant operator will occupy a single bit. If the bit is set, the value
-      // is the initial value in the instruction context. If the bit is not set, the value is considered absent.
+    // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
+    // An optional field with the constant operator will occupy a single bit. If the bit is set, the value
+    // is the initial value in the instruction context. If the bit is not set, the value is considered absent.
 
-      if (!mref.optional()) {
+    if (!mref.optional()) {
+      mref.as_initial_value();
+    }
+    else {
+      if (pmap.is_next_bit_set()) {
         mref.as_initial_value();
       }
       else {
-        if (pmap.is_next_bit_set()) {
-          mref.as_initial_value();
-        }
-        else {
-          mref.as_absent();
-        }
+        mref.as_absent();
       }
-      save_previous_value(mref);
     }
+    save_previous_value(mref);
+  }
 
-    virtual void decode(const int32_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int32_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint32_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint32_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const int64_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int64_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint64_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint64_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const ascii_string_mref& mref,
-                        fast_istream&            stream,
-                        decoder_presence_map&    pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const ascii_string_mref& mref,
+                      fast_istream&            stream,
+                      decoder_presence_map&    pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const unicode_string_mref& mref,
-                        fast_istream&              stream,
-                        decoder_presence_map&      pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const unicode_string_mref& mref,
+                      fast_istream&              stream,
+                      decoder_presence_map&      pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const byte_vector_mref& mref,
-                        fast_istream&           stream,
-                        decoder_presence_map&   pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const byte_vector_mref& mref,
+                      fast_istream&           stream,
+                      decoder_presence_map&   pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const decimal_mref&   mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_decimal(mref, stream,pmap);
-    }
+  virtual void decode(const decimal_mref&   mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_decimal(mref, stream,pmap);
+  }
 
 };
 
@@ -286,53 +290,53 @@ template <typename Operation>
 class copy_or_increment_operator_impl
   : public mfast::detail::codec_helper
 {
-  public:
-    template <typename T>
-    void decode_impl(const T&              mref,
-                     fast_istream&         stream,
-                     decoder_presence_map& pmap) const
-    {
-      if (pmap.is_next_bit_set()) {
-        stream >> mref;
-        // A NULL indicates that the value is absent and the state of the previous value is set to empty
+public:
+  template <typename T>
+  void decode_impl(const T&              mref,
+                   fast_istream&         stream,
+                   decoder_presence_map& pmap) const
+  {
+    if (pmap.is_next_bit_set()) {
+      stream >> mref;
+      // A NULL indicates that the value is absent and the state of the previous value is set to empty
+      save_previous_value(mref);
+    } else {
+
+      value_storage& previous = previous_value_of(mref);
+
+      if (!previous.is_defined())
+      {
+        // if the previous value is undefined – the value of the field is the initial value
+        // that also becomes the new previous value.
+
+        // If the field has optional presence and no initial value, the field is considered
+        // absent and the state of the previous value is changed to empty.
+        mref.as_initial_value();
         save_previous_value(mref);
-      } else {
 
-        value_storage& previous = previous_value_of(mref);
-
-        if (!previous.is_defined())
-        {
-          // if the previous value is undefined – the value of the field is the initial value
-          // that also becomes the new previous value.
-
-          // If the field has optional presence and no initial value, the field is considered
-          // absent and the state of the previous value is changed to empty.
-          mref.as_initial_value();
-          save_previous_value(mref);
-
-          if (mref.instruction()->mandatory_without_initial_value()) {
-            // Unless the field has optional presence, it is a dynamic error [ERR D5]
-            // if the instruction context has no initial value.
-            BOOST_THROW_EXCEPTION(fast_dynamic_error("D5"));
-          }
-        }
-        else if (previous.is_empty()) {
-
-          // It is a dynamic error [ERR D6] if the field is mandatory.
-          if (!mref.optional()) {
-            BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
-          }
-          // if the previous value is empty – the value of the field is empty.
-          // If the field is optional the value is considered absent.
-          mref.as_absent();
-        }
-        else {
-          Operation() (mref, previous);
-          // if the previous value is assigned – the value of the field is the previous value.
-          load_previous_value(mref);
+        if (mref.instruction()->mandatory_without_initial_value()) {
+          // Unless the field has optional presence, it is a dynamic error [ERR D5]
+          // if the instruction context has no initial value.
+          BOOST_THROW_EXCEPTION(fast_dynamic_error("D5"));
         }
       }
+      else if (previous.is_empty()) {
+
+        // It is a dynamic error [ERR D6] if the field is mandatory.
+        if (!mref.optional()) {
+          BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
+        }
+        // if the previous value is empty – the value of the field is empty.
+        // If the field is optional the value is considered absent.
+        mref.as_absent();
+      }
+      else {
+        Operation() (mref, previous);
+        // if the previous value is assigned – the value of the field is the previous value.
+        load_previous_value(mref);
+      }
     }
+  }
 
 };
 
@@ -352,64 +356,66 @@ class copy_operator
   , public decimal_decoder<copy_operator>
 {
 
-  public:
-    copy_operator(){}
+public:
+  copy_operator()
+  {
+  }
 
-    virtual void decode(const int32_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int32_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint32_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint32_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const int64_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int64_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint64_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint64_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const ascii_string_mref& mref,
-                        fast_istream&            stream,
-                        decoder_presence_map&    pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const ascii_string_mref& mref,
+                      fast_istream&            stream,
+                      decoder_presence_map&    pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const unicode_string_mref& mref,
-                        fast_istream&              stream,
-                        decoder_presence_map&      pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const unicode_string_mref& mref,
+                      fast_istream&              stream,
+                      decoder_presence_map&      pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const byte_vector_mref& mref,
-                        fast_istream&           stream,
-                        decoder_presence_map&   pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const byte_vector_mref& mref,
+                      fast_istream&           stream,
+                      decoder_presence_map&   pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const decimal_mref&   mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_decimal(mref, stream,pmap);
-    }
+  virtual void decode(const decimal_mref&   mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_decimal(mref, stream,pmap);
+  }
 
 };
 
@@ -428,36 +434,38 @@ class increment_operator
   , copy_or_increment_operator_impl<increment_operation>
 {
 
-  public:
-    increment_operator(){}
+public:
+  increment_operator()
+  {
+  }
 
-    virtual void decode(const int32_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int32_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint32_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint32_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const int64_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int64_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint64_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint64_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
 };
 
@@ -467,90 +475,92 @@ class default_operator
   , public mfast::detail::codec_helper
   , public decimal_decoder<default_operator>
 {
-  public:
-    default_operator(){}
+public:
+  default_operator()
+  {
+  }
 
-    template <typename T>
-    void decode_impl(const T&              mref,
-                     fast_istream&         stream,
-                     decoder_presence_map& pmap) const
-    {
-      // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
-      // Optional integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream in a nullable representation.
+  template <typename T>
+  void decode_impl(const T&              mref,
+                   fast_istream&         stream,
+                   decoder_presence_map& pmap) const
+  {
+    // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
+    // Optional integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream in a nullable representation.
 
-      if (pmap.is_next_bit_set()) {
-        stream >> mref;
-        //  A NULL indicates that the value is absent and the state of the previous value is left unchanged.
-        if (mref.absent())
-          return;
-      }
-      else {
-        // If the field has optional presence and no initial value, the field is considered absent
-        // when there is no value in the stream.
+    if (pmap.is_next_bit_set()) {
+      stream >> mref;
+      //  A NULL indicates that the value is absent and the state of the previous value is left unchanged.
+      if (mref.absent())
+        return;
+    }
+    else {
+      // If the field has optional presence and no initial value, the field is considered absent
+      // when there is no value in the stream.
 
-        //  The default operator specifies that the value of a field is either present in the stream
-        //  or it will be the initial value.
-        mref.as_initial_value();
-      }
-
-      save_previous_value(mref);
+      //  The default operator specifies that the value of a field is either present in the stream
+      //  or it will be the initial value.
+      mref.as_initial_value();
     }
 
-    virtual void decode(const int32_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+    save_previous_value(mref);
+  }
 
-    virtual void decode(const uint32_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int32_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const int64_mref&     mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint32_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const uint64_mref&    mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const int64_mref&     mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const ascii_string_mref& mref,
-                        fast_istream&            stream,
-                        decoder_presence_map&    pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const uint64_mref&    mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const unicode_string_mref& mref,
-                        fast_istream&              stream,
-                        decoder_presence_map&      pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const ascii_string_mref& mref,
+                      fast_istream&            stream,
+                      decoder_presence_map&    pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const byte_vector_mref& mref,
-                        fast_istream&           stream,
-                        decoder_presence_map&   pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const unicode_string_mref& mref,
+                      fast_istream&              stream,
+                      decoder_presence_map&      pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const decimal_mref&   mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      decode_decimal(mref, stream,pmap);
-    }
+  virtual void decode(const byte_vector_mref& mref,
+                      fast_istream&           stream,
+                      decoder_presence_map&   pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
+
+  virtual void decode(const decimal_mref&   mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    decode_decimal(mref, stream,pmap);
+  }
 
 };
 
@@ -614,89 +624,91 @@ class delta_operator
     }
   }
 
-  public:
-    delta_operator(){}
+public:
+  delta_operator()
+  {
+  }
 
-    virtual void decode(const int32_mref& mref,
-                        fast_istream&     stream,
-                        decoder_presence_map      & /* pmap */) const
-    {
-      this->decode_integer(mref, stream);
-    }
+  virtual void decode(const int32_mref& mref,
+                      fast_istream&     stream,
+                      decoder_presence_map      & /* pmap */) const
+  {
+    this->decode_integer(mref, stream);
+  }
 
-    virtual void decode(const uint32_mref& mref,
-                        fast_istream&      stream,
-                        decoder_presence_map       & /* pmap */) const
-    {
-      decode_integer(mref, stream);
-    }
+  virtual void decode(const uint32_mref& mref,
+                      fast_istream&      stream,
+                      decoder_presence_map       & /* pmap */) const
+  {
+    decode_integer(mref, stream);
+  }
 
-    virtual void decode(const int64_mref& mref,
-                        fast_istream&     stream,
-                        decoder_presence_map      & /* pmap */) const
-    {
-      decode_integer(mref, stream);
-    }
+  virtual void decode(const int64_mref& mref,
+                      fast_istream&     stream,
+                      decoder_presence_map      & /* pmap */) const
+  {
+    decode_integer(mref, stream);
+  }
 
-    virtual void decode(const uint64_mref& mref,
-                        fast_istream&      stream,
-                        decoder_presence_map       & /* pmap */) const
-    {
-      decode_integer(mref, stream);
-    }
+  virtual void decode(const uint64_mref& mref,
+                      fast_istream&      stream,
+                      decoder_presence_map       & /* pmap */) const
+  {
+    decode_integer(mref, stream);
+  }
 
-    virtual void decode(const decimal_mref&   mref,
-                        fast_istream&         stream,
-                        decoder_presence_map& pmap) const
-    {
-      if(!mref.has_individual_operators()) {
-        stream >> mref;
-        if (mref.present()) {
-          value_storage bv = delta_base_value_of(mref);
+  virtual void decode(const decimal_mref&   mref,
+                      fast_istream&         stream,
+                      decoder_presence_map& pmap) const
+  {
+    if(!mref.has_individual_operators()) {
+      stream >> mref;
+      if (mref.present()) {
+        value_storage bv = delta_base_value_of(mref);
 
-          check_overflow(bv.of_decimal.mantissa_, mref.mantissa(), mref.instruction(), stream);
-          check_overflow(bv.of_decimal.exponent_, mref.exponent(), mref.instruction(), stream);
-          mref.set_mantissa( bv.of_decimal.mantissa_ + mref.mantissa() );
-          mref.set_exponent( bv.of_decimal.exponent_ + mref.exponent() );
-          // if (mref.exponent() > 63 || mref.exponent() < -63 )
-          //   BOOST_THROW_EXCEPTION(fast_reportable_error("R1"));
-          //
-          save_previous_value(mref);
-        }
-        else {
-          mref.as_absent();
-        }
+        check_overflow(bv.of_decimal.mantissa_, mref.mantissa(), mref.instruction(), stream);
+        check_overflow(bv.of_decimal.exponent_, mref.exponent(), mref.instruction(), stream);
+        mref.set_mantissa( bv.of_decimal.mantissa_ + mref.mantissa() );
+        mref.set_exponent( bv.of_decimal.exponent_ + mref.exponent() );
+        // if (mref.exponent() > 63 || mref.exponent() < -63 )
+        //   BOOST_THROW_EXCEPTION(fast_reportable_error("R1"));
+        //
+        save_previous_value(mref);
       }
       else {
-        decode_integer(mref.for_exponent(), stream);
-        if (mref.present()) {
-          int64_mref mantissa_mref = mref.for_mantissa();
-          const decoder_field_operator* mantissa_operator = decoder_operators[mantissa_mref.instruction()->field_operator()];
-          mantissa_operator->decode(mantissa_mref, stream, pmap);
-        }
+        mref.as_absent();
       }
     }
-
-    virtual void decode(const ascii_string_mref& mref,
-                        fast_istream&            stream,
-                        decoder_presence_map&    pmap) const
-    {
-      decode_string(mref, stream, pmap);
+    else {
+      decode_integer(mref.for_exponent(), stream);
+      if (mref.present()) {
+        int64_mref mantissa_mref = mref.for_mantissa();
+        const decoder_field_operator* mantissa_operator = decoder_operators[mantissa_mref.instruction()->field_operator()];
+        mantissa_operator->decode(mantissa_mref, stream, pmap);
+      }
     }
+  }
 
-    virtual void decode(const unicode_string_mref& mref,
-                        fast_istream&              stream,
-                        decoder_presence_map&      pmap) const
-    {
-      decode_string(mref, stream, pmap);
-    }
+  virtual void decode(const ascii_string_mref& mref,
+                      fast_istream&            stream,
+                      decoder_presence_map&    pmap) const
+  {
+    decode_string(mref, stream, pmap);
+  }
 
-    virtual void decode(const byte_vector_mref& mref,
-                        fast_istream&           stream,
-                        decoder_presence_map&   pmap) const
-    {
-      decode_string(mref, stream, pmap);
-    }
+  virtual void decode(const unicode_string_mref& mref,
+                      fast_istream&              stream,
+                      decoder_presence_map&      pmap) const
+  {
+    decode_string(mref, stream, pmap);
+  }
+
+  virtual void decode(const byte_vector_mref& mref,
+                      fast_istream&           stream,
+                      decoder_presence_map&   pmap) const
+  {
+    decode_string(mref, stream, pmap);
+  }
 
 };
 
@@ -704,81 +716,89 @@ class tail_operator
   : public decoder_field_operator
   , public mfast::detail::codec_helper
 {
-  private:
+private:
 
-    template <typename T>
-    void decode_impl(const T&              mref,
-                     fast_istream&         stream,
-                     decoder_presence_map& pmap) const
-    {
-      if (pmap.is_next_bit_set()) {
+  template <typename T>
+  void decode_impl(const T&              mref,
+                   fast_istream&         stream,
+                   decoder_presence_map& pmap) const
+  {
+    if (pmap.is_next_bit_set()) {
 
-        uint32_t len;
-        const typename T::value_type* str;
-        if (stream.decode(str, len, mref.instruction()->is_nullable(), mref.instruction()) ) {
-          this->apply_string_delta(mref, tail_base_value_of(mref), len, str, len);
-        }
-        else {
-          //If the field has optional presence, the tail value can be NULL.
-          // In that case the value of the field is considered absent.
-          mref.as_absent();
-        }
+      uint32_t len;
+      const typename T::value_type* str;
+      if (stream.decode(str, len, mref.instruction()->is_nullable(), mref.instruction()) ) {
+        const value_storage& base_value (tail_base_value_of(mref));
+        this->apply_string_delta(mref,
+                                 base_value,
+                                 std::min<int>(len, base_value.array_length()),
+                                 str,
+                                 len);
       }
       else {
-        // If the tail value is not present in the stream, the value of the field depends
-        // on the state of the previous value in the following way:
+        //If the field has optional presence, the tail value can be NULL.
+        // In that case the value of the field is considered absent.
+        mref.as_absent();
+      }
+    }
+    else {
+      // If the tail value is not present in the stream, the value of the field depends
+      // on the state of the previous value in the following way:
 
-        value_storage& prev = previous_value_of(mref);
+      value_storage& prev = previous_value_of(mref);
 
-        if (!prev.is_defined()) {
-          //  * undefined – the value of the field is the initial value that also becomes the new previous value.
+      if (!prev.is_defined()) {
+        //  * undefined – the value of the field is the initial value that also becomes the new previous value.
 
-         // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
-          mref.as_initial_value();
+        // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
+        mref.as_initial_value();
 
-          if (mref.instruction()->mandatory_without_initial_value()) {
-            // Unless the field has optional presence, it is a dynamic error [ERR D6] if the instruction context has no initial value.
-            BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
-          }
-        }
-        else if (prev.is_empty()) {
-          //  * empty – the value of the field is empty. If the field is optional the value is considered absent.
-          //            It is a dynamic error [ERR D7] if the field is mandatory.
-          if (!mref.optional())
-             BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
-          mref.as_absent();
-        }
-        else {
-          // * assigned – the value of the field is the previous value.
-          load_previous_value(mref);
-          return;
+        if (mref.instruction()->mandatory_without_initial_value()) {
+          // Unless the field has optional presence, it is a dynamic error [ERR D6] if the instruction context has no initial value.
+          BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
         }
       }
-      save_previous_value(mref);
+      else if (prev.is_empty()) {
+        //  * empty – the value of the field is empty. If the field is optional the value is considered absent.
+        //            It is a dynamic error [ERR D7] if the field is mandatory.
+        if (!mref.optional())
+          BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
+        mref.as_absent();
+      }
+      else {
+        // * assigned – the value of the field is the previous value.
+        load_previous_value(mref);
+        return;
+      }
     }
+    save_previous_value(mref);
+  }
 
-  public:
-    tail_operator(){}
-    virtual void decode(const ascii_string_mref& mref,
-                        fast_istream&            stream,
-                        decoder_presence_map&    pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+public:
+  tail_operator()
+  {
+  }
 
-    virtual void decode(const unicode_string_mref& mref,
-                        fast_istream&              stream,
-                        decoder_presence_map&      pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const ascii_string_mref& mref,
+                      fast_istream&            stream,
+                      decoder_presence_map&    pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
-    virtual void decode(const byte_vector_mref& mref,
-                        fast_istream&           stream,
-                        decoder_presence_map&   pmap) const
-    {
-      decode_impl(mref, stream, pmap);
-    }
+  virtual void decode(const unicode_string_mref& mref,
+                      fast_istream&              stream,
+                      decoder_presence_map&      pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
+
+  virtual void decode(const byte_vector_mref& mref,
+                      fast_istream&           stream,
+                      decoder_presence_map&   pmap) const
+  {
+    decode_impl(mref, stream, pmap);
+  }
 
 };
 

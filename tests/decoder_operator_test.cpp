@@ -1051,6 +1051,31 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
     inst.destruct_value(storage, &alloc);
   }
 
+  { // testing mandatory field without initial value while tail value is in the stream
+
+    ascii_field_instruction inst(0, operator_tail,
+                                 presence_mandatory,
+                                 1,
+                                 "test_ascii","",
+                                 0);
+
+    inst.construct_value(storage, &alloc);
+    ascii_string_mref result(&alloc, &storage, &inst);
+
+    // Mandatory string and byte vector fields – one bit.
+
+    // the field is obtained by combining the delta value with a base value.
+    // The base value depends on the state of the previous value in the following way:
+    //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
+    result.as("value");
+
+
+    BOOST_CHECK(decode_mref("\xC0\x76\x61\x6C\x75\xE5", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
+
+    inst.destruct_value(storage, &alloc);
+
+  }
+
   { // testing optional field with initial value
     const char* default_value = "initial_string";
     ascii_field_instruction inst(0, operator_tail,
