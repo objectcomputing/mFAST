@@ -65,7 +65,8 @@ elseif (MSVC)
 endif()
 
 # variables to be used later
-set(MFAST_COMPONENTS CACHE INTERNAL "")
+set(MFAST_DYNAMIC_COMPONENTS CACHE INTERNAL "")
+set(MFAST_STATIC_COMPONENTS CACHE INTERNAL "")
 set(MFAST_LIBRARY CACHE INTERNAL "")
 
 include_directories ("${PROJECT_BINARY_DIR}"
