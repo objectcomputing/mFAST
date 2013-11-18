@@ -15,32 +15,35 @@ set(MFAST_EXECUTABLE "fast_type_gen")
 # These are IMPORTED targets created by mFASTTargets.cmake
 set(MFAST_FOUND "TRUE")
 
-set(MFAST_COMPONENTS @MFAST_COMPONENTS@)
 
-set(MFAST_USED_COMPONENTS "")
-
-# Use static by default
-if (NOT DEFINED MFAST_USE_STATIC_LIBS OR MFAST_USE_STATIC_LIBS) 
+if (NOT DEFINED MFAST_USE_STATIC_LIBS OR MFAST_USE_STATIC_LIBS)
   set(STATIC_SUFFIX "_static")
+  set(components @MFAST_STATIC_COMPONENTS@)
 else()
   add_definitions(-DMFAST_DYN_LINK)
+  set(components @MFAST_DYNAMIC_COMPONENTS@)
 endif()
 
-foreach(value ${mFAST_FIND_COMPONENTS})
-  foreach(entry ${MFAST_COMPONENTS})
-    if ("${value}${STATIC_SUFFIX}" STREQUAL ${entry})
-      list(REMOVE_ITEM mFAST_FIND_COMPONENTS ${value})
-      list(APPEND MFAST_LIBRARIES mfast_${value}${STATIC_SUFFIX})
-      set(MFAST_USED_COMPONENTS "${MFAST_USED_COMPONENTS} ${value}")
-      set(MFAST_${value}_FOUND Yes)
-      set(MFAST_${value}_LIBRARY mfast_${value}${STATIC_SUFFIX})
-    endif ()
+foreach(entry ${mFAST_FIND_COMPONENTS})
+  foreach(component ${components})
+    if ("${entry}${STATIC_SUFFIX}" STREQUAL ${component})
+      set(MFAST_${entry}_FOUND Yes)
+    endif()
   endforeach()
-  if (NOT DEFINED MFAST_${value}_FOUND OR NOT MFAST_${value}_FOUND)
-    message( SEND_ERROR "mFAST component ${value} NOT FOUND! Available components: ${MFAST_COMPONENTS}" )
+
+  if (MFAST_${entry}_FOUND)
+      list(REMOVE_ITEM mFAST_FIND_COMPONENTS ${entry})
+      list(APPEND MFAST_LIBRARIES mfast_${entry}${STATIC_SUFFIX})
+
+      set(MFAST_USED_COMPONENTS "${MFAST_USED_COMPONENTS} ${entry}")
+      set(MFAST_${entry}_LIBRARY mfast_${entry}${STATIC_SUFFIX})
+  else()
+    message( SEND_ERROR "mFAST component ${entry} NOT FOUND! Available components: ${components}" )
   endif()
+
 endforeach()
 
-list(APPEND MFAST_LIBRARIES "@MFAST_LIBRARY@")
+list(APPEND MFAST_LIBRARIES "mfast${STATIC_SUFFIX}")
 
-message("mFAST Found! Used components: ${MFAST_USED_COMPONENTS}")
+message("mFAST Found! Used components:${MFAST_USED_COMPONENTS}")
+message("Used libraries: ${MFAST_LIBRARIES}")
