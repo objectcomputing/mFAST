@@ -259,7 +259,7 @@ FastXMLVisitor::only_child(const XMLElement & element)
 {
   const XMLElement* first_elem = element.FirstChildElement();
   if (strcmp(first_elem->Name(), "length") == 0) {
-    first_elem = first_elem->NextSibling()->ToElement(); 
+      first_elem = first_elem->NextSiblingElement();
   }
   if (first_elem->NextSibling() == 0)
     return first_elem;
