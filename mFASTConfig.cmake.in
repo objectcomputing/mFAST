@@ -2,6 +2,7 @@
 # It defines the following variables
 # MFAST_INCLUDE_DIRS        - include directories for mFAST
 # MFAST_LIBRARIES           - libraries to link against
+# MFAST_LIBRARY_DIRS        - path with libraries installed
 # MFAST_COMPONENTS          - installed components
 # MFAST_<component>_LIBRARY - particular component library
 # MFAST_EXECUTABLE          - the fast_type_gen executable
@@ -10,6 +11,7 @@
 get_filename_component(MFAST_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include("${MFAST_CMAKE_DIR}/mFASTTargets.cmake")
 set(MFAST_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(MFAST_LIRARY_DIRS "@INSTALL_LIB_DIR@")
 
 set(MFAST_EXECUTABLE "fast_type_gen")
 # These are IMPORTED targets created by mFASTTargets.cmake

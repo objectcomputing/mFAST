@@ -32,10 +32,6 @@ if (BUILD_SHARED_LIBS)
           EXPORT  mFASTTargets
           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
   	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
-
-  SET(MFAST_LIBRARY mfast CACHE INTERNAL "mFast Library name")
-else()
-  SET(MFAST_LIBRARY mfast_static CACHE INTERNAL "mFast Library name")
 endif()
 
 add_subdirectory (coder)

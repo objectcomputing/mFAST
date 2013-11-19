@@ -67,7 +67,6 @@ endif()
 # variables to be used later
 set(MFAST_DYNAMIC_COMPONENTS CACHE INTERNAL "")
 set(MFAST_STATIC_COMPONENTS CACHE INTERNAL "")
-set(MFAST_LIBRARY CACHE INTERNAL "")
 
 include_directories ("${PROJECT_BINARY_DIR}"
                      "${PROJECT_SOURCE_DIR}/src")
@@ -143,7 +142,6 @@ add_custom_target(dist
 # ===============================
 
 export(PACKAGE ${CMAKE_PROJECT_NAME})
-export(TARGETS fast_type_gen ${MFAST_LIBRARIES} FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
 
 # Create the mFASTConfig.cmake for the build tree
 set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
