@@ -1,6 +1,7 @@
 # Config file for the mFAST package
 # It defines the following variables
-# MFAST_INCLUDE_DIRS        - include directories for mFAST
+# MFAST_INCLUDE_DIR         - include directories for mFAST
+# MFAST_LIBRARY_DIRS        - library directories for mFAST
 # MFAST_LIBRARIES           - libraries to link against
 # MFAST_COMPONENTS          - installed components
 # MFAST_<component>_LIBRARY - particular component library
@@ -12,6 +13,8 @@ include("${MFAST_CMAKE_DIR}/mFASTTargets.cmake")
 
 find_package( Boost 1.53.0 )
 set(MFAST_INCLUDE_DIR ${Boost_INCLUDE_DIR} "@CONF_INCLUDE_DIRS@")
+set(MFAST_LIBRARY_DIRS "@CONF_LIBRARY_DIRS@")
+
 list(REMOVE_DUPLICATES MFAST_INCLUDE_DIR)
 
 set(MFAST_EXECUTABLE "fast_type_gen")
