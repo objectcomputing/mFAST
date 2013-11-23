@@ -125,7 +125,7 @@ class nested_message_mref
       const templateref_instruction* templateRef_inst = static_cast<const templateref_instruction*>(this->instruction_);
       const template_instruction*& target_inst = this->storage()->of_templateref.of_instruction.instruction_;
 
-      assert(target_inst == 0);
+      // assert(target_inst == 0);
 
       if (inst == target_inst)
         return;

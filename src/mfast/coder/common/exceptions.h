@@ -85,7 +85,7 @@ struct tag_template_id;
 struct tag_template_name;
 }
 
-#if !defined(_MSC_VER) || (_MSC_VER >= 1700)
+#if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
 namespace  boost {
   // For Clang, we must use extern template and explicit template instantiation;
   //     otherwise, we will have duplicated definition link error when building shared library.

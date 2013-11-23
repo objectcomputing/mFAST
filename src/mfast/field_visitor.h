@@ -267,7 +267,15 @@ field_mref::accept_mutator(FieldMutator& mutator) const
 
 
 template <typename FieldAccessor>
-inline void
+#if defined(_MSC_VER) && (_MSC_VER < 1700)
+// For Visual Studio 2010,  a wield bug would be triggered which
+// cuases the passed-in accessor object being destroyed prematurely
+// in Release build if the function is inlined.
+_declspec(noinline)
+#else
+inline
+#endif
+void
 aggregate_cref::accept_accessor(FieldAccessor& accessor) const
 {
   detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);

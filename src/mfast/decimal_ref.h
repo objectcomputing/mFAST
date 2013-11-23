@@ -27,7 +27,7 @@
 
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
-#ifdef MAST_NO_SHARED_LIBS
+#if defined(MAST_NO_SHARED_LIBS) && !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
 namespace boost { namespace multiprecision {
 MFAST_EXTERN_TEMPLATE template class cpp_dec_float<18>;
 }}
