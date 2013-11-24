@@ -53,12 +53,8 @@ class json_visitor
       strm_ <<  separator_ << ref.value();
     }
 
-    void visit(const mfast::ascii_string_cref& ref)
-    {
-      strm_ <<  separator_ << quoted_string(ref.c_str());
-    }
-
-    void visit(const mfast::unicode_string_cref& ref)
+    template <typename Char>
+    void visit(const mfast::string_cref<Char>& ref)
     {
       strm_ <<  separator_ << quoted_string(ref.c_str());
     }
@@ -69,7 +65,7 @@ class json_visitor
     }
 
     template <typename IntType>
-    void visit(const mfast::vector_cref<IntType>& ref)
+    void visit(const mfast::int_vector_cref<IntType>& ref)
     {
       strm_ << separator_  << "[";
       separator_[0] = '\0';

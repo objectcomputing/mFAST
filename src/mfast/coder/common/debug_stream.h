@@ -20,7 +20,7 @@
 #define DEBUG_STREAM_H_E8L21B3
 
 #include <iostream>
-
+#include <mfast/output.h>
 #ifdef NDEBUG
 
 struct debug_stream {
@@ -61,7 +61,7 @@ class debug_stream
     {
     }
 
-    void set(std::ostream* os) 
+    void set(std::ostream* os)
     {
       os_ = os;
     }

@@ -223,6 +223,7 @@ public:
 
 };
 
+
 struct utf8_char
 {
   char value;
@@ -242,7 +243,6 @@ public:
   {
   }
 
-
   vector_cref(const value_storage*             storage,
               const unicode_field_instruction* instruction)
     : string_cref_base<unicode_field_instruction>(storage, instruction)
@@ -254,6 +254,33 @@ public:
   {
   }
 
+};
+
+template <typename T>
+class string_cref
+  : public vector_cref<T>
+{
+public:
+  typedef typename vector_cref<T>::instruction_cptr instruction_cptr;
+  string_cref()
+  {
+  }
+
+  string_cref(const string_cref<T>& other)
+    : vector_cref<T>(other)
+  {
+  }
+
+  string_cref(const value_storage* storage,
+              instruction_cptr     instruction)
+    : vector_cref<T>(storage, instruction)
+  {
+  }
+
+  explicit string_cref(const field_cref& other)
+    : vector_cref<T>(other)
+  {
+  }
 };
 
 template <typename T>
@@ -312,7 +339,6 @@ public:
   {
     this->assign(s.begin(), s.end());
   }
-
 
   void shallow_assign (const char* str) const
   {
@@ -434,8 +460,8 @@ public:
   }
 
   vector_mref(mfast::allocator* alloc,
-                   value_storage*    storage,
-                   instruction_cptr instruction)
+              value_storage*    storage,
+              instruction_cptr  instruction)
     : base_type(alloc, storage, instruction)
   {
   }
@@ -514,10 +540,119 @@ public:
   }
 };
 
-typedef vector_cref<char> ascii_string_cref;
-typedef vector_cref<utf8_char> unicode_string_cref;
-typedef vector_mref<char> ascii_string_mref;
-typedef vector_mref<utf8_char> unicode_string_mref;
+template <typename T>
+class string_mref
+  : public vector_mref<T>
+{
+public:
+  typedef vector_mref<T> base_type;
+  typedef typename base_type::instruction_cptr instruction_cptr;
+
+  string_mref()
+    : base_type()
+  {
+  }
+
+  string_mref(mfast::allocator* alloc,
+              value_storage*    storage,
+              instruction_cptr  instruction)
+    : base_type(alloc, storage, instruction)
+  {
+  }
+
+  string_mref(const vector_mref<utf8_char> &other)
+    : base_type(other)
+  {
+  }
+
+  explicit string_mref(const field_mref_base& other)
+    : base_type(other)
+  {
+  }
+
+
+  operator string_cref<T> () const
+  {
+    return string_cref<T>(this->storage(), this->instruction());
+  }
+
+  string_mref& operator = (const char* s)
+  {
+    this->assign(s, s+strlen(s));
+    return *this;
+  }
+
+  string_mref& operator = (const std::string& s)
+  {
+    this->assign(s.begin(), s.end());
+    return *this;
+  }
+
+  const string_mref& append (const std::string& str) const
+  {
+    this->insert(this->end(), str.begin(), str.end());
+    return *this;
+  }
+
+  const string_mref& append (const std::string& str, size_t subpos, size_t sublen) const
+  {
+    this->insert(this->end(), &str[subpos], &str[subpos+sublen]);
+    return *this;
+  }
+
+  const string_mref& append (const char* s) const
+  {
+    return this->append(s, std::strlen(s));
+  }
+
+  const string_mref& append (const char* s, size_t n) const
+  {
+    this->insert(this->end(), s, s+n);
+    return *this;
+  }
+
+  const string_mref& append (size_t n, char c) const
+  {
+    this->insert(this->end(), n, c);
+    return *this;
+  }
+
+  template <class InputIterator>
+  const string_mref& append (InputIterator first, InputIterator last) const
+  {
+    this->insert(this->end(), first, last);
+    return *this;
+  }
+
+  const string_mref& operator+= (const std::string& str) const
+  {
+    return this->append(str);
+  }
+
+  const string_mref& operator+= (const char* s) const
+  {
+    return this->append(s);
+  }
+
+  const string_mref& operator+= (char c) const
+  {
+    return this->append(1, c);
+  }
+
+};
+
+typedef string_cref<char> ascii_string_cref;
+typedef string_cref<utf8_char> unicode_string_cref;
+typedef string_mref<char> ascii_string_mref;
+typedef string_mref<utf8_char> unicode_string_mref;
+
+
+template <typename T>
+struct mref_of<string_cref<T> >
+{
+  typedef string_mref<T> type;
+};
+
 
 }
 

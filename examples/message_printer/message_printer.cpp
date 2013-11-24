@@ -1,10 +1,11 @@
 
 #include "MDRefreshSample.h"
-#include "mfast/output.h"
 #include <iostream>
 #include <iomanip>
 #include <map>
 #include <vector>
+#include <boost/io/ios_state.hpp>
+
 using std::ostream;
 using namespace mfast;
 
@@ -62,25 +63,56 @@ class message_printer
     {
     }
 
-    template <typename PrimitiveTypeRef>
-    void visit(const PrimitiveTypeRef& ref)
+    template <typename IntType>
+    void visit_i(const int_cref<IntType>& ref)
     {
-      os_ << indent_ << ref.name() << ": " << ref
-          << "\n";
+      // matches int32_cref, uint32_cref, int64_cref, uint64_cref
+      os_ << ref.value();
+    }
+
+    void visit_i(const decimal_cref& ref)
+    {
+      os_ << ref.mantissa() << "*10^" << ref.exponent();
+    }
+
+    template <typename CharType>
+    void visit_i(const string_cref<CharType>& ref)
+    {
+      // matches ascii_string_cref and unicode_string_cref
+      os_ << ref.c_str();
+    }
+
+    void visit_i(const byte_vector_cref& ref)
+    {
+      boost::io::ios_flags_saver  ifs( os_ );
+      os_ << std::hex << std::setfill('0');
+
+      for (std::size_t i = 0 ; i < ref.size(); ++i){
+        os_ << std::setw(2) <<  static_cast<unsigned>(ref[i]);
+      }
     }
 
     template <typename IntType>
-    typename boost::enable_if_c< (sizeof(IntType)>1) >::type
-    visit(const vector_cref<IntType>& ref)
+    void visit_i(const int_vector_cref<IntType>& ref)
     {
+      // matches int32_vector_cref, uint32_vector_cref, int64_vector_cref, uint64_vector_cref
+
       char sep[2]= { '\x0', '\x0'};
-      os_ << indent_ << ref.name() << ": {";
+      os_ << "{";
       for (std::size_t i = 0; i < ref.size(); ++i)
       {
         os_ << sep << ref[i];
         sep[0] = ',';
       }
-      os_ << "}\n";
+      os_ << "}";
+    }
+
+    template <typename T>
+    void visit(const T& ref)
+    {
+      os_ << indent_ << ref.name() << ": ";
+      this->visit_i(ref);
+      os_ << "\n";
     }
 
     template <typename CompositeTypeRef>

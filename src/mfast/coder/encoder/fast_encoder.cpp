@@ -90,8 +90,7 @@ struct fast_encoder_impl
   void visit(SimpleCRef &cref);
 
   template <typename IntType>
-  typename boost::enable_if_c< (sizeof(IntType)> 1) >::type
-  visit(vector_cref<IntType> &cref);
+  void visit(int_vector_cref<IntType> &cref);
 
   void visit(group_cref& cref, int);
   void visit(sequence_cref&, int);
@@ -134,8 +133,7 @@ fast_encoder_impl::visit(SimpleCRef& cref)
 }
 
 template <typename IntType>
-typename boost::enable_if_c< (sizeof(IntType)> 1) >::type
-fast_encoder_impl::visit(vector_cref<IntType> &cref)
+void fast_encoder_impl::visit(int_vector_cref<IntType> &cref)
 {
   strm_.encode(static_cast<uint32_t>(cref.size()), cref.optional(), !cref.present());
   if (cref.present()) {

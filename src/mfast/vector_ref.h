@@ -221,11 +221,41 @@ public:
 
 };
 
+template <typename T>
+class int_vector_cref
+  : public vector_cref<T>
+{
+  typedef vector_cref<T> base_type;
+
+public:
+  typedef typename base_type::instruction_cptr instruction_cptr;
+  int_vector_cref()
+  {
+  }
+
+  int_vector_cref(const value_storage* storage,
+                  instruction_cptr     instruction)
+    : base_type(storage, instruction)
+  {
+  }
+
+  int_vector_cref(const int_vector_cref& other)
+    : base_type(other)
+  {
+  }
+
+  explicit int_vector_cref(const field_cref& other)
+    : base_type(other)
+  {
+  }
+
+};
+
 typedef vector_cref<unsigned char> byte_vector_cref;
-typedef vector_cref<int32_t> int32_vector_cref;
-typedef vector_cref<uint32_t> uint32_vector_cref;
-typedef vector_cref<int64_t> int64_vector_cref;
-typedef vector_cref<uint64_t> uint64_vector_cref;
+typedef int_vector_cref<int32_t> int32_vector_cref;
+typedef int_vector_cref<uint32_t> uint32_vector_cref;
+typedef int_vector_cref<int64_t> int64_vector_cref;
+typedef int_vector_cref<uint64_t> uint64_vector_cref;
 
 template <typename T>
 class vector_mref_base
@@ -475,17 +505,61 @@ public:
 
 };
 
+
+template <typename T>
+class int_vector_mref
+  : public vector_mref<T>
+{
+  typedef vector_mref<T> base_type;
+
+public:
+  typedef typename base_type::instruction_cptr instruction_cptr;
+  int_vector_mref()
+  {
+  }
+
+  int_vector_mref(mfast::allocator* alloc,
+                  value_storage*    storage,
+                  instruction_cptr  instruction)
+    : base_type(alloc, storage, instruction)
+  {
+  }
+
+  int_vector_mref(const int_vector_mref& other)
+    : base_type(other)
+  {
+  }
+
+  explicit int_vector_mref(const field_mref_base& other)
+    : base_type(other)
+  {
+  }
+
+
+  operator int_vector_cref<T> () const {
+    return int_vector_cref<T>(this->storage(), this->instruction());
+  }
+};
+
+
 typedef vector_mref<unsigned char> byte_vector_mref;
-typedef vector_mref<int32_t> int32_vector_mref;
-typedef vector_mref<uint32_t> uint32_vector_mref;
-typedef vector_mref<int64_t> int64_vector_mref;
-typedef vector_mref<uint64_t> uint64_vector_mref;
+typedef int_vector_mref<int32_t> int32_vector_mref;
+typedef int_vector_mref<uint32_t> uint32_vector_mref;
+typedef int_vector_mref<int64_t> int64_vector_mref;
+typedef int_vector_mref<uint64_t> uint64_vector_mref;
 
 template <typename T>
 struct mref_of<vector_cref<T> >
 {
   typedef vector_mref<T> type;
 };
+
+template <typename T>
+struct mref_of<int_vector_cref<T> >
+{
+  typedef int_vector_mref<T> type;
+};
+
 
 
 template <typename T>

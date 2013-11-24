@@ -249,15 +249,8 @@ struct decode_visitor
     }
   }
 
-  void visit(const mfast::ascii_string_mref& ref)
-  {
-    std::string str;
-    if (get_quoted_string(strm_, &str)) {
-      ref.as(str);
-    }
-  }
-
-  void visit(const mfast::unicode_string_mref& ref)
+  template <typename Char>
+  void visit(const mfast::string_mref<Char>& ref)
   {
     std::string str;
     if (get_quoted_string(strm_, &str)) {
@@ -270,8 +263,7 @@ struct decode_visitor
   }
 
   template <typename IntType>
-  typename boost::enable_if_c< (sizeof(IntType)> 1) >::type
-  visit(vector_mref<IntType> &ref)
+  void visit(int_vector_mref<IntType> &ref)
   {
     ref.clear();
     if (!parse_array_preamble(strm_))

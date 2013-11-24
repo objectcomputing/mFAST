@@ -31,7 +31,7 @@
 #include "decoder_presence_map.h"
 #include "decoder_field_operator.h"
 #include "fast_istream.h"
-
+#include "mfast/vector_ref.h"
 
 namespace mfast {
 
@@ -92,8 +92,7 @@ struct fast_decoder_impl
   void visit(SimpleMRef &mref);
 
   template <typename IntType>
-  typename boost::enable_if_c< (sizeof(IntType)> 1) >::type
-  visit(vector_mref<IntType> &mref);
+  void visit(int_vector_mref<IntType>& mref);
 
   void visit(group_mref& mref, int);
   void visit(sequence_mref& mref, int);
@@ -152,8 +151,7 @@ fast_decoder_impl::visit(SimpleMRef& mref)
 }
 
 template <typename IntType>
-typename boost::enable_if_c< (sizeof(IntType)> 1) >::type
-fast_decoder_impl::visit(vector_mref<IntType> &mref)
+void fast_decoder_impl::visit(int_vector_mref<IntType> &mref)
 {
   debug_ << "decoding int vector " << mref.name();
 
