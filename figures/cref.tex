@@ -5,6 +5,9 @@
 \usepackage{mathabx}
 % \usepackage{relsize}
 \usepackage{tikz-uml}
+\newcommand{\bindx}{\guillemotleft bind\guillemotright}
+\newcommand{\tbind}[1]{\guillemotleft bind\guillemotright\\T $\rightarrow$ #1}
+\newcommand{\bindnode}[2]{\node at (#1)[align=center,right, font=\small] {\tbind{#2}};}
 
 \begin{document}
 
@@ -16,37 +19,44 @@
         + present() : bool
     }
 
-    \umlclass[width=25ex, x=-12,y=7]{int32\_cref}{}{
-        + value() : int32\_t
+    \umlclass[template={T},width=30ex, x=-6,y=5.25]{int\_cref}{}{
+      + value() : T
     }
-    \umlclass[width=25ex, x=-12,y=3.5]{uint32\_cref}{}{
-        + value() : uint32\_t
+
+    \umlemptyclass[width=25ex, x=-12,y=9]{int32\_cref}
+    \umlemptyclass[width=25ex, x=-6,y=9]{uint32\_cref}
+    \umlemptyclass[width=25ex, x=0,y=9]{int64\_cref}
+    \umlemptyclass[width=25ex, x=6,y=9]{uint64\_cref}
+
+    \umlclass[template={T},width=30ex, x=-6,y=-9]{int\_vector\_cref}{}{
     }
-    \umlclass[width=25ex, x=-12,y=0]{int64\_cref}{}{
-         + value() : int64\_t
-    }
-    \umlclass[width=25ex, x=-12,y=-3.5]{uint64\_cref}{}{
-         + value() : uint64\_t
-    }
-    \umlclass[width=25ex, x=-12,y=-7]{decimal\_cref}{}{
+
+    \umlemptyclass[width=25ex, x=-12,y=-12]{int32\_vector\_cref}
+    \umlemptyclass[width=25ex, x=-6,y=-12]{uint32\_vector\_cref}
+    \umlemptyclass[width=25ex, x=0,y=-12]{int64\_vector\_cref}
+    \umlemptyclass[width=25ex, x=6,y=-12]{uint64\_vector\_cref}
+
+
+    \umlclass[width=30ex, x=-6,y=1.75]{decimal\_cref}{}{
      + value() : decimal
     }
 
-    \umlclass[width=32ex, x=-6,y=5.25]{ascii\_string\_cref}{}{
-      + size() : size\_t \\
-      + c\_str() : const char* \\
-      + value() : string
-    }
-    \umlclass[width=32ex, x=-6,y=1.75]{unicode\_string\_cref}{}{
-      + size() : size\_t \\
-      + c\_str() : const char* \\
-      + value() : string
-    }
-    \umlclass[template={T},width=32ex, x=-6,y=-1.75]{vector\_cref}{}{
+
+
+    \umlemptyclass[width=30ex, x=-6,y=-1.75] {byte\_vector\_cref}
+    \umlclass[template={T},width=30ex, x=-6,y=-5.25]{vector\_cref}{}{
       + size() : size\_t \\
       + data() : const T* \\
       + value() : std::vector<T>
     }
+
+    \umlclass[template={T},width=30ex, x=-12,y=-5.25]{string\_cref}{}{
+      + c\_str() : const char*
+    }
+
+
+    \umlemptyclass[width=30ex, x=-12,y=1.75]{ascii\_string\_cref}
+    \umlemptyclass[width=30ex, x=-12,y=-1.75]{unicode\_string\_cref}
 
     \umlclass[width=40ex, x=7,y=5]{group\_cref}{}{
         + num\_fields() : size\_t\\
@@ -78,15 +88,43 @@
           + operator[] (i : size\_t) : field\_cref
       }
 
-    \umlinherit[arm1=9cm, geometry=-|-]{int32\_cref}{field\_cref}
-    \umlinherit[arm1=9cm, geometry=-|-]{uint32\_cref}{field\_cref}
-    \umlinherit[arm1=9cm, geometry=-|-]{int64\_cref}{field\_cref}
-    \umlinherit[arm1=9cm, geometry=-|-]{uint64\_cref}{field\_cref}
-    \umlinherit[arm1=9cm, geometry=-|-]{decimal\_cref}{field\_cref}
+    \umlinherit[arm1=3cm, geometry=-|-]{int\_cref}{field\_cref}
 
-    \umlinherit[arm1=3cm, geometry=-|-]{ascii\_string\_cref}{field\_cref}
-    \umlinherit[arm1=3cm, geometry=-|-]{unicode\_string\_cref}{field\_cref}
+
+    \umlinherit[arm1=3cm, geometry=-|-]{decimal\_cref}{field\_cref}
+
+
     \umlinherit[arm1=3cm, geometry=-|-]{vector\_cref}{field\_cref}
+    \umlinherit{string\_cref}{vector\_cref}
+
+    \umlreal[arm1=-3cm,geometry=-|-]{ascii\_string\_cref}{string\_cref}
+    \bindnode{-15, 0}{char}
+
+    \umlreal{unicode\_string\_cref}{string\_cref}
+    \bindnode{-12, -3}{utf8\_char}
+
+    \draw[dashed] (-12, 8.35) -- (-12, 7) -- (6, 7) -- (6, 8.35);
+    \draw[dashed] (0, 8.35) -- (0, 7);
+    \umlreal{uint32\_cref} {int\_cref}
+
+    % \node at (-12, 8)[align=center,right] {\tbind{int32\_t}};
+    \bindnode{-12, 7.8}{int32\_t}
+    \bindnode{-6, 7.8}{uint32\_t}
+    \bindnode{0, 7.8}{int64\_t}
+    \bindnode{6, 7.8}{uint64\_t}
+
+    \umlinherit {int\_vector\_cref}{vector\_cref}
+    \draw[dashed] (-12, -11.35) -- (-12, -10.5) -- (6, -10.5) -- (6, -11.35);
+    \draw[dashed] (0, -11.35) -- (0, -10.5);
+    \umlreal{uint32\_vector\_cref} {int\_vector\_cref}
+
+    \bindnode{-12, -10.9}{int32\_t}
+    \bindnode{-6, -10.9}{uint32\_t}
+    \bindnode{0, -10.9}{int64\_t}
+    \bindnode{6, -10.9}{uint64\_t}
+
+    \umlreal{byte\_vector\_cref}{vector\_cref}
+    \bindnode{-6, -3}{uchar\_t}
 
     \umlinherit[anchors=190 and 60, geometry=-|]{group\_cref}{field\_cref}
     \umlinherit[anchors=0 and -60, geometry=-|]{sequence\_cref}{field\_cref}

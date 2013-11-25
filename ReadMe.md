@@ -135,7 +135,7 @@ The following fragment of XML is an example of a template definition:
     </template>
     </templates>
 
-To minimize the memory usage for applications in non-financial domains, mFAST supports 4 additional primitive types not in the FAST specification. They are int32Vector, uInt32Vector, int64Vector and uInt64Vector. These integer vector types have similar APIs to byteVector; however, there are neither *operator* nor *initial value* supports for them. In essence, a field specified as `<int32Vector name="myfield" id="1" />` would be encoded exactly as followings.
+To minimize the memory usage for applications in non-financial domains, mFAST supports 4 additional primitive types not in the FAST specification. They are int32Vector, uInt32Vector, int64Vector and uInt64Vector. These integer vector types have similar APIs to byteVector; however, neither *operator* nor *initial value* are supported for integer vectors. In essence, a field specified as `<int32Vector name="myfield" id="1" />` would be encoded exactly as follows:
 
   <sequence name="myfield" id="1">
     <int32 name="element"/>
@@ -217,7 +217,8 @@ Constant and mutable reference objects, on the other hand, are used for reading/
 
 At the center of figure is the `field_cref` class, which is the base for all those constant reference classes can be directly used to refer fields. It provides `present()` for testing the presence of the value and other functions to query meta data such as `name()`, `id()`, or `field_type()`.
 
-The classes on the first column in the above figure are the reference classes for numeric types. Those on the second column are for string and byte vector types. All the classes on those two columns provide a `value()` member function to read the field value. Classes in the second column also provide interfaces like the const member functions in `std::string/std::vector<T>`. The template parameter for `vector_cref` can be only one of the following types: `uchar_t`, `int32_t`, `uint32_t`, `int64_t` and `uint64_t`. For better mapping to the name used by FAST specification, `byte_vector_cref` is the typedef for `vector_cref<uchar_t>`.
+The classes to the left of `field_cref` represent the references for the FAST primitive types. All references classes for numeric types provides a `value()`
+member function. The references classes for string and vector types provides interfaces like the const member function of `std::string` and `std::vector<T>` respectively.
 
 `group_cref` and `sequence_cref`, representing group and sequence types in FAST, provides access to the nested fields or elements respectively. The `sequenece_element_cref` class is used to represent the elements in a sequence. It does not inherit from `field_cref` because it does not correspond to a field in FAST sense. The class `nested_message_cref`, on the other hand, represents  templateRef in FAST. The class `message_cref`, corresponding to  *template* in FAST, is the base class for topmost level application types. The class `aggregate_cref` provides an abstraction to represent a collection of fields regardless whether the containing type is a group, a message or a element in a sequence.
 
@@ -418,8 +419,8 @@ struct message_printer
 
   template <typename PrimitiveTypes>
   void visit(const PrimitiveTypes& ref) const
-  { // for int32_cref, uint32_cref, int64_cref, uint64_cref, decimal_cref
-    //     ascii_string_cref, unicode_string_cref, byte_vector_cref
+  { // for int_cref<T>, decimal_cref, string_cref<T>, byte_vector_cref
+    // and int_vector_cref<T>
       std::cout << indenter_ << ref.name() << ":" << ref << "\n";
   }
 
