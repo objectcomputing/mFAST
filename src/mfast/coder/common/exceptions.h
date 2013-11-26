@@ -19,6 +19,7 @@
 #ifndef EXCEPTIONS_H_87B9JUIK
 #define EXCEPTIONS_H_87B9JUIK
 #include "../mfast_coder_export.h"
+#include "../../mfast_export.h"
 #include <boost/exception/all.hpp>
 
 #ifdef BOOST_MSVC
