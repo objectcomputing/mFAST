@@ -38,4 +38,7 @@ operator << (std::ostream& os, const decoder_presence_map& pmap)
   return os;
 }
 }
+#else
+// disable MSVC LNK4221
+namespace { char dummy; };
 #endif
