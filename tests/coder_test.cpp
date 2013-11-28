@@ -90,7 +90,7 @@ class fast_coding_test_case
     fast_decoder decoder_;
 };
 
-BOOST_AUTO_TEST_SUITE( test_encoder )
+BOOST_AUTO_TEST_SUITE( test_fast_coder )
 
 
 BOOST_AUTO_TEST_CASE(simple_coder_test)

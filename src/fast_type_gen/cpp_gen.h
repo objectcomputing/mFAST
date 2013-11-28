@@ -45,6 +45,10 @@ public:
   virtual void visit(const mfast::sequence_field_instruction*, void*);
   virtual void visit(const mfast::template_instruction*, void*);
   virtual void visit(const mfast::templateref_instruction*, void*);
+  virtual void visit(const mfast::int32_vector_field_instruction*, void*);
+  virtual void visit(const mfast::uint32_vector_field_instruction*, void*);
+  virtual void visit(const mfast::int64_vector_field_instruction*, void*);
+  virtual void visit(const mfast::uint64_vector_field_instruction*, void*);
 
 private:
   std::string prefix_string() const;
@@ -57,8 +61,10 @@ private:
   void gen_integer(const mfast::integer_field_instruction_base* inst,
                    const char*                                  cpp_type,
                    const std::string&                           initial_value);
-  void gen_string(const mfast::string_field_instruction* inst,
-                  const char*                            charset);
+  void gen_string(const mfast::ascii_field_instruction* inst,
+                  const char*                           charset);
+
+  void gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst);
   void output_subinstructions();
   std::string get_subinstructions(const mfast::group_field_instruction* inst);
 

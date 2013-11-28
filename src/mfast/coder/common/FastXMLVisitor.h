@@ -73,6 +73,7 @@ class FastXMLVisitor
     virtual bool VisitByteVector(const XMLElement & /* element */, const std::string& /* name_attr */, std::size_t index);
     virtual bool VisitEnterDefine(const XMLElement & /* element */, const std::string& /* name_attr */);
     virtual bool VisitExitDefine(const XMLElement & /* element */, const std::string& /* name_attr */);
+    virtual bool VisitIntVector(const XMLElement & /* element */, int integer_bits, const std::string& /* name_attr */, std::size_t index);
 
     virtual bool  VisitEnter (const XMLElement & element, const XMLAttribute* attr);
     virtual bool  VisitExit (const XMLElement & element);

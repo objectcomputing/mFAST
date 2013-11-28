@@ -167,8 +167,8 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
 
 }
 
-void cpp_gen::gen_string(const mfast::string_field_instruction* inst,
-                         const char*                            charset)
+void cpp_gen::gen_string(const mfast::ascii_field_instruction* inst,
+                         const char*                           charset)
 {
   gen_field(inst, gen_op_context(inst->name(), inst->op_context()), charset);
 
@@ -218,6 +218,43 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
        << "  " << inst->length_id() << ", // length id\n"
        << "  \"" <<  inst->length_name() << "\", // length name\n"
        << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
+}
+
+void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst)
+{
+  const char* name = inst->name();
+  std::size_t index = inst->field_index();
+  // std::string context = gen_op_context(inst->name(), inst->op_context());
+
+  out_ << "const static " << cpp_type << "_field_instruction\n"
+       << prefix_string() << name << "_instruction(\n"
+       << "  " << index << ",\n"
+       << "  " << get_presence(inst) << ",\n"
+       << "  " << inst->id() << ", // id\n"
+       << "  \""<< name << "\", // name\n"
+       << "  \""<< inst->ns() << "\"); // ns\n";
+
+  add_to_instruction_list(name);
+}
+
+void cpp_gen::visit(const mfast::int32_vector_field_instruction* inst, void*)
+{
+  gen_int_vector("int32_vector", inst);
+}
+
+void cpp_gen::visit(const mfast::uint32_vector_field_instruction* inst, void*)
+{
+  gen_int_vector("uint32_vector", inst);
+}
+
+void cpp_gen::visit(const mfast::int64_vector_field_instruction* inst, void*)
+{
+  gen_int_vector("int64_vector", inst);
+}
+
+void cpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
+{
+  gen_int_vector("uint64_vector", inst);
 }
 
 void cpp_gen::output_subinstructions()

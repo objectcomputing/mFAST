@@ -109,6 +109,11 @@ bool FastXMLVisitor::VisitByteVector(const XMLElement & /* element */, const std
   return true;
 }
 
+bool FastXMLVisitor::VisitIntVector(const XMLElement & /* element */, int /* bits */, const std::string& /* name_attr */, std::size_t /* index */)
+{
+  return true;
+}
+
 bool FastXMLVisitor::VisitEnterDefine(const XMLElement & /* element */, const std::string& /* name_attr */)
 {
   return true;
@@ -125,6 +130,23 @@ void FastXMLVisitor::save_context(const XMLElement & element)
   instruction_context& context = context_stack_.back();
   context.ns_ = get_optional_attr(element, "ns", context.ns_.c_str());
   context.dictionary_ = get_optional_attr(element, "dictionary", context.dictionary_.c_str());
+}
+
+bool parse_bits(const char* str, int& bits, bool& is_vector)
+{
+  bits = 0;
+  if (str[0] == '6' && str[1] == '4') {
+    bits = 64;
+  }
+  else if (str[0] == '3' && str[1] == '2') {
+    bits = 32;
+  }
+
+  if (bits != 0) {
+    is_vector = std::strcmp(str+2, "Vector") == 0;
+  }
+
+  return bits != 0;
 }
 
 bool FastXMLVisitor::VisitEnter (const XMLElement & element, const XMLAttribute* /* attr */)
@@ -160,19 +182,17 @@ bool FastXMLVisitor::VisitEnter (const XMLElement & element, const XMLAttribute*
     save_context(element);
     result = VisitEnterSequence(element, name_attr, num_fields_.back());
   }
-  else if (strcmp(element_name, "define") == 0){
+  else if (strcmp(element_name, "define") == 0) {
     return VisitEnterDefine(element, name_attr);
   }
   else {
     int bits;
-    if ((strncmp(element_name, "int", 3) == 0 &&  (bits = std::atoi(element_name+3)) ) ||
-        (strncmp(element_name, "uInt", 4) == 0 &&  (bits = std::atoi(element_name+4)))  ) {
+    bool is_vector;
+    if ((strncmp(element_name, "int", 3) == 0 &&  parse_bits(element_name+3, bits, is_vector) ) ||
+        (strncmp(element_name, "uInt", 4) == 0 &&  parse_bits(element_name+4, bits, is_vector) )  ) {
       // int8, int16 and uint8, uint16 are not standards, convert them to int32 and uint32 respectively
-      if (bits == 8 || bits == 16) {
-        bits = 32;
-      }
-      else if (bits != 32 && bits != 64)
-        return false;
+      if (is_vector)
+        return VisitIntVector(element,bits, name_attr, num_fields_.back());
       return VisitInteger(element,bits, name_attr, num_fields_.back());
     }
     else if (strcmp(element_name, "decimal") == 0 ) {
@@ -211,7 +231,7 @@ bool FastXMLVisitor::VisitExit (const XMLElement & element)
   if (name_attr.empty())
     return true;
 
-  typedef bool (FastXMLVisitor::*VisitExitPtr)(const XMLElement & , const std::string& , std::size_t , std::size_t index);
+  typedef bool (FastXMLVisitor::*VisitExitPtr)(const XMLElement &, const std::string&, std::size_t, std::size_t index);
   VisitExitPtr member_ptr;
 
   if (strcmp(element_name, "template") == 0 ) {
@@ -223,7 +243,7 @@ bool FastXMLVisitor::VisitExit (const XMLElement & element)
   else if (strcmp(element_name, "sequence") == 0 ) {
     member_ptr = &FastXMLVisitor::VisitExitSequence;
   }
-  else if (strcmp(element_name, "define") == 0){
+  else if (strcmp(element_name, "define") == 0) {
     return VisitExitDefine(element, name_attr);
   }
   else if (strncmp(element_name, "int",  3) == 0 ||
@@ -253,8 +273,7 @@ FastXMLVisitor::instruction_context& FastXMLVisitor::current_context()
   return context_stack_.back();
 }
 
-
-const XMLElement* 
+const XMLElement*
 FastXMLVisitor::only_child(const XMLElement & element)
 {
   const XMLElement* first_elem = element.FirstChildElement();
@@ -268,11 +287,11 @@ FastXMLVisitor::only_child(const XMLElement & element)
 
 // if element has only child and the child element is templateRef, it returns
 // the address of the child element; otherwise it returns 0.
-const XMLElement* 
+const XMLElement*
 FastXMLVisitor::only_child_templateRef(const XMLElement & element)
 {
   const XMLElement* first_elem = only_child(element);
-  if (first_elem && strcmp(first_elem->Name(), "templateRef") == 0) 
+  if (first_elem && strcmp(first_elem->Name(), "templateRef") == 0)
     return first_elem;
   return 0;
 }

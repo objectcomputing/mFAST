@@ -57,7 +57,7 @@ field_instruction::copy_construct_value(const value_storage& src,
 {
   dest.of_array.content_ = src.of_array.content_;
   dest.of_array.len_ = src.of_array.len_;
-  dest.of_array.capacity_ = 0;
+  dest.of_array.capacity_in_bytes_ = 0;
 }
 
 const char*
@@ -99,10 +99,6 @@ void integer_field_instruction_base::construct_value(value_storage& storage,
 
 const value_storage integer_field_instruction_base::default_value_(1);
 
-// template class int_field_instruction<int32_t>;
-// template class int_field_instruction<uint32_t>;
-// template class int_field_instruction<int64_t>;
-// template class int_field_instruction<uint64_t>;
 
 /////////////////////////////////////////////////////////
 
@@ -132,49 +128,76 @@ void decimal_field_instruction::accept(field_instruction_visitor& visitor,
 
 /////////////////////////////////////////////////////////
 
-void string_field_instruction::construct_value(value_storage& storage,
-                                               allocator*       ) const
+void vector_field_instruction_base::construct_value(value_storage& storage,
+                                                    allocator*       ) const
+{
+  storage = value_storage();
+  storage.of_array.defined_bit_ = 1;
+}
+
+void vector_field_instruction_base::destruct_value(value_storage& storage,
+                                                   allocator*     alloc) const
+{
+  if (storage.of_array.capacity_in_bytes_) {
+    alloc->deallocate(storage.of_array.content_, storage.of_array.capacity_in_bytes_);
+  }
+}
+
+void vector_field_instruction_base::copy_construct_value(const value_storage& src,
+                                                         value_storage&       dest,
+                                                         allocator*           alloc,
+                                                         value_storage*) const
+{
+  dest.of_array.defined_bit_ = 1;
+  dest.of_array.len_ = src.of_array.len_;
+  if (src.of_array.len_) {
+    dest.of_array.content_ = 0;
+    dest.of_array.capacity_in_bytes_ = alloc->reallocate(dest.of_array.content_, 0, src.of_array.len_ * element_size_);
+    std::memcpy(dest.of_array.content_, src.of_array.content_, src.of_array.len_ * element_size_);
+  }
+  else {
+    dest.of_array.capacity_in_bytes_ = 0;
+    dest.of_array.content_ = 0;
+  }
+}
+
+/////////////////////////////////////////////////////////
+
+void ascii_field_instruction::construct_value(value_storage& storage,
+                                              allocator*       ) const
 {
   storage = initial_value_;
   if (optional())
     storage.of_array.len_ = 0;
+  storage.of_array.defined_bit_ = 1;
 }
 
-void string_field_instruction::destruct_value(value_storage& storage,
-                                              allocator*     alloc) const
+void ascii_field_instruction::copy_construct_value(const value_storage& src,
+                                                   value_storage&       dest,
+                                                   allocator*           alloc,
+                                                   value_storage*) const
 {
-  if (storage.of_array.capacity_) {
-    alloc->deallocate(storage.of_array.content_, storage.of_array.capacity_);
-  }
-}
-
-void string_field_instruction::copy_construct_value(const value_storage& src,
-                                                    value_storage&       dest,
-                                                    allocator*           alloc,
-                                                    value_storage*) const
-{
+  dest.of_array.defined_bit_ = 1;
   size_t len = src.of_array.len_;
   if (len && src.of_array.content_ != initial_value_.of_array.content_) {
-    dest.of_array.content_ = alloc->allocate(len);
-    memcpy(dest.of_array.content_, src.of_array.content_, len);
-    dest.of_array.capacity_ = len;
+    dest.of_array.content_ = 0;
+    dest.of_array.capacity_in_bytes_ = alloc->reallocate(dest.of_array.content_, 0, len * element_size_);
+    std::memcpy(dest.of_array.content_, src.of_array.content_, len * element_size_);
   }
   else {
     dest.of_array.content_ = src.of_array.content_;
-    dest.of_array.capacity_ = 0;
+    dest.of_array.capacity_in_bytes_ = 0;
   }
   dest.of_array.len_ = len;
 }
-
-const value_storage string_field_instruction::default_value_("");
-
-/////////////////////////////////////////////////////////
 
 void ascii_field_instruction::accept(field_instruction_visitor& visitor,
                                      void*                      context) const
 {
   visitor.visit(this, context);
 }
+
+const value_storage ascii_field_instruction::default_value_("");
 
 void unicode_field_instruction::accept(field_instruction_visitor& visitor,
                                        void*                      context) const
@@ -335,21 +358,21 @@ void sequence_field_instruction::construct_value(value_storage& storage,
     std::size_t element_size = this->group_content_byte_count();
     std::size_t reserve_size = initial_length*element_size;
     storage.of_array.content_ = 0;
-    storage.of_array.capacity_ =  alloc->reallocate(storage.of_array.content_, 0, reserve_size)/element_size;
+    storage.of_array.capacity_in_bytes_ =  alloc->reallocate(storage.of_array.content_, 0, reserve_size);
     construct_sequence_elements(storage,0, initial_length, alloc);
   }
   else {
     storage.of_array.content_ = 0;
-    storage.of_array.capacity_ = 0;
+    storage.of_array.capacity_in_bytes_ = 0;
   }
 }
 
 void sequence_field_instruction::destruct_value(value_storage& storage,
                                                 allocator*     alloc ) const
 {
-  if (storage.of_array.capacity_) {
-    destruct_sequence_elements(storage, 0, storage.of_array.capacity_, alloc);
-    alloc->deallocate(storage.of_array.content_, this->group_content_byte_count()*storage.of_array.capacity_ );
+  if (storage.of_array.capacity_in_bytes_) {
+    destruct_sequence_elements(storage, 0, storage.of_array.capacity_in_bytes_/this->group_content_byte_count(), alloc);
+    alloc->deallocate(storage.of_array.content_, storage.of_array.capacity_in_bytes_ );
   }
 }
 
@@ -370,7 +393,7 @@ void sequence_field_instruction::copy_construct_value(const value_storage& src,
     std::size_t reserve_size = size*element_size;
 
     dest.of_array.content_ = 0;
-    dest.of_array.capacity_ =  alloc->reallocate(dest.of_array.content_, 0, reserve_size)/element_size;
+    dest.of_array.capacity_in_bytes_ =  alloc->reallocate(dest.of_array.content_, 0, reserve_size);
 
     const value_storage* src_elements = static_cast<const value_storage*>(src.of_array.content_);
     value_storage* dest_elements = static_cast<value_storage*>(dest.of_array.content_);
@@ -380,14 +403,14 @@ void sequence_field_instruction::copy_construct_value(const value_storage& src,
       copy_group_subfields(&src_elements[j], &dest_elements[j], alloc);
     }
     // we must zero out the extra memory we reserved; otherwise we may deallocate garbage pointers during destruction.
-    std::size_t unused = dest.of_array.capacity_ - size;
+    std::size_t unused = dest.of_array.capacity_in_bytes_ - size*element_size;
     if (unused > 0) {
-      memset( static_cast<char*>(dest.of_array.content_) + reserve_size, 0, unused * element_size);
+      std::memset( static_cast<char*>(dest.of_array.content_) + reserve_size, 0, unused);
     }
   }
   else {
     dest.of_array.content_ = 0;
-    dest.of_array.capacity_ = 0;
+    dest.of_array.capacity_in_bytes_ = 0;
   }
 }
 

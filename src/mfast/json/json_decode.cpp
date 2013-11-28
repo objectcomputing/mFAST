@@ -182,6 +182,26 @@ bool get_decimal_string(std::istream& strm, std::string& str)
   return true;
 }
 
+bool parse_array_preamble(std::istream& strm)
+{
+  char c;
+  strm >> std::skipws >> c;
+  if (!strm.good())
+    return false;
+
+  if (c != '[') {
+    strm.setstate(std::ios::failbit);
+    return false;
+  }
+
+  strm >> std::skipws;
+  if (strm.peek() == ']') {
+    strm >> c;
+    return false;
+  }
+  return true;
+}
+
 struct decode_visitor
 {
   std::istream& strm_;
@@ -229,15 +249,8 @@ struct decode_visitor
     }
   }
 
-  void visit(const mfast::ascii_string_mref& ref)
-  {
-    std::string str;
-    if (get_quoted_string(strm_, &str)) {
-      ref.as(str);
-    }
-  }
-
-  void visit(const mfast::unicode_string_mref& ref)
+  template <typename Char>
+  void visit(const mfast::string_mref<Char>& ref)
   {
     std::string str;
     if (get_quoted_string(strm_, &str)) {
@@ -248,6 +261,33 @@ struct decode_visitor
   void visit(const mfast::byte_vector_mref&)
   {
   }
+
+  template <typename IntType>
+  void visit(int_vector_mref<IntType> &ref)
+  {
+    ref.clear();
+    if (!parse_array_preamble(strm_))
+      return;
+
+    std::size_t i = 0;
+    char c;
+
+    do {
+      ref.resize(i + 1);
+
+      strm_ >> ref[i] >> std::skipws >> c;
+
+      if (!strm_.good())
+        return;
+    }
+    while (c == ',');
+
+    if (c == ']')
+      return;
+
+    strm_.setstate(std::ios::failbit);
+  }
+
 
 
   // return false only when the parsed result is empty or error
@@ -345,23 +385,11 @@ bool decode_visitor::visit_impl(const mfast::aggregate_mref& ref)
 void decode_visitor::visit(const mfast::sequence_mref& ref, int)
 {
   ref.clear();
-  char c;
-  strm_ >> std::skipws >> c;
-  if (!strm_.good())
+  if (!parse_array_preamble(strm_))
     return;
-
-  if (c != '[') {
-    strm_.setstate(std::ios::failbit);
-    return;
-  }
-
-  strm_ >> std::skipws;
-  if (strm_.peek() == ']') {
-    strm_ >> c;
-    ref.clear();
-  }
 
   std::size_t i = 0;
+  char c;
 
   do {
     ref.resize(i + 1);

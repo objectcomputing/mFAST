@@ -54,6 +54,10 @@ enum field_type_enum_t {
   field_type_ascii_string,
   field_type_unicode_string,
   field_type_byte_vector,
+  field_type_int32_vector,
+  field_type_uint32_vector,
+  field_type_int64_vector,
+  field_type_uint64_vector,
   field_type_sequence,
   field_type_group,
   field_type_templateref,
@@ -438,38 +442,33 @@ protected:
 };
 
 
-class MFAST_EXPORT string_field_instruction
+class MFAST_EXPORT vector_field_instruction_base
   : public field_instruction
 {
 public:
 
-  string_field_instruction(uint16_t             field_index,
-                           operator_enum_t      operator_id,
-                           field_type_enum_t    field_type,
-                           presence_enum_t      optional,
-                           uint32_t             id,
-                           const char*          name,
-                           const char*          ns,
-                           const op_context_t*  context,
-                           string_value_storage initial_value)
-    : field_instruction(field_index, operator_id, field_type, optional,
+  vector_field_instruction_base(uint16_t          field_index,
+                                operator_enum_t   operator_id,
+                                field_type_enum_t field_type,
+                                presence_enum_t   optional,
+                                uint32_t          id,
+                                const char*       name,
+                                const char*       ns,
+                                std::size_t       element_size)
+    : field_instruction(field_index,
+                        operator_id,
+                        field_type,
+                        optional,
                         id,
                         name,
                         ns)
-    , op_context_(context)
-    , initial_value_(initial_value.storage_)
-    , prev_value_(&prev_storage_)
-    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+    , element_size_(element_size)
   {
-    mandatory_no_initial_value_ = !optional && initial_value.storage_.is_empty();
   }
 
-  string_field_instruction(const string_field_instruction& other)
+  vector_field_instruction_base(const vector_field_instruction_base& other)
     : field_instruction(other)
-    , op_context_(other.op_context_)
-    , initial_value_(other.initial_value_)
-    , prev_value_(&prev_storage_)
-    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+    , element_size_(other.element_size_)
   {
   }
 
@@ -486,6 +485,55 @@ public:
                                     value_storage*       fields_storage=0) const;
 
 
+
+
+  std::size_t element_size_;
+};
+
+
+class MFAST_EXPORT ascii_field_instruction
+  : public vector_field_instruction_base
+{
+public:
+  ascii_field_instruction(uint16_t             field_index,
+                          operator_enum_t      operator_id,
+                          presence_enum_t      optional,
+                          uint32_t             id,
+                          const char*          name,
+                          const char*          ns,
+                          const op_context_t*  context,
+                          string_value_storage initial_value = string_value_storage(),
+                          field_type_enum_t    field_type = field_type_ascii_string)
+    :  vector_field_instruction_base(field_index,
+                                     operator_id,
+                                     field_type,
+                                     optional,
+                                     id, name, ns,
+                                     sizeof(char))
+    , op_context_(context)
+    , initial_value_(initial_value.storage_)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+  {
+    mandatory_no_initial_value_ = !optional && initial_value.storage_.is_empty();
+  }
+
+  ascii_field_instruction(const ascii_field_instruction& other)
+    : vector_field_instruction_base(other)
+    , op_context_(other.op_context_)
+    , initial_value_(other.initial_value_)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+  {
+  }
+
+  virtual void construct_value(value_storage& storage,
+                               allocator*     alloc) const;
+  // perform deep copy
+  virtual void copy_construct_value(const value_storage& src,
+                                    value_storage&       dest,
+                                    allocator*           alloc,
+                                    value_storage*       fields_storage=0) const;
   value_storage& prev_value()
   {
     return *prev_value_;
@@ -496,11 +544,6 @@ public:
     return *prev_value_;
   }
 
-  const op_context_t* op_context() const
-  {
-    return op_context_;
-  }
-
   const value_storage& initial_value() const
   {
     return initial_value_;
@@ -509,6 +552,13 @@ public:
   const value_storage& initial_or_default_value() const
   {
     return *initial_or_default_value_;
+  }
+
+  virtual void accept(field_instruction_visitor& visitor, void* context) const;
+
+  const op_context_t* op_context() const
+  {
+    return op_context_;
   }
 
 protected:
@@ -522,37 +572,8 @@ protected:
 };
 
 
-class MFAST_EXPORT ascii_field_instruction
-  : public string_field_instruction
-{
-public:
-  ascii_field_instruction(uint16_t             field_index,
-                          operator_enum_t      operator_id,
-                          presence_enum_t      optional,
-                          uint32_t             id,
-                          const char*          name,
-                          const char*          ns,
-                          const op_context_t*  context,
-                          string_value_storage initial_value = string_value_storage())
-    : string_field_instruction(field_index,
-                               operator_id,
-                               field_type_ascii_string,
-                               optional,
-                               id, name, ns, context,
-                               initial_value)
-  {
-  }
-
-  ascii_field_instruction(const ascii_field_instruction& other)
-    : string_field_instruction(other)
-  {
-  }
-
-  virtual void accept(field_instruction_visitor& visitor, void* context) const;
-};
-
 class MFAST_EXPORT unicode_field_instruction
-  : public string_field_instruction
+  : public ascii_field_instruction
 {
 public:
   unicode_field_instruction(uint16_t             field_index,
@@ -565,12 +586,14 @@ public:
                             string_value_storage initial_value = string_value_storage(),
                             uint32_t             length_id = 0,
                             const char*          length_name = "",
-                            const char*          length_ns = "")
-    : string_field_instruction(field_index,
+                            const char*          length_ns = "",
+                            field_type_enum_t    field_type = field_type_unicode_string)
+    :  ascii_field_instruction(field_index,
                                operator_id,
-                               field_type_unicode_string,
                                optional,
-                               id, name, ns, context, initial_value)
+                               id, name, ns, context,
+                               initial_value,
+                               field_type)
     , length_id_(length_id)
     , length_name_(length_name)
     , length_ns_(length_ns)
@@ -578,7 +601,7 @@ public:
   }
 
   unicode_field_instruction(const unicode_field_instruction& other)
-    : string_field_instruction(other)
+    : ascii_field_instruction(other)
     , length_id_(other.length_id_)
     , length_name_(other.length_name_)
     , length_ns_(other.length_ns_)
@@ -609,64 +632,104 @@ protected:
 };
 
 
-
 class MFAST_EXPORT byte_vector_field_instruction
-  : public string_field_instruction
+  : public unicode_field_instruction
 {
 public:
-  byte_vector_field_instruction(uint16_t                  field_index,
-                                operator_enum_t           operator_id,
-                                presence_enum_t           optional,
-                                uint32_t                  id,
-                                const char*               name,
-                                const char*               ns,
-                                const op_context_t*       value_context,
-                                byte_vector_value_storage initial_value = byte_vector_value_storage(),
-                                uint32_t                  length_id = 0,
-                                const char*               length_name = "",
-                                const char*               length_ns = "")
-    : string_field_instruction(field_index,
-                               operator_id,
-                               field_type_byte_vector,
-                               optional,
-                               id, name, ns, value_context,
-                               initial_value)
-    , length_id_(length_id)
-    , length_name_(length_name)
-    , length_ns_(length_ns)
+  byte_vector_field_instruction(uint16_t             field_index,
+                                operator_enum_t      operator_id,
+                                presence_enum_t      optional,
+                                uint32_t             id,
+                                const char*          name,
+                                const char*          ns,
+                                const op_context_t*  context,
+                                string_value_storage initial_value = string_value_storage(),
+                                uint32_t             length_id = 0,
+                                const char*          length_name = "",
+                                const char*          length_ns = "")
+    :  unicode_field_instruction(field_index,
+                                 operator_id,
+                                 optional,
+                                 id, name, ns, context,
+                                 initial_value,
+                                 length_id,
+                                 length_name,
+                                 length_ns,
+                                 field_type_byte_vector)
   {
   }
 
   byte_vector_field_instruction(const byte_vector_field_instruction& other)
-    : string_field_instruction(other)
-    , length_id_(other.length_id_)
-    , length_name_(other.length_name_)
-    , length_ns_(other.length_ns_)
+    : unicode_field_instruction(other)
   {
   }
 
   virtual void accept(field_instruction_visitor& visitor, void* context) const;
-
-  uint32_t length_id() const
-  {
-    return length_id_;
-  }
-
-  const char* length_name() const
-  {
-    return length_name_;
-  }
-
-  const char* length_ns() const
-  {
-    return length_ns_;
-  }
-
-protected:
-  uint32_t length_id_;
-  const char* length_name_;
-  const char* length_ns_;
 };
+
+
+namespace detail {
+template <typename T>
+struct vector_field_type;
+
+
+template <>
+struct vector_field_type<int32_t>
+{
+  static const field_type_enum_t value = field_type_int32_vector;
+};
+
+template <>
+struct vector_field_type<uint32_t>
+{
+  static const field_type_enum_t value = field_type_uint32_vector;
+};
+
+template <>
+struct vector_field_type<int64_t>
+{
+  static const field_type_enum_t value = field_type_int64_vector;
+};
+
+template <>
+struct vector_field_type<uint64_t>
+{
+  static const field_type_enum_t value = field_type_uint64_vector;
+};
+
+}
+
+template <typename T>
+class vector_field_instruction
+  : public vector_field_instruction_base
+{
+public:
+  vector_field_instruction(uint16_t        field_index,
+                           presence_enum_t optional,
+                           uint32_t        id,
+                           const char*     name,
+                           const char*     ns)
+    :  vector_field_instruction_base(field_index,
+                                     operator_none,
+                                     detail::vector_field_type<T>::value,
+                                     optional,
+                                     id, name, ns, sizeof(T))
+
+  {
+  }
+
+  vector_field_instruction(const vector_field_instruction& other)
+    :  vector_field_instruction_base(other)
+  {
+  }
+
+  virtual void accept(field_instruction_visitor& visitor, void* context) const;
+};
+
+typedef vector_field_instruction<int32_t> int32_vector_field_instruction;
+typedef vector_field_instruction<uint32_t> uint32_vector_field_instruction;
+typedef vector_field_instruction<int64_t> int64_vector_field_instruction;
+typedef vector_field_instruction<uint64_t> uint64_vector_field_instruction;
 
 typedef const field_instruction*  const_instruction_ptr_t;
 
@@ -1230,6 +1293,11 @@ public:
   virtual void visit(const sequence_field_instruction*, void*)=0;
   virtual void visit(const template_instruction*, void*)=0;
   virtual void visit(const templateref_instruction*, void*)=0;
+
+  virtual void visit(const int32_vector_field_instruction*, void*)=0;
+  virtual void visit(const uint32_vector_field_instruction*, void*)=0;
+  virtual void visit(const int64_vector_field_instruction*, void*)=0;
+  virtual void visit(const uint64_vector_field_instruction*, void*)=0;
 };
 
 
@@ -1241,50 +1309,38 @@ void int_field_instruction<T>::accept(field_instruction_visitor& visitor, void* 
   visitor.visit(this, context);
 }
 
-template <typename T, bool IsVectorOrAscii=false>
+template <typename T>
+void vector_field_instruction<T>::accept(field_instruction_visitor& visitor, void* context) const
+{
+  visitor.visit(this, context);
+}
+
+template <typename T>
 struct instruction_trait;
 
 
 template <>
-struct instruction_trait<int32_t, false>
+struct instruction_trait<int32_t>
 {
   typedef int32_field_instruction type;
 };
 
 template <>
-struct instruction_trait<uint32_t, false>
+struct instruction_trait<uint32_t>
 {
   typedef uint32_field_instruction type;
 };
 
 template <>
-struct instruction_trait<int64_t, false>
+struct instruction_trait<int64_t>
 {
   typedef int64_field_instruction type;
 };
 
 template <>
-struct instruction_trait<uint64_t, false>
+struct instruction_trait<uint64_t>
 {
   typedef uint64_field_instruction type;
-};
-
-template <>
-struct instruction_trait<char, true>
-{
-  typedef ascii_field_instruction type;
-};
-
-template <>
-struct instruction_trait<char, false>
-{
-  typedef unicode_field_instruction type;
-};
-
-template <>
-struct instruction_trait<unsigned char, true>
-{
-  typedef byte_vector_field_instruction type;
 };
 
 ///////////////////////////////////////////////////////

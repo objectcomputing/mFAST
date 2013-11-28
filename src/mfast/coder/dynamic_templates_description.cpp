@@ -207,6 +207,34 @@ private:
     list_.push_back(new_inst);
   }
 
+  virtual void visit(const int32_vector_field_instruction* inst, void*)
+  {
+    int32_vector_field_instruction* new_inst = new (alloc_) int32_vector_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const uint32_vector_field_instruction* inst, void*)
+  {
+    uint32_vector_field_instruction* new_inst = new (alloc_) uint32_vector_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const int64_vector_field_instruction* inst, void*)
+  {
+    int64_vector_field_instruction* new_inst = new (alloc_) int64_vector_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
+  virtual void visit(const uint64_vector_field_instruction* inst, void*)
+  {
+    uint64_vector_field_instruction* new_inst = new (alloc_) uint64_vector_field_instruction(*inst);
+    new_inst->field_index(list_.size());
+    list_.push_back(new_inst);
+  }
+
   virtual void visit(const group_field_instruction* inst, void*)
   {
     group_field_instruction* new_inst = new (alloc_) group_field_instruction(*inst);
@@ -984,6 +1012,42 @@ public:
       );
 
     current().push_back(instruction);
+    return true;
+  }
+
+  template <typename INT_TYPE>
+  void gen_int_vector_instruction(const XMLElement & element,
+                                  const std::string& name_attr,
+                                  std::size_t)
+  {
+
+    typedef vector_field_instruction<INT_TYPE> intruction_t;
+    intruction_t* instruction= new (*alloc_)intruction_t  (
+      current_index(),
+      get_presence(element),
+      get_id(element),
+      new_string(name_attr.c_str()),
+      get_ns(element));
+
+    current().push_back(instruction);
+  }
+
+  virtual bool VisitIntVector(const XMLElement & element, int integer_bits, const std::string& name_attr, std::size_t)
+  {
+
+    bool is_unsigned = element.Name()[0] == 'u';
+    if (is_unsigned) {
+      if (integer_bits == 64)
+        gen_int_vector_instruction<uint64_t>(element, name_attr, current_index());
+      else
+        gen_int_vector_instruction<uint32_t>(element, name_attr, current_index());
+    }
+    else {
+      if (integer_bits == 64)
+        gen_int_vector_instruction<int64_t>(element, name_attr, current_index());
+      else
+        gen_int_vector_instruction<int32_t>(element, name_attr, current_index());
+    }
     return true;
   }
 

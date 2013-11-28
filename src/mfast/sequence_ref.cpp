@@ -27,21 +27,22 @@ void sequence_mref_helper::reserve(const sequence_field_instruction* instruction
                                    allocator*                        alloc,
                                    std::size_t                       n)
 {
-  if (n > storage->of_array.capacity_)
+  std::size_t element_size = instruction->group_content_byte_count ();
+
+  if ( (n* element_size) > storage->of_array.capacity_in_bytes_)
   {
-    std::size_t element_size = instruction->group_content_byte_count ();    
     std::size_t reserve_size = n*element_size;
-    
-    std::size_t new_capacity_ = 
+
+    std::size_t new_capacity =
       alloc->reallocate (storage->of_array.content_,
-                         storage->of_array.capacity_ * element_size,
-                         reserve_size)/element_size;
-                         
-    instruction->construct_sequence_elements (*storage, 
-                                              storage->of_array.capacity_, 
-                                              new_capacity_ - storage->of_array.capacity_, 
+                         storage->of_array.capacity_in_bytes_ ,
+                         reserve_size);
+
+    instruction->construct_sequence_elements (*storage,
+                                              (storage->of_array.capacity_in_bytes_)/element_size,
+                                              (new_capacity - storage->of_array.capacity_in_bytes_)/element_size,
                                               alloc);
-    storage->of_array.capacity_ = new_capacity_;
+    storage->of_array.capacity_in_bytes_ = new_capacity;
   }
 }
 

@@ -428,7 +428,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
   inst.construct_value(storage, &alloc);
   BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
 
-  BOOST_CHECK_EQUAL(storage.of_array.capacity_,      0U);
+  BOOST_CHECK_EQUAL(storage.of_array.capacity_in_bytes_,      0U);
 
   {
     ascii_string_cref cref(&storage, &inst);
@@ -472,7 +472,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
 
     ref.shallow_assign("abcde");
     BOOST_CHECK(ref == "abcde");
-    BOOST_CHECK_EQUAL(storage.of_array.capacity_, 0U);
+    BOOST_CHECK_EQUAL(storage.of_array.capacity_in_bytes_, 0U);
 
     ref.as_absent();
     BOOST_CHECK(ref.absent());
