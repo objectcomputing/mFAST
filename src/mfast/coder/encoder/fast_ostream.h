@@ -116,7 +116,7 @@ is_positive(T)
 // use non-const reference to avoid ambiguious overloading problem
 inline bool encode_max_value(uint64_t& value, fast_ostreambuf* buf)
 {
-  if (value == std::numeric_limits<uint64_t>::max()) {
+  if (value == (std::numeric_limits<uint64_t>::max)()) {
     buf->sputn("\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80", 10);
     return true;
   }
@@ -125,7 +125,7 @@ inline bool encode_max_value(uint64_t& value, fast_ostreambuf* buf)
 
 inline bool encode_max_value(int64_t& value, fast_ostreambuf* buf)
 {
-  if (value == std::numeric_limits<int64_t>::max()) {
+  if (value == (std::numeric_limits<int64_t>::max)()) {
     buf->sputn("\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80", 10);
     return true;
   }
@@ -134,7 +134,7 @@ inline bool encode_max_value(int64_t& value, fast_ostreambuf* buf)
 
 inline bool encode_max_value(uint32_t& value, fast_ostreambuf* buf)
 {
-  if (value == std::numeric_limits<uint32_t>::max()) {
+  if (value == (std::numeric_limits<uint32_t>::max)()) {
     buf->sputn("\x10\x00\x00\x00\x80", 5);
     return true;
   }
@@ -143,7 +143,7 @@ inline bool encode_max_value(uint32_t& value, fast_ostreambuf* buf)
 
 inline bool encode_max_value(int32_t& value, fast_ostreambuf* buf)
 {
-  if (value == std::numeric_limits<int32_t>::max()) {
+  if (value == (std::numeric_limits<int32_t>::max)()) {
     buf->sputn("\x08\x00\x00\x00\x80", 5);
     return true;
   }

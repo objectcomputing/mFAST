@@ -197,7 +197,7 @@ class string_cref
 
     int compare(const char* other) const
     {
-      int result = strncmp(this->data(), other, this->size());
+      int result = std::strncmp(this->data(), other, this->size());
       if (result != 0 ) return result;
       if (other[this->size()] == '\0') return 0;
       return -1;
@@ -210,14 +210,14 @@ class string_cref
 
     int compare(const string_cref<true>& other) const
     {
-      int result = strncmp(this->data(), other.data(), std::min(this->size(), other.size()));
+      int result = std::strncmp(this->data(), other.data(), std::min<size_t>(this->size(), other.size()));
       if (result != 0) return result;
       return this->size()-other.size();
     }
 
     int compare(const string_cref<false>& other) const
     {
-      int result = strncmp(this->data(), other.data(), std::min(this->size(), other.size()));
+      int result = std::strncmp(this->data(), other.data(), std::min<size_t>(this->size(), other.size()));
       if (result != 0) return result;
       return this->size()-other.size();
     }

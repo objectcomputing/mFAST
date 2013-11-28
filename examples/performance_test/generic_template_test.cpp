@@ -26,7 +26,7 @@
 #include <limits>
 #include <vector>
 
-#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception/diagnostic_information.hpp>
 
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -60,7 +60,7 @@ int main(int argc, const char** argv)
 {
   std::vector<char> template_contents;
   std::vector<char> message_contents;
-  std::size_t head_n = std::numeric_limits<std::size_t>::max();
+  std::size_t head_n = (std::numeric_limits<std::size_t>::max)();
   std::size_t repeat_count = 1;
   bool force_reset = false;
   std::size_t skip_header_bytes = 0;
@@ -119,8 +119,8 @@ int main(int argc, const char** argv)
 
     const mfast::templates_description* descriptions[] = { &description };
     coder.include(descriptions);
-    
-#ifdef WITH_ENCODE 
+
+#ifdef WITH_ENCODE
     mfast::fast_encoder encoder(alloc);
     encoder.include(descriptions);
     std::vector<char> buffer;
@@ -136,8 +136,8 @@ int main(int argc, const char** argv)
         const char *last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
-          mfast::message_cref  msg = coder.decode(first, last, force_reset || first_message ); 
-#ifdef WITH_ENCODE       
+          mfast::message_cref  msg = coder.decode(first, last, force_reset || first_message );
+#ifdef WITH_ENCODE
           encoder.encode(msg, buffer, force_reset || first_message);
 #endif
           first_message = false;

@@ -26,13 +26,13 @@
 #include <vector>
 #include "example.h"
 
-#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception/diagnostic_information.hpp>
 // #include <boost/chrono/chrono.hpp>
 
 // Although chrono is better for performance measurement in theory, I choose to sue
-// boost data_time because QuickFAST uses it and I want to compare the result with 
+// boost data_time because QuickFAST uses it and I want to compare the result with
 // QuickFAST PerformanceTest directly.
- 
+
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -63,7 +63,7 @@ int read_file(const char* filename, std::vector<char>& contents)
 int main(int argc, const char** argv)
 {
   std::vector<char> message_contents;
-  std::size_t head_n = std::numeric_limits<std::size_t>::max();
+  std::size_t head_n = (std::numeric_limits<std::size_t>::max)();
   std::size_t repeat_count = 1;
   bool force_reset = false;
   std::size_t skip_header_bytes = 0;
@@ -114,21 +114,21 @@ int main(int argc, const char** argv)
     mfast::allocator* alloc = &malloc_allc;
     if (use_arena)
       alloc = &arena_alloc;
-    
+
     const mfast::templates_description* descriptions[] = { example::description() };
 
     mfast::fast_decoder decoder(alloc);
     decoder.include(descriptions);
-   
-#ifdef WITH_ENCODE 
+
+#ifdef WITH_ENCODE
     mfast::fast_encoder encoder(alloc);
     encoder.include(descriptions);
     std::vector<char> buffer;
     buffer.reserve(message_contents.size());
 #endif
-     
+
     mfast::message_type msg_value;
-      
+
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
 
     // typedef boost::chrono::high_resolution_clock clock;
@@ -141,9 +141,9 @@ int main(int argc, const char** argv)
         const char *last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
-          mfast::message_cref msg = decoder.decode(first, last, force_reset || first_message ); 
-          
-#ifdef WITH_ENCODE       
+          mfast::message_cref msg = decoder.decode(first, last, force_reset || first_message );
+
+#ifdef WITH_ENCODE
           encoder.encode(msg, buffer, force_reset || first_message);
 #endif
 #ifdef WITH_MESSAGE_COPY
@@ -154,7 +154,7 @@ int main(int argc, const char** argv)
         }
       }
     }
-    
+
     boost::posix_time::ptime stop = boost::posix_time::microsec_clock::universal_time();
     std::cout << "time spent " <<  static_cast<unsigned long>((stop - start).total_milliseconds()) << " msec\n";
 

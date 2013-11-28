@@ -75,10 +75,10 @@ BOOST_AUTO_TEST_CASE(int_test)
   BOOST_CHECK(encode_integer(UINT32_C(0), false, "\x80"));
   BOOST_CHECK(encode_integer(UINT32_C(1), false, "\x81"));
   BOOST_CHECK(encode_integer(UINT32_C(942755), false, "\x39\x45\xa3"));
-  BOOST_CHECK(encode_integer(std::numeric_limits<uint32_t>::max(), true,"\x10\x00\x00\x00\x80"));
+  BOOST_CHECK(encode_integer((std::numeric_limits<uint32_t>::max)(), true,"\x10\x00\x00\x00\x80"));
 
-  BOOST_CHECK(encode_integer(std::numeric_limits<int64_t>::max(), true, "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
-  BOOST_CHECK(encode_integer(std::numeric_limits<uint64_t>::max(), true, "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
+  BOOST_CHECK(encode_integer((std::numeric_limits<int64_t>::max)(), true, "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
+  BOOST_CHECK(encode_integer((std::numeric_limits<uint64_t>::max)(), true, "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
 }
 
 

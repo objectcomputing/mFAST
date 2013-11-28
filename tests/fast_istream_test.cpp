@@ -72,10 +72,10 @@ BOOST_AUTO_TEST_CASE(int32_test)
   BOOST_CHECK(decode_integer( "\x80",  false, UINT32_C(0)));
   BOOST_CHECK(decode_integer( "\x81",  false, UINT32_C(1)));
   BOOST_CHECK(decode_integer( "\x39\x45\xa3",  false, UINT32_C(942755)));
-  BOOST_CHECK(decode_integer("\x10\x00\x00\x00\x80",  true, std::numeric_limits<uint32_t>::max()));
+  BOOST_CHECK(decode_integer("\x10\x00\x00\x00\x80",  true, (std::numeric_limits<uint32_t>::max)()));
 
-  BOOST_CHECK(decode_integer( "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80",  true, std::numeric_limits<int64_t>::max()));
-  BOOST_CHECK(decode_integer( "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80",  true, std::numeric_limits<uint64_t>::max()));
+  BOOST_CHECK(decode_integer( "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80",  true, (std::numeric_limits<int64_t>::max)()));
+  BOOST_CHECK(decode_integer( "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80",  true, (std::numeric_limits<uint64_t>::max)()));
 
   { // check decoding null
     char data[] = "\x80";

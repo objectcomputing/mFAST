@@ -286,7 +286,7 @@ class make_vector_mref
 
     void resize(size_t n, char c = 0) const
     {
-      assert( n < static_cast<size_t>(std::numeric_limits<int32_t>::max()));
+      assert( n < static_cast<size_t>((std::numeric_limits<int32_t>::max)()));
       size_t len = n+1;
       if ( len > this->capacity()) {
         reserve(n);
@@ -335,13 +335,13 @@ class make_vector_mref
     void assign (size_t n, value_type val) const
     {
       resize(n);
-      memcpy(begin(), val, n*sizeof(value_type));
+      std::memcpy(begin(), val, n*sizeof(value_type));
     }
 
     void shallow_assign(const value_type* addr, size_t n) const
     {
-      assert( n < static_cast<size_t>(std::numeric_limits<int32_t>::max()) );
-      if (this->storage()->of_array.capacity_ > 0 && 
+      assert( n < static_cast<size_t>((std::numeric_limits<int32_t>::max)()) );
+      if (this->storage()->of_array.capacity_ > 0 &&
           this->storage()->of_array.content_ != 0) {
         this->allocator()->deallocate(this->storage()->of_array.content_,
                                       this->storage()->of_array.capacity_);
@@ -437,9 +437,9 @@ const
     // reserve() could be invoked with n < this->size(). Thus, we can
     // only copy min(size(), n) elements to the new buffer.
     if (this->storage()->array_length() > 0 && n > 0) {
-      memcpy(this->storage()->of_array.content_,
+      std::memcpy(this->storage()->of_array.content_,
              old_addr,
-             std::min(this->size(), n) );
+             std::min<size_t>(this->size(), n) );
     }
   }
 
@@ -485,11 +485,11 @@ void make_vector_mref<ConstVectorRef>::replace(size_t            pos,
       this->shift(data()+pos, diff);
     }
     else {
-      memmove(data()+ pos + count2, data() + pos + count, -diff);
+      std::memmove(data()+ pos + count2, data() + pos + count, -diff);
       this->resize(this->size() + diff);
     }
   }
-  memcpy(data()+pos, addr, count2*sizeof(value_type));
+  std::memcpy(data()+pos, addr, count2*sizeof(value_type));
 }
 
 }

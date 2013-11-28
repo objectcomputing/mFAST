@@ -246,6 +246,7 @@ class templates_loader
   arena_allocator* alloc_;
   const char* cpp_ns_;
   template_registry* registry_;
+  bool is_fix_protocol_;
 
 public:
   templates_loader(templates_description* definition,
@@ -255,6 +256,7 @@ public:
     , alloc_(&registry->impl_->alloc_)
     , cpp_ns_(new_string(cpp_ns))
     , registry_(registry)
+    , is_fix_protocol_(false)
   {
   }
 
@@ -280,10 +282,39 @@ public:
     return dst;
   }
 
-  instruction_cptr* current_instructions()
+  bool ensure_instruction_id(uint32_t id, instruction_cptr* first, instruction_cptr* last)
+  {
+    instruction_cptr* itr = first;
+    for (; itr != last; ++itr) {
+      if ( (*itr)->id() == id )
+        break;
+    }
+
+    if (itr != last) {
+      // found the instruction with specified id
+      if (itr != first) {
+        std::swap(*first, *itr);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  instruction_cptr* current_instructions(bool fix_protocol_ordered=false)
   {
     instruction_cptr* instructions = new (*alloc_)instruction_cptr[current().size()];
     std::copy(current().begin(), current().end(), instructions);
+
+    if (fix_protocol_ordered) {
+      // for FIX protocol, the header fields must be in the following order
+      uint32_t fix_protocol_header_field_ids[] = {8, 35, 49, 56, 1128};
+      instruction_cptr* first = instructions;
+      instruction_cptr* last = instructions + current().size();
+      for (size_t i = 0; i < 5 && first != last; ++i) {
+        if (ensure_instruction_id(fix_protocol_header_field_ids[i], first, last))
+          ++first;
+      }
+    }
     return instructions;
   }
 
@@ -394,8 +425,14 @@ public:
   }
 
 public:
-  virtual bool VisitEnterTemplates(const XMLElement & /* element */)
+  virtual bool VisitEnterTemplates(const XMLElement & element)
   {
+    const char* xmlns = get_optional_attr(element, "xmlns", "");
+
+    const char fix_protocol_xmlns[] = "http://www.fixprotocol.org/";
+    if (std::strncmp(xmlns, fix_protocol_xmlns, sizeof(fix_protocol_xmlns)-1) == 0)
+      is_fix_protocol_ = true;
+
     stack_.push_back(instruction_list_t());
     return true;
   }
@@ -440,7 +477,7 @@ public:
       get_ns(element),
       get_templateNs(element),
       get_dictionary(element),
-      current_instructions(),
+      current_instructions(is_fix_protocol_),
       current().size(),
       reset,
       get_typeRef_name(element),
