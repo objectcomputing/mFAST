@@ -28,27 +28,29 @@ namespace mfast {
 class resizable_fast_ostreambuf
   : public fast_ostreambuf
 {
-  public:
-    resizable_fast_ostreambuf(std::vector<char>& buf)
-      : fast_ostreambuf(0, 0)
-      , buf_(buf)
-    {
-      std::size_t old_size = buf.size();
-      std::size_t new_size = old_size + 1024;
-      buf.resize(new_size);
-      setp(&buf_[0], &buf_[old_size], &buf_[ new_size ]);
-      
-    }
+public:
+  resizable_fast_ostreambuf(std::vector<char>& buf)
+    : fast_ostreambuf(0, 0)
+    , buf_(buf)
+  {
+    std::size_t old_size = buf.size();
+    std::size_t new_size = old_size + 1024;
+    buf.resize(new_size);
+    char* addr = &buf_[0];
+    setp(addr,addr+old_size, addr+new_size);
 
-    virtual void overflow(std::size_t n)
-    {
-      std::size_t len = length();
-      buf_.resize(2*(len + n));
-      setp(&buf_[0], &buf_[len], &buf_[ buf_.size() ]);
-    }
+  }
 
-  private:
-    std::vector<char>& buf_;
+  virtual void overflow(std::size_t n)
+  {
+    std::size_t len = length();
+    buf_.resize(2*(len + n));
+    char* addr = &buf_[0];
+    setp(addr,addr+len, addr+buf_.size());
+  }
+
+private:
+  std::vector<char>& buf_;
 };
 
 }
