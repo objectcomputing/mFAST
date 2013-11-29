@@ -190,10 +190,15 @@ void cpp_gen::visit(const mfast::ascii_field_instruction* inst, void*)
 void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void*)
 {
   gen_string(inst, "unicode");
-  out_ << ", // initial value\n"
-       << "  " << inst->length_id() << ", // length id\n"
-       << "  \"" <<  inst->length_name() << "\", // length name\n"
-       << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
+  if (inst->length_name()) {
+    out_ << ", // initial value\n"
+         << "  " << inst->length_id() << ", // length id\n"
+         << "  \"" <<  inst->length_name() << "\", // length name\n"
+         << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
+  }
+  else {
+    out_ << "); // initial value\n\n";
+  }
 }
 
 void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
@@ -214,10 +219,15 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
   }
 
 
-  out_ << ", // initial value\n"
-       << "  " << inst->length_id() << ", // length id\n"
-       << "  \"" <<  inst->length_name() << "\", // length name\n"
-       << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
+  if (inst->length_name()) {
+    out_ << ", // initial value\n"
+         << "  " << inst->length_id() << ", // length id\n"
+         << "  \"" <<  inst->length_name() << "\", // length name\n"
+         << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
+  }
+  else {
+    out_ << "); // initial value\n\n";
+  }
 }
 
 void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst)
