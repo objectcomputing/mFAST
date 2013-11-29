@@ -55,6 +55,7 @@ protected:
   bool contains_only_templateRef(const mfast::group_field_instruction* inst);
 
   void reset_scope(std::stringstream& strm, const std::string& str);
+  std::string cpp_name(const mfast::field_instruction* inst) const;
 };
 
 

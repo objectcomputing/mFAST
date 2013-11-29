@@ -17,6 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "codegen_base.h"
+#include <cctype>
 
 codegen_base::codegen_base(const char* filebase, const char* fileext)
   : filebase_(filebase)
@@ -38,7 +39,7 @@ void codegen_base::traverse(mfast::dynamic_templates_description& desc)
 void codegen_base::traverse(const mfast::group_field_instruction* inst, const char* name_suffix)
 {
   std::string saved_cref_scope = cref_scope_.str();
-  cref_scope_ << inst->name() << name_suffix << "_cref::";
+  cref_scope_ << cpp_name(inst) << name_suffix << "_cref::";
 
   for (std::size_t i = 0; i < inst->subinstructions_count(); ++i)
   {
@@ -57,4 +58,21 @@ bool codegen_base::contains_only_templateRef(const mfast::group_field_instructio
 {
   return inst->ref_template() != 0 ||
          (inst->subinstructions_count() == 1 && inst->subinstruction(0)->field_type() == mfast::field_type_templateref);
+}
+
+std::string
+codegen_base::cpp_name(const mfast::field_instruction* inst) const
+{
+  const char* name = inst->name();
+  std::string result;
+  if (!std::isalpha(name[0]))
+    result = "_";
+  while (*name != '\x0') {
+    char c = *name++;
+    if (isalnum(c))
+      result += c;
+    else
+      result += '_';
+  }
+  return result;
 }

@@ -42,6 +42,9 @@
             <string name="TradeCondition" id="277">
                 <copy/>
             </string>
+            <string name="SecurityID" id="48" presence="optional" charset="unicode">
+              <copy/>
+            </string>
             <string name="EncodedIssuer" id="349" charset="unicode">
                 <length name="EncodedIssuerLen" id="348"/>
                 <copy/>
@@ -56,4 +59,19 @@
         </sequence>
         <templateRef name="StandardTrailer" />
     </template>
+  	<template name="0" id="2008" >
+  		<string name="MessageType" id="35"><constant value="0" /></string>
+  		<string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+  		<string name="SenderCompID" id="49"><constant value="OCI"/></string>
+  		<uInt32 name="MsgSeqNum" id="34"><increment/></uInt32>
+  		<uInt64 name="SendingTime" id="52"><copy/></uInt64>
+  	</template>
+
+  	<template name="With-dash" id="2009" >
+  		<string name="MessageType" id="35"><constant value="0" /></string>
+  		<string name="BeginString" id="8"><constant value="FIXT.1.1"/></string>
+  		<string name="SenderCompID" id="49"><constant value="OCI"/></string>
+  		<uInt32 name="MsgSeqNum" id="34"><increment/></uInt32>
+  		<uInt64 name="SendingTime" id="52"><copy/></uInt64>
+  	</template>
 </templates>

@@ -28,7 +28,7 @@ std::string cpp_gen::prefix_string() const
   return strm.str();
 }
 
-void cpp_gen::add_to_instruction_list(const char* name)
+void cpp_gen::add_to_instruction_list(const std::string& name)
 {
   std::stringstream strm;
   strm << "  &" << prefix_string() << name << "_instruction,\n";
@@ -77,7 +77,7 @@ void cpp_gen::gen_field(const mfast::field_instruction* inst,
                         const std::string&              context,
                         const char*                     cpp_type)
 {
-  const char* name = inst->name();
+  std::string name( cpp_name( inst ) );
   std::size_t index = inst->field_index();
   // std::string context = gen_op_context(inst->name(), inst->op_context());
 
@@ -87,7 +87,7 @@ void cpp_gen::gen_field(const mfast::field_instruction* inst,
        << "  " << get_operator_name(inst) << ",\n"
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
-       << "  \""<< name << "\", // name\n"
+       << "  \""<< inst->name() << "\", // name\n"
        << "  \""<< inst->ns() << "\", // ns\n"
        << "  "<< context << ",  // opContext\n";
 
@@ -136,7 +136,7 @@ void cpp_gen::visit(const mfast::uint64_field_instruction* inst, void*)
 
 void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
 {
-  const char* name = inst->name();
+  std::string name( cpp_name( inst ) );
   if (inst->mantissa_instruction() ) {
     // it has a separate mantissa instruction
     std::string mantisa_name(name);
@@ -232,7 +232,7 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
 
 void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst)
 {
-  const char* name = inst->name();
+  std::string name( cpp_name( inst ) );
   std::size_t index = inst->field_index();
   // std::string context = gen_op_context(inst->name(), inst->op_context());
 
@@ -241,7 +241,7 @@ void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_ins
        << "  " << index << ",\n"
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
-       << "  \""<< name << "\", // name\n"
+       << "  \""<< inst->name() << "\", // name\n"
        << "  \""<< inst->ns() << "\"); // ns\n";
 
   add_to_instruction_list(name);
@@ -314,7 +314,7 @@ cpp_gen::get_subinstructions(const mfast::group_field_instruction* inst)
 
 void cpp_gen::visit(const mfast::group_field_instruction* inst, void*)
 {
-  const char* name = inst->name();
+  std::string name( cpp_name( inst ) );
   std::size_t index = inst->field_index();
 
 
@@ -333,7 +333,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void*)
        << "  "<<  index << ",\n"
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
-       << "  \"" << name << "\", // name\n"
+       << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
        << "  \"" << inst->dictionary_ << "\", // dictionary\n"
        << subinstruction_arg
@@ -345,7 +345,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void*)
 
 void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
 {
-  const char* name = inst->name();
+  std::string name( cpp_name( inst ) );
   std::size_t index = inst->field_index();
 
   add_to_instruction_list(name);
@@ -392,7 +392,7 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
        << "  "<<  index << ",\n"
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
-       << "  \"" << name << "\", // name\n"
+       << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
        << "  \"" << inst->dictionary_ << "\", // dictionary\n"
        << subinstruction_arg
@@ -406,7 +406,7 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
   if (inst->subinstructions_count() == 0)
     return;
 
-  const char* name = inst->name();
+  std::string name( cpp_name( inst ) );
 
   prefixes_.push_back(name);
 
@@ -425,7 +425,7 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
 
   out_ << "  const static " << name << "::instruction_type the_instruction(\n"
        << "    " << inst->id() << ", // id\n"
-       << "    \"" << name << "\", // name\n"
+       << "    \"" << inst->name() << "\", // name\n"
        << "    \""<< inst->ns() << "\", // ns\n"
        << "    \""<< inst->template_ns() << "\", // templateNs\n"
        << "    \""<< inst->dictionary_ << "\", // dictionary\n"

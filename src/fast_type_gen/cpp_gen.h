@@ -52,7 +52,7 @@ public:
 
 private:
   std::string prefix_string() const;
-  void add_to_instruction_list(const char* name);
+  void add_to_instruction_list(const std::string& name);
   std::string gen_op_context(const char*                name,
                              const mfast::op_context_t* context);
   void gen_field(const mfast::field_instruction* inst,
