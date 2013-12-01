@@ -335,10 +335,10 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void*)
        << "  " << inst->id() << ", // id\n"
        << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
-       << "  \"" << inst->dictionary_ << "\", // dictionary\n"
+       << "  \"" << inst->dictionary() << "\", // dictionary\n"
        << subinstruction_arg
-       << "  \"" << inst->typeref_name_ << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns_ << "\"); // typeRef ns \n\n";
+       << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
+       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n";
 
 
 }
@@ -394,11 +394,11 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
        << "  " << inst->id() << ", // id\n"
        << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
-       << "  \"" << inst->dictionary_ << "\", // dictionary\n"
+       << "  \"" << inst->dictionary() << "\", // dictionary\n"
        << subinstruction_arg
        << "  "<< lengthInstruction << ", // length\n"
-       << "  \"" << inst->typeref_name_ << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns_ << "\"); // typeRef ns \n\n";
+       << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
+       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n";
 }
 
 void cpp_gen::visit(const mfast::template_instruction* inst, void*)
@@ -428,12 +428,12 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
        << "    \"" << inst->name() << "\", // name\n"
        << "    \""<< inst->ns() << "\", // ns\n"
        << "    \""<< inst->template_ns() << "\", // templateNs\n"
-       << "    \""<< inst->dictionary_ << "\", // dictionary\n"
+       << "    \""<< inst->dictionary() << "\", // dictionary\n"
        << "    "<< name << "__subinstructions,\n"
        << "    "<< inst->subinstructions_count() << ", // num_fields\n"
        << "    " << inst->has_reset_attribute() << ", // reset\n"
-       << "  \"" << inst->typeref_name_ << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns_ << "\"); // typeRef ns \n\n"
+       << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
+       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n"
        << "  return &the_instruction;\n"
        << "}\n\n";
 }

@@ -56,7 +56,7 @@ class group_cref
 
     size_t num_fields() const
     {
-      return instruction()->subinstructions_count_;
+      return instruction()->subinstructions_count();
     }
 
     operator aggregate_cref() const;
@@ -126,7 +126,7 @@ class make_group_mref
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
-    
+
     void as_present() const;
 
   private:

@@ -69,7 +69,7 @@ class make_sequence_cref
     {
     }
 
-    
+
     reference operator [](size_t index) const
     {
       assert(index < size());
@@ -80,7 +80,7 @@ class make_sequence_cref
       else {
         inst = this->instruction()->subinstruction(0);
       }
-      return reference(element_storage(index), static_cast<typename ElementType::instruction_cptr>(inst)); 
+      return reference(element_storage(index), static_cast<typename ElementType::instruction_cptr>(inst));
     }
 
     uint32_t length() const
@@ -95,7 +95,7 @@ class make_sequence_cref
 
     size_t num_fields() const
     {
-      return instruction()->subinstructions_count_;
+      return instruction()->subinstructions_count();
     }
 
     instruction_cptr instruction() const

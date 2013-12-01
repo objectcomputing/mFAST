@@ -278,7 +278,7 @@ aggregate_cref::aggregate_cref(const field_cref& other)
 inline size_t
 aggregate_cref::num_fields() const
 {
-  return instruction()->subinstructions_count_;
+  return instruction()->subinstructions_count();
 }
 
 inline field_cref

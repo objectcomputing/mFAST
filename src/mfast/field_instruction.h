@@ -189,7 +189,41 @@ public:
                     const char*     name,
                     const char*     ns);
 
+
+  void optional(bool v)
+  {
+    optional_flag_ = v;
+    update_invariant();
+  }
+
+  void id(uint32_t v)
+  {
+    id_ = v;
+  }
+
+  void name(const char* v)
+  {
+    name_ = v;
+  }
+
+  void ns(const char* v)
+  {
+    ns_ = v;
+  }
+
+  void field_operator(operator_enum_t v)
+  {
+    operator_id_ = v;
+    update_invariant();
+  }
+
 protected:
+
+  virtual void update_invariant()
+  {
+    nullable_flag_ =  optional_flag_ &&  (operator_id_ != operator_constant);
+    has_pmap_bit_ = operator_id_ > operator_delta || ((operator_id_ == operator_constant) && optional_flag_);
+  }
 
   uint16_t field_index_;
   uint16_t operator_id_ : 3;
@@ -203,6 +237,7 @@ protected:
   const char* name_;
   const char* ns_;
 };
+
 
 class dictionary_builder;
 
@@ -240,6 +275,8 @@ public:
   virtual void construct_value(value_storage& storage,
                                allocator*     alloc) const;
 
+
+
   value_storage& prev_value()
   {
     return *prev_value_;
@@ -255,6 +292,11 @@ public:
     return op_context_;
   }
 
+  void op_context(const op_context_t* v)
+  {
+    op_context_ = v;
+  }
+
   const value_storage& initial_value() const
   {
     return initial_value_;
@@ -265,8 +307,14 @@ public:
     return *initial_or_default_value_;
   }
 
-protected:
+  void initial_value(const value_storage& v)
+  {
+    initial_value_ = v;
+    initial_or_default_value_ = initial_value_.is_empty() ? &default_value_ : &initial_value_;
+    mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
+  }
 
+protected:
   friend class dictionary_builder;
   const op_context_t* op_context_;
   value_storage initial_value_;
@@ -274,6 +322,13 @@ protected:
   value_storage prev_storage_;
   const value_storage* initial_or_default_value_;
   static const value_storage default_value_;
+
+  virtual void update_invariant()
+  {
+    field_instruction::update_invariant();
+    mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
+  }
+
 };
 
 template <typename T>
@@ -310,17 +365,6 @@ public:
 
 };
 
-// #if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE) && !defined(MFAST_DYN_LINK) && !defined(mfast_EXPORTS)
-// extern template class int_field_instruction<int32_t>;
-// extern template class int_field_instruction<uint32_t>;
-// extern template class int_field_instruction<int64_t>;
-// extern template class int_field_instruction<uint64_t>;
-// #elif defined(MFAST_DYN_LINK) || defined(mfast_EXPORTS)
-// template class MFAST_EXPORT int_field_instruction<int32_t>;
-// template class MFAST_EXPORT int_field_instruction<uint32_t>;
-// template class MFAST_EXPORT int_field_instruction<int64_t>;
-// template class MFAST_EXPORT int_field_instruction<uint64_t>;
-// #endif
 
 typedef int_field_instruction<int32_t> int32_field_instruction;
 typedef int_field_instruction<uint32_t> uint32_field_instruction;
@@ -380,7 +424,7 @@ public:
                             const char*                 name,
                             const char*                 ns,
                             const op_context_t*         exponent_context,
-                            mantissa_field_instruction* mantissa_instruction,
+                            mantissa_field_instruction* mi,
                             decimal_value_storage       initial_value = decimal_value_storage())
     : integer_field_instruction_base(field_index,
                                      exponent_operator_id,
@@ -391,14 +435,8 @@ public:
                                      ns,
                                      exponent_context,
                                      initial_value.storage_)
-    , mantissa_instruction_(mantissa_instruction)
   {
-    assert(mantissa_instruction);
-    this->initial_value_.of_decimal.mantissa_ = mantissa_instruction->initial_value().get<int64_t>();
-
-    if (has_pmap_bit_ == 0) {
-      has_pmap_bit_ = mantissa_instruction->pmap_size();
-    }
+    mantissa_instruction(mi);
   }
 
   decimal_field_instruction(const decimal_field_instruction& other,
@@ -433,6 +471,16 @@ public:
       return default_value.storage_;
     }
     return initial_value_;
+  }
+
+  void mantissa_instruction(mantissa_field_instruction* v)
+  {
+    mantissa_instruction_ = v;
+    this->initial_value_.of_decimal.mantissa_ = mantissa_instruction_->initial_value().get<int64_t>();
+
+    if (has_pmap_bit_ == 0) {
+      has_pmap_bit_ = mantissa_instruction_->pmap_size();
+    }
   }
 
 protected:
@@ -484,9 +532,7 @@ public:
                                     allocator*           alloc,
                                     value_storage*       fields_storage=0) const;
 
-
-
-
+protected:
   std::size_t element_size_;
 };
 
@@ -534,6 +580,9 @@ public:
                                     value_storage&       dest,
                                     allocator*           alloc,
                                     value_storage*       fields_storage=0) const;
+
+  virtual void accept(field_instruction_visitor& visitor, void* context) const;
+
   value_storage& prev_value()
   {
     return *prev_value_;
@@ -542,6 +591,16 @@ public:
   const value_storage& prev_value() const
   {
     return *prev_value_;
+  }
+
+  const op_context_t* op_context() const
+  {
+    return op_context_;
+  }
+
+  void op_context(const op_context_t* v)
+  {
+    op_context_ = v;
   }
 
   const value_storage& initial_value() const
@@ -554,14 +613,22 @@ public:
     return *initial_or_default_value_;
   }
 
-  virtual void accept(field_instruction_visitor& visitor, void* context) const;
-
-  const op_context_t* op_context() const
+  void initial_value(const value_storage& v)
   {
-    return op_context_;
+    initial_value_ = v;
+    initial_or_default_value_ = initial_value_.is_empty() ? &default_value_ : &initial_value_;
+    mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
   }
 
 protected:
+
+  virtual void update_invariant()
+  {
+    field_instruction::update_invariant();
+    mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
+  }
+
+
   friend class dictionary_builder;
   const op_context_t* op_context_;
   value_storage initial_value_;
@@ -569,6 +636,9 @@ protected:
   value_storage prev_storage_;
   const value_storage* initial_or_default_value_;
   static const value_storage default_value_;
+
+
+
 };
 
 
@@ -623,6 +693,21 @@ public:
   const char* length_ns() const
   {
     return length_ns_;
+  }
+
+  void length_id(uint32_t v)
+  {
+    length_id_ = v;
+  }
+
+  void length_name(const char* v)
+  {
+    length_name_ = v;
+  }
+
+  void length_ns(const char* v)
+  {
+    length_ns_ = v;
   }
 
 protected:
@@ -733,14 +818,28 @@ typedef vector_field_instruction<uint64_t> uint64_vector_field_instruction;
 
 typedef const field_instruction*  const_instruction_ptr_t;
 
-struct MFAST_EXPORT aggregate_instruction_base
+class MFAST_EXPORT aggregate_instruction_base
+  : public field_instruction
 {
-  aggregate_instruction_base(const char*                    dictionary,
+public:
+  aggregate_instruction_base(uint16_t                       field_index,
+                             presence_enum_t                optional,
+                             uint32_t                       id,
+                             const char*                    name,
+                             const char*                    ns,
+                             const char*                    dictionary,
                              const const_instruction_ptr_t* subinstructions,
                              uint32_t                       subinstructions_count,
-                             const char*                    typeref_name,
-                             const char*                    typeref_ns)
-    : dictionary_(dictionary)
+                             const char*                    typeref_name ="",
+                             const char*                    typeref_ns="")
+    : field_instruction(field_index,
+                        operator_constant,
+                        field_type_group,
+                        optional,
+                        id,
+                        name,
+                        ns)
+    , dictionary_(dictionary)
     , typeref_name_(typeref_name)
     , typeref_ns_(typeref_ns)
     , segment_pmap_size_(0)
@@ -797,6 +896,7 @@ struct MFAST_EXPORT aggregate_instruction_base
     for (uint32_t i = 0; i < subinstructions_count_; ++i) {
       segment_pmap_size_ += subinstruction(i)->pmap_size();
     }
+    has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
   }
 
   const const_instruction_ptr_t*  subinstructions() const
@@ -804,13 +904,43 @@ struct MFAST_EXPORT aggregate_instruction_base
     return subinstructions_;
   }
 
+  const char* typeref_name() const
+  {
+    return typeref_name_;
+  }
+
+  void typeref_name(const char* v)
+  {
+    typeref_name_ = v;
+  }
+
+  const char* typeref_ns() const
+  {
+    return typeref_ns_;
+  }
+
+  void typeref_ns(const char* v)
+  {
+    typeref_ns_ = v;
+  }
+
+  const char* dictionary() const
+  {
+    return dictionary_;
+  }
+
+  void dictionary(const char* v)
+  {
+    dictionary_ = v;
+  }
+
+protected:
+
   const char* dictionary_;
   uint32_t subinstructions_count_;
   const char* typeref_name_;
   const char* typeref_ns_;
   std::size_t segment_pmap_size_;
-
-private:
   const const_instruction_ptr_t* subinstructions_;
 };
 
@@ -818,8 +948,7 @@ private:
 class template_instruction;
 
 class MFAST_EXPORT group_field_instruction
-  : public field_instruction
-  , public aggregate_instruction_base
+  : public aggregate_instruction_base
 {
 public:
 
@@ -833,19 +962,18 @@ public:
                           uint32_t                       subinstructions_count,
                           const char*                    typeref_name ="",
                           const char*                    typeref_ns="")
-    : field_instruction(field_index,
-                        operator_constant,
-                        field_type_group,
-                        optional,
-                        id,
-                        name, ns)
-    , aggregate_instruction_base(dictionary, subinstructions,
+    : aggregate_instruction_base(field_index,
+                                 optional,
+                                 id,
+                                 name,
+                                 ns,
+                                 dictionary,
+                                 subinstructions,
                                  subinstructions_count,
                                  typeref_name,
                                  typeref_ns)
     , ref_template_(0)
   {
-    has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
   }
 
   virtual void construct_value(value_storage& storage,
@@ -907,7 +1035,6 @@ public:
     , sequence_length_instruction_(sequence_length_instruction)
   {
     field_type_ = field_type_sequence;
-    has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
   }
 
   virtual void construct_value(value_storage& storage,
@@ -936,8 +1063,12 @@ public:
     return sequence_length_instruction_;
   }
 
-private:
+  uint32_field_instruction*& length_instruction()
+  {
+    return sequence_length_instruction_;
+  }
 
+private:
 
   friend class dictionary_builder;
   uint32_field_instruction* sequence_length_instruction_;

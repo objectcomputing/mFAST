@@ -123,16 +123,16 @@ void dictionary_builder::build_group(const field_instruction*          fi,
     this->current_ns_ = fi->ns();
   }
 
-  if (!is_empty_string(src->dictionary_)) {
-    this->current_dictionary_ = src->dictionary_;
+  if (!is_empty_string(src->dictionary())) {
+    this->current_dictionary_ = src->dictionary();
   }
 
-  if (!is_empty_string(src->typeref_name_)) {
+  if (!is_empty_string(src->typeref_name())) {
     const char* type_ns = this->current_ns_;
-    if (!is_empty_string(src->typeref_name_)) {
-      type_ns = src->typeref_ns_;
+    if (!is_empty_string(src->typeref_name())) {
+      type_ns = src->typeref_ns();
     }
-    current_type_ = qualified_name(type_ns, src->typeref_name_);
+    current_type_ = qualified_name(type_ns, src->typeref_name());
   }
 
   std::size_t instructions_count =  src->subinstructions_count();
