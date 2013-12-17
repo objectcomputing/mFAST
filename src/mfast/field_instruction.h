@@ -628,7 +628,6 @@ protected:
     mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
   }
 
-
   friend class dictionary_builder;
   const op_context_t* op_context_;
   value_storage initial_value_;
@@ -1011,17 +1010,17 @@ class MFAST_EXPORT sequence_field_instruction
   : public group_field_instruction
 {
 public:
-  sequence_field_instruction(uint16_t                       field_index,
-                             presence_enum_t                optional,
-                             uint32_t                       id,
-                             const char*                    name,
-                             const char*                    ns,
-                             const char*                    dictionary,
-                             const const_instruction_ptr_t* subinstructions,
-                             uint32_t                       subinstructions_count,
-                             uint32_field_instruction*      sequence_length_instruction,
-                             const char*                    typeref_name="",
-                             const char*                    typeref_ns="")
+  sequence_field_instruction(uint16_t                        field_index,
+                             presence_enum_t                 optional,
+                             uint32_t                        id,
+                             const char*                     name,
+                             const char*                     ns,
+                             const char*                     dictionary,
+                             const const_instruction_ptr_t*  subinstructions,
+                             uint32_t                        subinstructions_count,
+                             const uint32_field_instruction* sequence_length_instruction,
+                             const char*                     typeref_name="",
+                             const char*                     typeref_ns="")
     : group_field_instruction(field_index,
                               optional,
                               id,
@@ -1063,7 +1062,7 @@ public:
     return sequence_length_instruction_;
   }
 
-  uint32_field_instruction*& length_instruction()
+  const uint32_field_instruction*& length_instruction()
   {
     return sequence_length_instruction_;
   }
@@ -1071,7 +1070,7 @@ public:
 private:
 
   friend class dictionary_builder;
-  uint32_field_instruction* sequence_length_instruction_;
+  const uint32_field_instruction* sequence_length_instruction_;
 };
 
 
@@ -1331,7 +1330,9 @@ private:
   const template_instruction* target_;
 };
 
-class templates_loader;
+namespace coder {
+class templates_builder;
+}
 class MFAST_EXPORT templates_description
 {
 public:
@@ -1400,7 +1401,7 @@ protected:
   {
   }
 
-  friend class templates_loader;
+  friend class coder::templates_builder;
   const char* ns_;
   const char* template_ns_;
   const char* dictionary_;

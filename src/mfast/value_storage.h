@@ -156,6 +156,11 @@ struct int_value_storage
     storage_.of_uint.defined_bit_ = 1;
   }
 
+  explicit int_value_storage(const value_storage& s)
+    : storage_(s)
+  {
+  }
+
   int_value_storage(IntType v)
   {
     storage_.of_uint.defined_bit_ = 1;
@@ -173,6 +178,11 @@ struct decimal_value_storage
   decimal_value_storage()
   {
     storage_.of_decimal.defined_bit_ = 1;
+  }
+
+  explicit decimal_value_storage(const value_storage& s)
+    : storage_(s)
+  {
   }
 
   decimal_value_storage(int64_t mantissa, uint8_t exponent)
@@ -193,6 +203,12 @@ struct string_value_storage
   {
     storage_.of_array.defined_bit_ = 1;
   }
+
+  explicit string_value_storage(const value_storage& s)
+    : storage_(s)
+  {
+  }
+
 
   string_value_storage(const char* v)
   {
@@ -219,6 +235,12 @@ struct byte_vector_value_storage
   byte_vector_value_storage()
   {
   }
+
+  explicit byte_vector_value_storage(const value_storage& s)
+    : string_value_storage(s)
+  {
+  }
+
 
   byte_vector_value_storage(const unsigned char* v, std::size_t n)
     : string_value_storage(reinterpret_cast<const char*>(v), n)
