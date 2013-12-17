@@ -20,21 +20,26 @@
 #define TEMPLATE_LOADER_H_L6DO08PL
 
 #include "mfast_coder_export.h"
-
 #include "mfast/field_instruction.h"
 #include "mfast/arena_allocator.h"
 #include <map>
 namespace mfast
 {
+namespace coder {
+struct template_registry_impl;
+class templates_builder;
+}
 struct template_registry_impl;
 class MFAST_CODER_EXPORT template_registry
 {
 private:
-  template_registry_impl* impl_;
-  friend class templates_loader;
+  coder::template_registry_impl* impl_;
+  friend class coder::templates_builder;
 public:
   template_registry();
   ~template_registry();
+
+  arena_allocator* alloc();
 
   static template_registry* instance();
 };

@@ -294,6 +294,18 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
   msg_ref[1].as(12);
   msg_ref[2].as(13);
 
+  uint32_cref f0(msg_ref[0]);
+  BOOST_REQUIRE(!f0.absent());
+  BOOST_REQUIRE(!f0.instruction()->initial_value().is_empty());
+
+  BOOST_REQUIRE(f0.is_initial_value());
+
+  BOOST_REQUIRE(f0.is_initial_value());
+  uint32_cref f1(msg_ref[1]);
+  BOOST_REQUIRE(f1.is_initial_value());
+  uint32_cref f2(msg_ref[2]);
+  BOOST_REQUIRE(f2.is_initial_value());
+
   // encoding with reset, all values are initial
   BOOST_CHECK(test_case.encoding(msg_ref, "\x80", true));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref, true));
