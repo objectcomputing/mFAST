@@ -72,7 +72,7 @@ class message_printer
 
     void visit_i(const decimal_cref& ref)
     {
-      os_ << ref.mantissa() << "*10^" << ref.exponent();
+      os_ << ref.mantissa() << "*10^" << (int)ref.exponent();
     }
 
     template <typename CharType>

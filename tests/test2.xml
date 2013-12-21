@@ -45,6 +45,7 @@
             <string name="SecurityID" id="48" presence="optional" charset="unicode">
               <copy/>
             </string>
+            <string name="OrderStatus" id="10505" presence="optional"><default value="O"/></string>
             <string name="EncodedIssuer" id="349" charset="unicode">
                 <length name="EncodedIssuerLen" id="348"/>
                 <copy/>

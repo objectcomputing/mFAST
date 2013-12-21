@@ -45,11 +45,15 @@ class debug_allocator
       return pointer;
     }
 
-    virtual std::size_t reallocate(void*& pointer, std::size_t /* old_size */, std::size_t new_size)
+    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)
     {
+      new_size = std::max<std::size_t>(2*new_size, 64) & (~63);
+
       void* old_ptr = pointer;
-      if (pointer)
+      if (pointer) {
         pointer = std::realloc(pointer, new_size);
+        std::memset(static_cast<char*>(pointer)+old_size, 0xFF, new_size-old_size);
+      }
       else
         pointer = std::malloc(new_size);
       leased_addresses_.erase(old_ptr);
@@ -69,7 +73,7 @@ class debug_allocator
       leased_addresses_.erase(pointer);
     }
 
-  private:
+  protected:
     std::set<void*> leased_addresses_;
 };
 

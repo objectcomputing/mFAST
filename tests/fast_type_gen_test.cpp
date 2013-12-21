@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
 	BOOST_CHECK_EQUAL(len_inst->id(),268U);
   }
 
-  sample.mref().set_MDEntries().resize(2);
+  sample.mref().set_MDEntries().resize(1);
   typedef test2::MDRefreshSample_cref::MDEntries_element_cref MDEntries_element_cref;
   MDEntries_element_cref elem0 = sample.cref().get_MDEntries()[0];
 
@@ -119,6 +119,13 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   BOOST_CHECK_EQUAL(mantissa_inst->field_type(),                                mfast::field_type_int64);
   BOOST_CHECK_EQUAL(mantissa_inst->field_operator(),                            mfast::operator_delta);
 
+
+  sample.mref().set_MDEntries().resize(2);
+  sample.mref().set_MDEntries().resize(4);
+
+  MDEntries_element_cref elem3 = sample.cref().get_MDEntries()[3];
+  BOOST_CHECK_EQUAL(elem3.get_MDEntryType().size(),           0);
+
   test2::MDRefreshSample_mref::extra_mref extra_mref =  sample.mref().set_extra();
   extra_mref.resize(1);
   BOOST_CHECK(equal_string(extra_mref[0].get_BeginString(), "FIX4.4"));
@@ -130,6 +137,8 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
                                    const_cast<mfast::value_storage*>(sample_cref.field_storage(0)),
                                    test2::MDRefreshSample::instruction());
   test2::MDRefreshSample_mref specific_mref(generic_mref);
+
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

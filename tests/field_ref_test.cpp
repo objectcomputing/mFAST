@@ -846,9 +846,39 @@ public:
 
 };
 
+
+class simple_debug_allocator
+  : public debug_allocator
+{
+  public:
+
+    simple_debug_allocator()
+    {
+    }
+
+    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)
+    {
+      void* old_ptr = pointer;
+      if (pointer) {
+        pointer = std::realloc(pointer, new_size);
+        std::memset(static_cast<char*>(pointer)+old_size, 0xFF, new_size-old_size);
+      }
+      else
+        pointer = std::malloc(new_size);
+      leased_addresses_.erase(old_ptr);
+      if (pointer == 0) {
+        std::free(old_ptr);
+        throw std::bad_alloc();
+      }
+      leased_addresses_.insert(pointer);
+      return new_size;
+    }
+};
+
+
 BOOST_AUTO_TEST_CASE(sequence_resize_test)
 {
-  debug_allocator alloc;
+  simple_debug_allocator alloc;
   value_storage storage;
 
   mock_field_instruction mock0;

@@ -359,7 +359,7 @@ void sequence_field_instruction::construct_value(value_storage& storage,
     std::size_t reserve_size = initial_length*element_size;
     storage.of_array.content_ = 0;
     storage.of_array.capacity_in_bytes_ =  alloc->reallocate(storage.of_array.content_, 0, reserve_size);
-    construct_sequence_elements(storage,0, initial_length, alloc);
+    construct_sequence_elements(storage,0, storage.of_array.capacity_in_bytes_/element_size, alloc);
   }
   else {
     storage.of_array.content_ = 0;
@@ -402,10 +402,11 @@ void sequence_field_instruction::copy_construct_value(const value_storage& src,
       std::size_t j = i* this->subinstructions_count_;
       copy_group_subfields(&src_elements[j], &dest_elements[j], alloc);
     }
-    // we must zero out the extra memory we reserved; otherwise we may deallocate garbage pointers during destruction.
-    std::size_t unused = dest.of_array.capacity_in_bytes_ - size*element_size;
-    if (unused > 0) {
-      std::memset( static_cast<char*>(dest.of_array.content_) + reserve_size, 0, unused);
+    // we must default construct the extra elements we reserved; otherwise we may deallocate garbage pointers during destruction.
+    std::size_t unused_count = dest.of_array.capacity_in_bytes_/element_size - size;
+    if (unused_count > 0) {
+      // std::memset( static_cast<char*>(dest.of_array.content_) + reserve_size, 0, unused);
+      construct_sequence_elements(dest, size, unused_count, alloc);
     }
   }
   else {
