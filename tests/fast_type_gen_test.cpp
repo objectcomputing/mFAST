@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   sample.mref().set_MDEntries().resize(4);
 
   MDEntries_element_cref elem3 = sample.cref().get_MDEntries()[3];
-  BOOST_CHECK_EQUAL(elem3.get_MDEntryType().size(),           0);
+  BOOST_CHECK_EQUAL(elem3.get_MDEntryType().size(),           0U);
 
   test2::MDRefreshSample_mref::extra_mref extra_mref =  sample.mref().set_extra();
   extra_mref.resize(1);
