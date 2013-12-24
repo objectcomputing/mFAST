@@ -51,7 +51,7 @@ public:
   {
   }
 
-#ifdef BOOST_HAS_RVALUE_REFS
+#if defined(BOOST_HAS_RVALUE_REFS) && !(defined(_MSC_VER) && (_MSC_VER < 1700))
   std::string&& value() const
   {
     return std::move(std::string(this->data(), this->size()));
