@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="mFAST : A FAST (FIX Adapted for STreaming) encoder/decoder" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>mFAST</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/objectcomputing/mFAST">View on GitHub</a>
+
+          <h1 id="project_title">mFAST</h1>
+          <h2 id="project_tagline">A FAST (FIX Adapted for STreaming) encoder/decoder</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/objectcomputing/mFAST/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/objectcomputing/mFAST/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>
+<a name="introduction" class="anchor" href="#introduction"><span class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>In the financial domain, FAST (FIX Adapted for STreaming) is a data compression technology used to meet the challenge of transferring huge volumes of market data between financial institutions with low latency. It is a standard developed by FIX Protocol Ltd., specifically aimed at optimizing data representation on the network. Although it was initially designed for the financial industry, the application of it is not specific to market data. It can be applied to other domains which require data transfers with high throughput and low latency.</p>
+
+<p>Previously, OCI has developed an open source native C++ implementation of the FAST Protocol, QuickFAST[<a href="http://www.quickfast.org">www.quickfast.org</a>]. In recent months, however, OCI has identified approaches to further optimize the processing of FAST messages and simplify its use. Some of the features of this new approach include avoiding in-memory data representation for application types that are not type safe; accessing the data structure which does not require the use of string comparison; an alternative to the use of reference counted pointers for small objects to improve space and speed efficiency. The result of this effort is a new open source product called mFAST which was developed from the ground up to provide an easy to use and yet more efficient FAST encoder/decoder. Like QuickFAST, mFAST is also implemented in C++. However, mFAST incorporates some advanced techniques such as region-based memory management and the flyweight and visitor design patterns. These make mFAST more user friendly and significantly more efficient than QuickFAST.</p>
+
+<p>Compared to QuickFAST, mFAST offers the following features:</p>
+
+<h3>
+<a name="an-easier-to-use-application-type-system" class="anchor" href="#an-easier-to-use-application-type-system"><span class="octicon octicon-link"></span></a>An easier to use application type system</h3>
+
+<p>The FAST encoding is performed in accordance with a control structure called a template. A template controls the encoding of the stream by specifying the order and structure of fields, their field operators and the binary encoding representations to use. A FAST template is defined with a concrete syntax using XML format. One of the most distinctive advances of mFAST over QuickFast is its ability to generate C++ application types using the XML specification. If you are familiar with CORBA or DDS, this process is tantamount to the proxy/stub code generation using an IDL compiler.</p>
+
+<h3>
+<a name="lower-external-dependencies" class="anchor" href="#lower-external-dependencies"><span class="octicon octicon-link"></span></a>Lower external dependencies</h3>
+
+<p>In addition to the C++ standard library, the core mFAST library uses header-only BOOST libraries to provide platform portability. In addition, it uses TinyXML2 for XML parsing. TinyXML2 has only one source and one header file and it is statically linked to mFAST applications.
+QuickFAST, on the other hand, requires several non-header only libraries (thread, system, file systems, etc) and Xerces.</p>
+
+<h3>
+<a name="smaller-memory-footprint" class="anchor" href="#smaller-memory-footprint"><span class="octicon octicon-link"></span></a>Smaller memory footprint</h3>
+
+<p>In our measurements, mFAST applications are about 30 to 50 percent of their QuickFAST counterparts, depending on whether the applications are decoder/encoder only or using both, and also on whether the applications use offline type generation.</p>
+
+<h3>
+<a name="better-runtime-efficiency" class="anchor" href="#better-runtime-efficiency"><span class="octicon octicon-link"></span></a>Better runtime efficiency</h3>
+
+<p>Based on our evaluation on a data stream of 30000 messages, mFAST decoder is nearly 8 times faster and the encoder is more than 12 times faster than QuickFAST.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">mFAST maintained by <a href="https://github.com/objectcomputing">objectcomputing</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
