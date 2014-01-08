@@ -221,7 +221,7 @@ public:
         mref.as_initial_value();
       }
       else {
-        mref.as_absent();
+        mref.omit(true);
       }
     }
     save_previous_value(mref);
@@ -328,7 +328,7 @@ public:
         }
         // if the previous value is empty – the value of the field is empty.
         // If the field is optional the value is considered absent.
-        mref.as_absent();
+        mref.omit(true);
       }
       else {
         Operation() (mref, previous);
@@ -586,7 +586,7 @@ class delta_operator
     }
     else {
       //  If the field has optional presence, the delta value can be NULL. In that case the value of the field is considered absent.
-      mref.as_absent();
+      mref.omit(true);
     }
   }
 
@@ -620,7 +620,7 @@ class delta_operator
       save_previous_value(mref);
     }
     else {
-      mref.as_absent();
+      mref.omit(true);
     }
   }
 
@@ -676,7 +676,7 @@ public:
         save_previous_value(mref);
       }
       else {
-        mref.as_absent();
+        mref.omit(true);
       }
     }
     else {
@@ -738,7 +738,7 @@ private:
       else {
         //If the field has optional presence, the tail value can be NULL.
         // In that case the value of the field is considered absent.
-        mref.as_absent();
+        mref.omit(true);
       }
     }
     else {
@@ -763,7 +763,7 @@ private:
         //            It is a dynamic error [ERR D7] if the field is mandatory.
         if (!mref.optional())
           BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
-        mref.as_absent();
+        mref.omit(true);
       }
       else {
         // * assigned – the value of the field is the previous value.

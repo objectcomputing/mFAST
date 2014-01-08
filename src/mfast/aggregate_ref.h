@@ -219,19 +219,14 @@ class make_optional_mref
     }
 #endif
 
-    void as_absent() const
+    void omit(bool v) const
     {
-      this->parent_storage()->present(0);
-    }
-
-    void as_present() const
-    {
-      this->parent_storage()->present(1);
+      this->parent_storage()->present(!v);
     }
 
     void clear() const
     {
-      as_absent();
+      omit(true);
     }
 
 };

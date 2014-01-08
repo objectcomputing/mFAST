@@ -127,7 +127,7 @@ class make_group_mref
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
 
-    void as_present() const;
+    void omit(bool v) const;
 
   private:
     make_group_mref& operator= (const make_group_mref&);
@@ -200,9 +200,9 @@ make_group_mref<ConstGroupRef>::operator aggregate_mref() const
 
 template <typename ConstGroupRef>
 inline void
-make_group_mref<ConstGroupRef>::as_present() const
+make_group_mref<ConstGroupRef>::omit(bool v) const
 {
-  const_cast<value_storage*>(this->storage_)->present(1);
+  const_cast<value_storage*>(this->storage_)->present(!v);
 }
 
 }

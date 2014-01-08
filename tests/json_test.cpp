@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   tags[1].as("Eek with \\");
 
   Product_mref::stock_mref stock = product_ref.set_stock();
-  stock.as_present();
+  stock.omit(false);
   stock.set_warehouse().as(300);
   stock.set_retail().as(20);
 

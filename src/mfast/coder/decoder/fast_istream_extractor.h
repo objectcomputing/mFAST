@@ -31,7 +31,7 @@ template <typename U>
 inline fast_istream& operator >> (fast_istream& strm, const int_mref<U>& mref)
 {
   if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
-    mref.as_absent();
+    mref.omit(true);
   return strm;
 }
 
@@ -39,7 +39,7 @@ inline fast_istream& operator >> (fast_istream& strm, const int_mref<U>& mref)
 inline fast_istream& operator >> (fast_istream& strm, const exponent_mref& mref)
 {
   if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
-    mref.as_absent();
+    mref.omit(true);
   return strm;
 }
 
@@ -53,7 +53,7 @@ inline fast_istream& operator >> (fast_istream& strm, const ascii_string_mref& m
       mref[len-1] &= '\x7F';
   }
   else {
-    mref.as_absent();
+    mref.omit(true);
   }
   return strm;
 }
@@ -67,7 +67,7 @@ inline fast_istream& operator >> (fast_istream& strm, const unicode_string_mref&
     mref.assign(buf, buf+len);
   }
   else {
-    mref.as_absent();
+    mref.omit(true);
   }
   return strm;
 }
@@ -81,7 +81,7 @@ inline fast_istream& operator >> (fast_istream& strm, const byte_vector_mref& mr
     mref.assign(buf, buf+len);
   }
   else {
-    mref.as_absent();
+    mref.omit(true);
   }
   return strm;
 }
@@ -96,7 +96,7 @@ inline fast_istream& operator >> (fast_istream& strm, const decimal_mref& mref)
     strm.decode(storage->of_decimal.mantissa_, false);
   }
   else {
-    mref.as_absent();
+    mref.omit(true);
   }
   return strm;
 }

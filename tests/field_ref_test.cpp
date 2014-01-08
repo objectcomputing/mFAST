@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     BOOST_CHECK_EQUAL(another_cref.value(), UINT64_MAX);
 
 
-    ref.as_absent();
+    ref.omit(true);
     BOOST_CHECK(!ref.present() );
 
     detail::codec_helper helper;
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
 
     uint64_mref ref(&allocator, &storage, &inst);
     BOOST_CHECK(ref.present() );
-    ref.as_absent(); // mandatory field shoudn't be able to be absent
+    ref.omit(true); // mandatory field shoudn't be able to be absent
     BOOST_CHECK(ref.present() );
 
 
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     BOOST_CHECK_EQUAL(ref.mantissa(), INT64_MAX);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
 
-    ref.as_absent();
+    ref.omit(true);
     BOOST_CHECK(!ref.present() );
 
     ref.set_mantissa(4);
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     BOOST_CHECK_EQUAL(ref.mantissa(), 4);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
 
-    ref.as_absent();
+    ref.omit(true);
     ref.set_exponent(5);
     BOOST_CHECK(ref.present() );
     BOOST_CHECK_EQUAL(ref.exponent(), 5);
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
 
     }
     {
-      ref.as_absent();
+      ref.omit(true);
       helper.save_previous_value(ref);
       BOOST_CHECK_THROW(helper.delta_base_value_of(ref), mfast::fast_error);
     }
@@ -364,7 +364,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     BOOST_CHECK_EQUAL(ref.mantissa(), 6);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
 
-    ref.as_absent();
+    ref.omit(true);
     BOOST_CHECK(!ref.present() );
 
     ref.set_mantissa(4);
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     BOOST_CHECK_EQUAL(ref.mantissa(), 4);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
 
-    ref.as_absent();
+    ref.omit(true);
     ref.set_exponent(5);
     BOOST_CHECK(ref.present() );
     BOOST_CHECK_EQUAL(ref.exponent(), 5);
@@ -474,7 +474,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     BOOST_CHECK(ref == "abcde");
     BOOST_CHECK_EQUAL(storage.of_array.capacity_in_bytes_, 0U);
 
-    ref.as_absent();
+    ref.omit(true);
     BOOST_CHECK(ref.absent());
 
 
@@ -521,7 +521,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "4");
     }
-    ref.as_absent();
+    ref.omit(true);
     helper.save_previous_value(ref);
     {
       value_storage base_value = helper.tail_base_value_of(ref);
@@ -654,7 +654,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     BOOST_CHECK_EQUAL(ref.present(),    false);
     BOOST_CHECK_EQUAL(ref.num_fields(), 2U);
 
-    ref.as_present();
+    ref.omit(false);
     field_mref f0(ref[0] );
     BOOST_CHECK(f0.absent());
 
@@ -741,7 +741,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
     ref.resize(2);
     BOOST_CHECK_EQUAL(ref.present(),    true);
 
-    ref.as_absent();
+    ref.omit(true);
     BOOST_CHECK_EQUAL(ref.present(),    false);
 
     ref.resize(2);
