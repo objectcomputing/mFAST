@@ -157,7 +157,7 @@ void fast_decoder_impl::visit(int_vector_mref<IntType> &mref)
 
   uint32_t length=0;
   if (!strm_.decode(length, mref.optional())) {
-    mref.as_absent();
+    mref.omit(true);
     return;
   }
 
@@ -179,7 +179,7 @@ fast_decoder_impl::visit(group_mref& mref, int)
     debug_ << " : current pmap = " << current_pmap() << "\n";
     if (!current_pmap().is_next_bit_set()) {
       debug_ << "        " << mref.name() << " is absent\n";
-      mref.as_absent();
+      mref.omit(true);
       return;
     }
   }
@@ -218,7 +218,7 @@ fast_decoder_impl::visit(sequence_mref& mref, int)
   }
   else {
     debug_ << "  " << mref.name() << "is absent\n";
-    mref.as_absent();
+    mref.omit(true);
   }
   if (length_mref.present() && length_mref.value() > 0)
   {

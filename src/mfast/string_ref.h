@@ -317,7 +317,7 @@ public:
   void as (const vector_cref<char>& s)
   {
     if (s.absent())
-      this->as_absent();
+      this->omit(true);
     else
       this->assign(s.begin(), s.end());
   }
@@ -325,7 +325,7 @@ public:
   void as (const vector_cref<utf8_char>& s)
   {
     if (s.absent())
-      this->as_absent();
+      this->omit(true);
     else
       this->assign(s.begin(), s.end());
   }

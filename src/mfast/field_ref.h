@@ -139,10 +139,10 @@ class field_cref
     {
       return instruction_;
     }
-    
+
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
-    
+
 
   protected:
 
@@ -167,7 +167,7 @@ template <typename T, typename CanBeEmpty>
 class make_field_mref_base
 {
   protected:
-    void as_present() const
+     void omit(bool) const
     {
     }
 
@@ -180,17 +180,17 @@ class make_field_mref_base<T, boost::true_type>
     const field_instruction* my_instruction() const {
       return static_cast<const T*>(this)->instruction();
     }
-    
+
     value_storage* my_storage() const {
       return static_cast<const T*>(this)->storage();
     }
   public:
 
-    // overloading void present(bool) is not a good ideal. It causes the bool present() 
+    // overloading void present(bool) is not a good ideal. It causes the bool present()
     // declared in field_cref being hided because of the overloading rule.
-    void as_absent() const
+    void omit(bool v) const
     {
-      if (my_instruction()->optional()) {
+      if (v && my_instruction()->optional()) {
         my_storage()->present(0);
       }
     }
