@@ -34,7 +34,6 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   tags[1].as("Eek with \\");
 
   Product_mref::stock_mref stock = product_ref.set_stock();
-  stock.omit(false);
   stock.set_warehouse().as(300);
   stock.set_retail().as(20);
 
@@ -81,10 +80,12 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
   login.set_userName().as("John");
   login.set_password().as("J0hnsm1th");
 
-  person_ref.set_bankAccounts().resize(1);
-  BankAccount_mref acct1 = person_ref.set_bankAccounts()[0].as<BankAccount>();
-  acct1.set_number().as(12345678);
-  acct1.set_routingNumber().as(87654321);
+  BOOST_CHECK(person_ref.get_login().present());
+
+  // person_ref.set_bankAccounts().resize(1);
+  // BankAccount_mref acct1 = person_ref.set_bankAccounts()[0].as<BankAccount>();
+  // acct1.set_number().as(12345678);
+  // acct1.set_routingNumber().as(87654321);
 
   std::stringstream strm;
   mfast::json::encode(strm, person_ref);

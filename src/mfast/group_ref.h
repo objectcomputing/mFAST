@@ -112,17 +112,20 @@ class make_group_mref
                     const Instruction* instruction)
       : base_type(alloc, storage, instruction)
     {
+      storage->present(true);
     }
 
     make_group_mref(value_storage*    storage,
                     mfast::allocator* alloc)
       : base_type(storage, alloc)
     {
+      storage->present(true);
     }
 
     explicit make_group_mref(const field_mref_base& other)
       : base_type(other)
     {
+      base_type::storage()->present(true);
     }
 
     field_mref operator[](size_t index) const;
@@ -131,8 +134,6 @@ class make_group_mref
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
-
-    void omit(bool v) const;
 
   private:
     make_group_mref& operator= (const make_group_mref&);
@@ -201,14 +202,6 @@ inline
 make_group_mref<ConstGroupRef>::operator aggregate_mref() const
 {
   return aggregate_mref(this->alloc_, const_cast<value_storage*>(this->storage_->of_group.content_), this->instruction());
-}
-
-
-template <typename ConstGroupRef>
-inline void
-make_group_mref<ConstGroupRef>::omit(bool v) const
-{
-  const_cast<value_storage*>(this->storage_)->present(!v);
 }
 
 }

@@ -45,6 +45,15 @@ void inl_gen::gen_primitive (const char* cpp_type, const mfast::field_instructio
          << "{\n"
          << "  return static_cast<mfast::" << cpp_type << "_mref>((*this)[" << inst->field_index() << "]);\n"
          << "}\n\n";
+
+    if (inst->optional()) {
+      out_ << "inline\n"
+           << "void\n"
+           << mref_scope_.str() << "omit_" << name << "() const\n"
+           << "{\n"
+           << "  (*this)[" << inst->field_index() << "].omit();\n"
+           << "}\n\n";
+    }
   }
 }
 
@@ -137,14 +146,28 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 
     out_ << "\ninline " << cref_type_name << "\n"
          << cref_scope_.str() << "get_" << name << "() const\n"
-         << "{\n"
-         << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str() << ");\n"
+         << "{\n";
+    if (inst->optional())
+      out_ << "  if (" << "(*this)[" << index << "].absent())\n"
+           << "    return " << cref_type_name << "(0, 0);\n";
+    out_ << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str() << ");\n"
          << "}\n\n"
          << "inline " << mref_type_name << "\n"
          << mref_scope_.str() << "set_" << name << "() const\n"
-         << "{\n"
-         << "  return static_cast<" << mref_type_name << ">(" << mref_strm.str() << ");\n"
+         << "{\n";
+    if (inst->optional())
+      out_ << "  this->field_storage(" << index << ")->present(true);\n";
+    out_ << "  return " << mref_type_name << "("<< mref_strm.str() << ");\n"
          << "}\n\n";
+
+    if (inst->optional()) {
+      out_ << "inline\n"
+           << "void\n"
+           << mref_scope_.str() << "omit_" << name << "() const\n"
+           << "{\n"
+           << "  (*this)[" << inst->field_index() << "].omit();\n"
+           << "}\n\n";
+    }
   }
 
   if (inst->ref_instruction() == 0 && !embed_only_dyn_tempateref) {
@@ -238,6 +261,14 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
          << "{\n"
          << "  return static_cast<" << mref_type_name << ">((*this)[" << index << "]);\n"
          << "}\n\n";
+    if (inst->optional()) {
+      out_ << "inline\n"
+           << "void\n"
+           << mref_scope_.str() << "omit_" << name << "() const\n"
+           << "{\n"
+           << "  (*this)[" << inst->field_index() << "].omit();\n"
+           << "}\n\n";
+    }
   }
 
   if (inst->ref_instruction() == 0  && inst->subinstructions_count() > 1) {

@@ -302,11 +302,8 @@ struct decode_visitor
 
   void visit(const mfast::group_mref& ref, int)
   {
-    if (visit_impl(ref))
-      ref.omit(false);
-    else {
-      ref.omit(true);
-    }
+    if (!visit_impl(ref))
+      ref.omit();
   }
 
   void visit(const mfast::nested_message_mref&, int)
@@ -323,7 +320,7 @@ bool decode_visitor::visit_impl(const mfast::aggregate_mref& ref)
 
   for (std::size_t i = 0; i < ref.num_fields(); ++i)
   {
-    ref[i].omit(true);
+    ref[i].omit();
   }
 
   char c;

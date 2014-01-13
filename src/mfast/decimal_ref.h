@@ -234,9 +234,9 @@ class exponent_mref
     {
     }
 
-    void omit(bool v) const
+    void omit() const
     {
-      this->storage()->present(!v);
+      this->storage()->present(false);
     }
 
     void as_initial_value() const
@@ -253,7 +253,7 @@ class exponent_mref
     void as (const exponent_cref& cref) const
     {
       if (cref.absent()) {
-        omit(true);
+        omit();
       }
       else {
         as(cref.value());
@@ -323,7 +323,7 @@ class decimal_mref
     void as (const decimal_cref& cref) const
     {
       if (cref.absent()) {
-        omit(true);
+        omit();
       }
       else {
         as(cref.mantissa(), cref.exponent());

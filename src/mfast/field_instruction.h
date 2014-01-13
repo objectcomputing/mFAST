@@ -1003,9 +1003,6 @@ public:
 
   virtual void accept(field_instruction_visitor&, void*) const;
 
-
-  std::size_t content_allocation_size() const;
-
   const group_field_instruction* ref_instruction() const
   {
     return ref_instruction_;
