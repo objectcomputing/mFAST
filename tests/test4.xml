@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.ociweb.com/ns/templates/mfast_json" ns="http://www.ociweb.com/ns/mfast">
+
+    <define name="Address">
+      <group>
+        <string name="streeAddress" />
+        <string name="city" />
+        <string name="state" />
+        <uInt32 name="postalCode" />
+      </group>
+    </define>
+
+    <define name="PhoneNumbers">
+      <sequence>
+          <string name="type" />
+          <string name="number" />
+      </sequence>
+    </define>
+
+    <define name="Emails">
+      <sequence>
+          <string name="email" />
+      </sequence>
+    </define>
+
+    <template name="Person" >
+        <string name="firstName" />
+        <string name="lastName" />
+        <uInt32 name="age" />
+        <field name="address" presence="optional">
+          <type name="Address" />
+        </field>
+        <field name="phoneNumbers">
+            <type name="PhoneNumbers" />
+        </field>
+        <field name="emails">
+            <type name="Emails" />
+        </field>
+    </template>
+
+</templates>
+

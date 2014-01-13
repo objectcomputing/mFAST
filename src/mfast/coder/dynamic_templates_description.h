@@ -22,7 +22,7 @@
 #include "mfast_coder_export.h"
 #include "mfast/field_instruction.h"
 #include "mfast/arena_allocator.h"
-#include <map>
+#include <deque>
 namespace mfast
 {
 namespace coder {
@@ -52,6 +52,11 @@ public:
   dynamic_templates_description(const char*        xml_content,
                                 const char*        cpp_ns="",
                                 template_registry* registry = template_registry::instance());
+
+  const std::deque<const group_field_instruction*>& composite_instructions() const;
+private:
+  friend class coder::templates_builder;
+  std::deque<const group_field_instruction*> composite_instructions_;
 };
 
 }

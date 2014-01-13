@@ -45,11 +45,20 @@ class sequence_element_cref
 
 typedef make_aggregate_mref<sequence_element_cref> sequence_element_mref;
 
+
+template <>
+struct mref_of<sequence_element_cref>
+{
+  typedef sequence_element_mref type;
+};
+
+
 template <typename ElementType, typename SequenceInstructionType=mfast::sequence_instruction_ex<ElementType> >
 class make_sequence_cref
   : public field_cref
 {
   public:
+    typedef SequenceInstructionType instruction_type;
     typedef const SequenceInstructionType* instruction_cptr;
 
     typedef ElementType reference;
@@ -141,6 +150,7 @@ class make_sequence_mref
   typedef make_field_mref<make_sequence_cref<typename ElementType::cref_type, SequenceInstructionType> > base_type;
 
   public:
+    typedef SequenceInstructionType instruction_type;
     typedef const SequenceInstructionType* instruction_cptr;
     typedef ElementType reference;
 
@@ -203,6 +213,12 @@ class make_sequence_mref
 };
 
 typedef make_sequence_mref<sequence_element_mref, sequence_field_instruction> sequence_mref;
+
+template <typename ELEMENT_CREF, typename INSTRUCTION>
+struct mref_of<make_sequence_cref<ELEMENT_CREF, INSTRUCTION> >
+{
+  typedef make_sequence_mref< typename mref_of<ELEMENT_CREF>::type ,INSTRUCTION> type;
+};
 
 
 //////////////////////////////////////////////////////////////

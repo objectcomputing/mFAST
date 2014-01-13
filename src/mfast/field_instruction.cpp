@@ -305,6 +305,27 @@ void group_field_instruction::destruct_value(value_storage& storage,
   }
 }
 
+void group_field_instruction::construct_value(value_storage& storage,
+                                              value_storage* fields_storage,
+                                              allocator*     alloc,
+                                              bool           construct_subfields) const
+{
+  if (fields_storage) {
+    storage.of_group.own_content_ = false;
+  }
+  else {
+    storage.of_group.own_content_ = true;
+    fields_storage = static_cast<value_storage*>(
+      alloc->allocate(this->group_content_byte_count()));
+  }
+  storage.of_group.content_ = fields_storage;
+
+  if (construct_subfields)
+    construct_group_subfields(fields_storage, alloc);
+  else
+    memset(fields_storage, 0, this->group_content_byte_count());
+}
+
 void group_field_instruction::copy_construct_value(const value_storage& src,
                                                    value_storage&       dest,
                                                    allocator*           alloc,
@@ -376,6 +397,14 @@ void sequence_field_instruction::destruct_value(value_storage& storage,
   }
 }
 
+void sequence_field_instruction::construct_value(value_storage& storage,
+                                              value_storage*,
+                                              allocator*     alloc,
+                                              bool           ) const
+{
+  this->construct_value(storage, alloc);
+}
+
 void sequence_field_instruction::copy_construct_value(const value_storage& src,
                                                       value_storage&       dest,
                                                       allocator*           alloc,
@@ -425,26 +454,6 @@ void sequence_field_instruction::accept(field_instruction_visitor& visitor,
 
 
 
-void template_instruction::construct_value(value_storage& storage,
-                                           value_storage* fields_storage,
-                                           allocator*     alloc,
-                                           bool           construct_subfields) const
-{
-  if (fields_storage) {
-    storage.of_group.own_content_ = false;
-  }
-  else {
-    storage.of_group.own_content_ = true;
-    fields_storage = static_cast<value_storage*>(
-      alloc->allocate(this->group_content_byte_count()));
-  }
-  storage.of_group.content_ = fields_storage;
-
-  if (construct_subfields)
-    construct_group_subfields(fields_storage, alloc);
-  else
-    memset(fields_storage, 0, this->group_content_byte_count());
-}
 
 void template_instruction::copy_construct_value(const value_storage& src,
                                                 value_storage&       dest,

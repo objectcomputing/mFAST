@@ -8,7 +8,7 @@
 
 
 
-FASTTYPEGEN_TARGET(test_types test1.xml test2.xml test3.xml)
+FASTTYPEGEN_TARGET(test_types test1.xml test2.xml test3.xml test4.xml)
 
 
 add_executable (mfast_test

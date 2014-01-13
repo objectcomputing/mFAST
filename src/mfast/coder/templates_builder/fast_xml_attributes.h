@@ -54,6 +54,11 @@ struct fast_xml_attributes
     presence_ = 0;
     charset_ = 0;
 
+    set(attr);
+  }
+
+  void set(const XMLAttribute* attr)
+  {
     while (attr != 0) {
 
       const char* name = attr->Name();

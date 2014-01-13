@@ -30,4 +30,5 @@
 #include <mfast/arena_allocator.h>
 #include <mfast/field_comparator.h>
 #include <mfast/composite_field.h>
+#include <mfast/sequence_type.h>
 #endif /* end of include guard: MFAST_H_4EMINVTV */

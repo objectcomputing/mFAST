@@ -79,6 +79,8 @@ public:
 
   virtual std::size_t num_instructions() const = 0;
   virtual void add_instruction(const field_instruction*)=0;
+  virtual void add_instruction(const group_field_instruction*)=0;
+
   virtual void add_template(const char* ns, template_instruction* inst)=0;
 
   template_registry_impl* registered_templates() const
