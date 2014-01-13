@@ -44,7 +44,7 @@ void inl_gen::gen_primitive (const char* cpp_type, const mfast::field_instructio
          << mref_scope_.str() << "set_" << name << "() const\n"
          << "{\n"
          << "  return static_cast<mfast::" << cpp_type << "_mref>((*this)[" << inst->field_index() << "]);\n"
-         << "}\n";
+         << "}\n\n";
   }
 }
 
@@ -109,8 +109,7 @@ void inl_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
   gen_primitive("uint64_vector", inst);
 }
 
-
-void inl_gen::visit(const mfast::group_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 {
   std::string name (cpp_name(inst));
 
@@ -134,31 +133,33 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void*)
     mref_strm << "(*this)[" << index << "]";
   }
 
+  if (!top_level) {
 
-  out_ << "\ninline " << cref_type_name << "\n"
-       << cref_scope_.str() << "get_" << name << "() const\n"
-       << "{\n"
-       << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str() << ");\n"
-       << "}\n\n"
-       << "inline " << mref_type_name << "\n"
-       << mref_scope_.str() << "set_" << name << "() const\n"
-       << "{\n"
-       << "  return static_cast<" << mref_type_name << ">(" << mref_strm.str() << ");\n"
-       << "}\n\n";
+    out_ << "\ninline " << cref_type_name << "\n"
+         << cref_scope_.str() << "get_" << name << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str() << ");\n"
+         << "}\n\n"
+         << "inline " << mref_type_name << "\n"
+         << mref_scope_.str() << "set_" << name << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << mref_type_name << ">(" << mref_strm.str() << ");\n"
+         << "}\n\n";
+  }
 
-  if (inst->ref_template() == 0 && !embed_only_dyn_tempateref) {
+  if (inst->ref_instruction() == 0 && !embed_only_dyn_tempateref) {
 
     out_ << "inline\n"
          << cref_type_name << "::"<< name << "_cref(\n"
          << "  const mfast::value_storage*   storage,\n"
          << "  " << cref_type_name << "::instruction_cptr instruction)\n"
-         << "  : mfast::group_cref(storage, instruction)\n"
+         << "  : base_type(storage, instruction)\n"
          << "{\n"
          << "}\n\n"
          << "inline\n"
          << cref_type_name << "::"<< name << "_cref(\n"
          << "  const mfast::field_cref& other)\n"
-         << "  : mfast::group_cref(other)\n"
+         << "  : base_type(other)\n"
          << "{\n"
          << "}\n\n"
          << "inline\n"
@@ -166,21 +167,58 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void*)
          << "  mfast::allocator*      alloc,\n"
          << "  mfast::value_storage*  storage,\n"
          << "  " << mref_type_name << "::instruction_cptr instruction)\n"
-         << "  : " << mref_type_name << "_base(alloc, storage, instruction)\n"
+         << "  : base_type(alloc, storage, instruction)\n"
          << "{\n"
-         << "}\n"
+         << "}\n\n"
          << "inline\n"
          << mref_type_name << "::"<< name << "_mref(\n"
          << "  const mfast::field_mref_base& other)\n"
-         << "  : " << mref_type_name << "_base(other)\n"
+         << "  : base_type(other)\n"
          << "{\n"
-         << "}\n";
+         << "}\n\n";
+
+    if (top_level)
+    {
+      out_ << "inline\n"
+           << name << "::" << name << "(\n"
+           << "  mfast::allocator* alloc)\n"
+           << "  : base_type(alloc, instruction(), this->data())\n"
+           << "{\n"
+           << "}\n\n"
+           << "inline\n"
+           << name << "::" << name << "(\n"
+           << "  const " << name << "_cref& other,\n"
+           << "  mfast::allocator* alloc)\n"
+           << "  : base_type(alloc, instruction(), this->data(), other.field_storage(0))\n"
+           << "{\n"
+           << "}\n\n"
+           << "inline "<< name << "::cref_type\n"
+           << name << "::ref() const\n"
+           << "{\n"
+           << "  return " << name << "::cref_type(my_storage_.of_group.content_, instruction());\n"
+           << "}\n\n"
+           << "inline "<< name << "::cref_type\n"
+           << name << "::cref() const\n"
+           << "{\n"
+           << "  return " << name << "::cref_type(my_storage_.of_group.content_, instruction());\n"
+           << "}\n\n"
+           << "inline "<< name << "::mref_type\n"
+           << name << "::ref()\n"
+           << "{\n"
+           << "  return " << name << "::mref_type(alloc_, my_storage_.of_group.content_, instruction());\n"
+           << "}\n\n"
+           << "inline "<< name << "::mref_type\n"
+           << name << "::mref()\n"
+           << "{\n"
+           << "  return " << name << "::mref_type(alloc_, my_storage_.of_group.content_, instruction());\n"
+           << "}\n\n";
+    }
 
     traverse(inst, "");
   }
 }
 
-void inl_gen::visit(const mfast::sequence_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* top_level)
 {
   std::string name (cpp_name(inst));
 
@@ -189,23 +227,25 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void*)
   std::string cref_type_name = cref_scope_.str() + name + "_cref";
   std::string mref_type_name = mref_scope_.str() + name + "_mref";
 
-  out_ << "\ninline " << cref_type_name << "\n"
-       << cref_scope_.str() << "get_" << name << "() const\n"
-       << "{\n"
-       << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
-       << "}\n\n"
-       << "inline " << mref_type_name << "\n"
-       << mref_scope_.str() << "set_" << name << "() const\n"
-       << "{\n"
-       << "  return static_cast<" << mref_type_name << ">((*this)[" << index << "]);\n"
-       << "}\n\n";
+  if (!top_level) {
+    out_ << "inline " << cref_type_name << "\n"
+         << cref_scope_.str() << "get_" << name << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
+         << "}\n\n"
+         << "inline " << mref_type_name << "\n"
+         << mref_scope_.str() << "set_" << name << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << mref_type_name << ">((*this)[" << index << "]);\n"
+         << "}\n\n";
+  }
 
-  if (inst->ref_template() == 0  && inst->subinstructions_count() > 1) {
+  if (inst->ref_instruction() == 0  && inst->subinstructions_count() > 1) {
     out_ << "inline\n"
          << cref_scope_.str() << name << "_element_cref::"<< name << "_element_cref(\n"
          << "  const mfast::value_storage*   storage,\n"
          << "  " << cref_scope_.str() << name << "_element_cref::instruction_cptr instruction)\n"
-         << "  : " << cref_scope_.str() << name << "_element_cref_base(storage, instruction)\n"
+         << "  : base_type(storage, instruction)\n"
          << "{\n"
          << "}\n\n"
          << "inline\n"
@@ -213,12 +253,50 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void*)
          << "  mfast::allocator*               alloc,\n"
          << "  mfast::value_storage*         storage,\n"
          << "  " << mref_scope_.str() << name << "_element_mref::instruction_cptr instruction)\n"
-         << "  : " << mref_scope_.str() << name << "_element_mref_base(alloc,storage, instruction)\n"
+         << "  : base_type(alloc,storage, instruction)\n"
          << "{\n"
-         << "}\n";
+         << "}\n\n";
 
     traverse(inst, "_element");
   }
+
+  if (top_level)
+  {
+    out_ << "inline\n"
+         << name << "::" << name << "(\n"
+         << "  mfast::allocator* alloc)\n"
+         << "  : base_type(alloc, instruction(), 0)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n"
+         << name << "::" << name << "(\n"
+         << "  const " << name << "_cref& other,\n"
+         << "  mfast::allocator* alloc)\n"
+         << "  : base_type(reinterpret_cast<const mfast::sequence_cref&>(other), alloc)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline "<< name << "::cref_type\n"
+         << name << "::ref() const\n"
+         << "{\n"
+         << "  return " << name << "::cref_type(&my_storage_, instruction());\n"
+         << "}\n\n"
+         << "inline "<< name << "::cref_type\n"
+         << name << "::cref() const\n"
+         << "{\n"
+         << "  return " << name << "::cref_type(&my_storage_, instruction());\n"
+         << "}\n\n"
+         << "inline "<< name << "::mref_type\n"
+         << name << "::ref()\n"
+         << "{\n"
+         << "  return " << name << "::mref_type(alloc_, &my_storage_, instruction());\n"
+         << "}\n\n"
+         << "inline "<< name << "::mref_type\n"
+         << name << "::mref()\n"
+         << "{\n"
+         << "  return " << name << "::mref_type(alloc_, &my_storage_, instruction());\n"
+         << "}\n\n";
+  }
+
 }
 
 void inl_gen::visit(const mfast::template_instruction* inst, void*)
@@ -228,24 +306,24 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
 
   std::string name (cpp_name(inst));
 
-  out_ << "\ninline\n"
+  out_ << "inline\n"
        << name << "_cref::" << name << "_cref(\n"
        << "  const mfast::value_storage* storage_array,\n"
        << "  instruction_cptr            instruction)\n"
-       << "  : mfast::aggregate_cref(storage_array, instruction)\n"
+       << "  : base_type(storage_array, instruction)\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name << "_cref::" << name << "_cref(\n"
        << "  const mfast::message_cref& other)\n"
-       << "  : mfast::aggregate_cref(other)\n"
+       << "  : base_type(other)\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name << "_cref::" << name << "_cref(\n"
        << "  const mfast::field_cref& other)\n"
-       << "  : mfast::aggregate_cref(mfast::detail::field_storage_helper::storage_ptr_of(other)->of_group.content_,\n"
-       << "                          static_cast<instruction_cptr>(other.instruction()))\n"
+       << "  : base_type(mfast::detail::field_storage_helper::storage_ptr_of(other)->of_group.content_,\n"
+       << "              static_cast<instruction_cptr>(other.instruction()))\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
@@ -253,34 +331,34 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
        << "  mfast::allocator*     alloc,\n"
        << "  mfast::value_storage* storage_array,\n"
        << "  instruction_cptr      instruction)\n"
-       << "  : " << name << "_mref_base(alloc, storage_array, instruction)\n"
+       << "  : base_type(alloc, storage_array, instruction)\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name << "_mref::" << name << "_mref(\n"
        << "  const mfast::message_mref& other)\n"
-       << "  : " << name << "_mref_base(other)\n"
+       << "  : base_type(other)\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name << "_mref::" << name << "_mref(\n"
        << "  const mfast::field_mref_base& other)\n"
-       << "  : " << name << "_mref_base(other.allocator(),\n"
-       << "                                  mfast::detail::field_storage_helper::storage_ptr_of(other)->of_group.content_,\n"
-       << "                                  static_cast<instruction_cptr>(other.instruction()))\n"
+       << "  : base_type(other.allocator(),\n"
+       << "              mfast::detail::field_storage_helper::storage_ptr_of(other)->of_group.content_,\n"
+       << "              static_cast<instruction_cptr>(other.instruction()))\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name << "::" << name << "(\n"
        << "  mfast::allocator* alloc)\n"
-       << "  : mfast::message_type(alloc, instruction(), this->data())\n"
+       << "  : base_type(alloc, instruction(), this->data())\n"
        << "{\n"
        << "}\n\n"
        << "inline\n"
        << name << "::" << name << "(\n"
        << "  const " << name << "_cref& other,\n"
        << "  mfast::allocator* alloc)\n"
-       << "  : mfast::message_type(alloc, instruction(), this->data(), other.field_storage(0))\n"
+       << "  : base_type(alloc, instruction(), this->data(), other.field_storage(0))\n"
        << "{\n"
        << "}\n\n"
        << "inline "<< name << "::cref_type\n"
@@ -324,7 +402,7 @@ void inl_gen::visit(const mfast::templateref_instruction* inst, void*)
        << mref_scope_.str() << "set_nested_message" << index << "() const\n"
        << "{\n"
        << "  return mfast::nested_message_mref((*this)[" << index << "]);\n"
-       << "}\n";
+       << "}\n\n";
 }
 
 void inl_gen::generate(mfast::dynamic_templates_description& desc)

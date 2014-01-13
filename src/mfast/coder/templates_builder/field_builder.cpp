@@ -28,20 +28,29 @@ void field_builder::add_instruction(const field_instruction* inst)
   instructions_.push_back(inst);
 }
 
+void field_builder::add_instruction(const group_field_instruction* inst)
+{
+  instructions_.push_back(inst);
+}
+
 const char* field_builder::resolve_field_type(const XMLElement& element)
 {
   field_type_name_ = element.Name();
   content_element_ = &element;
-  if (std::strcmp(field_type_name_, "field") == 0) {
-    content_element_ = element.FirstChildElement();
-    if (std::strcmp(content_element_->Name(), "type") == 0 ) {
 
-      field_type_name_ = content_element_->Attribute("name", 0);
-      if (field_type_name_ == 0)
+  if (std::strcmp(field_type_name_, "field") == 0 ) {
+    content_element_ = element.FirstChildElement("type");
+    if (content_element_) {
+      field_type_name_ = name_;
+      name_ = 0;
+      fast_xml_attributes::set(content_element_->FirstAttribute());
+
+      if (name_ == 0)
         throw std::runtime_error("type element does not have a name");
+      std::swap(field_type_name_, name_);
     }
     else {
-      throw std::runtime_error("field must have a type element");
+      throw std::runtime_error("field element must have a type sub-element");
     }
   }
 
@@ -390,21 +399,23 @@ field_builder::build_subfields()
 {
   const XMLElement* child = content_element_->FirstChildElement();
   while (child != 0) {
-    const XMLElement* field_elem = child;
-    const char* child_type_name = child->Name();
+    /*
+       const XMLElement* field_elem = child;
+       const char* child_type_name = child->Name();
 
-    if (strcmp(child_type_name, "field") == 0 )
-    {
-      field_elem = field_elem->FirstChildElement();
-      child_type_name = field_elem->Name();
-      if (strcmp(child_type_name, "type") == 0 ) {
+       if (strcmp(child_type_name, "field") == 0 )
+       {
+       field_elem = field_elem->FirstChildElement();
+       child_type_name = field_elem->Name();
+       if (strcmp(child_type_name, "type") == 0 ) {
         child_type_name = field_elem->Attribute("name", 0);
         if (child_type_name == 0)
           throw std::runtime_error("type element does not have a name");
-      }
-    }
+       }
+       }
+     */
 
-    field_builder field(this, *field_elem);
+    field_builder field(this, *child);
     child = child->NextSiblingElement();
   }
 
@@ -413,7 +424,7 @@ field_builder::build_subfields()
   return result;
 }
 
-void field_builder::set_ref_template(group_field_instruction* instruction)
+void field_builder::set_ref_instruction(group_field_instruction* instruction)
 {
   const XMLElement* child = content_element_->FirstChildElement();
   if (strcmp(child->Name(), "templateRef") == 0 && child->NextSibling() == 0) {
@@ -427,7 +438,7 @@ void field_builder::set_ref_template(group_field_instruction* instruction)
       if (target == 0)
         BOOST_THROW_EXCEPTION(template_not_found_error(target_name, this->name()));
 
-      instruction->ref_template(target);
+      instruction->ref_instruction(target);
     }
   }
 }
@@ -451,10 +462,17 @@ field_builder::visit(const group_field_instruction* inst, void*)
     subinstructions,
     num_instructions(),
     get_typeRef_name(element_),
-    get_typeRef_ns(element_)
+    get_typeRef_ns(element_),
+    inst->cpp_ns()
     );
 
-  set_ref_template(instruction);
+  if (inst->subinstructions_count() == 0) {
+    set_ref_instruction(instruction);
+  }
+  else {
+    instruction->ref_instruction(inst);
+  }
+
   parent_->add_instruction(instruction);
 }
 
@@ -518,9 +536,16 @@ field_builder::visit(const sequence_field_instruction* inst, void*)
     num_instructions(),
     get_length_instruction(inst),
     get_typeRef_name(element_),
-    get_typeRef_ns(element_)
+    get_typeRef_ns(element_),
+    inst->cpp_ns()
     );
-  set_ref_template(instruction);
+
+  if (inst->subinstructions_count() == 0) {
+    instruction->ref_instruction(0);
+  }
+  else {
+    instruction->ref_instruction(inst);
+  }
   parent_->add_instruction(instruction);
 }
 

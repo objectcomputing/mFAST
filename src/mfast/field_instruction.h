@@ -960,7 +960,8 @@ public:
                           const const_instruction_ptr_t* subinstructions,
                           uint32_t                       subinstructions_count,
                           const char*                    typeref_name ="",
-                          const char*                    typeref_ns="")
+                          const char*                    typeref_ns="",
+                          const char*                    cpp_ns="")
     : aggregate_instruction_base(field_index,
                                  optional,
                                  id,
@@ -971,7 +972,8 @@ public:
                                  subinstructions_count,
                                  typeref_name,
                                  typeref_ns)
-    , ref_template_(0)
+    , ref_instruction_(0)
+    , cpp_ns_(cpp_ns)
   {
   }
 
@@ -979,6 +981,19 @@ public:
                                allocator*     alloc) const;
   virtual void destruct_value(value_storage& storage,
                               allocator*     alloc) const;
+
+// #ifdef __clang__
+// #pragma clang diagnostic push
+// #pragma clang diagnostic ignored "-Woverloaded-virtual"
+// #endif
+
+  virtual void construct_value(value_storage& storage,
+                               value_storage* fields_storage,
+                               allocator*     alloc,
+                               bool           construct_subfields=true) const;
+// #ifdef __clang__
+// #pragma clang diagnostic pop
+// #endif
 
   // perform deep copy
   virtual void copy_construct_value(const value_storage& src,
@@ -991,18 +1006,24 @@ public:
 
   std::size_t content_allocation_size() const;
 
-  const template_instruction* ref_template() const
+  const group_field_instruction* ref_instruction() const
   {
-    return ref_template_;
+    return ref_instruction_;
   }
 
-  void ref_template(const template_instruction* r)
+  void ref_instruction(const group_field_instruction* r)
   {
-    ref_template_ = r;
+    ref_instruction_ = r;
+  }
+
+  const char* cpp_ns() const
+  {
+    return cpp_ns_;
   }
 
 private:
-  const template_instruction* ref_template_;
+  const group_field_instruction* ref_instruction_;
+  const char* cpp_ns_;
 };
 
 
@@ -1020,7 +1041,8 @@ public:
                              uint32_t                        subinstructions_count,
                              const uint32_field_instruction* sequence_length_instruction,
                              const char*                     typeref_name="",
-                             const char*                     typeref_ns="")
+                             const char*                     typeref_ns="",
+                             const char*                     cpp_ns="")
     : group_field_instruction(field_index,
                               optional,
                               id,
@@ -1030,7 +1052,8 @@ public:
                               subinstructions,
                               subinstructions_count,
                               typeref_name,
-                              typeref_ns)
+                              typeref_ns,
+                              cpp_ns)
     , sequence_length_instruction_(sequence_length_instruction)
   {
     field_type_ = field_type_sequence;
@@ -1040,6 +1063,12 @@ public:
                                allocator*     alloc) const;
   virtual void destruct_value(value_storage& storage,
                               allocator*     alloc) const;
+
+
+  virtual void construct_value(value_storage& storage,
+                               value_storage* fields_storage,
+                               allocator*     alloc,
+                               bool           construct_subfields) const;
 
   void construct_sequence_elements(value_storage& storage,
                                    std::size_t    start,
@@ -1097,9 +1126,9 @@ public:
                               subinstructions,
                               subinstructions_count,
                               typeref_name,
-                              typeref_ns)
+                              typeref_ns,
+                              cpp_ns)
     , template_ns_(template_ns)
-    , cpp_ns_(cpp_ns)
     , reset_(reset)
   {
     field_type_ = field_type_template;
@@ -1109,21 +1138,6 @@ public:
   {
     return template_ns_;
   }
-
-  const char* cpp_ns() const
-  {
-    return cpp_ns_;
-  }
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Woverloaded-virtual"
-#endif
-
-  void construct_value(value_storage& storage,
-                       value_storage* fields_storage,
-                       allocator*     alloc,
-                       bool           construct_subfields=true) const;
 
 
   void copy_construct_value(value_storage&       storage,
@@ -1136,9 +1150,6 @@ public:
                                     allocator*           alloc,
                                     value_storage*       fields_storage=0) const;
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
   virtual void accept(field_instruction_visitor&, void*) const;
 
@@ -1152,7 +1163,6 @@ public:
 
 private:
   const char* template_ns_;
-  const char* cpp_ns_;
   bool reset_;
 };
 
@@ -1191,7 +1201,7 @@ public:
                        const char*                 name,
                        const char*                 ns,
                        const char*                 dictionary,
-                       const template_instruction* ref_template,
+                       const template_instruction* ref_instruction,
                        const char*                 typeref_name ="",
                        const char*                 typeref_ns="")
     : group_field_instruction(field_index,
@@ -1200,8 +1210,8 @@ public:
                               name,
                               ns,
                               dictionary,
-                              ref_template->subinstructions(),
-                              ref_template->subinstructions_count(),
+                              ref_instruction->subinstructions(),
+                              ref_instruction->subinstructions_count(),
                               typeref_name,
                               typeref_ns)
   {
@@ -1237,13 +1247,13 @@ public:
                           const char*                 name,
                           const char*                 ns,
                           const char*                 dictionary,
-                          const template_instruction* ref_template,
+                          const template_instruction* ref_instruction,
                           uint32_field_instruction*   sequence_length_instruction,
                           const char*                 typeref_name="",
                           const char*                 typeref_ns="")
     : sequence_field_instruction(field_index, optional, id, name, ns, dictionary,
-                                 ref_template->subinstructions(),
-                                 ref_template->subinstructions_count(),
+                                 ref_instruction->subinstructions(),
+                                 ref_instruction->subinstructions_count(),
                                  sequence_length_instruction, typeref_name, typeref_ns)
   {
   }

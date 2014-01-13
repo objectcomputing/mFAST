@@ -25,9 +25,9 @@ class templates_builder
   , public field_builder_base
 {
 public:
-  templates_builder(templates_description* definition,
-                    const char*            cpp_ns,
-                    template_registry*     registry);
+  templates_builder(dynamic_templates_description* definition,
+                    const char*                    cpp_ns,
+                    template_registry*             registry);
 
   virtual bool  VisitEnter (const XMLElement & element, const XMLAttribute* attr);
   virtual bool  VisitExit (const XMLElement & element);
@@ -35,6 +35,7 @@ public:
 
   virtual std::size_t num_instructions() const;
   virtual void add_instruction(const field_instruction*);
+  virtual void add_instruction(const group_field_instruction* inst);
   void add_template(const char* ns, template_instruction* inst);
 
   virtual const char* name() const
@@ -43,16 +44,16 @@ public:
   }
 
 protected:
-  templates_description* definition_;
+  dynamic_templates_description* definition_;
   const char* cpp_ns_;
   std::deque<const template_instruction*> templates_;
   const template_instruction template_instruction_prototype_;
 };
 
 
-templates_builder::templates_builder(templates_description* definition,
-                                     const char*            cpp_ns,
-                                     template_registry*     registry)
+templates_builder::templates_builder(dynamic_templates_description* definition,
+                                     const char*                    cpp_ns,
+                                     template_registry*             registry)
   : field_builder_base(registry->impl_, &this->member)
   , definition_(definition)
   , cpp_ns_(string_dup(cpp_ns, this->alloc()))
@@ -152,6 +153,12 @@ void templates_builder::add_instruction(const field_instruction* inst)
   member[inst->name()] = inst;
 }
 
+void templates_builder::add_instruction(const group_field_instruction* inst)
+{
+  member[inst->name()] = inst;
+  definition_->composite_instructions_.push_back(inst);
+}
+
 void templates_builder::add_template(const char* ns, template_instruction* inst)
 {
   templates_.push_back(inst);
@@ -194,8 +201,14 @@ dynamic_templates_description::dynamic_templates_description(const char*        
     document.Accept(&builder);
   }
   else {
-    BOOST_THROW_EXCEPTION(fast_static_error("S1"));
+    BOOST_THROW_EXCEPTION(std::runtime_error("XML parse error"));
   }
+}
+
+const std::deque<const group_field_instruction*>&
+dynamic_templates_description::composite_instructions() const
+{
+  return composite_instructions_;
 }
 
 } /* mfast */

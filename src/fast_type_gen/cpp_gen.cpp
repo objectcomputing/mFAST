@@ -292,10 +292,8 @@ cpp_gen::get_subinstructions(const mfast::group_field_instruction* inst)
   }
   else {
     prefixes_.pop_back();
-    if (inst->ref_template()) {
-      std::stringstream strm;
-      strm << inst->ref_template()->cpp_ns() << "::" << inst->ref_template()->name();
-      std::string qulified_name = strm.str();
+    if (inst->ref_instruction()) {
+      std::string qulified_name = ref_instruction_name(inst);
       subinstruction_arg << "  "<< qulified_name << "::instruction()->subinstructions(),\n"
                          << "  "<< qulified_name << "::instruction()->subinstructions_count(),\n";
     }
@@ -312,25 +310,41 @@ cpp_gen::get_subinstructions(const mfast::group_field_instruction* inst)
   return subinstruction_arg.str();
 }
 
-void cpp_gen::visit(const mfast::group_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 {
   std::string name( cpp_name( inst ) );
   std::size_t index = inst->field_index();
 
+  if (top_level) {
+    out_ << "const " << name << "::instruction_type*\n"
+         << name << "::instruction()\n"
+         << "{\n";
+  }
+  else
+    add_to_instruction_list(name);
 
-  add_to_instruction_list(name);
   prefixes_.push_back(name);
 
+
+
   if (  !contains_only_templateRef(inst) ) {
+
     subinstructions_list_.resize(subinstructions_list_.size()+1);
     traverse(inst, "");
   }
 
   std::string subinstruction_arg = get_subinstructions(inst);
 
-  out_ << "const static mfast::group_field_instruction\n"
-       << prefix_string() << name << "_instruction(\n"
-       << "  "<<  index << ",\n"
+  if (top_level) {
+    out_ << "const static " << name << "::instruction_type\n"
+         << "  the_instruction(\n";
+  }
+  else {
+    out_ << "const static mfast::group_field_instruction\n"
+         << prefix_string() << name << "_instruction(\n";
+  }
+
+  out_ << "  "<<  index << ",\n"
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
        << "  \"" << inst->name() << "\", // name\n"
@@ -341,14 +355,25 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void*)
        << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n";
 
 
+  if (top_level) {
+    out_ << "  return &the_instruction;\n"
+         << "}\n\n";
+  }
 }
 
-void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_level)
 {
   std::string name( cpp_name( inst ) );
   std::size_t index = inst->field_index();
 
-  add_to_instruction_list(name);
+  if (top_level) {
+    out_ << "const " << name << "::instruction_type*\n"
+         << name << "::instruction()\n"
+         << "{\n";
+  }
+  else
+    add_to_instruction_list(name);
+
   prefixes_.push_back(name);
 
   if (inst->length_instruction()) {
@@ -387,9 +412,16 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
 
   std::string subinstruction_arg = get_subinstructions(inst);
 
-  out_ << "const static mfast::sequence_field_instruction\n"
-       << prefix_string() << name << "_instruction(\n"
-       << "  "<<  index << ",\n"
+  if (top_level) {
+    out_ << "const static " << name << "::instruction_type\n"
+         << "  the_instruction(\n";
+  }
+  else {
+    out_ << "const static mfast::sequence_field_instruction\n"
+         << prefix_string() << name << "_instruction(\n";
+  }
+
+  out_ << "  "<<  index << ",\n"
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
        << "  \"" << inst->name() << "\", // name\n"
@@ -399,6 +431,11 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
        << "  "<< lengthInstruction << ", // length\n"
        << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
        << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n";
+
+  if (top_level) {
+    out_ << "  return &the_instruction;\n"
+         << "}\n\n";
+  }
 }
 
 void cpp_gen::visit(const mfast::template_instruction* inst, void*)

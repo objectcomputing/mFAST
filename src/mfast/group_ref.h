@@ -77,6 +77,11 @@ class group_cref
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
+    const value_storage* field_storage(size_t index) const
+    {
+      return &(this->storage_->of_group.content_[index]);
+    }
+
   private:
     group_cref& operator= (const group_cref&);
 };
@@ -137,7 +142,11 @@ class make_group_mref
 
 typedef make_group_mref<group_cref> group_mref;
 
-
+template <>
+struct mref_of<group_cref>
+{
+  typedef group_mref type;
+};
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -173,9 +182,6 @@ inline field_mref
 make_group_mref<ConstGroupRef>::operator[](size_t index)  const
 {
   assert(index < this->num_fields());
-  // return field_mref(this->alloc_,
-  //                   this->field_storage(index),
-  //                   this->instruction()->subinstructions_[index]);
   return aggregate_mref(*this)[index];
 }
 

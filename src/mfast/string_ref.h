@@ -547,6 +547,7 @@ class string_mref
 public:
   typedef vector_mref<T> base_type;
   typedef typename base_type::instruction_cptr instruction_cptr;
+  typedef string_cref<T> cref_type;
 
   string_mref()
     : base_type()

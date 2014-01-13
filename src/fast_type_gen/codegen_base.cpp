@@ -18,6 +18,7 @@
 //
 #include "codegen_base.h"
 #include <cctype>
+#include <boost/foreach.hpp>
 
 codegen_base::codegen_base(const char* filebase, const char* fileext)
   : filebase_(filebase)
@@ -31,8 +32,16 @@ codegen_base::codegen_base(const char* filebase, const char* fileext)
 
 void codegen_base::traverse(mfast::dynamic_templates_description& desc)
 {
-  for (size_t i = 0; i < desc.size(); ++i) {
-    desc[i]->accept(*this, 0);
+  BOOST_FOREACH(const mfast::group_field_instruction* inst, desc.composite_instructions())
+  {
+    // we use the second parameter to identify wether the instruction is nested. If the
+    // second parameter is not 0, it is nested inside another composite types.
+    inst->accept(*this, this);
+  }
+
+  for (size_t i = 0; i < desc.size(); ++i)
+  {
+    desc[i]->accept(*this, this);
   }
 }
 
@@ -43,6 +52,8 @@ void codegen_base::traverse(const mfast::group_field_instruction* inst, const ch
 
   for (std::size_t i = 0; i < inst->subinstructions_count(); ++i)
   {
+    // we use the second parameter to identify wether the instruction is nested. If the
+    // second parameter is not 0, it is nested inside another composite types.
     inst->subinstruction(i)->accept(*this, 0);
   }
   reset_scope(cref_scope_, saved_cref_scope);
@@ -56,7 +67,7 @@ void codegen_base::reset_scope(std::stringstream& strm, const std::string& str)
 
 bool codegen_base::contains_only_templateRef(const mfast::group_field_instruction* inst)
 {
-  return inst->ref_template() != 0 ||
+  return inst->ref_instruction() != 0 ||
          (inst->subinstructions_count() == 1 && inst->subinstruction(0)->field_type() == mfast::field_type_templateref);
 }
 
@@ -75,4 +86,13 @@ codegen_base::cpp_name(const mfast::field_instruction* inst) const
       result += '_';
   }
   return result;
+}
+
+std::string
+codegen_base::ref_instruction_name(const mfast::group_field_instruction* inst) const
+{
+  if (inst->ref_instruction()->cpp_ns() && inst->ref_instruction()->cpp_ns()[0] != 0)
+   return std::string(inst->ref_instruction()->cpp_ns()) + "::" + inst->ref_instruction()->name();
+  else
+    return inst->ref_instruction()->name();
 }

@@ -47,6 +47,7 @@ public:
   virtual const char* name() const;
   virtual std::size_t num_instructions() const;
   virtual void add_instruction(const field_instruction*);
+  virtual void add_instruction(const group_field_instruction*);
   virtual void add_template(const char* ns, template_instruction* inst);
 protected:
 
@@ -100,7 +101,7 @@ protected:
   virtual void visit(const uint64_vector_field_instruction*, void*);
 
   const_instruction_ptr_t* build_subfields();
-  void set_ref_template(group_field_instruction* instruction);
+  void set_ref_instruction(group_field_instruction* instruction);
   const uint32_field_instruction* get_length_instruction(const sequence_field_instruction* inst);
 };
 

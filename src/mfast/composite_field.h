@@ -4,7 +4,6 @@
 #include <boost/move/core.hpp>
 #include "mfast/message_ref.h"
 #include "mfast/group_ref.h"
-#include "mfast/sequence_ref.h"
 
 namespace mfast
 {
@@ -64,16 +63,17 @@ public:
   const char* name() const;
   mfast::allocator* allocator() const;
 
-  const value_storage& storage() const {
+  const value_storage& storage() const
+  {
     return my_storage_;
   }
 
 protected:
 
-  composite_field(mfast::allocator*        alloc,
-                  instruction_cptr         instruction,
-                  value_storage*           fields_storage,
-                  const value_storage*     other_fields_storage);
+  composite_field(mfast::allocator*    alloc,
+                  instruction_cptr     instruction,
+                  value_storage*       fields_storage,
+                  const value_storage* other_fields_storage);
 
   // Used by decoder to indicate this object uses arena allocator,
   // and the allocator has been resetted. All previously allocated memory
@@ -90,8 +90,7 @@ protected:
 };
 
 typedef composite_field<message_cref> message_type;
-// typedef composite_field<group_cref> group_type;
-// typedef composite_field<sequence_cref> sequence_type;
+typedef composite_field<group_cref> group_type;
 
 ///////////////////////////////////////////////////////
 
@@ -167,28 +166,28 @@ template <typename CRef>
 inline typename composite_field<CRef>::mref_type
 composite_field<CRef>::ref()
 {
-  return message_mref(alloc_, my_storage_.of_group.content_, instruction_);
+  return mref_type(alloc_, my_storage_.of_group.content_, instruction_);
 }
 
 template <typename CRef>
 inline typename composite_field<CRef>::mref_type
 composite_field<CRef>::mref()
 {
-  return message_mref(alloc_, my_storage_.of_group.content_, instruction_);
+  return mref_type(alloc_, my_storage_.of_group.content_, instruction_);
 }
 
 template <typename CRef>
 inline typename composite_field<CRef>::cref_type
 composite_field<CRef>::ref() const
 {
-  return message_cref(my_storage_.of_group.content_, instruction_);
+  return cref_type(my_storage_.of_group.content_, instruction_);
 }
 
 template <typename CRef>
 inline typename composite_field<CRef>::cref_type
 composite_field<CRef>::cref() const
 {
-  return message_cref(my_storage_.of_group.content_, instruction_);
+  return cref_type(my_storage_.of_group.content_, instruction_);
 }
 
 template <typename CRef>
