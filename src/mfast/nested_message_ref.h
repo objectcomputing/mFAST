@@ -66,11 +66,6 @@ class nested_message_cref
 
     template <typename FieldAccessor>
     void accept_accessor(FieldAccessor&) const;
-  protected:
-    value_storage* parent_storage() const
-    {
-      return this->storage()[1].of_templateref.content_;
-    }
 };
 
 
@@ -135,17 +130,6 @@ class nested_message_mref
       }
       templateRef_inst->construct_value(*this->storage(), alloc_, inst, construct_subfields);
 
-      if (this->optional()) {
-        // The templateref instruction can only be optional when it is enclosed by an optional group and the
-        // instruction is the only one in that group. This optional attribute is enforced during XML parsing phase.
-        //
-        // When the templateref instruction is optional, this->storage()[1] would be setup to point
-        // to the origin storage for the group; when we construct a new template value from inst, we must have
-        // the back pointer to the original group storage as well; otherwise, we are unable to set the group as absent.
-        this->storage()->of_templateref.content_[inst->subinstructions_count()].of_templateref.content_ =
-          this->parent_storage();
-        this->parent_storage()->present(1);
-      }
     }
 };
 

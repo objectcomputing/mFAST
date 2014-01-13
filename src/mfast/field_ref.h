@@ -167,7 +167,7 @@ template <typename T, typename CanBeEmpty>
 class make_field_mref_base
 {
   protected:
-     void omit(bool) const
+    void omit() const
     {
     }
 
@@ -188,9 +188,9 @@ class make_field_mref_base<T, boost::true_type>
 
     // overloading void present(bool) is not a good ideal. It causes the bool present()
     // declared in field_cref being hided because of the overloading rule.
-    void omit(bool v) const
+    void omit() const
     {
-      if (v && my_instruction()->optional()) {
+      if (my_instruction()->optional()) {
         my_storage()->present(0);
       }
     }

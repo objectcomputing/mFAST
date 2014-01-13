@@ -38,6 +38,9 @@ void hpp_gen::gen_primitive (const char* cpp_type, const mfast::field_instructio
   if (inst->optional() || inst->field_operator() != mfast::operator_constant)
   {
     header_mref_ << indent << "mfast::"<< cpp_type << "_mref set_" << name << "() const;\n";
+    if (inst->optional()) {
+      header_mref_ << indent << "void omit_" << name << "() const;\n";
+    }
   }
 }
 
@@ -119,17 +122,13 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     }
 
     if (!top_level) {
+      header_cref_ << indent << "typedef " << cpp_type << "_cref " << name << "_cref;\n";
+      header_mref_ << indent << "typedef " << cpp_type << "_mref " << name << "_mref;\n";
+      header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
+      header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
+
       if (inst->optional()) {
-        header_cref_ << indent << "typedef mfast::make_optional_cref<" << cpp_type << "_cref> " << name << "_cref;\n";
-        header_mref_ << indent << "typedef mfast::make_optional_mref<" << cpp_type << "_mref> " << name << "_mref;\n";
-        header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
-        header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
-      }
-      else {
-        header_cref_ << indent << "typedef " << cpp_type << "_cref " << name << "_cref;\n";
-        header_mref_ << indent << "typedef " << cpp_type << "_mref " << name << "_mref;\n";
-        header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
-        header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
+        header_mref_ << indent << "void omit_" << name << "() const;\n";
       }
     }
   }
@@ -140,7 +139,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
                  << indent << "class " << name << "_cref\n"
                  << indent << "  : public mfast::group_cref\n"
                  << indent << "{\n"
-                << indent << "   typedef mfast::group_cref base_type;\n"
+                 << indent << "  typedef mfast::group_cref base_type;\n"
                  << indent << "  public:\n"
                  << indent << "    typedef mfast::group_field_instruction instruction_type;\n"
                  << indent << "    typedef const instruction_type* instruction_cptr;\n"
@@ -171,6 +170,9 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     if (!top_level) {
       header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
       header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
+      if (inst->optional()) {
+        header_mref_ << indent << "void omit_" << name << "() const;\n";
+      }
     }
   }
 
@@ -289,6 +291,8 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
   if (!top_level) {
     header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
     header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
+    if (inst->optional())
+      header_mref_ << indent << "void omit_" << name << "() const;\n";
   }
 
   if (top_level)

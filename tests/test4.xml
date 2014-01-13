@@ -3,7 +3,7 @@
 
     <define name="Address">
       <group>
-        <string name="streeAddress" />
+        <string name="streetAddress" />
         <string name="city" />
         <string name="state" />
         <uInt32 name="postalCode" />

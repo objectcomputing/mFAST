@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(inserter_test)
     decimal_mref mref(&alloc, &storage, &inst);
 
 
-    mref.omit(true);
+    mref.omit();
     BOOST_CHECK(insert_to_stream(mref, "\x80"));
 
     mref.as(1, 4);

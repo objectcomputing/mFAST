@@ -294,7 +294,7 @@ public:
   void as_initial_value() const
   {
     if (this->instruction()->initial_value().is_empty())
-      this->omit(true);
+      this->omit();
     else
       copy_from(this->instruction()->initial_value());
   }
@@ -302,7 +302,7 @@ public:
   void as (const vector_cref<T>& cref) const
   {
     if (cref.absent()) {
-      this->omit(true);
+      this->omit();
     }
     else {
       assign(cref.begin(), cref.end());

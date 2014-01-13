@@ -66,13 +66,32 @@ class aggregate_cref
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
+
+    bool absent () const
+    {
+      return storage_array_ == 0;
+    }
+
+    bool present() const
+    {
+      return !absent();
+    }
+
+    bool operator ! () const
+    {
+      return this->absent();
+    }
+
+#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+    explicit bool operator() const
+    {
+      return this->present();
+    }
+#endif
+
   protected:
     aggregate_cref& operator= (const aggregate_cref&);
 
-    value_storage* parent_storage() const
-    {
-      return field_storage(num_fields())->of_group.content_;
-    }
 
     const value_storage* storage() const {
       return storage_array_;
@@ -128,108 +147,6 @@ class make_aggregate_mref
 };
 
 typedef make_aggregate_mref<aggregate_cref> aggregate_mref;
-
-
-
-template <typename T>
-class make_optional_cref
-  : public T
-{
-  public:
-    make_optional_cref(const value_storage*           storage_array,
-                       const group_field_instruction* instruction)
-      : T(storage_array, instruction)
-    {
-    }
-
-    explicit make_optional_cref(const field_cref& other)
-      : T (other)
-    {
-    }
-
-    bool absent () const
-    {
-      return this->parent_storage()->is_empty();
-    }
-
-    bool present() const
-    {
-      return !absent ();
-    }
-
-    bool operator ! () const
-    {
-      return this->absent();
-    }
-
-#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-    explicit bool operator() const
-    {
-      return this->present();
-    }
-#endif
-
-};
-
-template <typename T>
-class make_optional_mref
-  : public T
-{
-  public:
-    typedef typename T::instruction_cptr instruction_cptr;
-
-    make_optional_mref(mfast::allocator*    alloc,
-                       const value_storage* storage_array,
-                       instruction_cptr     instruction)
-      : T(alloc, storage_array, instruction)
-    {
-    }
-
-    explicit make_optional_mref(const field_mref& other)
-      : T(other)
-    {
-    }
-
-    typedef make_optional_cref<typename T::cref_type> cref_type;
-
-    operator cref_type() const
-    {
-      return cref_type(this->storage(), this->instruction());
-    }
-
-    bool absent () const
-    {
-      return this->parent_storage()->is_empty();
-    }
-
-    bool present() const
-    {
-      return !absent ();
-    }
-
-    bool operator ! () const
-    {
-      return this->absent();
-    }
-
-#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-    explicit bool operator() const
-    {
-      return this->present();
-    }
-#endif
-
-    void omit(bool v) const
-    {
-      this->parent_storage()->present(!v);
-    }
-
-    void clear() const
-    {
-      omit(true);
-    }
-
-};
 
 
 /////////////////////////////////////////////////////////////////

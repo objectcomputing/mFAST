@@ -180,7 +180,7 @@ fast_encoder_impl::visit(sequence_cref& cref, int)
   if (cref.present())
     length_mref.as(cref.size());
   else
-    length_mref.omit(true);
+    length_mref.omit();
 
   this->visit(length_mref);
 

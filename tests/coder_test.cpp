@@ -47,7 +47,7 @@ class fast_coding_test_case
     }
 
     boost::test_tools::predicate_result
-    encoding(const message_cref msg_ref, const byte_stream& result, bool reset=false)
+    encoding(const message_cref& msg_ref, const byte_stream& result, bool reset=false)
     {
       const int buffer_size = 128;
       char buffer[buffer_size];
@@ -66,7 +66,7 @@ class fast_coding_test_case
     }
 
     boost::test_tools::predicate_result
-    decoding(const byte_stream& bytes, const message_cref result, bool reset=false)
+    decoding(const byte_stream& bytes, const message_cref& result, bool reset=false)
     {
       const char* first = bytes.data();
       message_cref msg = decoder_.decode(first, first+bytes.size(), reset);
@@ -114,6 +114,8 @@ BOOST_AUTO_TEST_CASE(simple_coder_test)
   msg_ref[1].as(2);
   msg_ref[2].as(3);
 
+
+
   BOOST_CHECK(test_case.encoding(msg_ref,"\xB8\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
 }
@@ -139,7 +141,6 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
 
   msg_ref[0].as(1);
   group_mref grp(msg_ref[1]);
-  grp.omit(false);
   grp[0].as(2);
   grp[1].as(3);
 

@@ -146,7 +146,7 @@ class int_mref
     void as (const int_cref<T>& cref) const
     {
       if (cref.absent()) {
-        this->omit(true);
+        this->omit();
       }
       else {
         as(cref.value());

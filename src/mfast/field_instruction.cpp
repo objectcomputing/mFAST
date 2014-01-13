@@ -268,16 +268,6 @@ void aggregate_instruction_base::copy_group_subfields(const value_storage* src_s
 
 ///////////////////////////////////////////////////////////////////
 
-inline std::size_t
-group_field_instruction::content_allocation_size() const
-{
-  std::size_t result = this->group_content_byte_count();
-  // for optional group, we need an extra storage used for storing the
-  // pointer back to its parent so we have way to set the field as absent.
-  // For simplicity, always allocate the extra storage
-  result += sizeof(value_storage);
-  return result;
-}
 
 void group_field_instruction::construct_value(value_storage& storage,
                                               allocator*     alloc) const
@@ -287,7 +277,7 @@ void group_field_instruction::construct_value(value_storage& storage,
   // group field is never used for a dictionary key; so, we won't use this
   // function for reseting a key and thus no memory deallocation is required.
   storage.of_group.content_ =
-    static_cast<value_storage*>(alloc->allocate( content_allocation_size() ));
+    static_cast<value_storage*>(alloc->allocate( group_content_byte_count() ));
   storage.of_group.own_content_ = true;
   construct_group_subfields(storage.of_group.content_,
                             alloc,
@@ -300,7 +290,7 @@ void group_field_instruction::destruct_value(value_storage& storage,
   if (storage.of_group.content_) {
     destruct_group_subfields(storage.of_group.content_, alloc);
     if (storage.of_group.own_content_) {
-      alloc->deallocate(storage.of_group.content_, content_allocation_size());
+      alloc->deallocate(storage.of_group.content_, group_content_byte_count());
     }
   }
 }
@@ -334,7 +324,7 @@ void group_field_instruction::copy_construct_value(const value_storage& src,
   dest.of_group.present_ = src.of_group.present_;
   dest.of_group.own_content_ = true;
   dest.of_group.content_ =
-    static_cast<value_storage*>(alloc->allocate( content_allocation_size() ));
+    static_cast<value_storage*>(alloc->allocate( group_content_byte_count() ));
 
   copy_group_subfields(src.of_group.content_, dest.of_group.content_, alloc, &dest);
 }
@@ -509,12 +499,12 @@ void templateref_instruction::construct_value(value_storage&              storag
   storage.of_templateref.of_instruction.instruction_ = from_inst;
   if (from_inst) {
     storage.of_templateref.content_ = static_cast<value_storage*>(
-      alloc->allocate(from_inst->content_allocation_size()));
+      alloc->allocate(from_inst->group_content_byte_count()));
 
     if (construct_subfields)
       from_inst->construct_group_subfields(storage.of_templateref.content_, alloc);
     else
-      memset(storage.of_templateref.content_, 0, from_inst->content_allocation_size());
+      memset(storage.of_templateref.content_, 0, from_inst->group_content_byte_count());
   }
   else {
     storage.of_templateref.content_ = 0;
@@ -528,7 +518,7 @@ void templateref_instruction::destruct_value(value_storage& storage,
     storage.of_templateref.of_instruction.instruction_->destruct_group_subfields(
       static_cast<value_storage*>(storage.of_templateref.content_),
       alloc);
-    alloc->deallocate(storage.of_templateref.content_, storage.of_templateref.of_instruction.instruction_->content_allocation_size());
+    alloc->deallocate(storage.of_templateref.content_, storage.of_templateref.of_instruction.instruction_->group_content_byte_count());
   }
 }
 
@@ -540,7 +530,7 @@ void templateref_instruction::copy_construct_value(const value_storage& src,
   dest.of_templateref.of_instruction.instruction_ = src.of_templateref.of_instruction.instruction_;
   if (src.of_templateref.of_instruction.instruction_) {
     dest.of_templateref.content_ =
-      static_cast<value_storage*>(alloc->allocate( dest.of_templateref.of_instruction.instruction_->content_allocation_size() ));
+      static_cast<value_storage*>(alloc->allocate( dest.of_templateref.of_instruction.instruction_->group_content_byte_count() ));
 
     dest.of_templateref.of_instruction.instruction_->copy_group_subfields(
       src.of_templateref.content_,

@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
     decimal_mref mref(&alloc, &storage, &inst);
 
 
-    mref.omit(true);
+    mref.omit();
     BOOST_CHECK(extract_from_stream("\x80", mref));
 
     mref.as(1, 4);
