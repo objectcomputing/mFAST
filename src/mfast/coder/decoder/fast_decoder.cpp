@@ -112,12 +112,12 @@ fast_decoder_impl::fast_decoder_impl()
 
 void fast_decoder_impl::reset_messages()
 {
-  if (message_alloc_->reset()) {
-    message_map_t::iterator itr;
-    for (itr = template_messages_.begin(); itr!= template_messages_.end(); ++itr) {
-      itr->second.reset();
-    }
-  }
+  // if (message_alloc_->reset()) {
+  //   message_map_t::iterator itr;
+  //   for (itr = template_messages_.begin(); itr!= template_messages_.end(); ++itr) {
+  //     itr->second.reset();
+  //   }
+  // }
 }
 
 fast_decoder_impl::~fast_decoder_impl()
@@ -324,7 +324,7 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
   // because after the accept_mutator(), the active_message_
   // may change because of the decoding of dynamic template reference
   message_type* message = active_message_;
-  message->ensure_valid();
+  // message->ensure_valid();
   message->ref().accept_mutator(*this);
   return message;
 }

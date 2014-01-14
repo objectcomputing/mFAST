@@ -79,8 +79,8 @@ protected:
   // and the allocator has been resetted. All previously allocated memory
   // are invalidated. Thus memory for sub-fields needs to be re-allocated.
 
-  void reset();
-  void ensure_valid();
+  // void reset();
+  // void ensure_valid();
 
   friend struct fast_decoder_impl;
 
@@ -204,19 +204,19 @@ composite_field<CRef>::allocator() const
   return this->alloc_;
 }
 
-template <typename CRef>
-inline void
-composite_field<CRef>::reset()
-{
-  my_storage_.of_group.content_ = 0;
-}
-
-template <typename CRef>
-inline void
-composite_field<CRef>::ensure_valid()
-{
-  instruction_->ensure_valid_storage(my_storage_, alloc_);
-}
+// template <typename CRef>
+// inline void
+// composite_field<CRef>::reset()
+// {
+//   my_storage_.of_group.content_ = 0;
+// }
+//
+// template <typename CRef>
+// inline void
+// composite_field<CRef>::ensure_valid()
+// {
+//   instruction_->ensure_valid_storage(my_storage_, alloc_);
+// }
 
 }
 

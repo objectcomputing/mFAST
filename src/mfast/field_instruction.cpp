@@ -214,14 +214,10 @@ void byte_vector_field_instruction::accept(field_instruction_visitor& visitor,
 /////////////////////////////////////////////////////////
 
 void aggregate_instruction_base::construct_group_subfields(value_storage* subfields,
-                                                           allocator*     alloc,
-                                                           value_storage* parent) const
+                                                           allocator*     alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     this->subinstructions_[i]->construct_value(subfields[i], alloc);
-  }
-  if (parent) {
-    subfields[subinstructions_count_].of_group.content_ = parent;
   }
 }
 
@@ -254,16 +250,15 @@ int aggregate_instruction_base::find_subinstruction_index_by_name(const char* na
 // deep copy
 void aggregate_instruction_base::copy_group_subfields(const value_storage* src_subfields,
                                                       value_storage*       dest_subfields,
-                                                      allocator*           alloc,
-                                                      value_storage*       parent) const
+                                                      allocator*           alloc) const
 {
   for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
     this->subinstructions_[i]->copy_construct_value(src_subfields[i], dest_subfields[i], alloc);
   }
 
-  if (parent) {
-    dest_subfields[subinstructions_count_].of_group.content_ = parent;
-  }
+  // if (parent) {
+  //   dest_subfields[subinstructions_count_].of_group.content_ = parent;
+  // }
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -280,8 +275,7 @@ void group_field_instruction::construct_value(value_storage& storage,
     static_cast<value_storage*>(alloc->allocate( group_content_byte_count() ));
   storage.of_group.own_content_ = true;
   construct_group_subfields(storage.of_group.content_,
-                            alloc,
-                            &storage);
+                            alloc);
 }
 
 void group_field_instruction::destruct_value(value_storage& storage,
@@ -326,7 +320,7 @@ void group_field_instruction::copy_construct_value(const value_storage& src,
   dest.of_group.content_ =
     static_cast<value_storage*>(alloc->allocate( group_content_byte_count() ));
 
-  copy_group_subfields(src.of_group.content_, dest.of_group.content_, alloc, &dest);
+  copy_group_subfields(src.of_group.content_, dest.of_group.content_, alloc);
 }
 
 void group_field_instruction::accept(field_instruction_visitor& visitor,
@@ -465,17 +459,17 @@ void template_instruction::copy_construct_value(const value_storage& src,
 
 }
 
-void template_instruction::ensure_valid_storage(value_storage& storage,
-                                                allocator*     alloc) const
-{
-  if (storage.of_group.content_ == 0) {
-    // group field is never used for a dictionary key; so, we won't use this
-    // function for reseting a key and thus no memory deallocation is required.
-    storage.of_group.content_ =
-      static_cast<value_storage*>(alloc->allocate( this->group_content_byte_count() ));
-    memset(storage.of_group.content_, 0, this->group_content_byte_count());
-  }
-}
+// void template_instruction::ensure_valid_storage(value_storage& storage,
+//                                                 allocator*     alloc) const
+// {
+//   if (storage.of_group.content_ == 0) {
+//     // group field is never used for a dictionary key; so, we won't use this
+//     // function for reseting a key and thus no memory deallocation is required.
+//     storage.of_group.content_ =
+//       static_cast<value_storage*>(alloc->allocate( this->group_content_byte_count() ));
+//     memset(storage.of_group.content_, 0, this->group_content_byte_count());
+//   }
+// }
 
 void template_instruction::accept(field_instruction_visitor& visitor,
                                   void*                      context) const

@@ -72,8 +72,8 @@ protected:
   // and the allocator has been resetted. All previously allocated memory
   // are invalidated. Thus memory for sub-fields needs to be re-allocated.
 
-  void reset();
-  void ensure_valid();
+  // void reset();
+  // void ensure_valid();
 
   friend struct fast_decoder_impl;
 
@@ -178,20 +178,20 @@ squence_type_base<CRef>::allocator() const
   return this->alloc_;
 }
 
-template <typename CRef>
-inline void
-squence_type_base<CRef>::reset()
-{
-  my_storage_.of_array.content_ = 0;
-  my_storage_.of_array.capacity_in_bytes_ = 0;
-}
-
-template <typename CRef>
-inline void
-squence_type_base<CRef>::ensure_valid()
-{
-  instruction_->ensure_valid_storage(my_storage_, alloc_);
-}
+// template <typename CRef>
+// inline void
+// squence_type_base<CRef>::reset()
+// {
+//   my_storage_.of_array.content_ = 0;
+//   my_storage_.of_array.capacity_in_bytes_ = 0;
+// }
+//
+// template <typename CRef>
+// inline void
+// squence_type_base<CRef>::ensure_valid()
+// {
+//   instruction_->ensure_valid_storage(my_storage_, alloc_);
+// }
 
 } /* mfast */
 

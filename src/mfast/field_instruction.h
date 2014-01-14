@@ -847,15 +847,13 @@ public:
   }
 
   void construct_group_subfields(value_storage* group_content,
-                                 allocator*     alloc,
-                                 value_storage* parent=0) const;
+                                 allocator*     alloc) const;
   void destruct_group_subfields(value_storage* group_content,
                                 allocator*     alloc) const;
 
   void copy_group_subfields(const value_storage* src,
                             value_storage*       dest,
-                            allocator*           alloc,
-                            value_storage*       parent=0) const;
+                            allocator*           alloc) const;
 
   /// Returns the number of bytes needed for the content of the group
   uint32_t group_content_byte_count() const
@@ -1155,8 +1153,8 @@ public:
     return reset_;
   }
 
-  void ensure_valid_storage(value_storage& storage,
-                            allocator*     alloc) const;
+  // void ensure_valid_storage(value_storage& storage,
+  //                           allocator*     alloc) const;
 
 private:
   const char* template_ns_;
