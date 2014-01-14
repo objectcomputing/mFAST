@@ -28,10 +28,10 @@ inline std::size_t align(std::size_t n, std::size_t x)
   return (n + y) & ~y;
 }
 
-bool allocator::reset()
-{
-  return false;
-}
+// bool allocator::reset()
+// {
+//   return false;
+// }
 
 std::size_t
 allocator::reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)

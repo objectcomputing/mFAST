@@ -47,9 +47,9 @@ class MFAST_EXPORT allocator
     /// @throws std::bad_alloc on failure.
     virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)=0;
 
-    /// Deallocate a memory of size \a n 
+    /// Deallocate a memory of size \a n
     ///
-    /// Notice that \a pointer must be the one returned by  allocate() or rellocate() and \a n 
+    /// Notice that \a pointer must be the one returned by  allocate() or rellocate() and \a n
     /// must be the one specified in allocate() or the returned value of reallocate().
     virtual void deallocate(void* pointer, std::size_t n)=0;
 
@@ -60,7 +60,7 @@ class MFAST_EXPORT allocator
     /// operation.
     ///
     /// @return true if successful.
-    virtual bool reset();
+    // virtual bool reset();
 };
 
 }

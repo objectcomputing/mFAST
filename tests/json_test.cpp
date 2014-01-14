@@ -82,10 +82,10 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
 
   BOOST_CHECK(person_ref.get_login().present());
 
-  // person_ref.set_bankAccounts().resize(1);
-  // BankAccount_mref acct1 = person_ref.set_bankAccounts()[0].as<BankAccount>();
-  // acct1.set_number().as(12345678);
-  // acct1.set_routingNumber().as(87654321);
+  person_ref.set_bankAccounts().resize(1);
+  BankAccount_mref acct1 = person_ref.set_bankAccounts()[0].as<BankAccount>();
+  acct1.set_number().as(12345678);
+  acct1.set_routingNumber().as(87654321);
 
   std::stringstream strm;
   mfast::json::encode(strm, person_ref);
