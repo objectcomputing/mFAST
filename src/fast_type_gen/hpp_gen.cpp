@@ -137,9 +137,9 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 
     header_cref_ << "\n"
                  << indent << "class " << name << "_cref\n"
-                 << indent << "  : public mfast::group_cref\n"
+                 << indent << "  : public mfast::aggregate_cref\n"
                  << indent << "{\n"
-                 << indent << "  typedef mfast::group_cref base_type;\n"
+                 << indent << "  typedef mfast::aggregate_cref base_type;\n"
                  << indent << "  public:\n"
                  << indent << "    typedef mfast::group_field_instruction instruction_type;\n"
                  << indent << "    typedef const instruction_type* instruction_cptr;\n"
@@ -149,7 +149,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
                  << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
 
     std::stringstream mref_base_type;
-    mref_base_type << "mfast::make_group_mref<" << cref_scope_.str() << name << "_cref>";
+    mref_base_type << "mfast::make_aggregate_mref<" << cref_scope_.str() << name << "_cref>";
 
     header_mref_ << "\n"
                  << indent << "class " << name << "_mref\n"

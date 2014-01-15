@@ -26,7 +26,8 @@ add_executable (mfast_test
                 fast_type_gen_test.cpp
                 dictionary_builder_test.cpp
                 json_test.cpp
-			    int_vector_test.cpp)
+                int_vector_test.cpp
+                composite_type_test.cpp)
 
 target_link_libraries (mfast_test
                        mfast_static
