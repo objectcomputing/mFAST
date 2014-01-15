@@ -55,7 +55,10 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   std::istringstream istrm(result);
   BOOST_CHECK(mfast::json::decode(istrm, product3_holder.mref()));
   //
-  // BOOST_CHECK(product3_holder.cref() == product_ref);
+  BOOST_CHECK(product3_holder.cref() == product_ref);
+
+  product_ref.omit_stock();
+  BOOST_CHECK(product_ref.get_stock().absent());
 }
 
 BOOST_AUTO_TEST_CASE(json_encode_person_test)
