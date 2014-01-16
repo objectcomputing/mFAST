@@ -83,7 +83,7 @@ class aggregate_cref
     }
 
 #ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-    explicit bool operator() const
+    explicit operator bool() const
     {
       return this->present();
     }
