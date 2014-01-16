@@ -95,7 +95,6 @@ class make_group_mref
 
   public:
     typedef typename base_type::instruction_cptr instruction_cptr;
-    typedef ConstGroupRef cref;
 
     make_group_mref()
     {

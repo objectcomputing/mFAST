@@ -28,14 +28,14 @@
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
 #if defined(MAST_NO_SHARED_LIBS) && !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
-namespace boost { namespace multiprecision {
+namespace boost { namespace multiprecision { namespace backends{
 MFAST_EXTERN_TEMPLATE template class cpp_dec_float<18>;
-}}
+}}}
 #endif
 
 namespace mfast {
 
-typedef boost::multiprecision::cpp_dec_float<18> decimal_backend;
+typedef boost::multiprecision::backends::cpp_dec_float<18> decimal_backend;
 typedef boost::multiprecision::number<decimal_backend> decimal;
 class allocator;
 
