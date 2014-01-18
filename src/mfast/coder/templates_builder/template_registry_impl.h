@@ -10,8 +10,8 @@ namespace coder {
 
 struct template_registry_impl
 {
-  typedef std::map<std::string, const template_instruction*> map_type;
-  map_type templates_;
+  typedef std::map<std::string, const field_instruction*> map_type;
+  map_type types_;
   arena_allocator alloc_;
 
 
@@ -20,19 +20,19 @@ struct template_registry_impl
     return std::string(ns) + "||" + name;
   }
 
-  const template_instruction*
+  const field_instruction*
   find(const char* ns, const char* name) const
   {
-    map_type::const_iterator itr = templates_.find(get_key(ns, name));
-    if (itr != templates_.end()) {
+    map_type::const_iterator itr = types_.find(get_key(ns, name));
+    if (itr != types_.end()) {
       return itr->second;
     }
     return 0;
   }
 
-  void add(const char* ns, const template_instruction* inst)
+  void add(const char* ns, const field_instruction* inst)
   {
-    templates_[get_key(ns, inst->name())] = inst;
+    types_[get_key(ns, inst->name())] = inst;
   }
 
 };

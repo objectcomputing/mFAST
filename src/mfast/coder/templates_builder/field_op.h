@@ -112,6 +112,18 @@ private:
   }
 
   void set_init_value(const char* init_value_str,
+                      const enum_field_instruction*)
+  {
+      // we cannot really decide the exact enum value at this point,
+      // just ignore it and process it later.
+    if (init_value_str) {
+      initial_value_ = string_value_storage( init_value_str ).storage_;
+      // we use the defined_bit to differentiate whether the content is converted to int value or not
+      initial_value_.of_array.defined_bit_ = 0;
+    }
+  }
+
+  void set_init_value(const char* init_value_str,
                       const byte_vector_field_instruction*);
 
   const XMLElement* find_field_op_element(const XMLElement& element) const;

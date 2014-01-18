@@ -70,13 +70,14 @@ field_instruction::field_type_name() const
     "field_type_uint64",
     "field_type_decimal",
     "field_type_exponent",
+    "field_type_templateref",
     "field_type_ascii_string",
     "field_type_unicode_string",
     "field_type_byte_vector",
     "field_type_group",
     "field_type_sequence",
-    "field_type_templateref",
-    "field_type_template"
+    "field_type_template",
+    "field_type_enum"
   };
   return names[this->field_type()];
 }
@@ -124,6 +125,14 @@ void decimal_field_instruction::accept(field_instruction_visitor& visitor,
                                        void*                      context) const
 {
   visitor.visit(this, context);
+}
+
+//////////////////////////////////////////////////////////
+
+void enum_field_instruction::accept(field_instruction_visitor& visitor,
+                                    void*                      context) const
+{
+  return visitor.visit(this, context);
 }
 
 /////////////////////////////////////////////////////////
@@ -382,9 +391,9 @@ void sequence_field_instruction::destruct_value(value_storage& storage,
 }
 
 void sequence_field_instruction::construct_value(value_storage& storage,
-                                              value_storage*,
-                                              allocator*     alloc,
-                                              bool           ) const
+                                                 value_storage*,
+                                                 allocator*     alloc,
+                                                 bool           ) const
 {
   this->construct_value(storage, alloc);
 }
@@ -548,15 +557,13 @@ std::size_t templateref_instruction::pmap_size() const
 }
 
 const const_instruction_ptr_t*
-templateref_instruction::default_instructions(presence_enum_t optional)
+templateref_instruction::default_instruction()
 {
-  static const templateref_instruction mandatory_instruction(0, presence_mandatory);
-  static const templateref_instruction optional_instruction(0, presence_optional);
+  static const templateref_instruction the_instruction(0);
   static const field_instruction* array[] = {
-    &mandatory_instruction,
-    &optional_instruction
+    &the_instruction,
   };
-  return &array[optional];
+  return array;
 }
 
 }

@@ -32,7 +32,7 @@ codegen_base::codegen_base(const char* filebase, const char* fileext)
 
 void codegen_base::traverse(mfast::dynamic_templates_description& desc)
 {
-  BOOST_FOREACH(const mfast::group_field_instruction* inst, desc.composite_instructions())
+  BOOST_FOREACH(const mfast::field_instruction* inst, desc.defined_type_instructions())
   {
     // we use the second parameter to identify wether the instruction is nested. If the
     // second parameter is not 0, it is nested inside another composite types.
@@ -74,7 +74,11 @@ bool codegen_base::contains_only_templateRef(const mfast::group_field_instructio
 std::string
 codegen_base::cpp_name(const mfast::field_instruction* inst) const
 {
-  const char* name = inst->name();
+  return cpp_name( inst->name() );
+}
+
+std::string codegen_base::cpp_name(const char* name) const
+{
   std::string result;
   if (!std::isalpha(name[0]))
     result = "_";
@@ -88,11 +92,3 @@ codegen_base::cpp_name(const mfast::field_instruction* inst) const
   return result;
 }
 
-std::string
-codegen_base::ref_instruction_name(const mfast::group_field_instruction* inst) const
-{
-  if (inst->ref_instruction()->cpp_ns() && inst->ref_instruction()->cpp_ns()[0] != 0)
-   return std::string(inst->ref_instruction()->cpp_ns()) + "::" + inst->ref_instruction()->name();
-  else
-    return inst->ref_instruction()->name();
-}

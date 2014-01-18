@@ -48,11 +48,17 @@ public:
   virtual void visit(const mfast::sequence_field_instruction*, void*);
   virtual void visit(const mfast::template_instruction*, void*);
   virtual void visit(const mfast::templateref_instruction*, void*);
+  virtual void visit(const mfast::enum_field_instruction*, void*);
 
 private:
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix);
 
   void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);
+
+  void gen_accessors (const mfast::field_instruction* inst,
+                      const std::string&       name,
+                      const std::string&       cref_type_name,
+                      const std::string&       mref_type_name);
 
   std::stringstream mref_scope_;
 };

@@ -123,6 +123,9 @@ private:
   virtual void visit(const sequence_field_instruction*, void*);
   virtual void visit(const template_instruction*, void*);
   virtual void visit(const templateref_instruction*, void*);
+
+  virtual void visit(const enum_field_instruction*, void*);
+
   void build_template(const template_instruction*, void*);
 
   void build_group(const field_instruction*          fi,

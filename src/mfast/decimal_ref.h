@@ -239,7 +239,7 @@ class exponent_mref
       this->storage()->present(false);
     }
 
-    void as_initial_value() const
+    void to_initial_value() const
     {
       as(this->instruction()->initial_value().of_decimal.exponent_);
     }
@@ -385,7 +385,7 @@ class decimal_mref
       this->storage()->of_decimal.exponent_ = v;
     }
 
-    void as_initial_value() const
+    void to_initial_value() const
     {
       *this->storage() = instruction()->initial_value();
     }

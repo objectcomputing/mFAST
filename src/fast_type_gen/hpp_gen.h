@@ -51,6 +51,7 @@ public:
   virtual void visit(const mfast::sequence_field_instruction*, void*);
   virtual void visit(const mfast::template_instruction*, void*);
   virtual void visit(const mfast::templateref_instruction*, void*);
+  virtual void visit(const mfast::enum_field_instruction*, void*);
 
 private:
   void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);

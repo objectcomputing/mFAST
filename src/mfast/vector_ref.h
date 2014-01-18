@@ -291,7 +291,7 @@ public:
   {
   }
 
-  void as_initial_value() const
+  void to_initial_value() const
   {
     if (this->instruction()->initial_value().is_empty())
       this->omit();

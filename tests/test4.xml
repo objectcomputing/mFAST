@@ -23,9 +23,19 @@
       </sequence>
     </define>
 
+    <define name="Gender">
+      <enum>
+        <element name="male"/>
+        <element name="female"/>
+      </enum>
+    </define>
+
     <template name="Person" >
         <string name="firstName" />
         <string name="lastName" />
+        <field name="gender">
+          <type name="Gender" />
+        </field>
         <uInt32 name="age" />
         <field name="address" presence="optional">
           <type name="Address" />

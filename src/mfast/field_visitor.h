@@ -20,6 +20,7 @@
 #define FIELD_VISITOR_H_84G4WWEY
 
 #include "mfast/int_ref.h"
+#include "mfast/enum_ref.h"
 #include "mfast/decimal_ref.h"
 #include "mfast/string_ref.h"
 #include "mfast/group_ref.h"
@@ -39,124 +40,130 @@ class field_accessor_adaptor
 {
   FieldAccessor& accssor_;
 
-  public:
+public:
 
-    field_accessor_adaptor(FieldAccessor& accssor)
-      : accssor_(accssor)
-    {
-    }
+  field_accessor_adaptor(FieldAccessor& accssor)
+    : accssor_(accssor)
+  {
+  }
 
-    void visit(const aggregate_cref& ref)
-    {
-      for (std::size_t i = 0; i < ref.num_fields(); ++i) {
-        field_cref r(ref[i]);
-        if (r.present() || FieldAccessor::visit_absent ) {
-          r.instruction()->accept(*this, storage_ptr_of(r));
-        }
+  void visit(const aggregate_cref& ref)
+  {
+    for (std::size_t i = 0; i < ref.num_fields(); ++i) {
+      field_cref r(ref[i]);
+      if (r.present() || FieldAccessor::visit_absent ) {
+        r.instruction()->accept(*this, storage_ptr_of(r));
       }
     }
+  }
 
-    void visit(const sequence_cref& ref)
-    {
-      for (std::size_t j = 0; j < ref.size(); ++j) {
-        sequence_element_cref element(ref[j]);
-        accssor_.visit(element, j);
-      }
+  void visit(const sequence_cref& ref)
+  {
+    for (std::size_t j = 0; j < ref.size(); ++j) {
+      sequence_element_cref element(ref[j]);
+      accssor_.visit(element, j);
     }
+  }
 
-    virtual void visit(const int32_field_instruction* inst, void* storage)
-    {
-      int32_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const int32_field_instruction* inst, void* storage)
+  {
+    int32_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const uint32_field_instruction* inst, void* storage)
-    {
-      uint32_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const uint32_field_instruction* inst, void* storage)
+  {
+    uint32_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const int64_field_instruction* inst, void* storage)
-    {
-      int64_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const int64_field_instruction* inst, void* storage)
+  {
+    int64_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const uint64_field_instruction* inst, void* storage)
-    {
-      uint64_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const uint64_field_instruction* inst, void* storage)
+  {
+    uint64_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const decimal_field_instruction* inst, void* storage)
-    {
-      decimal_cref ref(static_cast<value_storage*>(storage),inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const decimal_field_instruction* inst, void* storage)
+  {
+    decimal_cref ref(static_cast<value_storage*>(storage),inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const ascii_field_instruction* inst, void* storage)
-    {
-      ascii_string_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const ascii_field_instruction* inst, void* storage)
+  {
+    ascii_string_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const unicode_field_instruction* inst, void* storage)
-    {
-      unicode_string_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const unicode_field_instruction* inst, void* storage)
+  {
+    unicode_string_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const byte_vector_field_instruction* inst, void* storage)
-    {
-      byte_vector_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const byte_vector_field_instruction* inst, void* storage)
+  {
+    byte_vector_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const int32_vector_field_instruction* inst, void* storage)
-    {
-      int32_vector_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const int32_vector_field_instruction* inst, void* storage)
+  {
+    int32_vector_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const uint32_vector_field_instruction* inst, void* storage)
-    {
-      uint32_vector_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const uint32_vector_field_instruction* inst, void* storage)
+  {
+    uint32_vector_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const int64_vector_field_instruction* inst, void* storage)
-    {
-      int64_vector_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const int64_vector_field_instruction* inst, void* storage)
+  {
+    int64_vector_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const uint64_vector_field_instruction* inst, void* storage)
-    {
-      uint64_vector_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref);
-    }
+  virtual void visit(const uint64_vector_field_instruction* inst, void* storage)
+  {
+    uint64_vector_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
-    virtual void visit(const group_field_instruction* inst, void* storage)
-    {
-      group_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref, 0);
-    }
+  virtual void visit(const group_field_instruction* inst, void* storage)
+  {
+    group_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref, 0);
+  }
 
-    virtual void visit(const sequence_field_instruction* inst, void* storage)
-    {
-      sequence_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref, 0);
-    }
+  virtual void visit(const sequence_field_instruction* inst, void* storage)
+  {
+    sequence_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref, 0);
+  }
 
-    virtual void visit(const template_instruction*, void* )
-    {
-    }
+  virtual void visit(const template_instruction*, void* )
+  {
+  }
 
-    virtual void visit(const templateref_instruction* inst, void* storage)
-    {
-      nested_message_cref ref(static_cast<value_storage*>(storage), inst);
-      accssor_.visit(ref, 0);
-    }
+  virtual void visit(const templateref_instruction* inst, void* storage)
+  {
+    nested_message_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref, 0);
+  }
+
+  virtual void visit(const enum_field_instruction* inst, void* storage)
+  {
+    enum_cref ref(static_cast<value_storage*>(storage), inst);
+    accssor_.visit(ref);
+  }
 
 };
 
@@ -169,126 +176,131 @@ class field_mutator_adaptor
   allocator* alloc_;
   FieldMutator& mutator_;
 
-  public:
+public:
 
-    field_mutator_adaptor(FieldMutator& mutator, allocator* alloc)
-      : alloc_(alloc)
-      , mutator_(mutator)
-    {
-    }
+  field_mutator_adaptor(FieldMutator& mutator, allocator* alloc)
+    : alloc_(alloc)
+    , mutator_(mutator)
+  {
+  }
 
-    void visit(const aggregate_mref& ref)
-    {
-      for (std::size_t i = 0; i < ref.num_fields(); ++i) {
-        field_mref r(ref[i]);
-        if (r.present() || FieldMutator::visit_absent ) {
-          r.instruction()->accept(*this, storage_ptr_of(r));
-        }
+  void visit(const aggregate_mref& ref)
+  {
+    for (std::size_t i = 0; i < ref.num_fields(); ++i) {
+      field_mref r(ref[i]);
+      if (r.present() || FieldMutator::visit_absent ) {
+        r.instruction()->accept(*this, storage_ptr_of(r));
       }
     }
+  }
 
-    void visit(const sequence_mref& ref)
-    {
-      for (std::size_t j = 0; j < ref.size(); ++j) {
-        sequence_element_mref element(ref[j]);
-        mutator_.visit(element, j);
-      }
+  void visit(const sequence_mref& ref)
+  {
+    for (std::size_t j = 0; j < ref.size(); ++j) {
+      sequence_element_mref element(ref[j]);
+      mutator_.visit(element, j);
     }
+  }
 
-    virtual void visit(const int32_field_instruction* inst, void* storage)
-    {
-      int32_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const int32_field_instruction* inst, void* storage)
+  {
+    int32_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const uint32_field_instruction* inst, void* storage)
-    {
-      uint32_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const uint32_field_instruction* inst, void* storage)
+  {
+    uint32_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const int64_field_instruction* inst, void* storage)
-    {
-      int64_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const int64_field_instruction* inst, void* storage)
+  {
+    int64_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const uint64_field_instruction* inst, void* storage)
-    {
-      uint64_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const uint64_field_instruction* inst, void* storage)
+  {
+    uint64_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const decimal_field_instruction* inst, void* storage)
-    {
-      decimal_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const decimal_field_instruction* inst, void* storage)
+  {
+    decimal_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const ascii_field_instruction* inst, void* storage)
-    {
-      ascii_string_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const ascii_field_instruction* inst, void* storage)
+  {
+    ascii_string_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const unicode_field_instruction* inst, void* storage)
-    {
-      unicode_string_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const unicode_field_instruction* inst, void* storage)
+  {
+    unicode_string_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const byte_vector_field_instruction* inst, void* storage)
-    {
-      byte_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const byte_vector_field_instruction* inst, void* storage)
+  {
+    byte_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const int32_vector_field_instruction* inst, void* storage)
-    {
-      int32_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const int32_vector_field_instruction* inst, void* storage)
+  {
+    int32_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const uint32_vector_field_instruction* inst, void* storage)
-    {
-      uint32_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const uint32_vector_field_instruction* inst, void* storage)
+  {
+    uint32_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const int64_vector_field_instruction* inst, void* storage)
-    {
-      int64_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const int64_vector_field_instruction* inst, void* storage)
+  {
+    int64_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const uint64_vector_field_instruction* inst, void* storage)
-    {
-      uint64_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref);
-    }
+  virtual void visit(const uint64_vector_field_instruction* inst, void* storage)
+  {
+    uint64_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 
-    virtual void visit(const group_field_instruction* inst, void* storage)
-    {
-      group_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref, 0);
-    }
+  virtual void visit(const group_field_instruction* inst, void* storage)
+  {
+    group_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref, 0);
+  }
 
-    virtual void visit(const sequence_field_instruction* inst, void* storage)
-    {
-      sequence_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref, 0);
-    }
+  virtual void visit(const sequence_field_instruction* inst, void* storage)
+  {
+    sequence_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref, 0);
+  }
 
-    virtual void visit(const template_instruction*, void* )
-    {
-    }
+  virtual void visit(const template_instruction*, void* )
+  {
+  }
 
-    virtual void visit(const templateref_instruction* inst, void* storage)
-    {
-      nested_message_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
-      mutator_.visit(ref, 0);
-    }
+  virtual void visit(const templateref_instruction* inst, void* storage)
+  {
+    nested_message_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref, 0);
+  }
 
+  virtual void visit(const enum_field_instruction* inst, void* storage)
+  {
+    enum_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
+    mutator_.visit(ref);
+  }
 };
 
 } // namespace detail
@@ -300,7 +312,7 @@ inline void
 field_cref::accept_accessor(FieldAccessor& accessor) const
 {
   detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-  this->instruction()->accept(adaptor, const_cast<value_storage *>(this->storage()));
+  this->instruction()->accept(adaptor, const_cast<value_storage*>(this->storage()));
 }
 
 template <typename FieldMutator>
@@ -374,14 +386,12 @@ make_sequence_mref<ElementType,SequenceInstructionType>::accept_mutator(FieldMut
   adaptor.visit(*this);
 }
 
-
 template <typename FieldAccessor>
 inline void nested_message_cref::accept_accessor(FieldAccessor& accessor) const
 {
   detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
   adaptor.visit(*this);
 }
-
 
 template <typename FieldMutator>
 inline void nested_message_mref::accept_mutator(FieldMutator& mutator) const

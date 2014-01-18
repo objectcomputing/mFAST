@@ -28,11 +28,6 @@ void field_builder::add_instruction(const field_instruction* inst)
   instructions_.push_back(inst);
 }
 
-void field_builder::add_instruction(const group_field_instruction* inst)
-{
-  instructions_.push_back(inst);
-}
-
 const char* field_builder::resolve_field_type(const XMLElement& element)
 {
   field_type_name_ = element.Name();
@@ -83,13 +78,17 @@ const field_instruction* field_builder::find_prototype(const char* type_name)
       instruction = &prototype;
     }
   }
+  else if (std::strcmp(type_name, "templateRef") == 0)
+  {
+    return *templateref_instruction::default_instruction();
+  }
   else if (std::strcmp(type_name, "typeRef") == 0 || std::strcmp(type_name, "length") == 0)
   {
     return 0;
   }
 
   if (instruction == 0) {
-    instruction = this->find_type(type_name);
+    instruction = this->find_type(ns_, type_name);
   }
 
   if ( instruction == 0 )
@@ -103,8 +102,8 @@ const field_instruction* field_builder::find_prototype(const char* type_name)
 field_builder::field_builder(field_builder_base* parent,
                              const XMLElement&   element)
   : fast_xml_attributes(element.FirstAttribute())
-  , field_builder_base(parent->registered_templates(),
-                       parent->registered_types())
+  , field_builder_base(parent->registry(),
+                       parent->local_types())
   , element_(element)
   , parent_(parent)
 {
@@ -120,8 +119,8 @@ field_builder::field_builder(field_builder_base* parent,
                              const XMLElement&   element,
                              const char*         name)
   : fast_xml_attributes(element.FirstAttribute())
-  , field_builder_base(parent->registered_templates(),
-                       parent->registered_types())
+  , field_builder_base(parent->registry(),
+                       parent->local_types())
   , element_(element)
   , parent_(parent)
 {
@@ -351,7 +350,7 @@ void field_builder::visit(const templateref_instruction*, void*)
   if (name_) {
     const char* resolved_ns = get_optional_attr(element_, "ns", parent_->resolved_ns());
     const template_instruction* target =
-      this->find_template( resolved_ns, name_);
+      dynamic_cast<const template_instruction*> (this->find_type( resolved_ns, name_));
 
     if (target == 0) {
       BOOST_THROW_EXCEPTION(template_not_found_error(name_,
@@ -375,19 +374,9 @@ void field_builder::visit(const templateref_instruction*, void*)
     }
   }
   else {
-    presence_enum_t optional = presence_mandatory;
-
-    if (element_.NextSibling() == 0 && element_.PreviousSibling() == 0) {
-
-      if (parent_->is_optional_group())
-      {
-        optional = presence_optional;
-      }
-    }
 
     instruction = new (alloc())templateref_instruction(
-      parent_->num_instructions(),
-      optional);
+      parent_->num_instructions());
 
     parent_->add_instruction(instruction);
 
@@ -399,21 +388,6 @@ field_builder::build_subfields()
 {
   const XMLElement* child = content_element_->FirstChildElement();
   while (child != 0) {
-    /*
-       const XMLElement* field_elem = child;
-       const char* child_type_name = child->Name();
-
-       if (strcmp(child_type_name, "field") == 0 )
-       {
-       field_elem = field_elem->FirstChildElement();
-       child_type_name = field_elem->Name();
-       if (strcmp(child_type_name, "type") == 0 ) {
-        child_type_name = field_elem->Attribute("name", 0);
-        if (child_type_name == 0)
-          throw std::runtime_error("type element does not have a name");
-       }
-       }
-     */
 
     field_builder field(this, *child);
     child = child->NextSiblingElement();
@@ -432,8 +406,8 @@ void field_builder::set_ref_instruction(group_field_instruction* instruction)
     if (target_name) {
       const char* target_ns = get_optional_attr(*child, "ns",  parent_->resolved_ns());
 
-      const template_instruction* target =
-        this->find_template(target_ns, target_name);
+      const group_field_instruction* target =
+        dynamic_cast<const group_field_instruction*>(this->find_type(target_ns, target_name));
 
       if (target == 0)
         BOOST_THROW_EXCEPTION(template_not_found_error(target_name, this->name()));
@@ -585,6 +559,86 @@ void field_builder::add_template(const char*, template_instruction* inst)
   BOOST_THROW_EXCEPTION(fast_static_error("S1") << reason_info("template cannot be nested")
                                                 << template_name_info(inst->name())
                                                 << referenced_by_info(parent_->name()));
+}
+
+void field_builder::visit(const enum_field_instruction* inst, void*)
+{
+  field_op fop(inst, &element_, alloc());
+
+  const char** enum_element_names = inst->elements_;
+  uint64_t num_elements = inst->num_elements_;
+
+  const char* init_value_str = 0;
+  if (!fop.initial_value_.is_defined())
+  {
+    // if the  defined flag is false, the content value is parsed string from XML
+    init_value_str = fop.initial_value_.get<const char*>();
+  }
+
+  if (enum_element_names == 0 ) {
+
+    std::deque<const char*> names;
+    const XMLElement* xml_element = element_.FirstChildElement("element");
+    for (; xml_element != 0; xml_element = xml_element->NextSiblingElement("element"))
+    {
+      const char* name_attr = xml_element->Attribute("name");
+      if (name_attr != 0) {
+        if (init_value_str && std::strcmp(name_attr, init_value_str) == 0)
+        {
+          fop.initial_value_.set<uint64_t>(names.size());
+        }
+        names.push_back(string_dup(name_attr, alloc()));
+      }
+      else {
+        throw std::runtime_error("XML element must have a name attribute");
+      }
+    }
+
+    num_elements = names.size();
+    enum_element_names = static_cast<const char**>(alloc().allocate(names.size()* sizeof(const char*) ));
+    std::copy(names.begin(), names.end(), enum_element_names);
+  }
+  else if (init_value_str) {
+    // In this case, the element names are already defined, but we haven't decide what the specified
+    // initial value is.
+
+    for (uint64_t i = 0; i < num_elements; ++i) {
+      if (std::strcmp(enum_element_names[i], init_value_str) == 0)
+      {
+        fop.initial_value_.set<uint64_t>(i);
+        break;
+      }
+    }
+  }
+
+  if (!fop.initial_value_.is_defined())
+  {
+    if (fop.initial_value_.get<const char*>() != 0) {
+      std::string msg = "Invalid initial value for enum : ";
+      throw std::runtime_error(msg + fop.initial_value_.get<const char*>());
+    }
+    else {
+      // at this point if initial_value_ is still undefined, we should reset it to zero
+      fop.initial_value_.set<uint64_t>(0);
+    }
+  }
+
+  enum_field_instruction* instruction = new (alloc()) enum_field_instruction (
+    parent_->num_instructions(),
+    fop.op_,
+    get_presence(inst),
+    get_id(inst),
+    get_name(alloc()),
+    get_ns(inst, alloc()),
+    fop.context_,
+    int_value_storage<uint64_t>(fop.initial_value_),
+    enum_element_names,
+    num_elements,
+    inst->elements_ == 0 ? 0 : inst,
+    inst->cpp_ns()
+    );
+
+  parent_->add_instruction(instruction);
 }
 
 }   /* coder */

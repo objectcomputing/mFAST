@@ -35,7 +35,6 @@ public:
 
   virtual std::size_t num_instructions() const;
   virtual void add_instruction(const field_instruction*);
-  virtual void add_instruction(const group_field_instruction* inst);
   void add_template(const char* ns, template_instruction* inst);
 
   virtual const char* name() const
@@ -101,8 +100,8 @@ templates_builder::templates_builder(dynamic_templates_description* definition,
 
   this->member["template"] = &template_instruction_prototype_;
 
-  static const templateref_instruction templateref_instruction_prototype(0,presence_mandatory);
-  this->member["templateRef"] = &templateref_instruction_prototype;
+  static const enum_field_instruction enum_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0,0,0,0,0,0);
+  this->member["enum"] = &enum_field_instruction_prototype;
 }
 
 bool
@@ -145,24 +144,27 @@ templates_builder::VisitExit (const XMLElement & element)
 
 std::size_t templates_builder::num_instructions() const
 {
-  return registered_types()->size();
+  return local_types()->size();
 }
 
 void templates_builder::add_instruction(const field_instruction* inst)
 {
   member[inst->name()] = inst;
+
+  if (inst->field_type() >= field_type_sequence){
+    definition_->defined_type_instructions_.push_back(inst);
+    const char* ns = inst->ns();
+    if (ns == 0 || ns[0] == '\0')
+      ns = resolved_ns_;
+    registry()->add(ns, inst);
+  }
 }
 
-void templates_builder::add_instruction(const group_field_instruction* inst)
-{
-  member[inst->name()] = inst;
-  definition_->composite_instructions_.push_back(inst);
-}
 
 void templates_builder::add_template(const char* ns, template_instruction* inst)
 {
   templates_.push_back(inst);
-  registered_templates()->add(ns, inst);
+  registry()->add(ns, inst);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -205,10 +207,10 @@ dynamic_templates_description::dynamic_templates_description(const char*        
   }
 }
 
-const std::deque<const group_field_instruction*>&
-dynamic_templates_description::composite_instructions() const
+const std::deque<const field_instruction*>&
+dynamic_templates_description::defined_type_instructions() const
 {
-  return composite_instructions_;
+  return defined_type_instructions_;
 }
 
 } /* mfast */

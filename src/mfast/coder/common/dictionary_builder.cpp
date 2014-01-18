@@ -61,7 +61,11 @@ public:
       "exponent",
       "ascii string",
       "unicode string",
-      "byteVector"
+      "byteVector",
+      "int32Vector",
+      "uInt32Vector",
+      "int64Vector",
+      "uInt64Vector"
     };
     *this << key_info(keyname)
           << first_type_info(field_type_name[first_type] )
@@ -180,8 +184,7 @@ void dictionary_builder::visit(const templateref_instruction* src_inst, void* de
   templateref_instruction*& dest = *static_cast<templateref_instruction**>(dest_inst);
 
   // this is dynamic templateRef, it can only be binded at decoding time
-  dest = new (*alloc_)templateref_instruction( src_inst->field_index(),
-                                               src_inst->optional() ? presence_optional : presence_mandatory  );
+  dest = new (*alloc_)templateref_instruction( src_inst->field_index());
 }
 
 void dictionary_builder::visit(const group_field_instruction* src_inst, void* dest_inst)
@@ -433,6 +436,17 @@ void dictionary_builder::visit(const uint64_vector_field_instruction* src_inst, 
 {
   uint64_vector_field_instruction*& dest = *static_cast<uint64_vector_field_instruction**>(dest_inst);
   dest = new (*alloc_)uint64_vector_field_instruction(*src_inst);
+}
+
+void dictionary_builder::visit(const enum_field_instruction* src_inst, void* dest_inst)
+{
+  enum_field_instruction*& dest = *static_cast<enum_field_instruction**>(dest_inst);
+  dest = new (*alloc_)enum_field_instruction(*src_inst);
+  dest->prev_value_ = get_dictionary_storage(dest->name(),
+                                             dest->ns(),
+                                             dest->op_context_,
+                                             field_type_uint64,
+                                             &dest->prev_storage_);
 }
 
 

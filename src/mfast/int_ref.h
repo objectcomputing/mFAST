@@ -159,7 +159,7 @@ class int_mref
       this->storage()->template set<T>(v);
     }
 
-    void as_initial_value() const
+    void to_initial_value() const
     {
       *this->storage() = this->instruction()->initial_value();
     }

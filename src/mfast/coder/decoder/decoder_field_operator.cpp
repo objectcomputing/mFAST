@@ -214,11 +214,11 @@ public:
     // is the initial value in the instruction context. If the bit is not set, the value is considered absent.
 
     if (!mref.optional()) {
-      mref.as_initial_value();
+      mref.to_initial_value();
     }
     else {
       if (pmap.is_next_bit_set()) {
-        mref.as_initial_value();
+        mref.to_initial_value();
       }
       else {
         mref.omit();
@@ -311,7 +311,7 @@ public:
 
         // If the field has optional presence and no initial value, the field is considered
         // absent and the state of the previous value is changed to empty.
-        mref.as_initial_value();
+        mref.to_initial_value();
         save_previous_value(mref);
 
         if (mref.instruction()->mandatory_without_initial_value()) {
@@ -500,7 +500,7 @@ public:
 
       //  The default operator specifies that the value of a field is either present in the stream
       //  or it will be the initial value.
-      mref.as_initial_value();
+      mref.to_initial_value();
     }
 
     save_previous_value(mref);
@@ -751,7 +751,7 @@ private:
         //  * undefined – the value of the field is the initial value that also becomes the new previous value.
 
         // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
-        mref.as_initial_value();
+        mref.to_initial_value();
 
         if (mref.instruction()->mandatory_without_initial_value()) {
           // Unless the field has optional presence, it is a dynamic error [ERR D6] if the instruction context has no initial value.

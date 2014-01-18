@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.value(), 5U);
 
-    ref.as_initial_value();
+    ref.to_initial_value();
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
 
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     BOOST_CHECK_EQUAL(ref.mantissa(), 5);
     BOOST_CHECK_EQUAL(ref.exponent(), 20);
 
-    ref.as_initial_value();
+    ref.to_initial_value();
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.mantissa(), INT64_MAX);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     BOOST_CHECK_EQUAL(ref.mantissa(), 5);
     BOOST_CHECK_EQUAL(ref.exponent(), 20);
 
-    ref.as_initial_value();
+    ref.to_initial_value();
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.mantissa(), 6);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
@@ -378,7 +378,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     BOOST_CHECK_EQUAL(ref.exponent(), 5);
 
     exponent_mref exp_mref = ref.for_exponent();
-    exp_mref.as_initial_value();
+    exp_mref.to_initial_value();
     BOOST_CHECK_EQUAL(exp_mref.value(), 64);
     BOOST_CHECK_EQUAL(ref.exponent(),   64);
 
@@ -441,7 +441,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     ascii_string_mref ref(&alloc, &storage, &inst);
     BOOST_CHECK(!ref.present());
 
-    ref.as_initial_value();
+    ref.to_initial_value();
     BOOST_CHECK(ref.present());
     BOOST_CHECK_EQUAL(ref.size(), strlen(default_value));
     BOOST_CHECK(ref == "initial_string" );
@@ -669,7 +669,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     unicode_string_mref mf1(f1);
     BOOST_CHECK_EQUAL(mf1.field_type(), field_type_unicode_string);
 
-    mf0.as_initial_value();
+    mf0.to_initial_value();
 
     BOOST_CHECK_EQUAL(mf0.size(),                                 sizeof(f0_initial));
     BOOST_CHECK_EQUAL(memcmp(mf0.data(), f0_initial, mf0.size()), 0);
@@ -763,7 +763,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
       unicode_string_mref mf1(e0f1);
       BOOST_CHECK_EQUAL(mf1.field_type(), field_type_unicode_string);
 
-      mf0.as_initial_value();
+      mf0.to_initial_value();
 
       BOOST_CHECK_EQUAL(mf0.size(),                                 sizeof(f0_initial));
       BOOST_CHECK_EQUAL(memcmp(mf0.data(), f0_initial, mf0.size()), 0);
