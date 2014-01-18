@@ -31,4 +31,6 @@
 #include <mfast/field_comparator.h>
 #include <mfast/composite_field.h>
 #include <mfast/sequence_type.h>
+#include <mfast/enum_ref.h>
+#include <mfast/boolean_ref.h>
 #endif /* end of include guard: MFAST_H_4EMINVTV */

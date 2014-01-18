@@ -105,6 +105,7 @@ void hpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
   gen_primitive("uint64_vector", inst);
 }
 
+
 void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 {
   std::string name( cpp_name( inst ) );
@@ -113,12 +114,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     std::string cpp_type = "mfast::nested_message"; // dynamic templateRef
     if (inst->ref_instruction()) {
       // this is static templateRef
-      cpp_type = ref_instruction_name(inst);
-      const char* cpp_ns = inst->ref_instruction()->cpp_ns();
-
-      if (cpp_ns && cpp_ns[0] != 0 &&  filebase_ != cpp_ns) {
-        dependency_.insert(cpp_ns);
-      }
+      cpp_type = referenced_type_name(inst);
     }
 
     if (!top_level) {
@@ -215,12 +211,7 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
   std::string name( cpp_name( inst ) );
 
   if (inst->ref_instruction()) {
-    std::string cpp_type = ref_instruction_name(inst);
-    const char* cpp_ns = inst->ref_instruction()->cpp_ns();
-
-    if (cpp_ns && cpp_ns[0] != 0 &&  filebase_ != cpp_ns) {
-      dependency_.insert(cpp_ns);
-    }
+    std::string cpp_type = referenced_type_name(inst);
 
     header_cref_ << indent << "typedef " << cpp_type << "_cref " << name << "_cref;\n";
     header_mref_ << indent << "typedef " << cpp_type << "_mref " << name << "_mref;\n";
@@ -443,9 +434,9 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
   std::string name (cpp_name(inst));
 
   if (inst->ref_instruction()) {
-    std::string actual_type_name = cpp_name(inst->ref_instruction());
-    header_cref_ << indent << "typedef " << actual_type_name << "_cref " << name << "_cref;\n"
-                 << indent << "typedef " << actual_type_name << "_mref " << name << "_mref;\n";
+    std::string actual_type_name = referenced_type_name(inst);
+    header_cref_ << indent << "typedef " << actual_type_name << "_cref " << name << "_cref;\n";
+    header_mref_ << indent << "typedef " << actual_type_name << "_mref " << name << "_mref;\n";
   }
   else {
     // this is the enum definition
@@ -456,10 +447,10 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     for (uint64_t i = 0; i < inst->num_elements_; ++i) {
       if (i != 0)
         header_cref_ << ",";
-      header_cref_ << indent << "\n    " << cpp_name(inst->elements_[i]);
+      header_cref_ << "\n" << indent << "    " << cpp_name(inst->elements_[i]);
     }
 
-    header_cref_ << indent << "\n  };\n"
+    header_cref_ << "\n" << indent << "  };\n"
                  << indent << "  typedef mfast::enum_field_instruction_ex<" << name << "> instruction_type;\n"
                  << indent << "  static const instruction_type* instruction();\n"
                  << indent << "};\n\n";
@@ -488,7 +479,7 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     header_cref_ << indent << "};\n\n";
 
 
-    header_cref_ << indent << "class " << name << "_mref\n"
+    header_mref_ << indent << "class " << name << "_mref\n"
                  << indent << "  : public mfast::enum_mref_ex<" << name << "_mref, " << name << "_cref>\n"
                  << indent << "{\n"
                  << indent << "  public:\n"
@@ -504,22 +495,26 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
 
     for (uint64_t i = 0; i < inst->num_elements_; ++i) {
       std::string element_name = cpp_name(inst->elements_[i]);
-      header_cref_ << indent << "    void as_" << element_name << "() const;\n";
+      header_mref_ << indent << "    void as_" << element_name << "() const;\n";
     }
 
-    header_cref_ << indent << "};\n\n";
+    header_mref_ << indent << "};\n\n";
   }
 
   if (!top_level)
   {
-    header_cref_ << indent << name << "_cref get_" << name << "() const;\n"
-                 << indent << name << "_mref set_" << name << "() const;\n";
+    header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
+    header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
     if (inst->optional() || inst->field_operator() != mfast::operator_constant ) {
-      header_cref_ << indent << "void " << " omit_" << name << "() const;\n";
+      header_mref_ << indent << "void " << " omit_" << name << "() const;\n";
     }
   }
+  else {
+    content_<< header_cref_.str() << header_mref_.str();
 
-  content_<< header_cref_.str();
-  header_cref_.clear();
-  header_cref_.str("");
+    header_cref_.clear();
+    header_cref_.str("");
+    header_mref_.clear();
+    header_mref_.str("");
+  }
 }

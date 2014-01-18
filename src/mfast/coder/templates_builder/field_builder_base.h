@@ -88,7 +88,6 @@ protected:
   template_registry_impl* registry_;
   const type_map_t* local_types_;
   const char* resolved_ns_;
-  bool is_optional_group_;
 };
 
 

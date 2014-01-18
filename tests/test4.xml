@@ -31,8 +31,10 @@
     </define>
 
     <template name="Person" >
-        <string name="firstName" />
-        <string name="lastName" />
+        <field name="firstName">
+          <string charset="unicode"/>
+        </field>
+        <string name="lastName" charset="unicode" />
         <field name="gender">
           <type name="Gender" />
         </field>
@@ -46,6 +48,15 @@
         <field name="emails">
             <type name="Emails" />
         </field>
+        <field name="bloodType">
+          <enum>
+            <element name="A" />
+            <element name="B" />
+            <element name="AB" />
+            <element name="O" />
+          </enum>
+        </field>
+        <boolean name="married" />
     </template>
 
 </templates>

@@ -34,23 +34,26 @@ const char* field_builder::resolve_field_type(const XMLElement& element)
   content_element_ = &element;
 
   if (std::strcmp(field_type_name_, "field") == 0 ) {
-    content_element_ = element.FirstChildElement("type");
+    content_element_ = element.FirstChildElement();
     if (content_element_) {
-      field_type_name_ = name_;
-      name_ = 0;
-      fast_xml_attributes::set(content_element_->FirstAttribute());
+      field_type_name_ = content_element_->Name();
+      if (strcmp(field_type_name_, "type")==0) {
+        field_type_name_ = name_;
+        name_ = 0;
+        fast_xml_attributes::set(content_element_->FirstAttribute());
 
-      if (name_ == 0)
-        throw std::runtime_error("type element does not have a name");
-      std::swap(field_type_name_, name_);
+        if (name_ == 0)
+          throw std::runtime_error("type element does not have a name");
+        std::swap(field_type_name_, name_);
+      }
+      else {
+        fast_xml_attributes::set(content_element_->FirstAttribute());
+      }
     }
     else {
-      throw std::runtime_error("field element must have a type sub-element");
+      throw std::runtime_error("field element must have a  child element");
     }
   }
-
-  is_optional_group_ =
-    std::strcmp(field_type_name_, "group") == 0 && (presence_ != 0) && std::strcmp(presence_, "optional");
 
   resolved_ns_ = ns_;
   if (resolved_ns_ == 0 && parent_) {
@@ -578,7 +581,8 @@ void field_builder::visit(const enum_field_instruction* inst, void*)
   if (enum_element_names == 0 ) {
 
     std::deque<const char*> names;
-    const XMLElement* xml_element = element_.FirstChildElement("element");
+
+    const XMLElement* xml_element = content_element_->FirstChildElement("element");
     for (; xml_element != 0; xml_element = xml_element->NextSiblingElement("element"))
     {
       const char* name_attr = xml_element->Attribute("name");
@@ -623,7 +627,7 @@ void field_builder::visit(const enum_field_instruction* inst, void*)
     }
   }
 
-  enum_field_instruction* instruction = new (alloc()) enum_field_instruction (
+  enum_field_instruction* instruction = new (alloc())enum_field_instruction (
     parent_->num_instructions(),
     fop.op_,
     get_presence(inst),
