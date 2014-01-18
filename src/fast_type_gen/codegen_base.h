@@ -56,8 +56,16 @@ protected:
 
   void reset_scope(std::stringstream& strm, const std::string& str);
   std::string cpp_name(const mfast::field_instruction* inst) const;
+  std::string cpp_name(const char* n) const;
 
-  std::string ref_instruction_name(const mfast::group_field_instruction* inst) const;
+  template <typename ReferableInstruction>
+  std::string ref_instruction_name(const ReferableInstruction* inst) const
+  {
+    if (inst->ref_instruction()->cpp_ns() && inst->ref_instruction()->cpp_ns()[0] != 0)
+     return std::string(inst->ref_instruction()->cpp_ns()) + "::" + inst->ref_instruction()->name();
+    else
+      return inst->ref_instruction()->name();
+  }
 };
 
 

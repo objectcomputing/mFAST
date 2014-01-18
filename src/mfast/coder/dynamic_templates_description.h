@@ -53,10 +53,10 @@ public:
                                 const char*        cpp_ns="",
                                 template_registry* registry = template_registry::instance());
 
-  const std::deque<const group_field_instruction*>& composite_instructions() const;
+  const std::deque<const field_instruction*>& defined_type_instructions() const;
 private:
   friend class coder::templates_builder;
-  std::deque<const group_field_instruction*> composite_instructions_;
+  std::deque<const field_instruction*> defined_type_instructions_;
 };
 
 }

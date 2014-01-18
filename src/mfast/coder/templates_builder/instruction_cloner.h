@@ -135,6 +135,13 @@ private:
     }
   }
 
+  virtual void visit(const enum_field_instruction* inst, void*)
+  {
+    enum_field_instruction* new_inst = new (alloc_) enum_field_instruction(*inst);
+    new_inst->field_index(list_.num_instructions());
+    list_.add_instruction(new_inst);
+  }
+
 };
 
 

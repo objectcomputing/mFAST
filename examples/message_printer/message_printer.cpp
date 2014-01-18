@@ -70,6 +70,11 @@ class message_printer
       os_ << ref.value();
     }
 
+    void visit_i(const enum_cref& ref)
+    {
+      os_ << ref.value_name();
+    }
+
     void visit_i(const decimal_cref& ref)
     {
       os_ << ref.mantissa() << "*10^" << (int)ref.exponent();

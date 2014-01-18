@@ -49,9 +49,11 @@ public:
   virtual void visit(const mfast::uint32_vector_field_instruction*, void*);
   virtual void visit(const mfast::int64_vector_field_instruction*, void*);
   virtual void visit(const mfast::uint64_vector_field_instruction*, void*);
+  virtual void visit(const mfast::enum_field_instruction*, void*);
 
 private:
   std::string prefix_string() const;
+  std::string cref_scope() const;
   void add_to_instruction_list(const std::string& name);
   std::string gen_op_context(const char*                name,
                              const mfast::op_context_t* context);

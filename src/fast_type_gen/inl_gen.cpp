@@ -29,32 +29,12 @@ void inl_gen::traverse(const mfast::group_field_instruction* inst, const char* n
 void inl_gen::gen_primitive (const char* cpp_type, const mfast::field_instruction* inst)
 {
   std::string name (cpp_name(inst));
-  out_ << "\n"
-       << "inline\n"
-       << "mfast::" << cpp_type << "_cref\n"
-       << cref_scope_.str() << "get_" << name << "() const\n"
-       << "{\n"
-       << "  return static_cast<mfast::" << cpp_type << "_cref>((*this)[" << inst->field_index() << "]);\n"
-       << "}\n\n";
+  std::stringstream cref_type_name;
+  cref_type_name << "mfast::" << cpp_type << "_cref";
+  std::stringstream mref_type_name;
+  mref_type_name << "mfast::" << cpp_type << "_mref";
 
-  if (inst->optional() || inst->field_operator() != mfast::operator_constant) {
-
-    out_ << "inline\n"
-         << "mfast::"<< cpp_type << "_mref\n"
-         << mref_scope_.str() << "set_" << name << "() const\n"
-         << "{\n"
-         << "  return static_cast<mfast::" << cpp_type << "_mref>((*this)[" << inst->field_index() << "]);\n"
-         << "}\n\n";
-
-    if (inst->optional()) {
-      out_ << "inline\n"
-           << "void\n"
-           << mref_scope_.str() << "omit_" << name << "() const\n"
-           << "{\n"
-           << "  (*this)[" << inst->field_index() << "].omit();\n"
-           << "}\n\n";
-    }
-  }
+  gen_accessors(inst, name, cref_type_name.str(), mref_type_name.str());
 }
 
 void inl_gen::visit(const mfast::int32_field_instruction* inst, void*)
@@ -245,30 +225,11 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
 {
   std::string name (cpp_name(inst));
 
-  std::size_t index = inst->field_index();
-
   std::string cref_type_name = cref_scope_.str() + name + "_cref";
   std::string mref_type_name = mref_scope_.str() + name + "_mref";
 
   if (!top_level) {
-    out_ << "inline " << cref_type_name << "\n"
-         << cref_scope_.str() << "get_" << name << "() const\n"
-         << "{\n"
-         << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
-         << "}\n\n"
-         << "inline " << mref_type_name << "\n"
-         << mref_scope_.str() << "set_" << name << "() const\n"
-         << "{\n"
-         << "  return static_cast<" << mref_type_name << ">((*this)[" << index << "]);\n"
-         << "}\n\n";
-    if (inst->optional()) {
-      out_ << "inline\n"
-           << "void\n"
-           << mref_scope_.str() << "omit_" << name << "() const\n"
-           << "{\n"
-           << "  (*this)[" << inst->field_index() << "].omit();\n"
-           << "}\n\n";
-    }
+    gen_accessors(inst, name, cref_type_name, mref_type_name);
   }
 
   if (inst->ref_instruction() == 0  && inst->subinstructions_count() > 1) {
@@ -439,4 +400,98 @@ void inl_gen::visit(const mfast::templateref_instruction* inst, void*)
 void inl_gen::generate(mfast::dynamic_templates_description& desc)
 {
   codegen_base::traverse(desc);
+}
+
+void inl_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
+{
+  std::string name (cpp_name(inst));
+
+  std::string cref_type_name = cref_scope_.str() + name + "_cref";
+  std::string mref_type_name = mref_scope_.str() + name + "_mref";
+
+
+  if (inst->ref_instruction() == 0) {
+
+    out_ << "inline\n"
+         << cref_type_name << "::"<< name << "_cref(\n"
+         << "  const mfast::value_storage*   storage,\n"
+         << "  " << cref_type_name << "::instruction_cptr instruction)\n"
+         << "  : base_type(storage, instruction)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n"
+         << cref_type_name << "::"<< name << "_cref(\n"
+         << "  const mfast::field_cref& other)\n"
+         << "  : base_type(other)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n"
+         << mref_type_name << "::"<< name << "_mref(\n"
+         << "  mfast::allocator*      alloc,\n"
+         << "  mfast::value_storage*  storage,\n"
+         << "  " << mref_type_name << "::instruction_cptr instruction)\n"
+         << "  : base_type(alloc, storage, instruction)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n"
+         << mref_type_name << "::"<< name << "_mref(\n"
+         << "  const mfast::field_mref_base& other)\n"
+         << "  : base_type(other)\n"
+         << "{\n"
+         << "}\n\n";
+
+
+    for (uint64_t i = 0; i < inst->num_elements_; ++i)
+    {
+
+      std::string element_name = cpp_name(inst->elements_[i]);
+
+      out_ << "inline\n"
+           << "bool " << cref_type_name << "::is_" << element_name << "() const\n"
+           << "{\n"
+           << "  return this->value() == " << name << "::" <<  element_name << ";\n"
+           << "}\n\n"
+           << "inline\n"
+           << "void " << mref_type_name << "::as_" << element_name << "() const\n"
+           << "{\n"
+           << "  return this->as(" << name << "::" <<  element_name << ");\n"
+           << "}\n\n";
+
+    }
+
+    if (!top_level)
+    {
+      gen_accessors(inst, name, cref_type_name, mref_type_name);
+    }
+  }
+
+
+}
+
+void inl_gen::gen_accessors(const mfast::field_instruction* inst,
+                            const std::string&              name,
+                            const std::string&              cref_type_name,
+                            const std::string&              mref_type_name)
+{
+  std::size_t index = inst->field_index();
+  out_ << "inline " << cref_type_name << "\n"
+       << cref_scope_.str() << "get_" << name << "() const\n"
+       << "{\n"
+       << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
+       << "}\n\n";
+  if (inst->field_operator() != mfast::operator_constant) {
+    out_ << "inline " << mref_type_name << "\n"
+         << mref_scope_.str() << "set_" << name << "() const\n"
+         << "{\n"
+         << "  return static_cast<" << mref_type_name << ">((*this)[" << index << "]);\n"
+         << "}\n\n";
+  }
+  if (inst->optional()) {
+    out_ << "inline\n"
+         << "void\n"
+         << mref_scope_.str() << "omit_" << name << "() const\n"
+         << "{\n"
+         << "  (*this)[" << index << "].omit();\n"
+         << "}\n\n";
+  }
 }

@@ -340,9 +340,11 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "{\n"
                << indent << "  typedef mfast::aggregate_cref base_type;\n"
                << indent << "  public:\n"
+               << indent << "    typedef mfast::template_instruction_ex<"<< name << "_cref> instruction_type;\n"
+               << indent << "    typedef const instruction_type* instruction_cptr;\n"
                << indent << "    " << name << "_cref(\n"
-               << indent << "      const mfast::value_storage*           storage,\n"
-               << indent << "      const mfast::group_field_instruction* instruction);\n\n"
+               << indent << "      const mfast::value_storage* storage,\n"
+               << indent << "      const instruction_type*     instruction);\n\n"
                << indent << "    " << name << "_cref(const mfast::message_cref& other);\n\n"
                << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
 
@@ -353,10 +355,12 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "{\n"
                << indent << "  typedef " << name << "_mref_base base_type;\n"
                << indent << "  public:\n"
+               << indent << "    typedef mfast::template_instruction_ex<"<< name << "_cref> instruction_type;\n"
+               << indent << "    typedef const instruction_type* instruction_cptr;\n"
                << indent << "    " << name << "_mref(\n"
-               << indent << "      mfast::allocator*                     alloc,\n"
-               << indent << "      mfast::value_storage*                 storage,\n"
-               << indent << "      const mfast::group_field_instruction* instruction);\n\n"
+               << indent << "      mfast::allocator*       alloc,\n"
+               << indent << "      mfast::value_storage*   storage,\n"
+               << indent << "      const instruction_type* instruction);\n\n"
                << indent << "   " << name << "_mref(const mfast::message_mref& other);\n\n"
                << indent << "    explicit " << name << "_mref(const mfast::field_mref_base& other);\n\n";
 
@@ -432,4 +436,90 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
       << "#include \"" << filebase_ << ".inl\"\n"
       << "}\n\n"
       << "#endif //__" << filebase_upper << "_H__\n";
+}
+
+void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
+{
+  std::string name (cpp_name(inst));
+
+  if (inst->ref_instruction()) {
+    std::string actual_type_name = cpp_name(inst->ref_instruction());
+    header_cref_ << indent << "typedef " << actual_type_name << "_cref " << name << "_cref;\n"
+                 << indent << "typedef " << actual_type_name << "_mref " << name << "_mref;\n";
+  }
+  else {
+    // this is the enum definition
+    header_cref_ << indent << "struct " << inst->name() << "\n"
+                 << indent << "{\n"
+                 << indent << "  enum element {";
+
+    for (uint64_t i = 0; i < inst->num_elements_; ++i) {
+      if (i != 0)
+        header_cref_ << ",";
+      header_cref_ << indent << "\n    " << cpp_name(inst->elements_[i]);
+    }
+
+    header_cref_ << indent << "\n  };\n"
+                 << indent << "  typedef mfast::enum_field_instruction_ex<" << name << "> instruction_type;\n"
+                 << indent << "  static const instruction_type* instruction();\n"
+                 << indent << "};\n\n";
+
+
+    header_cref_ << indent << "class " << name << "_cref\n"
+                 << indent << "  : public mfast::enum_cref_ex<" << name << "_cref, " << name << ">\n"
+                 << indent << "{\n"
+                 << indent << "  public:\n"
+                 << indent << "    typedef mfast::enum_cref_ex<" << name << "_cref, " << name << "> base_type;\n"
+                 << indent << "    typedef " << name << "::element element_type;\n"
+                 << indent << "    typedef " << name << "::instruction_type instruction_type;\n"
+
+                 << indent << "    " << name << "_cref(\n"
+                 << indent << "      const mfast::value_storage* storage=0,\n"
+                 << indent << "      instruction_cptr            instruction=0);\n\n"
+
+                 << indent << "    explicit " << name << "_cref(const field_cref& other);\n\n";
+
+
+    for (uint64_t i = 0; i < inst->num_elements_; ++i) {
+      std::string element_name = cpp_name(inst->elements_[i]);
+      header_cref_ << indent << "    bool is_" << element_name << "() const;\n";
+    }
+
+    header_cref_ << indent << "};\n\n";
+
+
+    header_cref_ << indent << "class " << name << "_mref\n"
+                 << indent << "  : public mfast::enum_mref_ex<" << name << "_mref, " << name << "_cref>\n"
+                 << indent << "{\n"
+                 << indent << "  public:\n"
+                 << indent << "    typedef  mfast::enum_mref_ex<" << name << "_mref, " << name << "_cref> base_type;\n"
+                 << indent << "    typedef " << name << "::element element_type;\n"
+                 << indent << "    " << name << "_mref(\n"
+                 << indent << "      mfast::allocator*     alloc=0,\n"
+                 << indent << "      mfast::value_storage* storage=0,\n"
+                 << indent << "      instruction_cptr      instruction=0);\n"
+
+                 << indent << "    explicit " << name << "_mref(const mfast::field_mref_base& other);\n\n";
+
+
+    for (uint64_t i = 0; i < inst->num_elements_; ++i) {
+      std::string element_name = cpp_name(inst->elements_[i]);
+      header_cref_ << indent << "    void as_" << element_name << "() const;\n";
+    }
+
+    header_cref_ << indent << "};\n\n";
+  }
+
+  if (!top_level)
+  {
+    header_cref_ << indent << name << "_cref get_" << name << "() const;\n"
+                 << indent << name << "_mref set_" << name << "() const;\n";
+    if (inst->optional() || inst->field_operator() != mfast::operator_constant ) {
+      header_cref_ << indent << "void " << " omit_" << name << "() const;\n";
+    }
+  }
+
+  content_<< header_cref_.str();
+  header_cref_.clear();
+  header_cref_.str("");
 }

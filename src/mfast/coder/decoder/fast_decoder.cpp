@@ -88,6 +88,11 @@ struct fast_decoder_impl
       this->current_ = state.prev_pmap_;
   }
 
+  void visit(enum_mref &mref)
+  {
+    this->visit(reinterpret_cast<uint64_mref&>(mref));
+  }
+
   template <typename SimpleMRef>
   void visit(SimpleMRef &mref);
 

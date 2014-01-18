@@ -51,17 +51,18 @@ enum field_type_enum_t {
   field_type_uint64,
   field_type_decimal,
   field_type_exponent,
-  field_type_ascii_string,
+  field_type_templateref,
+  field_type_ascii_string, // using of_array start
   field_type_unicode_string,
   field_type_byte_vector,
   field_type_int32_vector,
   field_type_uint32_vector,
   field_type_int64_vector,
   field_type_uint64_vector,
-  field_type_sequence,
+  field_type_sequence, // using of_array end, codegen needed start
   field_type_group,
-  field_type_templateref,
-  field_type_template
+  field_type_template,
+  field_type_enum
 };
 
 
@@ -490,6 +491,99 @@ protected:
 };
 
 
+template <typename T>
+class referalbe_instruction
+{
+public:
+  referalbe_instruction(const T*    ref_instruction,
+                        const char* cpp_ns)
+    : ref_instruction_(ref_instruction)
+    , cpp_ns_(cpp_ns)
+  {
+  }
+
+  const T* ref_instruction() const
+  {
+    return ref_instruction_;
+  }
+
+  void ref_instruction(const T* r)
+  {
+    ref_instruction_ = r;
+  }
+
+  const char* cpp_ns() const
+  {
+    return cpp_ns_;
+  }
+
+private:
+  const T* ref_instruction_;
+  const char* cpp_ns_;
+};
+
+class MFAST_EXPORT enum_field_instruction
+  : public integer_field_instruction_base
+  , public referalbe_instruction<enum_field_instruction>
+{
+public:
+
+  enum_field_instruction(uint16_t                      field_index,
+                         operator_enum_t               operator_id,
+                         presence_enum_t               optional,
+                         uint32_t                      id,
+                         const char*                   name,
+                         const char*                   ns,
+                         const op_context_t*           context,
+                         int_value_storage<uint64_t>   initial_value,
+                         const char**                  elements,
+                         uint64_t                      num_elements,
+                         const enum_field_instruction* ref,
+                         const char*                   cpp_ns)
+    : integer_field_instruction_base(field_index,
+                                     operator_id,
+                                     field_type_enum,
+                                     optional,
+                                     id,
+                                     name,
+                                     ns,
+                                     context,
+                                     initial_value.storage_)
+    , referalbe_instruction<enum_field_instruction>(ref, cpp_ns)
+    , elements_(elements)
+    , num_elements_(num_elements)
+  {
+  }
+
+  enum_field_instruction(const enum_field_instruction &other)
+    : integer_field_instruction_base(other)
+    , referalbe_instruction<enum_field_instruction>(other)
+    , elements_(other.elements_)
+    , num_elements_(other.num_elements_)
+  {
+  }
+
+  virtual void accept(field_instruction_visitor& visitor, void* context) const;
+
+  const char* element_name(uint64_t index) const
+  {
+    return elements_[index];
+  }
+
+  uint64_t num_elements() const
+  {
+    return num_elements_;
+  }
+
+  const char** elements() const
+  {
+    return elements_;
+  }
+
+  const char** elements_;
+  uint64_t num_elements_;
+};
+
 class MFAST_EXPORT vector_field_instruction_base
   : public field_instruction
 {
@@ -635,9 +729,6 @@ protected:
   value_storage prev_storage_;
   const value_storage* initial_or_default_value_;
   static const value_storage default_value_;
-
-
-
 };
 
 
@@ -832,7 +923,7 @@ public:
                              const char*                    typeref_name ="",
                              const char*                    typeref_ns="")
     : field_instruction(field_index,
-                        operator_constant,
+                        operator_none,
                         field_type_group,
                         optional,
                         id,
@@ -946,6 +1037,7 @@ class template_instruction;
 
 class MFAST_EXPORT group_field_instruction
   : public aggregate_instruction_base
+  , public referalbe_instruction<group_field_instruction>
 {
 public:
 
@@ -970,8 +1062,7 @@ public:
                                  subinstructions_count,
                                  typeref_name,
                                  typeref_ns)
-    , ref_instruction_(0)
-    , cpp_ns_(cpp_ns)
+    , referalbe_instruction<group_field_instruction>(0, cpp_ns)
   {
   }
 
@@ -1001,24 +1092,7 @@ public:
 
   virtual void accept(field_instruction_visitor&, void*) const;
 
-  const group_field_instruction* ref_instruction() const
-  {
-    return ref_instruction_;
-  }
 
-  void ref_instruction(const group_field_instruction* r)
-  {
-    ref_instruction_ = r;
-  }
-
-  const char* cpp_ns() const
-  {
-    return cpp_ns_;
-  }
-
-private:
-  const group_field_instruction* ref_instruction_;
-  const char* cpp_ns_;
 };
 
 
@@ -1133,7 +1207,6 @@ public:
   {
     return template_ns_;
   }
-
 
   void copy_construct_value(value_storage&       storage,
                             value_storage*       fields_storage,
@@ -1283,23 +1356,15 @@ class MFAST_EXPORT templateref_instruction
 {
 public:
 
-  templateref_instruction(uint16_t        field_index,
-                          presence_enum_t optional)
-    : field_instruction(field_index, operator_none, field_type_templateref, optional, 0, "", "")
-    , target_(0)
-  {
-    // I used empty string instead of null pointer for name to represent dynamic templateRef because I wanted
-    // to be able to print the name of dynamic templateRef directly (albeit empty) without using an if branch.
-  }
 
   templateref_instruction(uint16_t                    field_index,
-                          const template_instruction* ref)
+                          const template_instruction* ref =0)
     : field_instruction(field_index, operator_none,
                         field_type_templateref,
-                        ref->optional() ? presence_optional : presence_mandatory,
+                        presence_mandatory,
                         0,
-                        ref->name(),
-                        ref->ns())
+                        ref ? ref->name() : "",
+                        ref ? ref->ns() : "")
     , target_(ref)
   {
   }
@@ -1329,7 +1394,7 @@ public:
     return target_;
   }
 
-  static const const_instruction_ptr_t* default_instructions(presence_enum_t optional);
+  static const const_instruction_ptr_t* default_instruction();
 
 private:
   const template_instruction* target_;
@@ -1435,6 +1500,9 @@ public:
   virtual void visit(const uint32_vector_field_instruction*, void*)=0;
   virtual void visit(const int64_vector_field_instruction*, void*)=0;
   virtual void visit(const uint64_vector_field_instruction*, void*)=0;
+
+  virtual void visit(const enum_field_instruction* inst, void* data)=0;
+
 };
 
 

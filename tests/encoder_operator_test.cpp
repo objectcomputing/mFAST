@@ -732,7 +732,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_encode_test)
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    result.as_initial_value();
+    result.to_initial_value();
     BOOST_CHECK(encode_mref("\x80\x80\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);
@@ -877,7 +877,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_encode_test)
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
 
-    result.as_initial_value();
+    result.to_initial_value();
     BOOST_CHECK(encode_mref("\x80\x80\x80",  result,  CHANGE_PREVIOUS_VALUE ) );
 
     inst.destruct_value(storage, &alloc);

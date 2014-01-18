@@ -58,8 +58,8 @@ class field_mref
     void as(unsigned char (&value)[SIZE]);
 
     void as(const std::vector<unsigned char>& value);
-    
-    
+
+
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
 };
@@ -85,6 +85,7 @@ void field_mref::as(T value)
     static_cast<int64_mref>(*this).as(value);
     break;
   case field_type_uint64:
+  case field_type_enum:
     static_cast<uint64_mref>(*this).as(value);
     break;
   case field_type_decimal:

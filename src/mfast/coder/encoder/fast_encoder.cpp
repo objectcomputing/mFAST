@@ -86,6 +86,11 @@ struct fast_encoder_impl
     }
   }
 
+  void visit(enum_cref &cref)
+  {
+    this->visit(reinterpret_cast<uint64_cref&>(cref));
+  }
+
   template <typename SimpleCRef>
   void visit(SimpleCRef &cref);
 
