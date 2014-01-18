@@ -546,6 +546,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
   std::string instruction_variable_name;
   std::stringstream elements_variable_name;
   std::stringstream num_elements_name;
+  std::stringstream instruction_type;
 
   if (inst->ref_instruction())
   {
@@ -557,10 +558,12 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
          << name << "::instruction()\n"
          << "{\n";
     instruction_variable_name = "  the_instruction";
+    instruction_type << qualified_name << "::instruction_type";
   }
   else {
     add_to_instruction_list(name);
     instruction_variable_name =  prefix_string() + name + "_instruction";
+    instruction_type << cref_scope() << name << "_cref::instruction_type";
   }
 
   if (inst->ref_instruction()) {
@@ -584,7 +587,9 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
 
   std::string context = gen_op_context(inst->name(), inst->op_context());
 
-  out_ << "const static " << qualified_name << "::instruction_type\n"
+
+
+  out_ << "const static " << instruction_type.str() << "\n"
        << instruction_variable_name << "(\n"
        << "  " << index << ",\n"
        << "  " << get_operator_name(inst) << ",\n"

@@ -7,7 +7,7 @@
 #include "field_builder.h"
 #include "../dynamic_templates_description.h"
 #include <boost/utility.hpp>
-
+#include "mfast/boolean_ref.h"
 
 using namespace tinyxml2;
 
@@ -99,6 +99,8 @@ templates_builder::templates_builder(dynamic_templates_description* definition,
   this->member["sequence"] = &sequence_field_instruction_prototype;
 
   this->member["template"] = &template_instruction_prototype_;
+
+  this->member["boolean"] = mfast::boolean::instruction();
 
   static const enum_field_instruction enum_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0,0,0,0,0,0);
   this->member["enum"] = &enum_field_instruction_prototype;
