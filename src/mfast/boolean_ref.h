@@ -1,12 +1,12 @@
 #ifndef BOOLEAN_REF_H_H7MFNBMO
 #define BOOLEAN_REF_H_H7MFNBMO
-
+#include "mfast_export.h"
 #include "enum_ref.h"
 
 namespace mfast
 {
 
-struct boolean
+struct MFAST_EXPORT boolean
 {
   typedef enum_field_instruction_ex<boolean> instruction_type;
   static const instruction_type* instruction();
