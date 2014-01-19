@@ -458,13 +458,12 @@ void inl_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
            << "}\n\n";
 
     }
-
-    if (!top_level)
-    {
-      gen_accessors(inst, name, cref_type_name, mref_type_name);
-    }
   }
 
+  if (!top_level)
+  {
+    gen_accessors(inst, name, cref_type_name, mref_type_name);
+  }
 
 }
 
