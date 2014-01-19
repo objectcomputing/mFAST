@@ -51,4 +51,30 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   BOOST_CHECK(numbers_holder1.cref() == numbers_holder2.cref());
 }
 
+BOOST_AUTO_TEST_CASE(test_template)
+{
+  debug_allocator alloc;
+  using namespace test4;
+
+  Person persion1(&alloc);
+
+  Person_mref person_mref(persion1.mref());
+  BOOST_CHECK_EQUAL(person_mref.get_firstName().instruction()->field_type(), mfast::field_type_unicode_string);
+  person_mref.set_firstName().as("John");
+  person_mref.set_lastName().as("Doe");
+
+  person_mref.set_bloodType().as_O();
+  BOOST_CHECK_EQUAL(person_mref.get_bloodType().value(), Person_cref::bloodType::O);
+  BOOST_CHECK(person_mref.get_bloodType().is_O());
+  BOOST_CHECK_EQUAL(strcmp(person_mref.get_bloodType().value_name(), "O") , 0);
+
+
+  person_mref.set_discrete().as_Five();
+  BOOST_CHECK_EQUAL(person_mref.get_discrete().value(), DiscreteEnum::Five);
+  BOOST_CHECK(person_mref.get_discrete().is_Five());
+  BOOST_CHECK_EQUAL(strcmp(person_mref.get_discrete().value_name(), "Five") , 0);
+
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

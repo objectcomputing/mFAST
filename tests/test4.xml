@@ -31,6 +31,15 @@
       </enum>
     </define>
 
+    <define name="DiscreteEnum">
+      <enum>
+        <element name="One" value="1"/>
+        <element name="Three" value="3"/>
+        <element name="Five" value="5"/>
+        <copy/>
+      </enum>
+    </define>
+
     <template name="Person" >
         <field name="firstName">
           <string charset="unicode"/>
@@ -58,6 +67,9 @@
           </enum>
         </field>
         <boolean name="married" />
+        <field name="discrete" >
+          <type name="DiscreteEnum"/>
+        </field>
     </template>
 
 </templates>

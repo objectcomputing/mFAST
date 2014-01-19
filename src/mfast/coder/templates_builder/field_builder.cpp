@@ -568,8 +568,9 @@ void field_builder::visit(const enum_field_instruction* inst, void*)
 {
   field_op fop(inst, content_element_, alloc());
 
-  const char** enum_element_names = inst->elements_;
-  uint64_t num_elements = inst->num_elements_;
+  const char** enum_element_names = inst->elements();
+  uint64_t num_elements = inst->num_elements();
+  const uint64_t* enum_element_values = inst->element_values();
 
   const char* init_value_str = 0;
   if (!fop.initial_value_.is_defined())
@@ -581,6 +582,7 @@ void field_builder::visit(const enum_field_instruction* inst, void*)
   if (enum_element_names == 0 ) {
 
     std::deque<const char*> names;
+    std::deque<uint64_t> values;
 
     const XMLElement* xml_element = content_element_->FirstChildElement("element");
     for (; xml_element != 0; xml_element = xml_element->NextSiblingElement("element"))
@@ -592,15 +594,34 @@ void field_builder::visit(const enum_field_instruction* inst, void*)
           fop.initial_value_.set<uint64_t>(names.size());
         }
         names.push_back(string_dup(name_attr, alloc()));
+
+        const char* value_str = xml_element->Attribute("value");
+        if (value_str) {
+          uint64_t v = boost::lexical_cast<uint64_t>(value_str);
+          if (values.empty() || v > values.back()) {
+            values.push_back(v);
+          }
+        }
       }
       else {
         throw std::runtime_error("XML element must have a name attribute");
       }
     }
 
+    if (values.size() && values.size() != names.size())
+    {
+      throw std::runtime_error("Invalid value specification for enum elements");
+    }
+
     num_elements = names.size();
     enum_element_names = static_cast<const char**>(alloc().allocate(names.size()* sizeof(const char*) ));
     std::copy(names.begin(), names.end(), enum_element_names);
+
+    if (values.size()) {
+      uint64_t* values_array = static_cast<uint64_t*>(alloc().allocate(values.size()* sizeof(uint64_t) ));
+      std::copy(values.begin(), values.end(), values_array);
+      enum_element_values = values_array;
+    }
   }
   else if (init_value_str) {
     // In this case, the element names are already defined, but we haven't decide what the specified
@@ -637,6 +658,7 @@ void field_builder::visit(const enum_field_instruction* inst, void*)
     fop.context_,
     int_value_storage<uint64_t>(fop.initial_value_),
     enum_element_names,
+    enum_element_values,
     num_elements,
     inst->elements_ == 0 ? 0 : inst,
     inst->cpp_ns()

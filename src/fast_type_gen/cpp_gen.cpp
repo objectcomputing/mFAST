@@ -547,6 +547,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
   std::stringstream elements_variable_name;
   std::stringstream num_elements_name;
   std::stringstream instruction_type;
+  std::string values_variable_name="0";
 
   if (inst->ref_instruction())
   {
@@ -569,20 +570,34 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
   if (inst->ref_instruction()) {
     elements_variable_name << qualified_name << "::instruction()->elements()";
     num_elements_name << qualified_name << "::instruction()->num_elements()";
+    values_variable_name = qualified_name + "::instruction()->element_values()";
   }
   else {
     elements_variable_name << "elements";
-    num_elements_name << inst->num_elements_;
+    num_elements_name << inst->num_elements();
 
     out_ << "static const char* elements[] = {\n";
 
-    for (uint64_t i = 0; i < inst->num_elements_; ++i) {
+    for (uint64_t i = 0; i < inst->num_elements(); ++i) {
       if (i != 0 ) {
         out_ << ",\n";
       }
-      out_ << "  \"" << inst->element_name(i) << "\"";
+      out_ << "  \"" << inst->elements()[i] << "\"";
     }
     out_ << "};\n";
+
+    if (inst->element_values()) {
+      out_ << "static const uint64_t values[] = {\n";
+
+      for (uint64_t i = 0; i < inst->num_elements(); ++i) {
+        if (i != 0 ) {
+          out_ << ",\n";
+        }
+        out_ << "  " << inst->element_values()[i];
+      }
+      out_ << "};\n";
+      values_variable_name = "values";
+    }
   }
 
   std::string context = gen_op_context(inst->name(), inst->op_context());
@@ -599,7 +614,8 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
        << "  \""<< inst->ns() << "\", // ns\n"
        << "  "<< context << ",  // opContext\n"
        << "  int_value_storage<uint64_t>(" << inst->initial_value().get<uint64_t>() <<  "), // initial_value\n"
-       << "  " << elements_variable_name.str() << ", // elements names\n"
+       << "  " << elements_variable_name.str() << ", // element names\n"
+       << "  " << values_variable_name << ", // element values\n"
        << "  " << num_elements_name.str() << ",// num elements\n"
        << "  0, // ref_instruction\n"
        << "  0);\n\n";

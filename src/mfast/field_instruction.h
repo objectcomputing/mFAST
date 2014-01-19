@@ -24,6 +24,8 @@
 #include <boost/static_assert.hpp>
 #include "value_storage.h"
 #include "mfast/mfast_export.h"
+#include <algorithm>
+
 namespace mfast {
 
 class allocator;
@@ -537,6 +539,7 @@ public:
                          const op_context_t*           context,
                          int_value_storage<uint64_t>   initial_value,
                          const char**                  elements,
+                         const uint64_t*               element_values,
                          uint64_t                      num_elements,
                          const enum_field_instruction* ref,
                          const char*                   cpp_ns)
@@ -552,6 +555,7 @@ public:
     , referalbe_instruction<enum_field_instruction>(ref, cpp_ns)
     , elements_(elements)
     , num_elements_(num_elements)
+    , element_values_(element_values)
   {
   }
 
@@ -560,14 +564,20 @@ public:
     , referalbe_instruction<enum_field_instruction>(other)
     , elements_(other.elements_)
     , num_elements_(other.num_elements_)
+    , element_values_(other.element_values_)
   {
   }
 
   virtual void accept(field_instruction_visitor& visitor, void* context) const;
 
-  const char* element_name(uint64_t index) const
+  const char* element_name(uint64_t v) const
   {
-    return elements_[index];
+    if (element_values_ == 0)
+      return elements_[v];
+    const uint64_t* it = std::lower_bound(element_values_, element_values_+num_elements_, v);
+    if (it != element_values_+num_elements_ && *it == v)
+      return elements_[it-element_values_];
+    return 0;
   }
 
   uint64_t num_elements() const
@@ -580,8 +590,14 @@ public:
     return elements_;
   }
 
+  const uint64_t* element_values() const
+  {
+    return element_values_;
+  }
+
   const char** elements_;
   uint64_t num_elements_;
+  const uint64_t* element_values_;
 };
 
 class MFAST_EXPORT vector_field_instruction_base

@@ -102,7 +102,7 @@ templates_builder::templates_builder(dynamic_templates_description* definition,
 
   this->member["boolean"] = mfast::boolean::instruction();
 
-  static const enum_field_instruction enum_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0,0,0,0,0,0);
+  static const enum_field_instruction enum_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0,0,0,0,0,0,0);
   this->member["enum"] = &enum_field_instruction_prototype;
 }
 

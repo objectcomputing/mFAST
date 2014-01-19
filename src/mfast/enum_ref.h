@@ -76,7 +76,7 @@ public:
 
   const char* value_name() const
   {
-    assert(instruction() && value() < instruction()->num_elements_);
+    // assert(instruction() && value() < instruction()->num_elements_);
     return instruction()->element_name(value());
   }
 
@@ -84,12 +84,6 @@ public:
   {
     return static_cast<instruction_cptr>(instruction_);
   }
-
-  uint64_t max_value() const
-  {
-    return instruction()->num_elements_ -1;
-  }
-
 
 };
 
@@ -178,7 +172,8 @@ public:
                             const char*                   ns,
                             const op_context_t*           context,
                             int_value_storage<uint64_t>   initial_value,
-                            const char**                  elements,
+                            const char**                  element_names,
+                            const uint64_t*               element_values,
                             uint64_t                      num_elements,
                             const enum_field_instruction* ref,
                             const char*                   cpp_ns)
@@ -190,7 +185,8 @@ public:
                              ns,
                              context,
                              initial_value,
-                             elements,
+                             element_names,
+                             element_values,
                              num_elements,
                              ref,
                              cpp_ns)

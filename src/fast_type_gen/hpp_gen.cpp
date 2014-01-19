@@ -483,10 +483,13 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
                  << indent << "{\n"
                  << indent << "  enum element {";
 
-    for (uint64_t i = 0; i < inst->num_elements_; ++i) {
+    for (uint64_t i = 0; i < inst->num_elements(); ++i) {
       if (i != 0)
         header_cref_ << ",";
-      header_cref_ << "\n" << indent << "    " << cpp_name(inst->elements_[i]);
+      header_cref_ << "\n" << indent << "    " << cpp_name(inst->elements()[i]);
+      if (inst->element_values()) {
+        header_cref_ << " = " << inst->element_values()[i];
+      }
     }
 
     header_cref_ << "\n" << indent << "  };\n"
@@ -543,8 +546,9 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
   if (!top_level)
   {
     header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
-    header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
-    if (inst->optional() || inst->field_operator() != mfast::operator_constant ) {
+    if (inst->field_operator() != mfast::operator_constant)
+      header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
+    if (inst->optional()) {
       header_mref_ << indent << "void " << " omit_" << name << "() const;\n";
     }
   }
