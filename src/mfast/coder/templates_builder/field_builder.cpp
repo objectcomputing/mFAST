@@ -566,7 +566,7 @@ void field_builder::add_template(const char*, template_instruction* inst)
 
 void field_builder::visit(const enum_field_instruction* inst, void*)
 {
-  field_op fop(inst, &element_, alloc());
+  field_op fop(inst, content_element_, alloc());
 
   const char** enum_element_names = inst->elements_;
   uint64_t num_elements = inst->num_elements_;
