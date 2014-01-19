@@ -571,6 +571,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     elements_variable_name << qualified_name << "::instruction()->elements()";
     num_elements_name << qualified_name << "::instruction()->num_elements()";
     values_variable_name = qualified_name + "::instruction()->element_values()";
+    instruction_type.str(qualified_name + "::instruction_type");
   }
   else {
     elements_variable_name << "elements";
