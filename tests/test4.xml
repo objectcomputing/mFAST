@@ -27,6 +27,7 @@
       <enum>
         <element name="male"/>
         <element name="female"/>
+        <copy/>
       </enum>
     </define>
 
