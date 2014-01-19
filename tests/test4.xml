@@ -40,6 +40,22 @@
       </enum>
     </define>
 
+    <define name="Micros">
+      <decimal>
+        <exponent>
+          <constant value="-6"/>
+        </exponent>
+      </decimal>
+    </define>
+
+    <define name="UUID">
+      <byteVector>
+        <length>
+          <constant value="16"/>
+        </length>
+      </byteVector>
+    </define>
+
     <template name="Person" >
         <field name="firstName">
           <string charset="unicode"/>
