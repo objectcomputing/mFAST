@@ -268,7 +268,9 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
 
     std::string element_type;
 
-    if (inst->subinstruction(0)->field_type() == mfast::field_type_templateref) {
+    mfast::field_type_enum_t element_field_type_enum = inst->subinstruction(0)->field_type() ;
+
+    if (element_field_type_enum == mfast::field_type_templateref) {
       element_type = "mfast::nested_message";
     }
     else{
@@ -283,7 +285,20 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
         "mfast::unicode_string",
         "mfast::byte_vector",
       };
-      element_type = names[inst->subinstruction(0)->field_type()];
+      if (element_field_type_enum <= mfast::field_type_byte_vector)
+        element_type = names[inst->subinstruction(0)->field_type()];
+      else if (element_field_type_enum == mfast::field_type_enum)
+      {
+        const mfast::enum_field_instruction* subinst0 =
+          dynamic_cast<const mfast::enum_field_instruction*>(inst->subinstruction(0));
+        element_type = cpp_name(subinst0->ref_instruction());
+      }
+      else {
+        const mfast::group_field_instruction* subinst0 =
+          dynamic_cast<const mfast::group_field_instruction*>(inst->subinstruction(0));
+        if (subinst0)
+          element_type = cpp_name(subinst0->ref_instruction());
+      }
     }
 
     header_cref_ << indent << "typedef mfast::make_sequence_cref<" << element_type << "_cref> " << name << "_cref;\n";
