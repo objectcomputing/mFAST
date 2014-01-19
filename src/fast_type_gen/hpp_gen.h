@@ -33,6 +33,7 @@ public:
   {
   }
 
+  void set_export_symbol(const char* symbol);
   void generate(mfast::dynamic_templates_description& desc);
 
   virtual void visit(const mfast::int32_field_instruction*, void*);
@@ -75,6 +76,7 @@ private:
   ind_stream header_cref_;
   ind_stream header_mref_;
   std::stringstream content_;
+  std::string export_symbol_;
 };
 
 #endif /* end of include guard: HPP_GEN_H_EWCP8CL9 */

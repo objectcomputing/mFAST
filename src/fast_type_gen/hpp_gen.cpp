@@ -22,6 +22,11 @@
 
 indent_t indent;
 
+void hpp_gen::set_export_symbol(const char* symbol)
+{
+  export_symbol_ = symbol;
+}
+
 void hpp_gen::traverse(const mfast::group_field_instruction* inst, const char* name_suffix)
 {
   header_cref_.inc_indent(2);
@@ -105,7 +110,6 @@ void hpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
   gen_primitive("uint64_vector", inst);
 }
 
-
 void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 {
   std::string name( cpp_name( inst ) );
@@ -180,7 +184,14 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     header_cref_.str("");
     header_mref_.clear();
     header_mref_.str("");
-    content_<< "class " << name << "\n"
+
+    content_<< "class ";
+
+    if (export_symbol_.size()) {
+      content_ << boost::to_upper_copy(export_symbol_) << " ";
+    }
+
+    content_<< name << "\n"
             << "  : private boost::array<mfast::value_storage, " << inst->subinstructions_count() << ">\n"
             << "  , public mfast::group_type\n"
             << "{\n"
@@ -294,7 +305,13 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
     header_cref_.str("");
     header_mref_.clear();
     header_mref_.str("");
-    content_<< "class " << name << "\n"
+    content_<< "class ";
+
+    if (export_symbol_.size()) {
+      content_ << boost::to_upper_copy(export_symbol_) << " ";
+    }
+
+    content_<< name << "\n"
             << "  : public mfast::sequence_type\n"
             << "{\n"
             << "  typedef mfast::sequence_type base_type;\n"
@@ -369,7 +386,13 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
   header_mref_.clear();
   header_mref_.str("");
 
-  content_<< "class " << name << "\n"
+  content_<< "class ";
+
+  if (export_symbol_.size()) {
+    content_ << boost::to_upper_copy(export_symbol_) << " ";
+  }
+
+  content_<< name << "\n"
           << "  : private boost::array<mfast::value_storage, " << inst->subinstructions_count() << ">\n"
           << "  , public mfast::message_type\n"
           << "{\n"
@@ -421,12 +444,22 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
     out_ << "#include <" << dep << ".h>\n";
   }
 
-  out_<< "namespace " << filebase_ << "\n{\n"
-      << content_.str()
-      << "\n mfast::templates_description* description();\n\n"
-      << "#include \"" << filebase_ << ".inl\"\n"
-      << "}\n\n"
-      << "#endif //__" << filebase_upper << "_H__\n";
+  if (export_symbol_.size()) {
+    out_ << "#include \"" << export_symbol_ << ".h\"\n";
+  }
+
+  out_ << "namespace " << filebase_ << "\n{\n"
+       << content_.str()
+       << "\n";
+
+  if (export_symbol_.size()) {
+    out_ << boost::to_upper_copy(export_symbol_) << " ";
+  }
+
+  out_ << "mfast::templates_description* description();\n\n"
+       << "#include \"" << filebase_ << ".inl\"\n"
+       << "}\n\n"
+       << "#endif //__" << filebase_upper << "_H__\n";
 }
 
 void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
@@ -440,7 +473,13 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
   }
   else {
     // this is the enum definition
-    header_cref_ << indent << "struct " << inst->name() << "\n"
+    header_cref_ << indent << "struct ";
+
+    if (export_symbol_.size()) {
+      out_ << boost::to_upper_copy(export_symbol_) << " ";
+    }
+
+    header_cref_ << inst->name() << "\n"
                  << indent << "{\n"
                  << indent << "  enum element {";
 
