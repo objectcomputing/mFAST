@@ -247,6 +247,11 @@ struct byte_vector_value_storage
   {
   }
 
+  byte_vector_value_storage(const char* v, std::size_t n)
+    : string_value_storage(reinterpret_cast<const char*>(v), n)
+  {
+  }
+
 };
 
 }

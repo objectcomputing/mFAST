@@ -226,7 +226,7 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
     const char* val = static_cast<const char*>(inst->initial_value().of_array.content_);
     for (std::size_t i = 0; i < inst->initial_value().array_length(); ++i)
     {
-      out_ << "\\x" << std::hex << std::setfill('0') << std::setw(2) << (int) val[i];
+      out_ << "\\x" << std::hex << std::setfill('0') << std::setw(2) << std::dec << (int) val[i];
     }
     out_<< "\"," <<  inst->initial_value().array_length() << ")";
   }

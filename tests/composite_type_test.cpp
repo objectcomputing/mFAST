@@ -79,6 +79,17 @@ BOOST_AUTO_TEST_CASE(test_template)
   BOOST_CHECK_EQUAL(person_mref.get_salary().mantissa(), 2000);
 
 
+  BOOST_CHECK_EQUAL(person_mref.get_id().size(), 16U);
+
+
+  debug_allocator alloc2;
+
+  Person person2(persion1.cref(), &alloc2);
+
+  BOOST_CHECK(persion1.cref() == person2.cref());
+
+
+
 }
 
 
