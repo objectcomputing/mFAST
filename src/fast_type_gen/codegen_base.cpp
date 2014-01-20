@@ -92,3 +92,14 @@ std::string codegen_base::cpp_name(const char* name) const
   return result;
 }
 
+bool codegen_base::is_const_field(const mfast::field_instruction* inst) const
+{
+  if (inst->field_operator() != mfast::operator_constant )
+    return false;
+  if (inst->field_type() == mfast::field_type_exponent) {
+    const mfast::decimal_field_instruction* the_inst = static_cast<const mfast::decimal_field_instruction*>(inst);
+    if (the_inst->mantissa_instruction() ==0 || the_inst->mantissa_instruction()->field_operator() != mfast::operator_constant)
+      return false;
+  }
+  return true;
+}

@@ -99,9 +99,9 @@ struct decimal_encoder
     if(!cref.has_individual_operators())
       derived->encode_impl(cref, stream, pmap);
     else  {
-      derived->encode_impl(cref.for_exponent(), stream, pmap);
+      derived->encode_impl(cref.get_exponent(), stream, pmap);
       if (cref.present()) {
-        int64_cref mantissa_cref = cref.for_mantissa();
+        int64_cref mantissa_cref = cref.get_mantissa();
         const encoder_field_operator* mantissa_operator = encoder_operators[mantissa_cref.instruction()->field_operator()];
         mantissa_operator->encode(mantissa_cref, stream, pmap);
       }
@@ -713,9 +713,9 @@ class delta_operator
         }
       }
       else {
-        encode_integer(cref.for_exponent(), stream);
+        encode_integer(cref.get_exponent(), stream);
         if (cref.present()) {
-          int64_cref mantissa_cref = cref.for_mantissa();
+          int64_cref mantissa_cref = cref.get_mantissa();
           const encoder_field_operator* mantissa_operator = encoder_operators[mantissa_cref.instruction()->field_operator()];
           mantissa_operator->encode(mantissa_cref, stream, pmap);
         }

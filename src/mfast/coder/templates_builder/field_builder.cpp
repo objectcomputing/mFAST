@@ -175,20 +175,22 @@ void field_builder::visit(const uint64_field_instruction* inst, void*)
 
 void field_builder::visit(const decimal_field_instruction* inst, void*)
 {
+  const mantissa_field_instruction* base_mantissa_instruction = inst->mantissa_instruction();
   const XMLElement* mantissa_element = element_.FirstChildElement("mantissa");
   const XMLElement* exponent_element = element_.FirstChildElement("exponent");
   field_instruction* instruction;
-  if (mantissa_element || exponent_element) {
+  if (base_mantissa_instruction || mantissa_element || exponent_element) {
 
-    mantissa_field_instruction* mantissa_instruction =0;
+    mantissa_field_instruction* mantissa_instruction = 0;
+
+    if (base_mantissa_instruction == 0)
+    {
+      static const mantissa_field_instruction mantissa_prototype(operator_none, 0, int_value_storage<int64_t>(0));
+      base_mantissa_instruction = &mantissa_prototype;
+    }
 
     if (mantissa_element)
     {
-      static const mantissa_field_instruction mantissa_instruction_prototype(operator_none, 0, int_value_storage<int64_t>(0));
-      const mantissa_field_instruction* base_mantissa_instruction = inst->mantissa_instruction();
-      if (mantissa_instruction == 0)
-        base_mantissa_instruction = &mantissa_instruction_prototype;
-
       field_op mantissa_op(base_mantissa_instruction, mantissa_element, alloc());
 
       mantissa_instruction = new (alloc())mantissa_field_instruction(
@@ -196,6 +198,12 @@ void field_builder::visit(const decimal_field_instruction* inst, void*)
         mantissa_op.context_,
         int_value_storage<int64_t>(mantissa_op.initial_value_));
     }
+    else {
+      mantissa_instruction = new (alloc())mantissa_field_instruction(
+        *base_mantissa_instruction);
+    }
+
+
 
     field_op exponent_op(inst, exponent_element, alloc());
 

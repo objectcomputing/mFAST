@@ -58,6 +58,8 @@ protected:
   std::string cpp_name(const mfast::field_instruction* inst) const;
   std::string cpp_name(const char* n) const;
 
+  bool is_const_field(const mfast::field_instruction* inst) const;
+
   template <typename ReferableInstruction>
   std::string ref_instruction_name(const ReferableInstruction* inst) const
   {

@@ -17,6 +17,14 @@
       </sequence>
     </define>
 
+    <define name="Addresses">
+      <sequence>
+        <field name="element">
+          <type name="Address" />
+        </field>
+      </sequence>
+    </define>
+
     <define name="Emails">
       <sequence>
           <string name="email" />
@@ -40,10 +48,10 @@
       </enum>
     </define>
 
-    <define name="Micros">
+    <define name="Salary">
       <decimal>
         <exponent>
-          <constant value="-6"/>
+          <constant value="-2"/>
         </exponent>
       </decimal>
     </define>
@@ -65,8 +73,8 @@
           <type name="Gender" />
         </field>
         <uInt32 name="age" />
-        <field name="address" presence="optional">
-          <type name="Address" />
+        <field name="addresses" presence="optional">
+          <type name="Addresses" />
         </field>
         <field name="phoneNumbers">
             <type name="PhoneNumbers" />
@@ -85,6 +93,9 @@
         <boolean name="married" />
         <field name="discrete" >
           <type name="DiscreteEnum"/>
+        </field>
+        <field name="salary">
+          <type name="Salary" />
         </field>
     </template>
 

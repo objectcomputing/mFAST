@@ -478,7 +478,7 @@ void inl_gen::gen_accessors(const mfast::field_instruction* inst,
        << "{\n"
        << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
        << "}\n\n";
-  if (inst->field_operator() != mfast::operator_constant) {
+  if (!is_const_field(inst)) {
     out_ << "inline " << mref_type_name << "\n"
          << mref_scope_.str() << "set_" << name << "() const\n"
          << "{\n"

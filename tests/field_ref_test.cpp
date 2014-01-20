@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     BOOST_CHECK(ref.present() );
     BOOST_CHECK_EQUAL(ref.exponent(), 5);
 
-    exponent_mref exp_mref = ref.for_exponent();
+    exponent_mref exp_mref = ref.set_exponent();
     exp_mref.to_initial_value();
     BOOST_CHECK_EQUAL(exp_mref.value(), 64);
     BOOST_CHECK_EQUAL(ref.exponent(),   64);

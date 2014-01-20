@@ -479,12 +479,10 @@ public:
   void mantissa_instruction(mantissa_field_instruction* v)
   {
     mantissa_instruction_ = v;
-    if (v) {
-      this->initial_value_.of_decimal.mantissa_ = mantissa_instruction_->initial_value().get<int64_t>();
+    this->initial_value_.of_decimal.mantissa_ = mantissa_instruction_->initial_value().get<int64_t>();
 
-      if (has_pmap_bit_ == 0) {
-        has_pmap_bit_ = mantissa_instruction_->pmap_size();
-      }
+    if (has_pmap_bit_ == 0) {
+      has_pmap_bit_ = mantissa_instruction_->pmap_size();
     }
   }
 
