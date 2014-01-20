@@ -40,12 +40,13 @@ void hpp_gen::gen_primitive (const char* cpp_type, const mfast::field_instructio
 {
   std::string name(cpp_name(inst));
   header_cref_ << indent << "mfast::"<< cpp_type << "_cref get_" << name << "() const;\n";
-  if (inst->optional() || inst->field_operator() != mfast::operator_constant)
+  if (!is_const_field(inst))
   {
     header_mref_ << indent << "mfast::"<< cpp_type << "_mref set_" << name << "() const;\n";
-    if (inst->optional()) {
-      header_mref_ << indent << "void omit_" << name << "() const;\n";
-    }
+  }
+
+  if (inst->optional()) {
+    header_mref_ << indent << "void omit_" << name << "() const;\n";
   }
 }
 

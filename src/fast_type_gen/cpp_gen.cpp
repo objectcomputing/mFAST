@@ -164,8 +164,11 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
 
   gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "decimal");
 
-  if ( inst->mantissa_instruction() ) {
-    out_ << "  &" << prefix_string() << name << "_mantissa_instruction,\n";
+  if ( inst->field_type() == mfast::field_type_exponent)  {
+    if (inst->mantissa_instruction() )
+      out_ << "  &" << prefix_string() << name << "_mantissa_instruction,\n";
+    else
+      out_ << "  0, // mantissa_instruction\n";
   }
 
   const mfast::value_storage& init_value = inst->initial_value();

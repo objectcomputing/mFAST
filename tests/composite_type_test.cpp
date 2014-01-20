@@ -74,6 +74,11 @@ BOOST_AUTO_TEST_CASE(test_template)
   BOOST_CHECK(person_mref.get_discrete().is_Five());
   BOOST_CHECK_EQUAL(strcmp(person_mref.get_discrete().value_name(), "Five") , 0);
 
+  person_mref.set_salary().as(20.0);
+  BOOST_CHECK_EQUAL(person_mref.get_salary().exponent(), -2);
+  BOOST_CHECK_EQUAL(person_mref.get_salary().mantissa(), 2000);
+
+
 }
 
 

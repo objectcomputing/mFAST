@@ -96,9 +96,9 @@ struct decimal_decoder
     if(!mref.has_individual_operators())
       derived->decode_impl(mref, stream, pmap);
     else {
-      derived->decode_impl(mref.for_exponent(), stream, pmap);
+      derived->decode_impl(mref.set_exponent(), stream, pmap);
       if (mref.present()) {
-        int64_mref mantissa_mref = mref.for_mantissa();
+        int64_mref mantissa_mref = mref.set_mantissa();
         const decoder_field_operator* mantissa_operator = decoder_operators[mantissa_mref.instruction()->field_operator()];
         mantissa_operator->decode(mantissa_mref, stream, pmap);
       }
@@ -680,9 +680,9 @@ public:
       }
     }
     else {
-      decode_integer(mref.for_exponent(), stream);
+      decode_integer(mref.set_exponent(), stream);
       if (mref.present()) {
-        int64_mref mantissa_mref = mref.for_mantissa();
+        int64_mref mantissa_mref = mref.set_mantissa();
         const decoder_field_operator* mantissa_operator = decoder_operators[mantissa_mref.instruction()->field_operator()];
         mantissa_operator->decode(mantissa_mref, stream, pmap);
       }
