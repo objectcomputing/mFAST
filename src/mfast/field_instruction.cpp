@@ -127,12 +127,25 @@ void decimal_field_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
+decimal_field_instruction*
+decimal_field_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) decimal_field_instruction(*this);
+}
+
 //////////////////////////////////////////////////////////
 
 void enum_field_instruction::accept(field_instruction_visitor& visitor,
                                     void*                      context) const
 {
   return visitor.visit(this, context);
+}
+
+
+enum_field_instruction*
+enum_field_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) enum_field_instruction(*this);
 }
 
 /////////////////////////////////////////////////////////
@@ -206,6 +219,12 @@ void ascii_field_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
+ascii_field_instruction*
+ascii_field_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) ascii_field_instruction(*this);
+}
+
 const value_storage ascii_field_instruction::default_value_("");
 
 void unicode_field_instruction::accept(field_instruction_visitor& visitor,
@@ -214,10 +233,23 @@ void unicode_field_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
+unicode_field_instruction*
+unicode_field_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) unicode_field_instruction(*this);
+}
+
 void byte_vector_field_instruction::accept(field_instruction_visitor& visitor,
                                            void*                      context) const
 {
   visitor.visit(this, context);
+}
+
+
+byte_vector_field_instruction*
+byte_vector_field_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) byte_vector_field_instruction(*this);
 }
 
 /////////////////////////////////////////////////////////
@@ -338,6 +370,12 @@ void group_field_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
+group_field_instruction*
+group_field_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) group_field_instruction(*this);
+}
+
 /////////////////////////////////////////////////////////
 
 void sequence_field_instruction::construct_sequence_elements(value_storage& storage,
@@ -443,6 +481,13 @@ void sequence_field_instruction::accept(field_instruction_visitor& visitor,
   visitor.visit(this, context);
 }
 
+
+sequence_field_instruction*
+sequence_field_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) sequence_field_instruction(*this);
+}
+
 /////////////////////////////////////////////////////////
 
 
@@ -484,6 +529,12 @@ void template_instruction::accept(field_instruction_visitor& visitor,
                                   void*                      context) const
 {
   visitor.visit(this, context);
+}
+
+template_instruction*
+template_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) template_instruction(*this);
 }
 
 ///////////////////////////////////////////////////////////
@@ -546,6 +597,12 @@ void templateref_instruction::accept(field_instruction_visitor& visitor,
                                      void*                      context) const
 {
   visitor.visit(this, context);
+}
+
+templateref_instruction*
+templateref_instruction::clone(arena_allocator& alloc) const
+{
+  return new (alloc) templateref_instruction(*this);
 }
 
 std::size_t templateref_instruction::pmap_size() const

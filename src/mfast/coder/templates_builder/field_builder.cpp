@@ -1,6 +1,5 @@
 #include "field_builder.h"
 #include "field_op.h"
-#include "instruction_cloner.h"
 #include "../common/exceptions.h"
 
 using namespace tinyxml2;
@@ -379,9 +378,12 @@ void field_builder::visit(const templateref_instruction*, void*)
     else if (target->subinstructions_count() > 0) {
       // In this case, we do need the clone the subfield instructions because the field
       // index would be different from those in the referenced template.
-      instruction_cloner cloner(*parent_, alloc());
-      target->accept(cloner, 0);
 
+      for (size_t i = 0; i < target->subinstructions_count(); ++i) {
+        field_instruction* new_inst = target->subinstruction(i)->clone(alloc());
+        new_inst->field_index(parent_->num_instructions());
+        parent_->add_instruction(new_inst);
+      }
     }
   }
   else {
