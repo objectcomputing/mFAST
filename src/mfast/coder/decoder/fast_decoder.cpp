@@ -23,7 +23,7 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/malloc_allocator.h"
 #include "mfast/output.h"
-#include "mfast/composite_field.h"
+#include "mfast/composite_type.h"
 #include "../common/exceptions.h"
 #include "../common/debug_stream.h"
 #include "../common/dictionary_builder.h"
