@@ -843,6 +843,10 @@ public:
   {
   }
 
+  virtual mock_field_instruction* clone(arena_allocator& alloc) const
+  {
+    return new (alloc) mock_field_instruction(*this);
+  }
 };
 
 
