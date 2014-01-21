@@ -29,7 +29,7 @@
 #include <mfast/field_visitor.h>
 #include <mfast/arena_allocator.h>
 #include <mfast/field_comparator.h>
-#include <mfast/composite_field.h>
+#include <mfast/composite_type.h>
 #include <mfast/sequence_type.h>
 #include <mfast/enum_ref.h>
 #include <mfast/boolean_ref.h>
