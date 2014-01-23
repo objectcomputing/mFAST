@@ -27,9 +27,9 @@
 
 namespace mfast {
 
-class group_cref
-  : public field_cref
-{
+  class group_cref
+    : public field_cref
+  {
   public:
 
     typedef const group_field_instruction* instruction_cptr;
@@ -84,14 +84,14 @@ class group_cref
 
   private:
     group_cref& operator= (const group_cref&);
-};
+  };
 
 
-template <typename ConstGroupRef>
-class make_group_mref
-  : public make_field_mref<ConstGroupRef>
-{
-  typedef make_field_mref<ConstGroupRef> base_type;
+  template <typename ConstGroupRef>
+  class make_group_mref
+    : public make_field_mref<ConstGroupRef>
+  {
+    typedef make_field_mref<ConstGroupRef> base_type;
 
   public:
     typedef typename base_type::instruction_cptr instruction_cptr;
@@ -138,70 +138,60 @@ class make_group_mref
     make_group_mref& operator= (const make_group_mref&);
     friend class detail::codec_helper;
     // void ensure_valid() const;
-};
+  };
 
-typedef make_group_mref<group_cref> group_mref;
+  typedef make_group_mref<group_cref> group_mref;
 
-template <>
-struct mref_of<group_cref>
-{
-  typedef group_mref type;
-};
+  template <>
+  struct mref_of<group_cref>
+  {
+    typedef group_mref type;
+  };
+
 ///////////////////////////////////////////////////////////////////////////////
 
 
-inline
-group_cref::operator aggregate_cref() const
-{
-  return aggregate_cref(static_cast<const value_storage*>(storage_->of_array.content_), instruction());
-}
+  inline
+  group_cref::operator aggregate_cref() const
+  {
+    return aggregate_cref(static_cast<const value_storage*>(storage_->of_array.content_), instruction());
+  }
 
-inline field_cref
-group_cref::operator[](std::size_t index) const
-{
-  return aggregate_cref(*this)[index];
-}
+  inline field_cref
+  group_cref::operator[](std::size_t index) const
+  {
+    return aggregate_cref(*this)[index];
+  }
 
 /// return -1 if no such field is found
-inline int
-group_cref::field_index_with_id(std::size_t id) const
-{
-  return aggregate_cref(*this).field_index_with_id(id);
-}
+  inline int
+  group_cref::field_index_with_id(std::size_t id) const
+  {
+    return aggregate_cref(*this).field_index_with_id(id);
+  }
 
-inline int
-group_cref::field_index_with_name(const char* name) const
-{
-  return aggregate_cref(*this).field_index_with_name(name);
-}
+  inline int
+  group_cref::field_index_with_name(const char* name) const
+  {
+    return aggregate_cref(*this).field_index_with_name(name);
+  }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template <typename ConstGroupRef>
-inline field_mref
-make_group_mref<ConstGroupRef>::operator[](size_t index)  const
-{
-  assert(index < this->num_fields());
-  return aggregate_mref(*this)[index];
-}
+  template <typename ConstGroupRef>
+  inline field_mref
+  make_group_mref<ConstGroupRef>::operator[](size_t index)  const
+  {
+    assert(index < this->num_fields());
+    return aggregate_mref(*this)[index];
+  }
 
-// template <typename ConstGroupRef>
-// inline void
-// make_group_mref<ConstGroupRef>::ensure_valid() const
-// {
-//   // To improve efficiency during decoding, when the top level message is resetted,
-//   // all subfields' storage are zero-ed instead of properly initialized. Upon the
-//   // encoder visit this field, we need to check if the memory for the subfields of this
-//   // group is allocated. If not, we need to allocate the memory for the subfields.
-//   this->instruction()->ensure_valid_storage(const_cast<value_storage&>(*this->storage_), this->alloc_);
-// }
-
-template <typename ConstGroupRef>
-inline
-make_group_mref<ConstGroupRef>::operator aggregate_mref() const
-{
-  return aggregate_mref(this->alloc_, const_cast<value_storage*>(this->storage_->of_group.content_), this->instruction());
-}
+  template <typename ConstGroupRef>
+  inline
+  make_group_mref<ConstGroupRef>::operator aggregate_mref() const
+  {
+    return aggregate_mref(this->alloc_, const_cast<value_storage*>(this->storage_->of_group.content_), this->instruction());
+  }
 
 }
 
