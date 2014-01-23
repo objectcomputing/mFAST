@@ -22,6 +22,7 @@
 #include <string>
 #include "mfast/field_ref.h"
 #include "mfast/vector_ref.h"
+#include <boost/utility/string_ref.hpp>
 
 namespace mfast {
 
@@ -51,19 +52,11 @@ public:
   {
   }
 
-#if defined(BOOST_HAS_RVALUE_REFS) && !(defined(_MSC_VER) && (_MSC_VER < 1700))
-  std::string&& value() const
-  {
-    return std::move(std::string(this->data(), this->size()));
-  }
-#else
-  std::string value() const
-  {
-    return std::string(this->data(), this->size());
-  }
 
-#endif
-
+  boost::string_ref value() const
+  {
+    return boost::string_ref(this->data(), this->size());
+  }
 
   bool operator == (const char* other) const
   {
