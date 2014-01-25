@@ -20,7 +20,7 @@
 #define TEMPLATE_LOADER_H_L6DO08PL
 
 #include "mfast_coder_export.h"
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "mfast/arena_allocator.h"
 #include <deque>
 namespace mfast

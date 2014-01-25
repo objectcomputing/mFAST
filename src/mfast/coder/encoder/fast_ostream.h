@@ -20,7 +20,7 @@
 #ifndef FAST_OSTREAM_H_DUY5XTNJ
 #define FAST_OSTREAM_H_DUY5XTNJ
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "../common/codec_helper.h"
 #include "fast_ostreambuf.h"
 

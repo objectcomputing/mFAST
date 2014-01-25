@@ -19,7 +19,7 @@
 #ifndef FIELD_REF_H_BJLDKLDX
 #define FIELD_REF_H_BJLDKLDX
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include <new>
 #include <iostream>
 #include <typeinfo>

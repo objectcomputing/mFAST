@@ -19,7 +19,7 @@
 #include <string>
 #include <map>
 #include <set>
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "../../../../tinyxml2/tinyxml2.h"
 #include "../common/exceptions.h"
 #include "field_builder.h"

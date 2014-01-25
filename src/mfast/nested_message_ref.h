@@ -19,7 +19,7 @@
 #ifndef NESTED_MESSAGE_REF_H_X549MWYP
 #define NESTED_MESSAGE_REF_H_X549MWYP
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
 #include "mfast/message_ref.h"
 

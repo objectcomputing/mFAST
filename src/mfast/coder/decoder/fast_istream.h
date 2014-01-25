@@ -4,7 +4,7 @@
 #include <limits>
 #include <boost/type_traits.hpp>
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "fast_istreambuf.h"
 #include "decoder_presence_map.h"
 
@@ -20,7 +20,7 @@ class fast_istream
     fast_istream(fast_istreambuf* sb);
 
     void reset(fast_istreambuf* sb);
-    
+
     bool eof() const {
       return buf_->in_avail() == 0;
     }
@@ -143,7 +143,7 @@ class fast_istream
     {
       return *warning_log_;
     }
-    
+
     void warning_log (std::ostream* log)
     {
       warning_log_ = log;

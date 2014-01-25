@@ -21,7 +21,7 @@
 
 #include <deque>
 #include <map>
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "xml_util.h"
 #include "template_registry_impl.h"
 namespace mfast

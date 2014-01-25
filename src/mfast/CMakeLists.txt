@@ -2,11 +2,12 @@
 file (GLOB headers "*.h") ## retrieve all header files in current directory
 file (GLOB sources "*.cpp")     ## retrieve all source files in current directory
 
-
+file (GLOB instruction_headers "instructions/*.h") ## retrieve all header files in instructions directory
+file (GLOB instruction_sources "instructions/*.cpp")     ## retrieve all source files in instructions directory
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-set(mfast_SRCS  ${sources} ${headers})
+set(mfast_SRCS  ${sources} ${instruction_sources} ${headers} ${instruction_headers})
 
 add_library(mfast_static STATIC ${mfast_SRCS})
 
@@ -22,12 +23,12 @@ install(TARGETS mfast_static
 		ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
 
 
-if (BUILD_SHARED_LIBS)	
-  add_library(mfast SHARED ${mfast_SRCS})  
+if (BUILD_SHARED_LIBS)
+  add_library(mfast SHARED ${mfast_SRCS})
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
 	set_target_properties(mfast PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
-  
+
   install(TARGETS mfast
           EXPORT  mFASTTargets
           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin

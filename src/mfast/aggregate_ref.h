@@ -19,7 +19,7 @@
 #ifndef AGGREGATE_REF_H_J48H7C2R
 #define AGGREGATE_REF_H_J48H7C2R
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
 namespace mfast
 {

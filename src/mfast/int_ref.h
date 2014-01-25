@@ -19,22 +19,22 @@
 #ifndef INT_REF_H_7FQR23WL
 #define INT_REF_H_7FQR23WL
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
 
 namespace mfast {
 
-namespace detail {
-class codec_helper;
-}
+  namespace detail {
+    class codec_helper;
+  }
 
-template <typename T>
-class int_cref
-  : public field_cref
-{
+  template <typename T>
+  class int_cref
+    : public field_cref
+  {
   public:
     typedef T value_type;
-    typedef typename instruction_trait<T>::type instruction_type;
+    typedef int_field_instruction<T> instruction_type;
     typedef const instruction_type* instruction_cptr;
 
     int_cref()
@@ -91,36 +91,37 @@ class int_cref
       v.present(this->present());
     }
 
-};
+  };
 
-template <typename T>
-inline bool operator == (const int_cref<T>& lhs, const int_cref<T>& rhs)
-{
-  return (lhs.absent() == rhs.absent()) &&
-         (lhs.absent() || lhs.value() == rhs.value());
-}
+  template <typename T>
+  inline bool operator == (const int_cref<T>& lhs, const int_cref<T>& rhs)
+  {
+    return (lhs.absent() == rhs.absent()) &&
+           (lhs.absent() || lhs.value() == rhs.value());
+  }
 
-template <typename T>
-inline bool operator != (const int_cref<T>& lhs, const int_cref<T>& rhs)
-{
-  return !(lhs == rhs);
-}
+  template <typename T>
+  inline bool operator != (const int_cref<T>& lhs, const int_cref<T>& rhs)
+  {
+    return !(lhs == rhs);
+  }
 
-typedef int_cref<int32_t> int32_cref;
-typedef int_cref<uint32_t> uint32_cref;
-typedef int_cref<int64_t> int64_cref;
-typedef int_cref<uint64_t> uint64_cref;
+  typedef int_cref<int32_t> int32_cref;
+  typedef int_cref<uint32_t> uint32_cref;
+  typedef int_cref<int64_t> int64_cref;
+  typedef int_cref<uint64_t> uint64_cref;
 
-class fast_istream;
+  class fast_istream;
 
-template <typename T>
-class int_mref
-  : public make_field_mref<int_cref<T> >
-{
-  typedef make_field_mref<int_cref<T> > base_type;
+  template <typename T>
+  class int_mref
+    : public make_field_mref<int_cref<T> >
+  {
+    typedef make_field_mref<int_cref<T> > base_type;
 
   public:
-    typedef const typename instruction_trait<T>::type* instruction_cptr;
+    typedef int_field_instruction<T> instruction_type;
+    typedef const instruction_type* instruction_cptr;
 
     int_mref()
     {
@@ -194,38 +195,38 @@ class int_mref
       *this->storage() = v;
     }
 
-};
+  };
 
-typedef int_mref<int32_t> int32_mref;
-typedef int_mref<uint32_t> uint32_mref;
-typedef int_mref<int64_t> int64_mref;
-typedef int_mref<uint64_t> uint64_mref;
+  typedef int_mref<int32_t> int32_mref;
+  typedef int_mref<uint32_t> uint32_mref;
+  typedef int_mref<int64_t> int64_mref;
+  typedef int_mref<uint64_t> uint64_mref;
 
 
 
-template <>
-struct mref_of<int32_cref>
-{
-  typedef int32_mref type;
-};
+  template <>
+  struct mref_of<int32_cref>
+  {
+    typedef int32_mref type;
+  };
 
-template <>
-struct mref_of<uint32_cref>
-{
-  typedef uint32_mref type;
-};
+  template <>
+  struct mref_of<uint32_cref>
+  {
+    typedef uint32_mref type;
+  };
 
-template <>
-struct mref_of<int64_cref>
-{
-  typedef int64_mref type;
-};
+  template <>
+  struct mref_of<int64_cref>
+  {
+    typedef int64_mref type;
+  };
 
-template <>
-struct mref_of<uint64_cref>
-{
-  typedef uint64_mref type;
-};
+  template <>
+  struct mref_of<uint64_cref>
+  {
+    typedef uint64_mref type;
+  };
 
 
 };
