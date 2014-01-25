@@ -107,8 +107,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
   std::string cref_type_name = cref_scope_.str() + name + "_cref";
   std::string mref_type_name = mref_scope_.str() + name + "_mref";
 
-  bool embed_only_dyn_tempateref =
-    (inst->subinstructions_count()==1) && (inst->subinstruction(0)->field_type() == mfast::field_type_templateref);
+  bool embed_only_dyn_tempateref = contains_only_templateref(inst);
 
   std::stringstream cref_strm;
   std::stringstream mref_strm;
@@ -232,7 +231,9 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
     gen_accessors(inst, name, cref_type_name, mref_type_name);
   }
 
-  if (inst->ref_instruction() == 0  && inst->subinstructions_count() > 1) {
+  const mfast::field_instruction* element_instruction = get_element_instruction(inst);
+
+  if (inst->ref_instruction() == 0 && element_instruction==0) {
     out_ << "inline\n"
          << cref_scope_.str() << name << "_element_cref::"<< name << "_element_cref(\n"
          << "  const mfast::value_storage*   storage,\n"

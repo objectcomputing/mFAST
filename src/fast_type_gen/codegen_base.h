@@ -24,19 +24,21 @@
 #include <mfast.h>
 #include <mfast/coder/dynamic_templates_description.h>
 #include <fstream>
+#include <set>
 
 class file_open_error
   : public virtual boost::exception, public virtual std::exception
 {
-  public:
-    file_open_error()
-    {
-    }
+public:
+  file_open_error()
+  {
+  }
 
-    file_open_error(const std::string& filename)
-    {
-      *this << boost::errinfo_file_name(filename) << boost::errinfo_errno(errno);
-    }
+  file_open_error(const std::string& filename)
+  {
+    *this << boost::errinfo_file_name(filename) << boost::errinfo_errno(errno);
+  }
+
 };
 
 class codegen_base
@@ -44,30 +46,29 @@ class codegen_base
 {
 protected:
   std::string filebase_;
+  std::string cpp_ns_;
   std::ofstream out_;
   std::stringstream cref_scope_;
+
 public:
   codegen_base(const char* filebase, const char* fileext);
+
 protected:
   void traverse(mfast::dynamic_templates_description& desc);
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix="");
-
-  bool contains_only_templateRef(const mfast::group_field_instruction* inst);
 
   void reset_scope(std::stringstream& strm, const std::string& str);
   std::string cpp_name(const mfast::field_instruction* inst) const;
   std::string cpp_name(const char* n) const;
 
+  std::string cpp_type_of(const mfast::field_instruction* inst,
+                          std::set<std::string>*          dependency=0) const;
+
   bool is_const_field(const mfast::field_instruction* inst) const;
 
-  template <typename ReferableInstruction>
-  std::string ref_instruction_name(const ReferableInstruction* inst) const
-  {
-    if (inst->ref_instruction()->cpp_ns() && inst->ref_instruction()->cpp_ns()[0] != 0)
-     return std::string(inst->ref_instruction()->cpp_ns()) + "::" + inst->ref_instruction()->name();
-    else
-      return inst->ref_instruction()->name();
-  }
+  bool contains_only_templateref(const mfast::group_field_instruction* inst) const;
+
+  const  mfast::field_instruction* get_element_instruction(const mfast::sequence_field_instruction* inst) const;
 };
 
 

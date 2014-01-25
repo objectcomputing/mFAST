@@ -9,11 +9,11 @@
 
 
 namespace mfast {
-namespace json {
-bool get_quoted_string(std::istream& strm, std::string* pstr, bool first_quote_extracted);
-bool get_decimal_string(std::istream& strm, std::string& str);
-bool skip_value (std::istream& strm);
-}
+  namespace json {
+    bool get_quoted_string(std::istream& strm, std::string* pstr, bool first_quote_extracted);
+    bool get_decimal_string(std::istream& strm, std::string& str);
+    bool skip_value (std::istream& strm);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE( json_test_suite )
@@ -29,9 +29,20 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   product_ref.set_price().as(12356, -2);
   product_ref.set_name().as("Foo");
   Product_mref::tags_mref tags = product_ref.set_tags();
+  BOOST_CHECK_EQUAL(tags.instruction()->field_type(),            mfast::field_type_sequence);
+  BOOST_CHECK_EQUAL(tags.instruction()->subinstructions_count(), 1U);
+
   tags.resize(2);
+  BOOST_CHECK_EQUAL(tags.size(),                                 2U);
+
+  mfast::ascii_string_mref tag0 = tags[0];
+  BOOST_CHECK_EQUAL(tag0.instruction()->field_type(),            mfast::field_type_ascii_string);
+
+
   tags[0].as("Bar with \"quote\"");
+  BOOST_CHECK_EQUAL(strcmp(tags[0].c_str(), "Bar with \"quote\""),0);
   tags[1].as("Eek with \\");
+  BOOST_CHECK_EQUAL(strcmp(tags[1].c_str(), "Eek with \\"),       0);
 
   Product_mref::stock_mref stock = product_ref.set_stock();
   stock.set_warehouse().as(300);
@@ -86,9 +97,18 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
   BOOST_CHECK(person_ref.get_login().present());
 
   person_ref.set_bankAccounts().resize(1);
-  BankAccount_mref acct1 = person_ref.set_bankAccounts()[0].as<BankAccount>();
-  acct1.set_number().as(12345678);
-  acct1.set_routingNumber().as(87654321);
+  BankAccount_mref acct0 = person_ref.set_bankAccounts()[0].as<BankAccount>();
+  acct0.set_number().as(12345678);
+  acct0.set_routingNumber().as(87654321);
+
+
+  BOOST_CHECK_EQUAL(person_ref.get_bankAccounts().size(), 1U);
+  mfast::nested_message_cref n0 = person_ref.get_bankAccounts()[0];
+  BankAccount_cref acct0_read = static_cast<BankAccount_cref>(n0.target());
+
+  BOOST_CHECK_EQUAL(acct0_read.get_number().value(), 12345678U);
+  BOOST_CHECK_EQUAL(acct0_read.get_routingNumber().value(), 87654321U);
+
 
   std::stringstream strm;
   mfast::json::encode(strm, person_ref);

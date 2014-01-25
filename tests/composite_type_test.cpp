@@ -6,7 +6,7 @@
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 #include "debug_allocator.h"
-
+#include <boost/foreach.hpp>
 
 BOOST_AUTO_TEST_SUITE( composite_test_suite )
 
@@ -28,6 +28,9 @@ BOOST_AUTO_TEST_CASE(test_group)
   Address addr2(addr1.cref(), &alloc2);
 
   BOOST_CHECK(addr1.cref() == addr2.cref());
+
+
+
 }
 
 BOOST_AUTO_TEST_CASE(test_sequence)
@@ -49,6 +52,61 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   PhoneNumbers numbers_holder2(numbers_holder1.cref(), &alloc2);
 
   BOOST_CHECK(numbers_holder1.cref() == numbers_holder2.cref());
+
+  // Testing sequence of primitive types
+
+  Emails emails;
+
+  const char* values[] = {
+    "test1@.email.com",
+    "test2@.email.com",
+    "test3@.email.com",
+  };
+
+  emails.mref().assign(values, values+3);
+
+  BOOST_REQUIRE_EQUAL(emails.cref().size(), 3U);
+  BOOST_CHECK(emails.cref()[0] == values[0]);
+  BOOST_CHECK(emails.cref()[1] == values[1]);
+  BOOST_CHECK(emails.cref()[2] == values[2]);
+
+  std::size_t index = 0;
+
+  for (Emails_cref::iterator it = emails.cref().begin(); it != emails.cref().end(); ++it)
+  {
+    BOOST_CHECK( it->value() == values[index++] );
+  }
+
+  // Testing sequence of aggregate types
+
+  Addresses addresses;
+
+  addresses.mref().resize(2);
+  BOOST_CHECK_EQUAL(addresses.cref().size(), 2U);
+  index = 0;
+
+  for (Addresses_mref::iterator itr = addresses.mref().begin(); itr != addresses.mref().end(); ++itr)
+  {
+    itr->set_postalCode().as(index+10000);
+    ++index;
+  }
+
+  index = 0;
+
+
+  BOOST_FOREACH (const Address_mref& addr,  addresses.mref())
+  {
+    addr.set_postalCode().as(index+10000);
+    ++index;
+  }
+
+  index = 0;
+
+  BOOST_FOREACH(const Address_cref& addr,  addresses.cref())
+  {
+    BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
+    ++index;
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_template)
@@ -56,9 +114,9 @@ BOOST_AUTO_TEST_CASE(test_template)
   debug_allocator alloc;
   using namespace test4;
 
-  Person persion1(&alloc);
+  Person person1(&alloc);
 
-  Person_mref person_mref(persion1.mref());
+  Person_mref person_mref(person1.mref());
   BOOST_CHECK_EQUAL(person_mref.get_firstName().instruction()->field_type(), mfast::field_type_unicode_string);
   person_mref.set_firstName().as("John");
   person_mref.set_lastName().as("Doe");
@@ -66,30 +124,61 @@ BOOST_AUTO_TEST_CASE(test_template)
   person_mref.set_bloodType().as_O();
   BOOST_CHECK_EQUAL(person_mref.get_bloodType().value(), Person_cref::bloodType::O);
   BOOST_CHECK(person_mref.get_bloodType().is_O());
-  BOOST_CHECK_EQUAL(strcmp(person_mref.get_bloodType().value_name(), "O") , 0);
+  BOOST_CHECK_EQUAL(strcmp(person_mref.get_bloodType().value_name(), "O"), 0);
 
 
   person_mref.set_discrete().as_Five();
   BOOST_CHECK_EQUAL(person_mref.get_discrete().value(), DiscreteEnum::Five);
   BOOST_CHECK(person_mref.get_discrete().is_Five());
-  BOOST_CHECK_EQUAL(strcmp(person_mref.get_discrete().value_name(), "Five") , 0);
+  BOOST_CHECK_EQUAL(strcmp(person_mref.get_discrete().value_name(), "Five"), 0);
 
   person_mref.set_salary().as(20.0);
-  BOOST_CHECK_EQUAL(person_mref.get_salary().exponent(), -2);
-  BOOST_CHECK_EQUAL(person_mref.get_salary().mantissa(), 2000);
+  BOOST_CHECK_EQUAL(person_mref.get_salary().exponent(),                     -2);
+  BOOST_CHECK_EQUAL(person_mref.get_salary().mantissa(),                     2000);
 
 
-  BOOST_CHECK_EQUAL(person_mref.get_id().size(), 16U);
-
+  BOOST_CHECK_EQUAL(person_mref.get_id().size(),                             16U);
 
   debug_allocator alloc2;
 
-  Person person2(persion1.cref(), &alloc2);
+  // testing group assignment
+  person1.mref().set_education().set_college().as("SLU");
 
-  BOOST_CHECK(persion1.cref() == person2.cref());
+  Person tmp_person(&alloc2);
+
+  BOOST_CHECK(!tmp_person.cref().get_education().present());
+
+  tmp_person.mref().set_education().set_college().as("SLU");
+  tmp_person.mref().set_education().set_high_school().as("Kirkwood");
+
+  BOOST_CHECK(tmp_person.cref().get_education().present());
+
+  person1.mref().set_education().as( tmp_person.cref().get_education() );
+  BOOST_CHECK(person1.cref().get_education() == tmp_person.cref().get_education());
+
+  // testing sequence assignment
+  person1.mref().set_addresses().resize(4);
+  BOOST_CHECK_EQUAL(person1.cref().get_addresses().size(), 4U);
 
 
+  unsigned index = 0;
+  BOOST_FOREACH (const Address_mref& addr,  person1.mref().set_addresses())
+  {
+    addr.set_postalCode().as(index+10000);
+    ++index;
+  }
 
+  index = 0;
+
+  BOOST_FOREACH(const Address_cref& addr,  person1.cref().get_addresses())
+  {
+    BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
+    ++index;
+  }
+
+  Person person2(person1.cref(), &alloc2);
+
+  BOOST_CHECK(person1.cref() == person2.cref());
 }
 
 

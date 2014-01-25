@@ -30,33 +30,34 @@
 namespace mfast {
 
 
-namespace detail {
-extern const value_storage null_storage;
+  namespace detail {
+    extern const value_storage null_storage;
 
-class field_storage_helper
-{
-  public:
-    template <typename Ref>
-    static value_storage& storage_of(const Ref& ref)
+    class field_storage_helper
     {
-      return *const_cast<value_storage*>(ref.storage());
-    }
+    public:
+      template <typename Ref>
+      static value_storage& storage_of(const Ref& ref)
+      {
+        return *const_cast<value_storage*>(ref.storage());
+      }
 
-    template <typename Ref>
-    static value_storage* storage_ptr_of(const Ref& ref)
-    {
-      return const_cast<value_storage*>(ref.storage());
-    }
+      template <typename Ref>
+      static value_storage* storage_ptr_of(const Ref& ref)
+      {
+        return const_cast<value_storage*>(ref.storage());
+      }
 
-};
+    };
 
-}
+  }
 
 
-class field_cref;
+  template <typename ElementRef, bool IsElementAggregate>
+  struct sequence_iterator_base;
 
-class field_cref
-{
+  class field_cref
+  {
   public:
 
     typedef boost::false_type is_mutable;
@@ -109,6 +110,7 @@ class field_cref
     {
       return this->present();
     }
+
 #endif
 
     bool optional() const
@@ -143,7 +145,6 @@ class field_cref
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
-
   protected:
 
     const value_storage* storage () const
@@ -157,65 +158,70 @@ class field_cref
     const value_storage* storage_;
 
     friend class mfast::detail::field_storage_helper;
-};
+    template <typename ElementRef, bool IsElementAggregate>
+    friend struct sequence_iterator_base;
+  };
 
 //////////////////////////////////////////////////////////////////
 
-namespace detail
-{
-template <typename T, typename CanBeEmpty>
-class make_field_mref_base
-{
-  protected:
-    void omit() const
+  namespace detail
+  {
+    template <typename T, typename CanBeEmpty>
+    class make_field_mref_base
     {
-    }
+    protected:
+      void omit() const
+      {
+      }
 
-};
+    };
 
-template <typename T>
-class make_field_mref_base<T, boost::true_type>
-{
-  private:
-    const field_instruction* my_instruction() const {
-      return static_cast<const T*>(this)->instruction();
-    }
-
-    value_storage* my_storage() const {
-      return static_cast<const T*>(this)->storage();
-    }
-  public:
-
-    // overloading void present(bool) is not a good ideal. It causes the bool present()
-    // declared in field_cref being hided because of the overloading rule.
-    void omit() const
+    template <typename T>
+    class make_field_mref_base<T, boost::true_type>
     {
-      if (my_instruction()->optional()) {
-        my_storage()->present(0);
+    private:
+      const field_instruction* my_instruction() const
+      {
+        return static_cast<const T*>(this)->instruction();
       }
-    }
 
-    void clear() const
-    {
-      if (my_instruction()->optional()) {
-        my_storage()->present(0);
+      value_storage* my_storage() const
+      {
+        return static_cast<const T*>(this)->storage();
       }
-      else if (my_instruction()->is_array()) {
-        my_storage()->array_length(0);
+
+    public:
+
+      // overloading void present(bool) is not a good ideal. It causes the bool present()
+      // declared in field_cref being hided because of the overloading rule.
+      void omit() const
+      {
+        if (my_instruction()->optional()) {
+          my_storage()->present(0);
+        }
       }
-    }
 
-};
+      void clear() const
+      {
+        if (my_instruction()->optional()) {
+          my_storage()->present(0);
+        }
+        else if (my_instruction()->is_array()) {
+          my_storage()->array_length(0);
+        }
+      }
 
-}
+    };
+
+  }
 
 
-template <typename ConstFieldRef>
-class make_field_mref
-  : public ConstFieldRef
-  , public detail::make_field_mref_base< make_field_mref<ConstFieldRef>,
-                                         typename ConstFieldRef::canbe_optional >
-{
+  template <typename ConstFieldRef>
+  class make_field_mref
+    : public ConstFieldRef
+    , public detail::make_field_mref_base< make_field_mref<ConstFieldRef>,
+                                           typename ConstFieldRef::canbe_optional >
+  {
   public:
     typedef boost::true_type is_mutable;
     typedef typename ConstFieldRef::instruction_cptr instruction_cptr;
@@ -260,72 +266,72 @@ class make_field_mref
 
     template <typename T>
     friend class make_field_mref;
-};
+  };
 
-typedef make_field_mref<field_cref> field_mref_base;
+  typedef make_field_mref<field_cref> field_mref_base;
 
-template <typename T>
-struct cref_of
-{
-  typedef typename T::cref_type type;
-};
+  template <typename T>
+  struct cref_of
+  {
+    typedef typename T::cref_type type;
+  };
 
-template <typename T>
-struct mref_of;
-
-
+  template <typename T>
+  struct mref_of;
 
 
-template <typename T1, typename T2>
-typename boost::disable_if<typename T1::is_mutable, T1>::type
-dynamic_cast_as(const T2& ref)
-{
-  typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
-  if (instruction == 0)
-    throw std::bad_cast();
-  return T1(detail::field_storage_helper::storage_ptr_of(ref), instruction);
-}
 
-template <typename T1, typename T2>
-typename boost::enable_if<typename T1::is_mutable, T1>::type
-dynamic_cast_as(const T2& ref)
-{
-  typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
-  if (instruction == 0)
-    throw std::bad_cast();
-  return T1(ref.allocator(), detail::field_storage_helper::storage_ptr_of(ref), instruction);
-}
 
-namespace detail {
-
-inline field_cref
-field_ref_with_id(const value_storage*              storage,
-                  const aggregate_instruction_base* helper,
-                  uint32_t                          id)
-{
-  if (helper) {
-
-    int index = helper->find_subinstruction_index_by_id(id);
-    if (index >= 0)
-      return field_cref(&storage[index], helper->subinstruction(index));
+  template <typename T1, typename T2>
+  typename boost::disable_if<typename T1::is_mutable, T1>::type
+  dynamic_cast_as(const T2& ref)
+  {
+    typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
+    if (instruction == 0)
+      throw std::bad_cast();
+    return T1(detail::field_storage_helper::storage_ptr_of(ref), instruction);
   }
-  return field_cref();
-}
 
-inline field_cref
-field_ref_with_name(const value_storage*              storage,
-                    const aggregate_instruction_base* helper,
-                    const char*                       name)
-{
-  if (helper) {
-    int index = helper->find_subinstruction_index_by_name(name);
-    if (index >= 0)
-      return field_cref(&storage[index], helper->subinstruction(index));
+  template <typename T1, typename T2>
+  typename boost::enable_if<typename T1::is_mutable, T1>::type
+  dynamic_cast_as(const T2& ref)
+  {
+    typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
+    if (instruction == 0)
+      throw std::bad_cast();
+    return T1(ref.allocator(), detail::field_storage_helper::storage_ptr_of(ref), instruction);
   }
-  return field_cref();
-}
 
-}
+  namespace detail {
+
+    inline field_cref
+    field_ref_with_id(const value_storage*           storage,
+                      const group_field_instruction* helper,
+                      uint32_t                       id)
+    {
+      if (helper) {
+
+        int index = helper->find_subinstruction_index_by_id(id);
+        if (index >= 0)
+          return field_cref(&storage[index], helper->subinstruction(index));
+      }
+      return field_cref();
+    }
+
+    inline field_cref
+    field_ref_with_name(const value_storage*           storage,
+                        const group_field_instruction* helper,
+                        const char*                    name)
+    {
+      if (helper) {
+        int index = helper->find_subinstruction_index_by_name(name);
+        if (index >= 0)
+          return field_cref(&storage[index], helper->subinstruction(index));
+      }
+      return field_cref();
+    }
+
+  }
 
 }
 

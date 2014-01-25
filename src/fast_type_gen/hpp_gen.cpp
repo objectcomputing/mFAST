@@ -115,12 +115,17 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 {
   std::string name( cpp_name( inst ) );
 
-  if (contains_only_templateRef(inst)) {
-    std::string cpp_type = "mfast::nested_message"; // dynamic templateRef
-    if (inst->ref_instruction()) {
-      // this is static templateRef
-      cpp_type = referenced_type_name(inst);
-    }
+  std::string cpp_type;
+
+  if (inst->ref_instruction()) {
+    cpp_type = cpp_type_of(inst, &dependency_);
+  }
+  else if (this->contains_only_templateref(inst)) {
+    cpp_type = "mfast::nested_message";
+  }
+
+
+  if (cpp_type.size()) {
 
     if (!top_level) {
       header_cref_ << indent << "typedef " << cpp_type << "_cref " << name << "_cref;\n";
@@ -221,15 +226,16 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_level)
 {
   std::string name( cpp_name( inst ) );
+  const mfast::field_instruction* element_instruction = get_element_instruction(inst);
 
   if (inst->ref_instruction()) {
-    std::string cpp_type = referenced_type_name(inst);
+    std::string cpp_type = cpp_type_of(inst, &dependency_);
 
     header_cref_ << indent << "typedef " << cpp_type << "_cref " << name << "_cref;\n";
     header_mref_ << indent << "typedef " << cpp_type << "_mref " << name << "_mref;\n";
 
   }
-  else if (inst->subinstructions_count() > 1)
+  else if (element_instruction == 0)
   {
     std::string element_type = name + "_element";
 
@@ -268,42 +274,17 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
   else {
 
     std::string element_type;
+    std::string trait;
 
-    mfast::field_type_enum_t element_field_type_enum = inst->subinstruction(0)->field_type() ;
+    element_type = cpp_type_of(element_instruction,&dependency_);
 
-    if (element_field_type_enum == mfast::field_type_templateref) {
-      element_type = "mfast::nested_message";
-    }
-    else{
-      static const char* names[] = {
-        "mfast::int32",
-        "mfast::uint32",
-        "mfast::int64",
-        "mfast::uint64",
-        "mfast::decimal",
-        "mfast::exponent",
-        "mfast::ascii_string",
-        "mfast::unicode_string",
-        "mfast::byte_vector",
-      };
-      if (element_field_type_enum <= mfast::field_type_byte_vector)
-        element_type = names[inst->subinstruction(0)->field_type()];
-      else if (element_field_type_enum == mfast::field_type_enum)
-      {
-        const mfast::enum_field_instruction* subinst0 =
-          dynamic_cast<const mfast::enum_field_instruction*>(inst->subinstruction(0));
-        element_type = cpp_name(subinst0->ref_instruction());
-      }
-      else {
-        const mfast::group_field_instruction* subinst0 =
-          dynamic_cast<const mfast::group_field_instruction*>(inst->subinstruction(0));
-        if (subinst0)
-          element_type = cpp_name(subinst0->ref_instruction());
-      }
-    }
+    if (inst->element_instruction())
+      trait = "mfast::defined_element_sequence_trait";
+    else
+      trait = "mfast::sole_element_sequence_trait";
 
-    header_cref_ << indent << "typedef mfast::make_sequence_cref<" << element_type << "_cref> " << name << "_cref;\n";
-    header_mref_ << indent << "typedef mfast::make_sequence_mref<" << element_type << "_mref> " << name << "_mref;\n";
+    header_cref_ << indent << "typedef mfast::make_sequence_cref<" << element_type << "_cref, " << trait << "> " << name << "_cref;\n";
+    header_mref_ << indent << "typedef mfast::make_sequence_mref<" << element_type << "_mref, " << trait << "> " << name << "_mref;\n";
   }
 
   if (!top_level) {
@@ -483,7 +464,7 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
   std::string name (cpp_name(inst));
 
   if (inst->ref_instruction()) {
-    std::string actual_type_name = referenced_type_name(inst);
+    std::string actual_type_name = cpp_type_of(inst, &dependency_);
     header_cref_ << indent << "typedef " << actual_type_name << "_cref " << name << "_cref;\n";
     header_mref_ << indent << "typedef " << actual_type_name << "_mref " << name << "_mref;\n";
   }

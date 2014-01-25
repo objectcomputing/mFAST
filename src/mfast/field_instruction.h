@@ -463,7 +463,7 @@ namespace mfast {
 
 
     virtual void accept(field_instruction_visitor&, void*) const;
-     virtual decimal_field_instruction* clone(arena_allocator& alloc) const;
+    virtual decimal_field_instruction* clone(arena_allocator& alloc) const;
 
     const mantissa_field_instruction* mantissa_instruction() const
     {
@@ -497,17 +497,17 @@ namespace mfast {
 
 
   template <typename T>
-  class referalbe_instruction
+  class referable_instruction
   {
   public:
-    referalbe_instruction(const T*    ref_instruction,
+    referable_instruction(const T*    ref_instruction,
                           const char* cpp_ns)
       : ref_instruction_(ref_instruction)
       , cpp_ns_(cpp_ns)
     {
     }
 
-    const T* ref_instruction() const
+    const field_instruction* ref_instruction() const
     {
       return ref_instruction_;
     }
@@ -529,7 +529,7 @@ namespace mfast {
 
   class MFAST_EXPORT enum_field_instruction
     : public integer_field_instruction_base
-    , public referalbe_instruction<enum_field_instruction>
+    , public referable_instruction<enum_field_instruction>
   {
   public:
 
@@ -555,7 +555,7 @@ namespace mfast {
                                        ns,
                                        context,
                                        initial_value.storage_)
-      , referalbe_instruction<enum_field_instruction>(ref, cpp_ns)
+      , referable_instruction<enum_field_instruction>(ref, cpp_ns)
       , elements_(elements)
       , num_elements_(num_elements)
       , element_values_(element_values)
@@ -564,7 +564,7 @@ namespace mfast {
 
     enum_field_instruction(const enum_field_instruction &other)
       : integer_field_instruction_base(other)
-      , referalbe_instruction<enum_field_instruction>(other)
+      , referable_instruction<enum_field_instruction>(other)
       , elements_(other.elements_)
       , num_elements_(other.num_elements_)
       , element_values_(other.element_values_)
@@ -932,20 +932,22 @@ namespace mfast {
 
   typedef const field_instruction*  const_instruction_ptr_t;
 
-  class MFAST_EXPORT aggregate_instruction_base
+  class MFAST_EXPORT group_field_instruction
     : public field_instruction
+    , public referable_instruction<group_field_instruction>
   {
   public:
-    aggregate_instruction_base(uint16_t                       field_index,
-                               presence_enum_t                optional,
-                               uint32_t                       id,
-                               const char*                    name,
-                               const char*                    ns,
-                               const char*                    dictionary,
-                               const const_instruction_ptr_t* subinstructions,
-                               uint32_t                       subinstructions_count,
-                               const char*                    typeref_name ="",
-                               const char*                    typeref_ns="")
+    group_field_instruction(uint16_t                       field_index,
+                            presence_enum_t                optional,
+                            uint32_t                       id,
+                            const char*                    name,
+                            const char*                    ns,
+                            const char*                    dictionary,
+                            const const_instruction_ptr_t* subinstructions,
+                            uint32_t                       subinstructions_count,
+                            const char*                    typeref_name ="",
+                            const char*                    typeref_ns="",
+                            const char*                    cpp_ns="")
       : field_instruction(field_index,
                           operator_none,
                           field_type_group,
@@ -953,10 +955,12 @@ namespace mfast {
                           id,
                           name,
                           ns)
+      , referable_instruction<group_field_instruction>(0, cpp_ns)
       , dictionary_(dictionary)
       , typeref_name_(typeref_name)
       , typeref_ns_(typeref_ns)
       , segment_pmap_size_(0)
+
     {
       set_subinstructions(subinstructions, subinstructions_count);
     }
@@ -1046,50 +1050,6 @@ namespace mfast {
       dictionary_ = v;
     }
 
-  protected:
-
-    const char* dictionary_;
-    uint32_t subinstructions_count_;
-    const char* typeref_name_;
-    const char* typeref_ns_;
-    std::size_t segment_pmap_size_;
-    const const_instruction_ptr_t* subinstructions_;
-  };
-
-
-  class template_instruction;
-
-  class MFAST_EXPORT group_field_instruction
-    : public aggregate_instruction_base
-    , public referalbe_instruction<group_field_instruction>
-  {
-  public:
-
-    group_field_instruction(uint16_t                       field_index,
-                            presence_enum_t                optional,
-                            uint32_t                       id,
-                            const char*                    name,
-                            const char*                    ns,
-                            const char*                    dictionary,
-                            const const_instruction_ptr_t* subinstructions,
-                            uint32_t                       subinstructions_count,
-                            const char*                    typeref_name ="",
-                            const char*                    typeref_ns="",
-                            const char*                    cpp_ns="")
-      : aggregate_instruction_base(field_index,
-                                   optional,
-                                   id,
-                                   name,
-                                   ns,
-                                   dictionary,
-                                   subinstructions,
-                                   subinstructions_count,
-                                   typeref_name,
-                                   typeref_ns)
-      , referalbe_instruction<group_field_instruction>(0, cpp_ns)
-    {
-    }
-
     virtual void construct_value(value_storage& storage,
                                  allocator*     alloc) const;
     virtual void destruct_value(value_storage& storage,
@@ -1117,6 +1077,14 @@ namespace mfast {
     virtual void accept(field_instruction_visitor&, void*) const;
     virtual group_field_instruction* clone(arena_allocator& alloc) const;
 
+  protected:
+
+    const char* dictionary_;
+    uint32_t subinstructions_count_;
+    const char* typeref_name_;
+    const char* typeref_ns_;
+    std::size_t segment_pmap_size_;
+    const const_instruction_ptr_t* subinstructions_;
 
   };
 
@@ -1125,33 +1093,21 @@ namespace mfast {
     : public group_field_instruction
   {
   public:
-    sequence_field_instruction(uint16_t                        field_index,
-                               presence_enum_t                 optional,
-                               uint32_t                        id,
-                               const char*                     name,
-                               const char*                     ns,
-                               const char*                     dictionary,
-                               const const_instruction_ptr_t*  subinstructions,
-                               uint32_t                        subinstructions_count,
-                               const uint32_field_instruction* sequence_length_instruction,
-                               const char*                     typeref_name="",
-                               const char*                     typeref_ns="",
-                               const char*                     cpp_ns="")
-      : group_field_instruction(field_index,
-                                optional,
-                                id,
-                                name,
-                                ns,
-                                dictionary,
-                                subinstructions,
-                                subinstructions_count,
-                                typeref_name,
-                                typeref_ns,
-                                cpp_ns)
-      , sequence_length_instruction_(sequence_length_instruction)
-    {
-      field_type_ = field_type_sequence;
-    }
+    sequence_field_instruction(uint16_t                          field_index,
+                               presence_enum_t                   optional,
+                               uint32_t                          id,
+                               const char*                       name,
+                               const char*                       ns,
+                               const char*                       dictionary,
+                               const const_instruction_ptr_t*    subinstructions,
+                               uint32_t                          subinstructions_count,
+                               const uint32_field_instruction*   sequence_length_instruction,
+                               const char*                       typeref_name="",
+                               const char*                       typeref_ns="",
+                               const char*                       cpp_ns="",
+                               const group_field_instruction*    element_instruction=0,
+                               const sequence_field_instruction* ref_instruction=0);
+
 
     virtual void construct_value(value_storage& storage,
                                  allocator*     alloc) const;
@@ -1189,12 +1145,24 @@ namespace mfast {
     {
       return sequence_length_instruction_;
     }
+
     virtual sequence_field_instruction* clone(arena_allocator& alloc) const;
+
+    const group_field_instruction* element_instruction() const
+    {
+      return element_instruction_;
+    }
+
+    void element_instruction(const group_field_instruction* i)
+    {
+      element_instruction_ = i;
+    }
 
   private:
 
     friend class dictionary_builder;
     const uint32_field_instruction* sequence_length_instruction_;
+    const group_field_instruction* element_instruction_;
   };
 
 
@@ -1325,36 +1293,24 @@ namespace mfast {
     : public sequence_field_instruction
   {
   public:
-    sequence_instruction_ex(uint16_t                       field_index,
-                            presence_enum_t                optional,
-                            uint32_t                       id,
-                            const char*                    name,
-                            const char*                    ns,
-                            const char*                    dictionary,
-                            const const_instruction_ptr_t* subinstructions,
-                            uint32_t                       subinstructions_count,
-                            uint32_field_instruction*      sequence_length_instruction,
-                            const char*                    typeref_name="",
-                            const char*                    typeref_ns="")
-      : sequence_field_instruction(field_index, optional, id, name, ns, dictionary, subinstructions,
-                                   subinstructions_count, sequence_length_instruction, typeref_name, typeref_ns)
-    {
-    }
-
-    sequence_instruction_ex(uint16_t                    field_index,
-                            presence_enum_t             optional,
-                            uint32_t                    id,
-                            const char*                 name,
-                            const char*                 ns,
-                            const char*                 dictionary,
-                            const template_instruction* ref_instruction,
-                            uint32_field_instruction*   sequence_length_instruction,
-                            const char*                 typeref_name="",
-                            const char*                 typeref_ns="")
+    sequence_instruction_ex(uint16_t                          field_index,
+                            presence_enum_t                   optional,
+                            uint32_t                          id,
+                            const char*                       name,
+                            const char*                       ns,
+                            const char*                       dictionary,
+                            const const_instruction_ptr_t*    subinstructions,
+                            uint32_t                          subinstructions_count,
+                            uint32_field_instruction*         sequence_length_instruction,
+                            const char*                       typeref_name,
+                            const char*                       typeref_ns,
+                            const char*                       cpp_ns,
+                            const group_field_instruction*    element_instruction,
+                            const sequence_field_instruction* ref_instruction)
       : sequence_field_instruction(field_index, optional, id, name, ns, dictionary,
-                                   ref_instruction->subinstructions(),
-                                   ref_instruction->subinstructions_count(),
-                                   sequence_length_instruction, typeref_name, typeref_ns)
+                                   subinstructions, subinstructions_count, sequence_length_instruction,
+                                   typeref_name, typeref_ns, cpp_ns,
+                                   element_instruction, ref_instruction)
     {
     }
 
@@ -1362,6 +1318,7 @@ namespace mfast {
     {
       return new (alloc) sequence_instruction_ex<T>(*this);
     }
+
   };
 
 
@@ -1434,6 +1391,7 @@ namespace mfast {
     {
       return target_;
     }
+
     virtual templateref_instruction* clone(arena_allocator& alloc) const;
 
     static const const_instruction_ptr_t* default_instruction();
@@ -1563,7 +1521,6 @@ namespace mfast {
     return new (alloc) int_field_instruction<T>(*this);
   }
 
-
   template <typename T>
   void vector_field_instruction<T>::accept(field_instruction_visitor& visitor, void* context) const
   {
@@ -1576,7 +1533,6 @@ namespace mfast {
   {
     return new (alloc) vector_field_instruction<T>(*this);
   }
-
 
   template <typename T>
   struct instruction_trait;

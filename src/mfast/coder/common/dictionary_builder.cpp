@@ -116,8 +116,8 @@ void dictionary_builder::build(const templates_description* def)
 }
 
 void dictionary_builder::build_group(const field_instruction*          fi,
-                                     const aggregate_instruction_base* src,
-                                     aggregate_instruction_base*       dest)
+                                     const group_field_instruction* src,
+                                     group_field_instruction*       dest)
 {
   const char* inherited_ns = current_ns_;
   const char* inherited_dictionary = current_dictionary_;

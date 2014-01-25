@@ -69,6 +69,7 @@ private:
   void gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst);
   void output_subinstructions();
   std::string get_subinstructions(const mfast::group_field_instruction* inst);
+  bool need_generate_subinstructions(const mfast::group_field_instruction* inst);
 
   std::vector<std::string> subinstructions_list_;
   std::stringstream template_instructions_;

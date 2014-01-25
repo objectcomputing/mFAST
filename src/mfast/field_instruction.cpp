@@ -252,23 +252,23 @@ namespace mfast {
 
 /////////////////////////////////////////////////////////
 
-  void aggregate_instruction_base::construct_group_subfields(value_storage* subfields,
-                                                             allocator*     alloc) const
+  void group_field_instruction::construct_group_subfields(value_storage* subfields,
+                                                          allocator*     alloc) const
   {
     for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
       this->subinstructions_[i]->construct_value(subfields[i], alloc);
     }
   }
 
-  void aggregate_instruction_base::destruct_group_subfields(value_storage* subfields,
-                                                            allocator*     alloc) const
+  void group_field_instruction::destruct_group_subfields(value_storage* subfields,
+                                                         allocator*     alloc) const
   {
     for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
       this->subinstructions_[i]->destruct_value(subfields[i], alloc);
     }
   }
 
-  int aggregate_instruction_base::find_subinstruction_index_by_id(uint32_t id) const
+  int group_field_instruction::find_subinstruction_index_by_id(uint32_t id) const
   {
     for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
       if (this->subinstructions_[i]->id() == id)
@@ -277,7 +277,7 @@ namespace mfast {
     return -1;
   }
 
-  int aggregate_instruction_base::find_subinstruction_index_by_name(const char* name) const
+  int group_field_instruction::find_subinstruction_index_by_name(const char* name) const
   {
     for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
       if (std::strcmp(this->subinstructions_[i]->name(), name) ==0)
@@ -287,9 +287,9 @@ namespace mfast {
   }
 
 // deep copy
-  void aggregate_instruction_base::copy_group_subfields(const value_storage* src_subfields,
-                                                        value_storage*       dest_subfields,
-                                                        allocator*           alloc) const
+  void group_field_instruction::copy_group_subfields(const value_storage* src_subfields,
+                                                     value_storage*       dest_subfields,
+                                                     allocator*           alloc) const
   {
     for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
       this->subinstructions_[i]->copy_construct_value(src_subfields[i], dest_subfields[i], alloc);
@@ -299,9 +299,6 @@ namespace mfast {
     //   dest_subfields[subinstructions_count_].of_group.content_ = parent;
     // }
   }
-
-///////////////////////////////////////////////////////////////////
-
 
   void group_field_instruction::construct_value(value_storage& storage,
                                                 allocator*     alloc) const
@@ -369,6 +366,44 @@ namespace mfast {
   }
 
 /////////////////////////////////////////////////////////
+  sequence_field_instruction::sequence_field_instruction(uint16_t                          field_index,
+                                                         presence_enum_t                   optional,
+                                                         uint32_t                          id,
+                                                         const char*                       name,
+                                                         const char*                       ns,
+                                                         const char*                       dictionary,
+                                                         const const_instruction_ptr_t*    subinstructions,
+                                                         uint32_t                          subinstructions_count,
+                                                         const uint32_field_instruction*   sequence_length_instruction,
+                                                         const char*                       typeref_name,
+                                                         const char*                       typeref_ns,
+                                                         const char*                       cpp_ns,
+                                                         const group_field_instruction*    element_instruction,
+                                                         const sequence_field_instruction* ref_inst)
+    : group_field_instruction(field_index,
+                              optional,
+                              id,
+                              name,
+                              ns,
+                              dictionary,
+                              subinstructions,
+                              subinstructions_count,
+                              typeref_name,
+                              typeref_ns,
+                              cpp_ns)
+    , sequence_length_instruction_(sequence_length_instruction)
+    , element_instruction_(element_instruction)
+  {
+    field_type_ = field_type_sequence;
+    if (ref_inst) {
+      ref_instruction(ref_inst);
+      element_instruction_=ref_inst->element_instruction();
+    }
+    if (element_instruction_) {
+      this->set_subinstructions(element_instruction_->subinstructions(),
+                                element_instruction_->subinstructions_count());
+    }
+  }
 
   void sequence_field_instruction::construct_sequence_elements(value_storage& storage,
                                                                std::size_t    start,

@@ -58,18 +58,22 @@ private:
   void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix);
 
-  template <typename Instruction>
+#if 0
   std::string  referenced_type_name(const Instruction* inst)
   {
-    std::string cpp_type = ref_instruction_name(inst);
-    const char* cpp_ns = inst->ref_instruction()->cpp_ns();
-
-    if (cpp_ns && cpp_ns[0] != 0 &&  filebase_ != cpp_ns && std::strcmp(cpp_ns, "mfast") != 0) {
-      dependency_.insert(cpp_ns);
+    if (inst->field_type() == mfast::field_type_templateref) {
+      return "mfast::nested_message";
     }
-    return cpp_type;
-  }
+    else {
+      const char* cpp_ns = inst->ref_instruction()->cpp_ns();
 
+      if (cpp_ns && cpp_ns[0] != 0 &&  filebase_ != cpp_ns && std::strcmp(cpp_ns, "mfast") != 0) {
+        dependency_.insert(cpp_ns);
+      }
+      return ref_instruction_name(inst);
+    }
+  }
+#endif
 
   typedef indented_stringstream ind_stream;
   std::set<std::string> dependency_;

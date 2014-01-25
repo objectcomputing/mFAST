@@ -110,6 +110,9 @@ namespace mfast
     template <typename T>
     friend class make_aggregate_mref;
 
+    template <typename ElementRef, bool IsElementAggregate>
+    friend struct sequence_iterator_base;
+
   };
 
   class message_mref;
