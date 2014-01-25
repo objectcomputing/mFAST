@@ -10,11 +10,10 @@ namespace mfast
 {
   template <typename U>
   inline fast_ostream& operator << (fast_ostream& strm, const int_cref<U>& cref)
-  {    
+  {
     strm.encode(cref.value(), cref.instruction()->is_nullable(), cref.absent());
     return strm;
   }
-
 
   inline fast_ostream& operator << (fast_ostream& strm, const exponent_cref& cref)
   {
@@ -48,7 +47,7 @@ namespace mfast
     }
     return strm;
   }
-    
+
 }
 
 #endif /* end of include guard: FAST_OSTREAM_INSERTER_H_WQ683ZCZ */

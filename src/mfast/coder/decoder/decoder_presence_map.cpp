@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -22,21 +22,22 @@
 #ifndef NDEBUG
 
 namespace mfast {
-std::ostream&
-operator << (std::ostream& os, const decoder_presence_map& pmap)
-{
-  uint64_t mask = pmap.mask_ >> 1;
-  if (mask == 0) {
-    os << "0";
+  std::ostream&
+  operator << (std::ostream& os, const decoder_presence_map& pmap)
+  {
+    uint64_t mask = pmap.mask_ >> 1;
+    if (mask == 0) {
+      os << "0";
+      return os;
+    }
+
+    os << (mask & pmap.cur_bitmap_ ? "J" : "Q");
+    while ((mask >>=1)) {
+      os << (mask & pmap.cur_bitmap_ ? "1" : "0");
+    }
     return os;
   }
 
-  os << (mask & pmap.cur_bitmap_ ? "J" : "Q");
-  while ((mask >>=1)) {
-    os << (mask & pmap.cur_bitmap_ ? "1" : "0");
-  }
-  return os;
-}
 }
 #else
 // disable MSVC LNK4221

@@ -11,22 +11,24 @@
 namespace mfast
 {
 
-class fast_istream;
-std::ostream& operator << (std::ostream& os, const fast_istream& istream);
-class fast_istream
-{
+  class fast_istream;
+  std::ostream& operator << (std::ostream& os, const fast_istream& istream);
+  class fast_istream
+  {
   public:
 
     fast_istream(fast_istreambuf* sb);
 
     void reset(fast_istreambuf* sb);
 
-    bool eof() const {
+    bool eof() const
+    {
       return buf_->in_avail() == 0;
     }
 
-    bool operator!() const {
-       return buf_->in_avail() == 0;
+    bool operator!() const
+    {
+      return buf_->in_avail() == 0;
     }
 
     /**
@@ -165,169 +167,169 @@ class fast_istream
 
     fast_istreambuf* buf_;
     std::ostream* warning_log_;
-};
-
-namespace detail {
-
-template <typename T>
-struct int_trait;
-
-
-template <>
-struct int_trait<int8_t>     // only used for decoding decimal exponent
-{
-  typedef int8_t temp_type;
-};
-
-
-template <>
-struct int_trait<int32_t>
-{
-  typedef int32_t temp_type;
-};
-
-template <>
-struct int_trait<uint32_t>
-{
-  typedef uint64_t temp_type;
-};
-
-template <>
-struct int_trait<int64_t>
-{
-  typedef int64_t temp_type;
-};
-
-struct temp_uint64_t
-{
-  uint64_t value;
-  bool carry;
-
-  temp_uint64_t(int)
-    : value(0), carry(false)
-  {
-  }
-
-  temp_uint64_t& operator = (uint64_t other)
-  {
-    value = other;
-    return *this;
-  }
-
-  temp_uint64_t& operator |= (uint64_t other)
-  {
-    value |= other;
-    return *this;
-  }
-
-  temp_uint64_t& operator <<= (int /* shiftbits */)       // shiftbits should always be 7
-  {
-    carry =  (value == 0x0200000000000000ULL);
-    value <<= 7;
-    return *this;
-  }
-
-  operator uint64_t () const {
-    return value;
-  }
-};
-
-template <typename T>
-inline bool to_nullable_value(T& result, typename int_trait<T>::temp_type tmp, bool is_positive)
-{
-  if (tmp == 0) {
-    return false;
-  }
-  else if (is_positive)
-    result = static_cast<T>(tmp -1);
-  else
-    result = static_cast<T>(tmp);
-  return true;
-}
-
-template <>
-struct int_trait<uint64_t>
-{
-  typedef temp_uint64_t temp_type;
-};
-
-inline bool to_nullable_value(uint64_t& result, temp_uint64_t tmp, bool is_positive)
-{
-  if (tmp.value == 0) {
-    if (!tmp.carry)
-      return false;
-    else {
-      result = std::numeric_limits<uint64_t>::max();
-    }
-  }
-  else if (is_positive)
-    result = tmp.value -1;
-  else
-    result = tmp.value;
-  return true;
-
-}
-
-}
-
-inline fast_istream::fast_istream(fast_istreambuf* sb)
-  : buf_(sb)
-  , warning_log_(0)
-{
-}
-
-inline void
-fast_istream::reset(fast_istreambuf* sb)
-{
-  buf_ = sb;
-}
-
-template <typename T>
-typename boost::enable_if< boost::is_integral<T>,bool>::type
-fast_istream::decode(T& result, bool nullable)
-{
-  typename detail::int_trait<T>::temp_type tmp = 0;
-
-  char c = buf_->sbumpc();
-  bool is_positive = true;
-
-  if (boost::is_unsigned<T>::value) {
-    tmp = c & 0x7F;
-  }
-  else {
-    if (c & 0x40) {
-      // this is a negtive integer
-      is_positive = false;
-      tmp = (static_cast<T>(-1) << 7) | (c & 0x7F);
-    }
-    else {
-      // positive integer, mask the most significat two bits
-      tmp = c & 0x3F;
-    }
-  }
-
-  int consumed_bytes = 0;
-
-  const int max_bytes = 8*sizeof(T)/7+1;
-
-  while ( (c & 0x80) == 0 && consumed_bytes < max_bytes) {
-    tmp <<= 7;
-    c = buf_->sbumpc();
-    tmp |= ( c & 0x7F );
-    ++consumed_bytes;
   };
 
-  if ((c & 0x80) ==0)
-    BOOST_THROW_EXCEPTION(fast_dynamic_error("D2"));
+  namespace detail {
 
-  if (nullable) {
-    return detail::to_nullable_value(result, tmp, is_positive);
+    template <typename T>
+    struct int_trait;
+
+
+    template <>
+    struct int_trait<int8_t> // only used for decoding decimal exponent
+    {
+      typedef int8_t temp_type;
+    };
+
+
+    template <>
+    struct int_trait<int32_t>
+    {
+      typedef int32_t temp_type;
+    };
+
+    template <>
+    struct int_trait<uint32_t>
+    {
+      typedef uint64_t temp_type;
+    };
+
+    template <>
+    struct int_trait<int64_t>
+    {
+      typedef int64_t temp_type;
+    };
+
+    struct temp_uint64_t
+    {
+      uint64_t value;
+      bool carry;
+
+      temp_uint64_t(int)
+        : value(0), carry(false)
+      {
+      }
+
+      temp_uint64_t& operator = (uint64_t other)
+      {
+        value = other;
+        return *this;
+      }
+
+      temp_uint64_t& operator |= (uint64_t other)
+      {
+        value |= other;
+        return *this;
+      }
+
+      temp_uint64_t& operator <<= (int /* shiftbits */)   // shiftbits should always be 7
+      {
+        carry =  (value == 0x0200000000000000ULL);
+        value <<= 7;
+        return *this;
+      }
+
+      operator uint64_t () const {
+        return value;
+      }
+    };
+
+    template <typename T>
+    inline bool to_nullable_value(T& result, typename int_trait<T>::temp_type tmp, bool is_positive)
+    {
+      if (tmp == 0) {
+        return false;
+      }
+      else if (is_positive)
+        result = static_cast<T>(tmp -1);
+      else
+        result = static_cast<T>(tmp);
+      return true;
+    }
+
+    template <>
+    struct int_trait<uint64_t>
+    {
+      typedef temp_uint64_t temp_type;
+    };
+
+    inline bool to_nullable_value(uint64_t& result, temp_uint64_t tmp, bool is_positive)
+    {
+      if (tmp.value == 0) {
+        if (!tmp.carry)
+          return false;
+        else {
+          result = std::numeric_limits<uint64_t>::max();
+        }
+      }
+      else if (is_positive)
+        result = tmp.value -1;
+      else
+        result = tmp.value;
+      return true;
+
+    }
+
   }
-  else {
-    result = static_cast<T>(tmp);
+
+  inline fast_istream::fast_istream(fast_istreambuf* sb)
+    : buf_(sb)
+    , warning_log_(0)
+  {
   }
-  return true;
-}
+
+  inline void
+  fast_istream::reset(fast_istreambuf* sb)
+  {
+    buf_ = sb;
+  }
+
+  template <typename T>
+  typename boost::enable_if< boost::is_integral<T>,bool>::type
+  fast_istream::decode(T& result, bool nullable)
+  {
+    typename detail::int_trait<T>::temp_type tmp = 0;
+
+    char c = buf_->sbumpc();
+    bool is_positive = true;
+
+    if (boost::is_unsigned<T>::value) {
+      tmp = c & 0x7F;
+    }
+    else {
+      if (c & 0x40) {
+        // this is a negtive integer
+        is_positive = false;
+        tmp = (static_cast<T>(-1) << 7) | (c & 0x7F);
+      }
+      else {
+        // positive integer, mask the most significat two bits
+        tmp = c & 0x3F;
+      }
+    }
+
+    int consumed_bytes = 0;
+
+    const int max_bytes = 8*sizeof(T)/7+1;
+
+    while ( (c & 0x80) == 0 && consumed_bytes < max_bytes) {
+      tmp <<= 7;
+      c = buf_->sbumpc();
+      tmp |= ( c & 0x7F );
+      ++consumed_bytes;
+    };
+
+    if ((c & 0x80) ==0)
+      BOOST_THROW_EXCEPTION(fast_dynamic_error("D2"));
+
+    if (nullable) {
+      return detail::to_nullable_value(result, tmp, is_positive);
+    }
+    else {
+      result = static_cast<T>(tmp);
+    }
+    return true;
+  }
 
 }
 

@@ -5,11 +5,11 @@
 #ifndef REPORT_OVERFLOW
 namespace mfast {
 
-template <typename BaseType, typename DeltaType>
-void check_overflow(BaseType, DeltaType, const field_instruction*, fast_istream&)
-{
-}
-  
+  template <typename BaseType, typename DeltaType>
+  void check_overflow(BaseType, DeltaType, const field_instruction*, fast_istream&)
+  {
+  }
+
 }
 #else
 
@@ -24,7 +24,7 @@ namespace mfast
   {
     stream.warning_log() << "Instruction " << instruction->name() << " id= " << instruction->id() << " overflow\n";
   }
-  
+
   inline void check_overflow(int32_t base, int64_t delta, const field_instruction* instruction, fast_istream& stream)
   {
     int64_t r = base;
@@ -32,7 +32,7 @@ namespace mfast
     if (r > INT32_MAX || r < INT32_MIN)
       report_overflow(instruction, stream);
   }
-  
+
   inline void check_overflow(uint32_t base, int64_t delta, const field_instruction* instruction, fast_istream& stream)
   {
     int64_t r = base;
@@ -40,7 +40,7 @@ namespace mfast
     if (r > UINT32_MAX || r < 0)
       report_overflow(instruction, stream);
   }
-  
+
   inline void check_overflow(int64_t base, int64_t delta, const field_instruction* instruction, fast_istream& stream)
   {
     int128_t r = base;
@@ -48,7 +48,7 @@ namespace mfast
     if (r > INT64_MAX || r < INT64_MIN)
       report_overflow(instruction, stream);
   }
-  
+
   inline void check_overflow(uint64_t base, int64_t delta, const field_instruction* instruction, fast_istream& stream)
   {
     int128_t r = base;
@@ -56,7 +56,7 @@ namespace mfast
     if (r > UINT64_MAX || r < 0)
       report_overflow(instruction, stream);
   }
-  
+
   inline void check_overflow(int8_t base, int8_t delta, const field_instruction* instruction, fast_istream& stream)
   {
     int8_t r = base;
@@ -64,7 +64,6 @@ namespace mfast
     if (r > 63 || r < 63)
       report_overflow(instruction, stream);
   }
-  
 
 }
 

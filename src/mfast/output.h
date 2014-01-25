@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -27,58 +27,59 @@
 #include <boost/io/ios_state.hpp>
 
 namespace mfast {
-inline std::ostream& operator << (std::ostream& os, const int32_cref& cref)
-{
-  os << cref.value();
-  return os;
-}
-
-inline std::ostream& operator << (std::ostream& os, const uint32_cref& cref)
-{
-  os << cref.value();
-  return os;
-}
-
-inline std::ostream& operator << (std::ostream& os, const int64_cref& cref)
-{
-  os << cref.value();
-  return os;
-}
-
-inline std::ostream& operator << (std::ostream& os, const uint64_cref& cref)
-{
-  os << cref.value();
-  return os;
-}
-
-inline std::ostream& operator << (std::ostream& os, const ascii_string_cref& cref)
-{
-  os << cref.c_str();
-  return os;
-}
-
-inline std::ostream& operator << (std::ostream& os, const unicode_string_cref& cref)
-{
-  os << cref.c_str();
-  return os;
-}
-
-inline std::ostream& operator << (std::ostream& os, const byte_vector_cref& cref)
-{
-  boost::io::ios_flags_saver  ifs( os );
-  os << std::hex << std::setfill('0');
-  
-  for (std::size_t i = 0 ; i < cref.size(); ++i){
-    os << std::setw(2) <<  static_cast<unsigned>(cref[i]);
+  inline std::ostream& operator << (std::ostream& os, const int32_cref& cref)
+  {
+    os << cref.value();
+    return os;
   }
-  return os;
-}
 
-inline std::ostream& operator << (std::ostream& os, const decimal_cref& cref)
-{
-  os << cref.value();
-  return os;
-}
+  inline std::ostream& operator << (std::ostream& os, const uint32_cref& cref)
+  {
+    os << cref.value();
+    return os;
+  }
+
+  inline std::ostream& operator << (std::ostream& os, const int64_cref& cref)
+  {
+    os << cref.value();
+    return os;
+  }
+
+  inline std::ostream& operator << (std::ostream& os, const uint64_cref& cref)
+  {
+    os << cref.value();
+    return os;
+  }
+
+  inline std::ostream& operator << (std::ostream& os, const ascii_string_cref& cref)
+  {
+    os << cref.c_str();
+    return os;
+  }
+
+  inline std::ostream& operator << (std::ostream& os, const unicode_string_cref& cref)
+  {
+    os << cref.c_str();
+    return os;
+  }
+
+  inline std::ostream& operator << (std::ostream& os, const byte_vector_cref& cref)
+  {
+    boost::io::ios_flags_saver ifs( os );
+    os << std::hex << std::setfill('0');
+
+    for (std::size_t i = 0; i < cref.size(); ++i) {
+      os << std::setw(2) <<  static_cast<unsigned>(cref[i]);
+    }
+    return os;
+  }
+
+  inline std::ostream& operator << (std::ostream& os, const decimal_cref& cref)
+  {
+    os << cref.value();
+    return os;
+  }
+
 }
 
 #endif /* end of include guard: OUTPUT_H_6GES63G2 */
