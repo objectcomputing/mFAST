@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -33,9 +33,9 @@ namespace mfast
 // we should always export exception classes; otherwise, the vtable won't
 // be available for application when they are in shared libraries.
 
-class MFAST_CODER_EXPORT fast_error
-  : public virtual boost::exception, public virtual std::exception
-{
+  class MFAST_CODER_EXPORT fast_error
+    : public virtual boost::exception, public virtual std::exception
+  {
   public:
     fast_error()
     {
@@ -43,47 +43,48 @@ class MFAST_CODER_EXPORT fast_error
 
     fast_error(const char* error_code);
 
-};
-
-
-class MFAST_CODER_EXPORT fast_static_error
-  : public fast_error
-{
-public:
-  fast_static_error()
-  {
   };
-  fast_static_error(const char* error_code)
-    : fast_error(error_code)
+
+
+  class MFAST_CODER_EXPORT fast_static_error
+    : public fast_error
   {
-  }
+  public:
+    fast_static_error()
+    {
+    };
+    fast_static_error(const char* error_code)
+      : fast_error(error_code)
+    {
+    }
 
-};
+  };
 
-class MFAST_CODER_EXPORT fast_dynamic_error
-  : public fast_error
-{
+  class MFAST_CODER_EXPORT fast_dynamic_error
+    : public fast_error
+  {
   public:
     fast_dynamic_error(const char* error_code)
-    : fast_error(error_code)
+      : fast_error(error_code)
+    {
+    }
+
+  };
+
+  class MFAST_CODER_EXPORT fast_reportable_error
+    : public fast_error
   {
-  }
+  public:
+    fast_reportable_error(const char* error_code)
+      : fast_error(error_code)
+    {
+    }
 
-};
+  };
 
-class MFAST_CODER_EXPORT fast_reportable_error
-  : public fast_error
-{
-public:
-  fast_reportable_error(const char* error_code)
-    : fast_error(error_code)
-  {
-  }
-};
-
-struct tag_referenced_by;
-struct tag_template_id;
-struct tag_template_name;
+  struct tag_referenced_by;
+  struct tag_template_id;
+  struct tag_template_name;
 }
 
 #if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
@@ -92,31 +93,31 @@ namespace  boost {
   //     otherwise, we will have duplicated definition link error when building shared library.
   // For GCC, we must nest the explicit instantiation statement inside their original namespace;
   //     otherwise, the code won't compile.
-extern template class error_info<mfast::tag_referenced_by,std::string>;
-extern template class error_info<mfast::tag_template_id,unsigned>;
-extern template class error_info<mfast::tag_template_name,std::string>;
+  extern template class error_info<mfast::tag_referenced_by,std::string>;
+  extern template class error_info<mfast::tag_template_id,unsigned>;
+  extern template class error_info<mfast::tag_template_name,std::string>;
 }
 #endif
 
 namespace mfast {
-typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info;
-typedef boost::error_info<tag_template_id,unsigned> template_id_info;
-typedef boost::error_info<tag_template_name,std::string> template_name_info;
+  typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info;
+  typedef boost::error_info<tag_template_id,unsigned> template_id_info;
+  typedef boost::error_info<tag_template_name,std::string> template_name_info;
 
-class MFAST_CODER_EXPORT duplicate_template_id_error
-  : public fast_static_error
-{
+  class MFAST_CODER_EXPORT duplicate_template_id_error
+    : public fast_static_error
+  {
   public:
     duplicate_template_id_error(unsigned tid)
     {
       *this << template_id_info(tid);
     }
 
-};
+  };
 
-class MFAST_CODER_EXPORT template_not_found_error
-  : public fast_dynamic_error
-{
+  class MFAST_CODER_EXPORT template_not_found_error
+    : public fast_dynamic_error
+  {
   public:
     template_not_found_error(const char* template_name, const char* referenced_by)
       : fast_dynamic_error("D8")
@@ -124,7 +125,8 @@ class MFAST_CODER_EXPORT template_not_found_error
       *this << template_name_info(template_name) << referenced_by_info(referenced_by);
     }
 
-};
+  };
+
 }
 
 

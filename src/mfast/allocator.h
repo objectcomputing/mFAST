@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -24,10 +24,10 @@
 #include "mfast/mfast_export.h"
 namespace mfast {
 
-/// An abstract interface for allocators.
-///
-class MFAST_EXPORT allocator
-{
+  /// An abstract interface for allocators.
+  ///
+  class MFAST_EXPORT allocator
+  {
   public:
     /// Allocate exactly n bytes for the memory that is not subjected to regrow
     ///
@@ -61,7 +61,7 @@ class MFAST_EXPORT allocator
     ///
     /// @return true if successful.
     // virtual bool reset();
-};
+  };
 
 }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -65,15 +65,15 @@ class indented_stringstream
       os_ << t;
       return *this;
     }
-    
+
     std::string str() const {
       return os_.str();
     }
-    
+
     void str(const char* s) {
       os_.str(s);
     }
-    
+
     void clear() {
       os_.clear();
     }

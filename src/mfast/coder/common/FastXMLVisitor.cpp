@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -278,7 +278,7 @@ FastXMLVisitor::only_child(const XMLElement & element)
 {
   const XMLElement* first_elem = element.FirstChildElement();
   if (strcmp(first_elem->Name(), "length") == 0) {
-      first_elem = first_elem->NextSiblingElement();
+    first_elem = first_elem->NextSiblingElement();
   }
   if (first_elem->NextSibling() == 0)
     return first_elem;

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -23,16 +23,16 @@
 #include <new>
 
 namespace mfast {
-class MFAST_EXPORT malloc_allocator
-  : public allocator
-{
+  class MFAST_EXPORT malloc_allocator
+    : public allocator
+  {
   public:
     static malloc_allocator* instance();
 
     virtual void* allocate(std::size_t s);
     virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size);
     virtual void deallocate(void* pointer,std::size_t);
-};
+  };
 
 }
 

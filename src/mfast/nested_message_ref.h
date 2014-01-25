@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -26,9 +26,9 @@
 namespace mfast
 {
 
-class nested_message_cref
-  : public field_cref
-{
+  class nested_message_cref
+    : public field_cref
+  {
   public:
     typedef templateref_instruction instruction_type;
     typedef const templateref_instruction* instruction_cptr;
@@ -67,12 +67,12 @@ class nested_message_cref
 
     template <typename FieldAccessor>
     void accept_accessor(FieldAccessor&) const;
-};
+  };
 
 
-class nested_message_mref
-  : public make_field_mref<nested_message_cref>
-{
+  class nested_message_mref
+    : public make_field_mref<nested_message_cref>
+  {
   public:
     typedef boost::true_type is_mutable;
     typedef mfast::allocator allocator_type;
@@ -132,7 +132,8 @@ class nested_message_mref
       templateRef_inst->construct_value(*this->storage(), alloc_, inst, construct_subfields);
 
     }
-};
+
+  };
 
 
 }
