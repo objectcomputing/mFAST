@@ -24,15 +24,16 @@
 #include "mfast/group_ref.h"
 #include "mfast/aggregate_ref.h"
 #include <cassert>
-
+#include <boost/iterator/iterator_facade.hpp>
 
 namespace mfast {
 
 
-class sequence_element_cref
-  : public aggregate_cref
-{
+  class sequence_element_cref
+    : public aggregate_cref
+  {
   public:
+    typedef sequence_field_instruction instruction_type;
     typedef const sequence_field_instruction* instruction_cptr;
 
     sequence_element_cref(const value_storage* storage,
@@ -41,27 +42,243 @@ class sequence_element_cref
     sequence_element_cref(const sequence_element_cref& other);
     instruction_cptr instruction() const;
 
-};
+  };
 
-typedef make_aggregate_mref<sequence_element_cref> sequence_element_mref;
-
-
-template <>
-struct mref_of<sequence_element_cref>
-{
-  typedef sequence_element_mref type;
-};
+  typedef make_aggregate_mref<sequence_element_cref> sequence_element_mref;
 
 
-template <typename ElementType, typename SequenceInstructionType=mfast::sequence_instruction_ex<ElementType> >
-class make_sequence_cref
-  : public field_cref
-{
+  template <>
+  struct mref_of<sequence_element_cref>
+  {
+    typedef sequence_element_mref type;
+  };
+
+
+  template <typename ElementRef, bool IsElementAggregate>
+  struct sequence_iterator_base;
+
+  template <typename ElementRef>
+  struct sequence_iterator_base<ElementRef,true>
+  {
+    sequence_iterator_base()
+    {
+    }
+
+    explicit sequence_iterator_base(const ElementRef& ref)
+      : element_(ref)
+    {
+    }
+
+    sequence_iterator_base(const sequence_iterator_base& other)
+      : element_(other.element_)
+    {
+    }
+
+    const char* content_storage() const
+    {
+      return reinterpret_cast<const char*>(element_.storage_array_);
+    }
+
+    void content_storage(const void* ptr)
+    {
+      element_.storage_array_ = reinterpret_cast<const value_storage*>(ptr);
+    }
+
+    std::size_t
+    element_group_content_byte_count() const
+    {
+      return element_.instruction()->group_content_byte_count();
+    }
+
+    ElementRef element_;
+  };
+
+  template <typename ElementRef>
+  struct sequence_iterator_base<ElementRef,false>
+  {
+    sequence_iterator_base()
+    {
+    }
+
+    explicit sequence_iterator_base(const ElementRef& ref)
+      : element_(ref)
+    {
+    }
+
+    sequence_iterator_base(const sequence_iterator_base& other)
+      : element_(other.element_)
+    {
+    }
+
+    const char* content_storage() const
+    {
+      return reinterpret_cast<const char*>(element_.storage_);
+    }
+
+    void content_storage(const void* ptr)
+    {
+      element_.storage_ = reinterpret_cast<const value_storage*>(ptr);
+    }
+
+    std::size_t
+    element_group_content_byte_count() const
+    {
+      return sizeof(value_storage);
+    }
+
+    ElementRef element_;
+  };
+
+
+  template <typename ElementRef, typename IsElementAggregate>
+  class sequence_iterator
+    : sequence_iterator_base<ElementRef, IsElementAggregate::value>
+    , public boost::iterator_facade<sequence_iterator<ElementRef, IsElementAggregate>,
+                                    ElementRef,
+                                    boost::random_access_traversal_tag,
+                                    const ElementRef&>
+  {
+  public:
+    sequence_iterator()
+    {
+    }
+
+    explicit sequence_iterator(const ElementRef& ref)
+      : sequence_iterator_base<ElementRef, IsElementAggregate::value>(ref)
+    {
+    }
+
+    sequence_iterator(const sequence_iterator& other)
+      : sequence_iterator_base<ElementRef, IsElementAggregate::value>(other.element_)
+    {
+    }
+
+    sequence_iterator& operator = (const sequence_iterator& other)
+    {
+      // the cref and mref classes in mfast emulate the build-in C++
+      // reference in that they are only copyable but not assignable.
+      // However, I really need the assignment in the place, so I use memcpy
+      // as a workaround.
+
+      std::memcpy(&this->element_, &other.element_, sizeof(ElementRef));
+
+      return *this;
+    }
+
+  private:
+    friend class boost::iterator_core_access;
+
+    bool equal(sequence_iterator const& other) const
+    {
+      return this->content_storage()  == other.content_storage();
+    }
+
+    ElementRef const& dereference() const
+    // ElementRef dereference() const
+    {
+      return this->element_;
+    }
+
+    void advance(int n)
+    {
+      this->content_storage( this->content_storage() + n * this->element_group_content_byte_count() );
+    }
+
+    void increment()
+    {
+      advance(1);
+    }
+
+    void decrement()
+    {
+      advance(-1);
+    }
+
+    int distance_to(sequence_iterator const& other) const
+    {
+      return (other.content_storage() - this->content_storage())/this->element_group_content_byte_count();
+    }
+
+  };
+
+  ///
+  /// Used for representing sequence where elements are defined in place, such as
+  ///
+  /// <sequence name="seq">
+  ///    <string name="field1" />
+  ///    <string name="field2" />
+  /// </sequence>
+  struct inline_element_sequence_trait
+  {
+    typedef boost::true_type is_element_aggregate;
+    static const field_instruction* element_instruction(const sequence_field_instruction* inst)
+
+    {
+      return inst;
+    }
+
+  };
+
+  ///
+  /// Used for representing sequence where elements are defined frome static templateref or type of group, such as
+  ///
+  /// <sequence name="Seq">
+  ///    <templateRef name="MyTemplate" />
+  /// </sequence>
+  ///
+  /// or
+  ///
+  /// <define name="MyGroup">
+  ///   <group> ...</group>
+  /// </define>
+  /// <sequence name="Seq">
+  ///    <field name="" > <type name="MyGroup" /> </field>
+  /// </sequence>
+  struct defined_element_sequence_trait
+  {
+    typedef boost::true_type is_element_aggregate;
+    static const field_instruction* element_instruction(const sequence_field_instruction* inst)
+    {
+      return inst->element_instruction();
+    }
+
+  };
+
+  ///
+  /// Used for representing sequence with only one field, such as
+  ///
+  /// <sequence name="Seq">
+  ///    <string name="sole_field" />
+  /// </sequence>
+  ///
+
+  struct sole_element_sequence_trait
+  {
+    typedef boost::false_type is_element_aggregate;
+    static const field_instruction* element_instruction(const sequence_field_instruction* inst)
+    {
+      return inst->subinstruction(0);
+    }
+
+  };
+
+
+
+  template <typename ElementType,
+            typename SequenceTrait = inline_element_sequence_trait,
+            typename SequenceInstructionType=mfast::sequence_instruction_ex<ElementType> >
+  class make_sequence_cref
+    : public field_cref
+  {
   public:
     typedef SequenceInstructionType instruction_type;
+    typedef typename ElementType::instruction_type element_instruction_type;
     typedef const SequenceInstructionType* instruction_cptr;
+    typedef typename SequenceTrait::is_element_aggregate is_element_aggregate;
 
     typedef ElementType reference;
+    typedef sequence_iterator<ElementType, is_element_aggregate> iterator;
+    typedef iterator const_iterator;
 
     make_sequence_cref()
     {
@@ -78,18 +295,11 @@ class make_sequence_cref
     {
     }
 
-
     reference operator [](size_t index) const
     {
       assert(index < size());
-      const field_instruction* inst;
-      if (boost::is_convertible<instruction_cptr, typename ElementType::instruction_cptr>::value) {
-        inst = this->instruction();
-      }
-      else {
-        inst = this->instruction()->subinstruction(0);
-      }
-      return reference(element_storage(index), static_cast<typename ElementType::instruction_cptr>(inst));
+      return reference(element_storage(index),
+                       element_instruction());
     }
 
     uint32_t length() const
@@ -112,10 +322,41 @@ class make_sequence_cref
       return static_cast<instruction_cptr>(instruction_);
     }
 
+    iterator begin() const
+    {
+      return iterator(reference(element_storage(0),
+                                element_instruction()));
+    }
+
+    iterator end() const
+    {
+      return iterator(reference(element_storage(this->size()),
+                                element_instruction()));
+    }
+
+    iterator cbegin() const
+    {
+      return begin();
+    }
+
+    iterator cend() const
+    {
+      return end();
+    }
+
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
   protected:
+
+
+
+    typename ElementType::instruction_cptr
+    element_instruction() const
+    {
+      return static_cast<typename ElementType::instruction_cptr>(SequenceTrait::element_instruction(instruction()));
+    }
+
     const field_instruction* subinstruction(std::size_t index) const
     {
       return instruction()->subinstruction(index);
@@ -127,32 +368,48 @@ class make_sequence_cref
         static_cast<const value_storage*>(storage_->of_array.content_);
       return &storages[index*num_fields()];
     }
-};
 
-typedef make_sequence_cref<sequence_element_cref, sequence_field_instruction> sequence_cref;
+  };
 
-namespace detail {
-struct MFAST_EXPORT sequence_mref_helper
-{
+  typedef make_sequence_cref<sequence_element_cref,
+                             inline_element_sequence_trait,
+                             sequence_field_instruction> sequence_cref;
 
-  static void reserve(const sequence_field_instruction* instruction,
-                      value_storage*                    storage,
-                      allocator*                        alloc,
-                      std::size_t                       n);
-};
+  namespace detail {
+    struct MFAST_EXPORT sequence_mref_helper
+    {
 
-}
+      static void reserve(const sequence_field_instruction* instruction,
+                          value_storage*                    storage,
+                          allocator*                        alloc,
+                          std::size_t                       n);
+    };
 
-template <typename ElementType, typename SequenceInstructionType=mfast::sequence_instruction_ex<typename ElementType::cref_type> >
-class make_sequence_mref
-  : public make_field_mref<make_sequence_cref<typename ElementType::cref_type, SequenceInstructionType> >
-{
-  typedef make_field_mref<make_sequence_cref<typename ElementType::cref_type, SequenceInstructionType> > base_type;
+  }
+
+  template <typename ElementType,
+            typename SequenceTrait = inline_element_sequence_trait,
+            typename SequenceInstructionType=mfast::sequence_instruction_ex<typename ElementType::cref_type> >
+  class make_sequence_mref
+    : public make_field_mref<make_sequence_cref<typename ElementType::cref_type,
+                                                SequenceTrait,
+                                                SequenceInstructionType> >
+  {
+    typedef make_field_mref<make_sequence_cref<typename ElementType::cref_type,
+                                               SequenceTrait,
+                                               SequenceInstructionType> > base_type;
 
   public:
+    typedef make_sequence_cref<typename ElementType::cref_type,
+                               SequenceTrait,
+                               SequenceInstructionType> cref_type;
+
+    typedef typename cref_type::is_element_aggregate is_element_aggregate;
     typedef SequenceInstructionType instruction_type;
     typedef const SequenceInstructionType* instruction_cptr;
     typedef ElementType reference;
+    typedef sequence_iterator<ElementType, is_element_aggregate> iterator;
+    typedef iterator const_iterator;
 
     make_sequence_mref()
     {
@@ -180,16 +437,9 @@ class make_sequence_mref
     operator [](size_t index) const
     {
       assert(index < this->size());
-      const field_instruction* inst;
-      if (boost::is_convertible<instruction_cptr, typename ElementType::instruction_cptr>::value) {
-        inst = this->instruction();
-      }
-      else {
-        inst = this->instruction()->subinstruction(0);
-      }
       return reference(this->alloc_,
                        element_storage(index),
-                       static_cast<typename ElementType::instruction_cptr>(inst));
+                       this->element_instruction());
     }
 
     void resize(size_t n) const;
@@ -204,58 +454,99 @@ class make_sequence_mref
       return static_cast<instruction_cptr>(base_type::instruction());
     }
 
+    void as(const cref_type&) const;
+
+
+    template <typename RandomAccessIterator>
+    void assign(RandomAccessIterator first, RandomAccessIterator last)
+    {
+      resize(std::distance(first, last));
+      RandomAccessIterator itr;
+      iterator dest = begin();
+      for (itr = first; itr!= last; ++itr, ++dest)
+        dest->as(*itr);
+    }
+
+    iterator begin() const
+    {
+      return iterator(reference(this->alloc_,
+                                element_storage(0),
+                                this->element_instruction()));
+    }
+
+    iterator end() const
+    {
+      return iterator(reference(this->alloc_,
+                                element_storage(this->size()),
+                                this->element_instruction()));
+    }
+
   private:
     value_storage* element_storage(std::size_t index) const
     {
       return const_cast<value_storage*>(base_type::element_storage(index));
     }
 
-};
+  };
 
-typedef make_sequence_mref<sequence_element_mref, sequence_field_instruction> sequence_mref;
+  typedef make_sequence_mref<sequence_element_mref,
+                             inline_element_sequence_trait,
+                             sequence_field_instruction> sequence_mref;
 
-template <typename ELEMENT_CREF, typename INSTRUCTION>
-struct mref_of<make_sequence_cref<ELEMENT_CREF, INSTRUCTION> >
-{
-  typedef make_sequence_mref< typename mref_of<ELEMENT_CREF>::type ,INSTRUCTION> type;
-};
+  template <typename ELEMENT_CREF, typename TRAIT, typename INSTRUCTION>
+  struct mref_of<make_sequence_cref<ELEMENT_CREF, TRAIT, INSTRUCTION> >
+  {
+    typedef make_sequence_mref< typename mref_of<ELEMENT_CREF>::type,TRAIT, INSTRUCTION> type;
+  };
 
 
 //////////////////////////////////////////////////////////////
 
-inline
-sequence_element_cref::sequence_element_cref(const value_storage*                    storage,
-                                             sequence_element_cref::instruction_cptr instruction)
-  : aggregate_cref(storage, instruction)
-{
-}
+  inline
+  sequence_element_cref::sequence_element_cref(const value_storage*                    storage,
+                                               sequence_element_cref::instruction_cptr instruction)
+    : aggregate_cref(storage, instruction)
+  {
+  }
 
-inline
-sequence_element_cref::sequence_element_cref(const sequence_element_cref &other)
-  : aggregate_cref(other)
-{
-}
+  inline
+  sequence_element_cref::sequence_element_cref(const sequence_element_cref &other)
+    : aggregate_cref(other)
+  {
+  }
 
-inline sequence_element_cref::instruction_cptr
-sequence_element_cref::instruction() const
-{
-  return static_cast<instruction_cptr>(aggregate_cref::instruction());
-}
+  inline sequence_element_cref::instruction_cptr
+  sequence_element_cref::instruction() const
+  {
+    return static_cast<instruction_cptr>(aggregate_cref::instruction());
+  }
 
-template <typename ElementType, typename SequenceInstructionType>
-inline void
-make_sequence_mref<ElementType, SequenceInstructionType>::resize(size_t n) const
-{
-  this->reserve (n);
-  this->storage()->array_length(n);
-}
+  template <typename ElementType, typename SequenceTrait, typename SequenceInstructionType>
+  inline void
+  make_sequence_mref<ElementType, SequenceTrait, SequenceInstructionType>::resize(size_t n) const
+  {
+    this->reserve (n);
+    this->storage()->array_length(n);
+  }
 
-template <typename ElementType, typename SequenceInstructionType>
-inline void
-make_sequence_mref<ElementType, SequenceInstructionType>::reserve(size_t n) const
-{
-  detail::sequence_mref_helper::reserve(static_cast<const sequence_field_instruction*>(this->instruction()), this->storage(), this->alloc_, n);
-}
+  template <typename ElementType, typename SequenceTrait, typename SequenceInstructionType>
+  inline void
+  make_sequence_mref<ElementType, SequenceTrait, SequenceInstructionType>::reserve(size_t n) const
+  {
+    detail::sequence_mref_helper::reserve(static_cast<const sequence_field_instruction*>(this->instruction()), this->storage(), this->alloc_, n);
+  }
+
+  template <typename ElementType, typename SequenceTrait, typename SequenceInstructionType>
+  inline void
+  make_sequence_mref<ElementType, SequenceTrait, SequenceInstructionType>::as(const cref_type& src) const
+  {
+    value_storage tmp_storage;
+    this->instruction()->copy_construct_value(*src.storage_,
+                                              tmp_storage,
+                                              this->alloc_);
+    std::swap(tmp_storage, const_cast<value_storage&>(*this->storage_));
+    this->instruction()->destruct_value(tmp_storage);
+  }
 
 }
 

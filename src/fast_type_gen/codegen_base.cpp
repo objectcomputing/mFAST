@@ -22,6 +22,7 @@
 
 codegen_base::codegen_base(const char* filebase, const char* fileext)
   : filebase_(filebase)
+  , cpp_ns_(filebase)
   , out_((filebase_+fileext).c_str(), std::ofstream::trunc)
 {
   if (!out_.is_open()) {
@@ -65,12 +66,6 @@ void codegen_base::reset_scope(std::stringstream& strm, const std::string& str)
   strm << str;
 }
 
-bool codegen_base::contains_only_templateRef(const mfast::group_field_instruction* inst)
-{
-  return inst->ref_instruction() != 0 ||
-         (inst->subinstructions_count() == 1 && inst->subinstruction(0)->field_type() == mfast::field_type_templateref);
-}
-
 std::string
 codegen_base::cpp_name(const mfast::field_instruction* inst) const
 {
@@ -102,4 +97,158 @@ bool codegen_base::is_const_field(const mfast::field_instruction* inst) const
       return false;
   }
   return true;
+}
+
+using namespace mfast;
+
+class type_name_finder
+  : public field_instruction_visitor
+{
+public:
+  std::string name_;
+  const char* caller_cpp_ns_;
+  std::set<std::string>* dependency_;
+
+  type_name_finder(const char*            caller_cpp_ns,
+                   std::set<std::string>* dependency)
+    : caller_cpp_ns_(caller_cpp_ns)
+    , dependency_(dependency)
+  {
+  }
+
+  virtual void visit(const int32_field_instruction*, void*)
+  {
+    name_ = "mfast::int32";
+  }
+
+  virtual void visit(const uint32_field_instruction*, void*)
+  {
+    name_ = "mfast::uint32";
+  }
+
+  virtual void visit(const int64_field_instruction*, void*)
+  {
+    name_ = "mfast::uint64";
+  }
+
+  virtual void visit(const uint64_field_instruction*, void*)
+  {
+    name_ = "mfast::int64";
+  }
+
+  virtual void visit(const decimal_field_instruction*, void*)
+  {
+    name_ = "mfast::decimal";
+  }
+
+  virtual void visit(const ascii_field_instruction*, void*)
+  {
+    name_ = "mfast::ascii_string";
+  }
+
+  virtual void visit(const unicode_field_instruction*, void*)
+  {
+    name_ = "mfast::unicode_string";
+  }
+
+  virtual void visit(const byte_vector_field_instruction*, void*)
+  {
+    name_ = "mfast::byte_vector";
+  }
+
+  virtual void visit(const group_field_instruction* inst, void*)
+  {
+    if (inst->ref_instruction()) {
+      inst->ref_instruction()->accept(*this, 0);
+    }
+    else if (inst->cpp_ns()==0 || inst->cpp_ns()[0] == 0 ||
+             strcmp(caller_cpp_ns_, inst->cpp_ns()) ==0)
+    {
+      name_ = inst->name();
+    }
+    else {
+      name_ = std::string(inst->cpp_ns()) + "::" + inst->name();
+      if (dependency_)
+        dependency_->insert(inst->cpp_ns());
+    }
+
+  }
+
+  virtual void visit(const sequence_field_instruction* inst, void*)
+  {
+    this->visit(static_cast<const group_field_instruction*>(inst), 0);
+  }
+
+  virtual void visit(const template_instruction* inst, void*)
+  {
+    this->visit(static_cast<const group_field_instruction*>(inst), 0);
+  }
+
+  virtual void visit(const templateref_instruction*, void*)
+  {
+    name_ = "mfast::nested_message";
+  }
+
+  virtual void visit(const int32_vector_field_instruction*, void*)
+  {
+    name_ = "mfast::int32_vector";
+  }
+
+  virtual void visit(const uint32_vector_field_instruction*, void*)
+  {
+    name_ = "mfast::uint32_vector";
+  }
+
+  virtual void visit(const int64_vector_field_instruction*, void*)
+  {
+    name_ = "mfast::int64_vector";
+  }
+
+  virtual void visit(const uint64_vector_field_instruction*, void*)
+  {
+    name_ = "mfast::uint64_vector";
+  }
+
+  virtual void visit(const enum_field_instruction* inst, void*)
+  {
+    if (inst->ref_instruction()) {
+      inst->ref_instruction()->accept(*this, 0);
+    }
+    else if (inst->cpp_ns()==0 || inst->cpp_ns()[0] == 0 ||
+             strcmp(caller_cpp_ns_, inst->cpp_ns()) ==0)
+    {
+      name_ = inst->name();
+    }
+    else {
+      name_ = std::string(inst->cpp_ns()) + "::" + inst->name();
+      if (dependency_)
+        dependency_->insert(inst->cpp_ns());
+    }
+
+  }
+
+};
+
+std::string
+codegen_base::cpp_type_of(const mfast::field_instruction* inst,
+                          std::set<std::string>*          dependency) const
+{
+  type_name_finder finder(cpp_ns_.c_str(), dependency);
+  inst->accept(finder, 0);
+  return finder.name_;
+}
+
+bool codegen_base::contains_only_templateref(const mfast::group_field_instruction* inst) const
+{
+  return inst->subinstructions_count() == 1 && inst->subinstruction(0)->field_type() == mfast::field_type_templateref;
+}
+
+const mfast::field_instruction*
+codegen_base::get_element_instruction(const mfast::sequence_field_instruction* inst) const
+{
+  if (inst->element_instruction())
+    return inst->element_instruction();
+  if (inst->subinstructions_count() == 1)
+    return inst->subinstruction(0);
+  return 0;
 }

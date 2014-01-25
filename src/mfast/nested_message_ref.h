@@ -30,6 +30,7 @@ class nested_message_cref
   : public field_cref
 {
   public:
+    typedef templateref_instruction instruction_type;
     typedef const templateref_instruction* instruction_cptr;
     typedef boost::false_type is_mutable;
 

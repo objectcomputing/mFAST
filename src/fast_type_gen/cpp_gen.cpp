@@ -28,12 +28,11 @@ std::string cpp_gen::prefix_string() const
   return strm.str();
 }
 
-
 std::string cpp_gen::cref_scope() const
 {
   std::stringstream strm;
   for (std::size_t i = 0; i < prefixes_.size(); ++i) {
-    strm << prefixes_[i] << "_cref::" ;
+    strm << prefixes_[i] << "_cref::";
   }
   return strm.str();
 }
@@ -282,7 +281,9 @@ void cpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
 
 void cpp_gen::output_subinstructions()
 {
+  assert(subinstructions_list_.size());
   std::string content = subinstructions_list_.back();
+
   content.resize(content.size()-1);
 
   out_ << "const static field_instruction* " << prefix_string() << "subinstructions[] = {\n"
@@ -291,33 +292,44 @@ void cpp_gen::output_subinstructions()
   subinstructions_list_.pop_back();
 }
 
+bool cpp_gen::need_generate_subinstructions(const mfast::group_field_instruction* inst)
+{
+  return inst->ref_instruction()==0 && !this->contains_only_templateref(inst);
+}
+
 std::string
 cpp_gen::get_subinstructions(const mfast::group_field_instruction* inst)
 {
+  using namespace mfast;
   std::stringstream subinstruction_arg;
 
-  if ( !contains_only_templateRef(inst) ) {
+  if (need_generate_subinstructions(inst)) {
+
     output_subinstructions();
 
     subinstruction_arg << "  "<< prefix_string() << "subinstructions,\n"
                        << "  "<< inst->subinstructions_count() << ", // num_fields\n";
     prefixes_.pop_back();
+
   }
-  else {
+  else
+  {
     prefixes_.pop_back();
-    if (inst->ref_instruction()) {
-      std::string qualified_name = ref_instruction_name(inst);
+
+    if (this->contains_only_templateref(inst))
+      subinstruction_arg << "  "<< "mfast::templateref_instruction::default_instruction(),\n"
+                         << "  1, // num_fields\n";
+    else {
+      std::string qualified_name = cpp_type_of(inst);
+
       subinstruction_arg << "  "<< qualified_name << "::instruction()->subinstructions(),\n"
                          << "  "<< qualified_name << "::instruction()->subinstructions_count(),\n";
     }
-    else {
-      // use templateref instruction singleton
-      subinstruction_arg << "  "<< "mfast::templateref_instruction::default_instruction(),\n"
-                         << "  1, // num_fields\n";
-    }
   }
   return subinstruction_arg.str();
+
 }
+
 
 void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 {
@@ -327,7 +339,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
   std::string qualified_name = name;
   if (inst->ref_instruction())
   {
-    qualified_name = ref_instruction_name(inst);
+    qualified_name = cpp_type_of(inst);
   }
 
   if (top_level) {
@@ -340,9 +352,10 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 
   prefixes_.push_back(name);
 
+  bool to_gen_subinstructions = need_generate_subinstructions(inst);
 
-
-  if (  !contains_only_templateRef(inst) ) {
+  if (  to_gen_subinstructions )
+  {
 
     subinstructions_list_.resize(subinstructions_list_.size()+1);
     traverse(inst, "");
@@ -354,7 +367,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     out_ << "const static " << name << "::instruction_type\n"
          << "  the_instruction(\n";
   }
-  else if (  !contains_only_templateRef(inst) ) {
+  else if (  to_gen_subinstructions ) {
     out_ << "const static " << cref_scope() << name << "_cref::instruction_type\n"
          << prefix_string() << name << "_instruction(\n";
   }
@@ -384,11 +397,12 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
 {
   std::string name( cpp_name( inst ) );
   std::size_t index = inst->field_index();
+  bool to_gen_subinstruction =  inst->ref_instruction() == 0 && inst->element_instruction()==0;
 
   std::string qualified_name = name;
   if (inst->ref_instruction())
   {
-    qualified_name = ref_instruction_name(inst);
+    qualified_name = cpp_type_of(inst);
   }
 
   if (top_level) {
@@ -422,7 +436,8 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
   }
 
 
-  if ( !contains_only_templateRef(inst) ) {
+  if (to_gen_subinstruction )
+  {
     subinstructions_list_.resize(subinstructions_list_.size()+1);
     traverse(inst, "_element");
   }
@@ -435,7 +450,19 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
     lengthInstruction = strm.str();
   }
 
-  std::string subinstruction_arg = get_subinstructions(inst);
+  std::stringstream subinstruction_arg;
+  if (to_gen_subinstruction )
+  {
+    output_subinstructions();
+
+    subinstruction_arg << "  "<< prefix_string() << "subinstructions,\n"
+                       << "  "<< inst->subinstructions_count() << ", // num_fields\n";
+  }
+  else {
+    subinstruction_arg << "  0, // subinstructions\n"
+                       << "  0, // subinstructions_count\n";
+  }
+  prefixes_.pop_back();
 
   if (top_level) {
     out_ << "const static " << name << "::instruction_type\n"
@@ -452,10 +479,25 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
        << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
        << "  \"" << inst->dictionary() << "\", // dictionary\n"
-       << subinstruction_arg
+       << subinstruction_arg.str()
        << "  "<< lengthInstruction << ", // length\n"
        << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n";
+       << "  \"" << inst->typeref_ns() << "\", // typeRef ns \n"
+       << "  \"\", // cpp_ns\n";
+
+  if (inst->element_instruction()) {
+    out_ << "  " << cpp_type_of(inst->element_instruction()) << "::instruction(), // element_instruction\n";
+  }
+  else {
+    out_ << "  0, // element_instruction\n";
+  }
+
+  if (inst->ref_instruction()) {
+    out_ << "  " << cpp_type_of(inst->ref_instruction()) << "::instruction()); // ref_instruction\n\n";
+  }
+  else {
+    out_ << "  0); // ref_instruction\n\n";
+  }
 
   if (top_level) {
     out_ << "  return &the_instruction;\n"
@@ -504,8 +546,8 @@ void cpp_gen::visit(const mfast::templateref_instruction* inst, void*)
 {
   std::size_t index = inst->field_index();
 
-  out_ << "templateref_instruction\n"
-       << "templateref" << index << "_instruction(\n"
+  out_ << "static const templateref_instruction\n"
+       << prefix_string() << "templateref" << index << "_instruction(\n"
        << "  " << index << ");\n\n";
 
   std::stringstream tmp;
@@ -554,7 +596,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
 
   if (inst->ref_instruction())
   {
-    qualified_name = ref_instruction_name(inst);
+    qualified_name = cpp_type_of(inst);
   }
 
   if (top_level) {

@@ -8,12 +8,6 @@
       <uInt32 name="postalCode"/>
     </group>
   </define>
-  <define name="PhoneNumbers">
-    <sequence>
-      <string name="type"/>
-      <string name="number"/>
-    </sequence>
-  </define>
   <define name="Addresses">
     <sequence>
       <field name="element">
@@ -21,6 +15,13 @@
       </field>
     </sequence>
   </define>
+  <define name="PhoneNumbers">
+    <sequence>
+      <string name="type"/>
+      <string name="number"/>
+    </sequence>
+  </define>
+
   <define name="Emails">
     <sequence>
       <string name="email"/>
@@ -52,6 +53,13 @@
     <byteVector>
       <default value="000102030405060708090A0B0C0D0E0F"/>
     </byteVector>
+  </define>
+  <define name="Education">
+    <group>
+      <string name="college" presence="optional" />
+      <string name="high-school" presence="optional" />
+      <string name="elementary-school" presence="optional" />
+    </group>
   </define>
   <template name="Person">
     <field name="firstName">
@@ -88,6 +96,9 @@
     </field>
     <field name="id">
       <type name="UUID"/>
+    </field>
+    <field name="education" presence="optional">
+      <type name="Education" />
     </field>
   </template>
 </templates>
