@@ -21,7 +21,7 @@
 
 #include <cassert>
 #include <boost/move/core.hpp>
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "mfast/allocator.h"
 #include "mfast/field_ref.h"
 #include "mfast/group_ref.h"

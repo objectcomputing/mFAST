@@ -19,7 +19,7 @@
 #ifndef GROUP_REF_H_15PUY407
 #define GROUP_REF_H_15PUY407
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
 #include "mfast/field_mref.h"
 #include "mfast/aggregate_ref.h"

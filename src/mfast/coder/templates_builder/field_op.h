@@ -24,7 +24,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "mfast/arena_allocator.h"
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "xml_util.h"
 #include "../common/exceptions.h"
 

@@ -18,7 +18,7 @@
 //
 #ifndef MFAST_H_4EMINVTV
 #define MFAST_H_4EMINVTV
-#include <mfast/field_instruction.h>
+#include <mfast/field_instructions.h>
 #include <mfast/decimal_ref.h>
 #include <mfast/int_ref.h>
 #include <mfast/string_ref.h>

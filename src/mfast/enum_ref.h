@@ -20,7 +20,7 @@
 #ifndef ENUM_REF_H_USHYGHOA
 #define ENUM_REF_H_USHYGHOA
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
 
 namespace mfast {

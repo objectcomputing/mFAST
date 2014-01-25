@@ -19,7 +19,7 @@
 #ifndef DICTIONARY_BUILDER_H_F26FXFII
 #define DICTIONARY_BUILDER_H_F26FXFII
 
-#include "mfast/field_instruction.h"
+#include "mfast/field_instructions.h"
 #include "mfast/arena_allocator.h"
 #include <vector>
 #include <map>
