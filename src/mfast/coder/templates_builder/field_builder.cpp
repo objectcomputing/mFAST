@@ -127,12 +127,6 @@ namespace mfast
       , element_(element)
       , parent_(parent)
     {
-
-      const field_instruction* prototype =
-        find_prototype(resolve_field_type(element));
-
-      if (prototype)
-        prototype->accept(*this, 0);
     }
 
     field_builder::field_builder(field_builder_base* parent,
@@ -145,10 +139,16 @@ namespace mfast
       , parent_(parent)
     {
       name_ = name;
-      const field_instruction* prototype =
-        find_prototype(resolve_field_type(element));
+    }
 
-      prototype->accept(*this, 0);
+    void field_builder::build()
+    {
+      const field_instruction* prototype =
+        find_prototype(resolve_field_type(element_));
+      std::cout << "prototype =" << prototype << "\n";
+      if (prototype) {
+        prototype->accept(*this, 0);
+      }
     }
 
     template <typename IntType>
@@ -420,7 +420,8 @@ namespace mfast
       const XMLElement* child = content_element_->FirstChildElement();
       while (child != 0) {
 
-        field_builder field(this, *child);
+        field_builder builder(this, *child);
+        builder.build();
         child = child->NextSiblingElement();
       }
 

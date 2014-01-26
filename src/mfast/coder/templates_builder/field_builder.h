@@ -52,6 +52,8 @@ namespace mfast
                     const XMLElement&   element,
                     const char*         type_name);
 
+      void build();
+
 
       const char* resolve_field_type(const XMLElement& element);
 

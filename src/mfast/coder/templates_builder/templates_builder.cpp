@@ -140,11 +140,14 @@ namespace mfast
       else if (strcmp(element_name, "define") == 0) {
         const char* name =  get_optional_attr(element, "name", 0);
         const XMLElement* elem = element.FirstChildElement();
-        if (name && elem)
-          field_builder(this, *elem, name);
+        if (name && elem) {
+          field_builder builder(this, *elem, name);
+          builer.build();
+        }
       }
       else if (strcmp(element_name, "template") == 0) {
-        field_builder(this, element);
+        field_builder builder(this, element);
+        builder.build();
       }
       return false;
     }
