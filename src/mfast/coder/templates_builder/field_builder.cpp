@@ -145,7 +145,6 @@ namespace mfast
     {
       const field_instruction* prototype =
         find_prototype(resolve_field_type(element_));
-      std::cout << "prototype =" << prototype << "\n";
       if (prototype) {
         prototype->accept(*this, 0);
       }

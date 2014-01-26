@@ -142,7 +142,7 @@ namespace mfast
         const XMLElement* elem = element.FirstChildElement();
         if (name && elem) {
           field_builder builder(this, *elem, name);
-          builer.build();
+          builder.build();
         }
       }
       else if (strcmp(element_name, "template") == 0) {
