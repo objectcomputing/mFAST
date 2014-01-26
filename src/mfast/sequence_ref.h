@@ -458,7 +458,7 @@ namespace mfast {
 
 
     template <typename RandomAccessIterator>
-    void assign(RandomAccessIterator first, RandomAccessIterator last)
+    void assign(RandomAccessIterator first, RandomAccessIterator last) const
     {
       resize(std::distance(first, last));
       RandomAccessIterator itr;
