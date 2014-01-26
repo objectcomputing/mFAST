@@ -25,6 +25,7 @@
 #include "mfast/aggregate_ref.h"
 #include <cassert>
 #include <boost/iterator/iterator_facade.hpp>
+#include <boost/range.hpp>
 
 namespace mfast {
 
@@ -465,6 +466,12 @@ namespace mfast {
       iterator dest = begin();
       for (itr = first; itr!= last; ++itr, ++dest)
         dest->as(*itr);
+    }
+
+    template <typename Range>
+    void as(Range r) const
+    {
+      assign(boost::begin(r), boost::end(r));
     }
 
     iterator begin() const
