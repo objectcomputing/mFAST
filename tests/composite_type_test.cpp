@@ -26,6 +26,8 @@
 #include <boost/test/unit_test.hpp>
 #include "debug_allocator.h"
 #include <boost/foreach.hpp>
+#include <boost/assign/list_of.hpp> // for 'list_of()'
+using namespace boost::assign; // bring 'list_of()' into scope
 
 BOOST_AUTO_TEST_SUITE( composite_test_suite )
 
@@ -95,6 +97,11 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   {
     BOOST_CHECK( it->value() == values[index++] );
   }
+
+  emails.mref().as( list_of("test1")("test2") );
+  BOOST_REQUIRE_EQUAL(emails.cref().size(), 2U);
+  BOOST_CHECK(emails.cref()[0] == "test1");
+  BOOST_CHECK(emails.cref()[1] == "test2");
 
   // Testing sequence of aggregate types
 
