@@ -202,6 +202,9 @@ BOOST_AUTO_TEST_CASE(test_template)
     ++index;
   }
 
+  person1.mref().set_emails().as(list_of("test1")("test2"));
+
+
   Person person2(person1.cref(), &alloc2);
 
   BOOST_CHECK(person1.cref() == person2.cref());

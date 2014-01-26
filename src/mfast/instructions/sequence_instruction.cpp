@@ -53,9 +53,11 @@ namespace mfast
       ref_instruction(ref_inst);
       element_instruction_=ref_inst->element_instruction();
     }
-    if (element_instruction_) {
-      this->set_subinstructions(element_instruction_->subinstructions(),
-                                element_instruction_->subinstructions_count());
+    const group_field_instruction* subinst_source = element_instruction_ ? element_instruction_ : ref_inst;
+
+    if (subinst_source) {
+      this->set_subinstructions(subinst_source->subinstructions(),
+                                subinst_source->subinstructions_count());
     }
   }
 
