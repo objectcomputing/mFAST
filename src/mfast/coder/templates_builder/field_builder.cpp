@@ -667,10 +667,12 @@ namespace mfast
       else if (init_value_str) {
         // In this case, the element names are already defined, but we haven't decide what the specified
         // initial value is.
+        std::cout << "initial str is " << init_value_str << "\n";
 
         for (uint64_t i = 0; i < num_elements; ++i) {
           if (std::strcmp(enum_element_names[i], init_value_str) == 0)
           {
+            fop.initial_value_ = value_storage(0); // reset the storage to defined value
             fop.initial_value_.set<uint64_t>(i);
             break;
           }
@@ -681,7 +683,7 @@ namespace mfast
       {
         if (fop.initial_value_.get<const char*>() != 0) {
           std::string msg = "Invalid initial value for enum : ";
-          throw std::runtime_error(msg + fop.initial_value_.get<const char*>());
+          throw std::runtime_error(msg + init_value_str);
         }
         else {
           // at this point if initial_value_ is still undefined, we should reset it to zero
