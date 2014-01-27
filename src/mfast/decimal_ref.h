@@ -364,14 +364,16 @@ namespace mfast {
       if (!has_const_exponent()) {
         d.backend().extract_parts(m, exp);
         d *= decimal(decimal_backend(1.0, 18-exp));
-        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long() * (d < 0 ? -1 : 1);
+        // Don't be distract by the method name -- extract_unsigned_long_long()
+        // the returned value is signed
+        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long() ;
         this->storage()->of_decimal.exponent_ = exp-18;
         normalize();
       }
       else {
         const int8_t const_exp = instruction()->initial_value().of_decimal.exponent_;
         d *= decimal(decimal_backend(1.0, -1*const_exp));
-        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long() * (d < 0 ? -1 : 1);
+        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long() ;
         this->storage()->of_decimal.exponent_ = const_exp;
       }
       this->storage()->present(1);

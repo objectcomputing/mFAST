@@ -667,7 +667,6 @@ namespace mfast
       else if (init_value_str) {
         // In this case, the element names are already defined, but we haven't decide what the specified
         // initial value is.
-        std::cout << "initial str is " << init_value_str << "\n";
 
         for (uint64_t i = 0; i < num_elements; ++i) {
           if (std::strcmp(enum_element_names[i], init_value_str) == 0)

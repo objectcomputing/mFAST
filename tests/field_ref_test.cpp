@@ -322,6 +322,9 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     ref.as(decimal("0.05"));
     BOOST_CHECK_EQUAL(ref.mantissa(), 5);
     BOOST_CHECK_EQUAL(ref.exponent(), -2);
+
+    ref.as(-110);
+    BOOST_CHECK_EQUAL(ref.value(), decimal(-110));
   }
 }
 
