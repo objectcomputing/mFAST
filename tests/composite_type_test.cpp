@@ -147,6 +147,9 @@ BOOST_AUTO_TEST_CASE(test_template)
   person_mref.set_firstName().as("John");
   person_mref.set_lastName().as("Doe");
 
+  // testing the default value
+  BOOST_CHECK(person_mref.get_gender().is_female());
+
   person_mref.set_bloodType().as_O();
   BOOST_CHECK_EQUAL(person_mref.get_bloodType().value(), Person_cref::bloodType::O);
   BOOST_CHECK(person_mref.get_bloodType().is_O());

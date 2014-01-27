@@ -67,7 +67,9 @@
     </field>
     <string name="lastName" charset="unicode"/>
     <field name="gender">
-      <type name="Gender"/>
+      <type name="Gender">
+        <default value="female" />
+      </type>
     </field>
     <uInt32 name="age"/>
     <field name="addresses" presence="optional">
