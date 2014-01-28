@@ -413,7 +413,8 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
   else
     add_to_instruction_list(name);
 
-  prefixes_.push_back(name);
+  prefixes_.push_back(name+"_element");
+
 
   if (inst->length_instruction()) {
     std::string context = gen_op_context(inst->length_instruction()->name(),
