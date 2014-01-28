@@ -27,6 +27,17 @@
       <string name="email"/>
     </sequence>
   </define>
+
+  <define name="Config">
+    <sequence>
+      <string name="name"/>
+      <group name="detail">
+        <string name="detail1" />
+        <string name="detail2" />
+      </group>
+    </sequence>
+  </define>
+
   <define name="Gender">
     <enum>
       <element name="male"/>
