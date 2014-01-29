@@ -73,6 +73,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   PhoneNumbers numbers_holder2(numbers_holder1.cref(), &alloc2);
 
   BOOST_CHECK(numbers_holder1.cref() == numbers_holder2.cref());
+  BOOST_CHECK(numbers_holder1.mref() == numbers_holder2.mref());
 
   // Testing sequence of primitive types
 

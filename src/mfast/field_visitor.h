@@ -376,7 +376,7 @@ namespace mfast {
   make_sequence_cref<ElementType, SequenceTrait, SequenceInstructionType>::accept_accessor(FieldAccessor& accessor) const
   {
     detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-    adaptor.visit(*this);
+    adaptor.visit(sequence_cref(*this));
   }
 
   template <typename ElementType, typename SequenceTrait, typename SequenceInstructionType>
@@ -385,7 +385,7 @@ namespace mfast {
   make_sequence_mref<ElementType, SequenceTrait, SequenceInstructionType>::accept_mutator(FieldMutator& mutator) const
   {
     detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
-    adaptor.visit(*this);
+    adaptor.visit(sequence_mref(*this));
   }
 
   template <typename FieldAccessor>

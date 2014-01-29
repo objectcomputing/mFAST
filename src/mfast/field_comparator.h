@@ -129,9 +129,13 @@ namespace mfast
     return detail::equal(lhs, rhs);
   }
 
-  inline bool operator == (const sequence_cref& lhs, const sequence_cref& rhs)
+  template <typename ElementType,
+            typename SequenceTrait,
+            typename SequenceInstructionType >
+  inline bool operator == (const make_sequence_cref<ElementType, SequenceTrait, SequenceInstructionType>& lhs,
+                           const make_sequence_cref<ElementType, SequenceTrait, SequenceInstructionType>& rhs)
   {
-    return detail::equal(lhs, rhs);
+    return detail::equal(static_cast<sequence_cref>(lhs), static_cast<sequence_cref>(rhs));
   }
 
   inline bool operator == (const aggregate_cref& lhs, const aggregate_cref& rhs)
