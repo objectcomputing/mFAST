@@ -178,8 +178,9 @@ namespace mfast {
     {
       if (this->storage()->of_array.capacity_in_bytes_ > 0) {
         const_cast<char&>(*this->end()) = '\0';
+        return this->data();
       }
-      return this->data();
+      return this->data() ? this->data() : "";
     }
 
   };
