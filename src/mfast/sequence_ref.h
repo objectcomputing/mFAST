@@ -303,6 +303,16 @@ namespace mfast {
                        element_instruction());
     }
 
+    operator make_sequence_cref<sequence_element_cref,
+                                inline_element_sequence_trait,
+                                sequence_field_instruction>() const
+    {
+      return make_sequence_cref<sequence_element_cref,
+                                inline_element_sequence_trait,
+                                sequence_field_instruction>(this->storage(),
+                                                            this->instruction());
+    }
+
     uint32_t length() const
     {
       return size();
@@ -432,6 +442,17 @@ namespace mfast {
     explicit make_sequence_mref(const field_mref_base& other)
       : base_type(other)
     {
+    }
+
+    operator make_sequence_mref<sequence_element_mref,
+                                inline_element_sequence_trait,
+                                sequence_field_instruction> () const
+    {
+      return make_sequence_mref<sequence_element_mref,
+                                inline_element_sequence_trait,
+                                sequence_field_instruction>(this->allocator(),
+                                                            this->storage(),
+                                                            this->instruction());
     }
 
     reference
