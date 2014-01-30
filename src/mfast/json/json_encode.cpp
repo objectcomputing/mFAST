@@ -52,6 +52,14 @@ namespace mfast {
           strm_ <<  separator_ << ref.value();
         }
 
+        void visit(const enum_cref& ref)
+        {
+          if (ref.is_boolean())
+            strm_ <<  separator_ << ref.value_name();
+          else
+            strm_ << separator_ << ref.value();
+        }
+
         template <typename Char>
         void visit(const mfast::string_cref<Char>& ref)
         {
@@ -136,6 +144,13 @@ namespace mfast {
     {
       encode_detail::json_visitor visitor(os);
       visitor.visit(msg, 0);
+      return os.good();
+    }
+
+    bool encode(std::ostream& os, const mfast::sequence_cref& seq)
+    {
+      encode_detail::json_visitor visitor(os);
+      visitor.visit(seq, 0);
       return os.good();
     }
 

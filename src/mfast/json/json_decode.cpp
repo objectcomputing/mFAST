@@ -224,6 +224,47 @@ namespace mfast {
           ref.as(value);
       }
 
+      void visit(const enum_mref& ref)
+      {
+        if (ref.is_boolean()) {
+          char c1;
+          char rest[5];
+
+          strm_ >> std::skipws >> c1;
+
+          switch (c1)
+          {
+          case '0':
+            ref.as(false);
+            return;
+          case '1':
+            ref.as(true);
+            return;
+          case 'f':
+            strm_.get(rest, 5);
+            if (strcmp(rest, "alse")==0) {
+              ref.as(false);
+              return;
+            }
+            break;
+          case 't':
+            strm_.get(rest, 4);
+            if (strcmp(rest, "rue")==0) {
+              ref.as(true);
+              return;
+            }
+            break;
+          }
+
+          strm_.setstate(std::ios::failbit);
+        }
+        else {
+          // treat it is an integer
+          this->visit(reinterpret_cast<const uint64_mref&>(ref));
+        }
+
+      }
+
       void visit(const mfast::decimal_mref& ref)
       {
         try {
@@ -310,7 +351,7 @@ namespace mfast {
     };
 
 
-   // return false only when the parsed result is empty or error
+    // return false only when the parsed result is empty or error
     bool decode_visitor::visit_impl(const mfast::aggregate_mref& ref)
     {
 
@@ -386,8 +427,11 @@ namespace mfast {
 
       do {
         ref.resize(i + 1);
-
-        ref[i++].accept_mutator(*this);
+        sequence_element_mref element = ref[i++];
+        if (element.num_fields() == 1)
+          element.accept_mutator(*this);
+        else
+          this->visit_impl(element);
 
         strm_ >> std::skipws >> c;
 
@@ -402,10 +446,17 @@ namespace mfast {
       strm_.setstate(std::ios::failbit);
     }
 
-    bool decode(std::istream& is, const message_mref& msg)
+    bool decode(std::istream& is, const mfast::aggregate_mref& msg)
     {
       decode_visitor visitor(is);
       visitor.visit_impl(msg);
+      return !is.fail();
+    }
+
+    bool decode(std::istream& is, const mfast::sequence_mref& seq)
+    {
+      decode_visitor visitor(is);
+      visitor.visit(seq, 0);
       return !is.fail();
     }
 

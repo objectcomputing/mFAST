@@ -29,7 +29,7 @@ namespace detail {
 class codec_helper;
 }
 
-class enum_cref
+class MFAST_EXPORT enum_cref
   : public field_cref
 {
 public:
@@ -84,6 +84,8 @@ public:
   {
     return static_cast<instruction_cptr>(instruction_);
   }
+
+  bool is_boolean() const;
 
 };
 
