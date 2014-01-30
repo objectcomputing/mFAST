@@ -9,9 +9,10 @@ namespace mfast
 {
   namespace json {
 
-    MFAST_JSON_EXPORT bool encode(std::ostream& os, const mfast::aggregate_cref& msg);
-    MFAST_JSON_EXPORT bool decode(std::istream& is, const message_mref& msg);
-
+    MFAST_JSON_EXPORT bool encode(std::ostream& os, const ::mfast::aggregate_cref& msg);
+    MFAST_JSON_EXPORT bool encode(std::istream& is, const ::mfast::sequence_mref& seq);
+    MFAST_JSON_EXPORT bool decode(std::istream& is, const ::mfast::aggregate_mref& msg);
+    MFAST_JSON_EXPORT bool decode(std::istream& is, const ::mfast::sequence_mref& seq);
   } // namespace json
 } // namespace mfast
 
