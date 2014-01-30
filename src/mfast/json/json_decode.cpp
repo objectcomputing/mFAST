@@ -428,7 +428,7 @@ namespace mfast {
       do {
         ref.resize(i + 1);
         sequence_element_mref element = ref[i++];
-        if (element.num_fields() == 1)
+        if (ref.element_unnamed())
           element.accept_mutator(*this);
         else
           this->visit_impl(element);

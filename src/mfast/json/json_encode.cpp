@@ -122,7 +122,7 @@ namespace mfast {
 
         void visit(const mfast::sequence_element_cref& ref, int)
         {
-          if (ref.num_fields() == 1) {
+          if (ref.element_unnamed()) {
             ref[0].accept_accessor(*this);
           }
           else {

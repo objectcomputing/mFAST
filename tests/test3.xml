@@ -13,11 +13,14 @@
           <delta value="0" />
         </decimal>
         <sequence name="tags" presence="optional">
-            <string name="tag_item" />
+            <string  />
         </sequence>
         <group name="stock" presence="optional">
             <templateRef name="Stock" />
         </group>
+        <sequence name="resalers" presence="optional">
+            <string  name="name"/>
+        </sequence>
     </template>
 
     <template name="LoginAccount">
@@ -47,7 +50,7 @@
             <string name="number" />
         </sequence>
         <sequence name="emails">
-            <string name="entry"/>
+            <string />
         </sequence>
         <group name="login" presence="optional">
             <templateRef />
