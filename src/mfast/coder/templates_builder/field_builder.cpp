@@ -537,7 +537,7 @@ namespace mfast
         subinstructions = build_subfields();
         subinstructions_count = num_instructions();
         element_instruction = get_sole_templateref();
-        if (element_instruction  == 0 && subinstructions_count ==1)
+        if (element_instruction  == 0 && subinstructions_count ==1 && subinstructions[0]->name()[0]==0)
         {
           element_instruction = dynamic_cast<const group_field_instruction*>(subinstructions[0]);
           if (element_instruction)

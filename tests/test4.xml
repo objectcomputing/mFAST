@@ -10,7 +10,7 @@
   </define>
   <define name="Addresses">
     <sequence>
-      <field name="element">
+      <field>
         <type name="Address"/>
       </field>
     </sequence>
@@ -24,7 +24,7 @@
 
   <define name="Emails">
     <sequence>
-      <string name="email"/>
+      <string />
     </sequence>
   </define>
 

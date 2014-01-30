@@ -248,7 +248,7 @@ codegen_base::get_element_instruction(const mfast::sequence_field_instruction* i
 {
   if (inst->element_instruction())
     return inst->element_instruction();
-  if (inst->subinstructions_count() == 1)
+  if (inst->subinstructions_count() == 1 && inst->subinstruction(0)->name()[0] == 0 )
     return inst->subinstruction(0);
   return 0;
 }

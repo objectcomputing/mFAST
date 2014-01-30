@@ -43,6 +43,11 @@ namespace mfast {
     sequence_element_cref(const sequence_element_cref& other);
     instruction_cptr instruction() const;
 
+    bool element_unnamed() const
+    {
+      return this->instruction()->subinstructions_count() == 1 && this->instruction()->subinstruction(0)->name()[0] == 0;
+    }
+
   };
 
   typedef make_aggregate_mref<sequence_element_cref> sequence_element_mref;
@@ -221,7 +226,7 @@ namespace mfast {
   };
 
   ///
-  /// Used for representing sequence where elements are defined frome static templateref or type of group, such as
+  /// Used for representing sequence where elements are defined frome static templateref or an unnamed group, such as
   ///
   /// <sequence name="Seq">
   ///    <templateRef name="MyTemplate" />
@@ -233,7 +238,7 @@ namespace mfast {
   ///   <group> ...</group>
   /// </define>
   /// <sequence name="Seq">
-  ///    <field name="" > <type name="MyGroup" /> </field>
+  ///    <field> <type name="MyGroup" /> </field>
   /// </sequence>
   struct defined_element_sequence_trait
   {
@@ -246,10 +251,10 @@ namespace mfast {
   };
 
   ///
-  /// Used for representing sequence with only one field, such as
+  /// Used for representing sequence with only one unamed field, such as
   ///
   /// <sequence name="Seq">
-  ///    <string name="sole_field" />
+  ///    <string />
   /// </sequence>
   ///
 
@@ -357,6 +362,11 @@ namespace mfast {
 
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
+
+    bool element_unnamed() const
+    {
+      return this->instruction()->subinstructions_count() == 1 && this->instruction()->subinstruction(0)->name()[0] == 0;
+    }
 
   protected:
 
