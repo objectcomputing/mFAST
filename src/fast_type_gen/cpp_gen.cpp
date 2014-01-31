@@ -75,11 +75,11 @@ cpp_gen::gen_op_context(const char*                name,
   out_ << "const static " << "op_context_t " << prefix_string() << name << "_opContext ={\n"
        << "  \"" << context->key_ << "\", \n"
        << "  \"" << context->ns_ << "\", \n"
-       << "  \"" << context->dictionary_ << "\"};";
-  std::string result = "&";
-  result += name;
-  result += "_opContext";
-  return result;
+       << "  \"" << context->dictionary_ << "\"};\n\n";
+
+  std::stringstream result;
+  result << "&" <<  prefix_string() << name << "_opContext";
+  return result.str();
 }
 
 void cpp_gen::gen_field(const mfast::field_instruction* inst,
@@ -120,7 +120,8 @@ void cpp_gen::gen_integer(const mfast::integer_field_instruction_base* inst,
                           const std::string&                           initial_value)
 {
   gen_field(inst, gen_op_context(inst->name(), inst->op_context()), cpp_type);
-  out_ << "  int_value_storage<"<< cpp_type << "_t>(" << initial_value  <<  ")); // initial_value\n\n";
+  out_ << "  int_value_storage<"<< cpp_type << "_t>(" << initial_value   << "), // initial_value\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 }
 
 void cpp_gen::visit(const mfast::int32_field_instruction* inst, void*)
@@ -175,7 +176,8 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
   out_ << "  decimal_value_storage(";
   if (!init_value.is_empty())
     out_ <<  init_value.of_decimal.mantissa_ << "LL, " << static_cast<int> (init_value.of_decimal.exponent_);
-  out_ << ")); // initial_value\n\n";
+  out_ << "), // initial_value\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 
 }
 
@@ -196,7 +198,8 @@ void cpp_gen::gen_string(const mfast::ascii_field_instruction* inst,
 void cpp_gen::visit(const mfast::ascii_field_instruction* inst, void*)
 {
   gen_string(inst, "ascii");
-  out_ <<  "); // initial value\n\n";
+  out_ <<  ", // initial_value\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 }
 
 void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void*)
@@ -209,7 +212,8 @@ void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void*)
          << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
   }
   else {
-    out_ << "); // initial value\n\n";
+    out_ << ", // initial_value\n"
+         << "  " << inst->tag() << "); // tag\n\n";
   }
 }
 
@@ -238,7 +242,8 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
          << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
   }
   else {
-    out_ << "); // initial value\n\n";
+    out_ << ", // initial_value\n"
+         << "  " << inst->tag() << "); // tag\n\n";
   }
 }
 
@@ -330,7 +335,6 @@ cpp_gen::get_subinstructions(const mfast::group_field_instruction* inst)
 
 }
 
-
 void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 {
   std::string name( cpp_name( inst ) );
@@ -384,8 +388,9 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
        << "  \"" << inst->dictionary() << "\", // dictionary\n"
        << subinstruction_arg
        << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n";
-
+       << "  \"" << inst->typeref_ns() << "\", // typeRef ns \n"
+       << "  \"\", // cpp_ns\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 
   if (top_level) {
     out_ << "  return &the_instruction;\n"
@@ -497,7 +502,8 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
     out_ << "  " << cpp_type_of(inst->ref_instruction()) << "::instruction()); // ref_instruction\n\n";
   }
   else {
-    out_ << "  0); // ref_instruction\n\n";
+    out_ << "  0, // ref_instruction\n"
+         << "  " << inst->tag() << "); //tag \n\n";
   }
 
   if (top_level) {
@@ -538,7 +544,9 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
        << "    "<< inst->subinstructions_count() << ", // num_fields\n"
        << "    " << inst->has_reset_attribute() << ", // reset\n"
        << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n"
+       << "  \"" << inst->typeref_ns() << "\", // typeRef ns \n"
+       << "  \"\", // cpp_ns\n"
+       << "  " << inst->tag() << "); // tag \n\n"
        << "  return &the_instruction;\n"
        << "}\n\n";
 }
@@ -549,7 +557,8 @@ void cpp_gen::visit(const mfast::templateref_instruction* inst, void*)
 
   out_ << "static const templateref_instruction\n"
        << prefix_string() << "templateref" << index << "_instruction(\n"
-       << "  " << index << ");\n\n";
+       << "  " << index << ", // index\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 
   std::stringstream tmp;
   tmp << "templateref" << index;
@@ -665,7 +674,8 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
        << "  " << values_variable_name << ", // element values\n"
        << "  " << num_elements_name.str() << ",// num elements\n"
        << "  0, // ref_instruction\n"
-       << "  0);\n\n";
+       << "  0, // cpp_ns\n"
+       << "  " << inst->tag() << "); //tag \n\n";
 
   if (top_level) {
     out_ << "  return &the_instruction;\n"

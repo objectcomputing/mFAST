@@ -41,7 +41,8 @@ namespace mfast
                            const uint64_t*               element_values,
                            uint64_t                      num_elements,
                            const enum_field_instruction* ref,
-                           const char*                   cpp_ns)
+                           const char*                   cpp_ns,
+                           instruction_tag               tag= instruction_tag())
       : integer_field_instruction_base(field_index,
                                        operator_id,
                                        field_type_enum,
@@ -50,7 +51,8 @@ namespace mfast
                                        name,
                                        ns,
                                        context,
-                                       initial_value.storage_)
+                                       initial_value.storage_,
+                                       tag)
       , referable_instruction<enum_field_instruction>(ref, cpp_ns)
       , elements_(elements)
       , num_elements_(num_elements)

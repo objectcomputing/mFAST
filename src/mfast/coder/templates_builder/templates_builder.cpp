@@ -76,25 +76,25 @@ namespace mfast
       , cpp_ns_(string_dup(cpp_ns, this->alloc()))
       , template_instruction_prototype_(0,0,"","","",0,0,0,0,0,cpp_ns_)
     {
-      static const int32_field_instruction int32_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0);
+      static const int32_field_instruction int32_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, int_value_storage<int32_t>());
       this->member["int32"] = &int32_field_instruction_prototype;
 
-      static const uint32_field_instruction uint32_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0);
+      static const uint32_field_instruction uint32_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, int_value_storage<uint32_t>());
       this->member["uInt32"] = &uint32_field_instruction_prototype;
 
-      static const int64_field_instruction int64_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0);
+      static const int64_field_instruction int64_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, int_value_storage<int64_t>());
       this->member["int64"] = &int64_field_instruction_prototype;
 
-      static const uint64_field_instruction uint64_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0);
+      static const uint64_field_instruction uint64_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, int_value_storage<uint64_t>());
       this->member["uInt64"] = &uint64_field_instruction_prototype;
 
-      static const decimal_field_instruction decimal_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0);
+      static const decimal_field_instruction decimal_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, decimal_value_storage());
       this->member["decimal"] = &decimal_field_instruction_prototype;
 
-      static const ascii_field_instruction ascii_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0);
+      static const ascii_field_instruction ascii_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, string_value_storage());
       this->member["string"] = &ascii_field_instruction_prototype;
 
-      static const byte_vector_field_instruction byte_vector_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0);
+      static const byte_vector_field_instruction byte_vector_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
       this->member["byteVector"] = &byte_vector_field_instruction_prototype;
 
       static const int32_vector_field_instruction int32_vector_field_instruction_prototype(0,presence_mandatory,0,0,"");
@@ -109,11 +109,11 @@ namespace mfast
       static const uint64_vector_field_instruction uint64_vector_field_instruction_prototype(0,presence_mandatory,0,0,"");
       this->member["uInt64Vector"] = &uint64_vector_field_instruction_prototype;
 
-      static const group_field_instruction group_field_instruction_prototype(0,presence_mandatory,0,0,"","",0,0);
+      static const group_field_instruction group_field_instruction_prototype(0,presence_mandatory,0,0,"","",0,0, "", "", "");
       this->member["group"] = &group_field_instruction_prototype;
 
-      static const uint32_field_instruction length_instruction_prototype(0,operator_none,presence_mandatory,0,"__length__","",0);
-      static const sequence_field_instruction sequence_field_instruction_prototype(0,presence_mandatory,0,0,"","",0,0,&length_instruction_prototype);
+      static const uint32_field_instruction length_instruction_prototype(0,operator_none,presence_mandatory,0,"__length__","",0, int_value_storage<uint32_t>());
+      static const sequence_field_instruction sequence_field_instruction_prototype(0,presence_mandatory,0,0,"","",0,0,&length_instruction_prototype, "", "", "",0,0);
       this->member["sequence"] = &sequence_field_instruction_prototype;
 
       this->member["template"] = &template_instruction_prototype_;

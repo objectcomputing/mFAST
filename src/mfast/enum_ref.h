@@ -178,7 +178,8 @@ public:
                             const uint64_t*               element_values,
                             uint64_t                      num_elements,
                             const enum_field_instruction* ref,
-                            const char*                   cpp_ns)
+                            const char*                   cpp_ns,
+                            instruction_tag               tag=instruction_tag())
     : enum_field_instruction(field_index,
                              operator_id,
                              optional,
@@ -191,7 +192,8 @@ public:
                              element_values,
                              num_elements,
                              ref,
-                             cpp_ns)
+                             cpp_ns,
+                             tag)
   {
   }
 

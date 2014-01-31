@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0);
+                                  0, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
@@ -420,7 +420,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0);
+                                  0, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
@@ -552,7 +552,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0);
+                                  0, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
@@ -599,7 +599,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0); // no initial value
+                                  0, int_value_storage<uint64_t>()); // no initial value
     inst.construct_value(storage, &allocator);
 
 
@@ -691,7 +691,8 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
                                    presence_mandatory,
                                    1,
                                    "test_decimal","",
-                                   0); // no initial value
+                                   0,
+                                   decimal_value_storage()); // no initial value
 
     inst.construct_value(storage, &allocator);
     decimal_mref result(&allocator, &storage, &inst);
@@ -709,7 +710,8 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0); // no initial value
+                                   0,
+                                   decimal_value_storage()); // no initial value
 
     inst.construct_value(storage, &allocator);
     decimal_mref result(&allocator, &storage, &inst);
@@ -757,7 +759,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -780,7 +782,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -878,7 +880,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
                                    1,
                                    "test_ascii","",
                                    0,
-                                   string_value_storage(default_value));
+                                   string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
 
@@ -902,7 +904,8 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
                                    presence_mandatory,
                                    1,
                                    "test_unicode","",
-                                   0);
+                                   0,
+                                   string_value_storage(), 0, "", "");
 
     inst.construct_value(storage, &alloc);
 
@@ -927,7 +930,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
                                    1,
                                    "test_unicode","",
                                    0,
-                                   string_value_storage(default_value));
+                                   string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
 
@@ -953,7 +956,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
                                    1,
                                    "test_unicode","",
                                    0,
-                                   string_value_storage(default_value));
+                                   string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
 
@@ -1036,7 +1039,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -1058,7 +1061,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref result(&alloc, &storage, &inst);
@@ -1173,7 +1176,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 

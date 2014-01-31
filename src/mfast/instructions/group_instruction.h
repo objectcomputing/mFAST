@@ -38,16 +38,18 @@ namespace mfast
                             const char*                    dictionary,
                             const const_instruction_ptr_t* subinstructions,
                             uint32_t                       subinstructions_count,
-                            const char*                    typeref_name ="",
-                            const char*                    typeref_ns="",
-                            const char*                    cpp_ns="")
+                            const char*                    typeref_name,
+                            const char*                    typeref_ns,
+                            const char*                    cpp_ns,
+                            instruction_tag                tag = instruction_tag())
       : field_instruction(field_index,
                           operator_none,
                           field_type_group,
                           optional,
                           id,
                           name,
-                          ns)
+                          ns,
+                          tag)
       , referable_instruction<group_field_instruction>(0, cpp_ns)
       , dictionary_(dictionary)
       , typeref_name_(typeref_name)
@@ -186,8 +188,10 @@ namespace mfast
                          const char*                    dictionary,
                          const const_instruction_ptr_t* subinstructions,
                          uint32_t                       subinstructions_count,
-                         const char*                    typeref_name ="",
-                         const char*                    typeref_ns="")
+                         const char*                    typeref_name,
+                         const char*                    typeref_ns,
+                         const char*                    cpp_ns,
+                         instruction_tag                tag = instruction_tag())
       : group_field_instruction(field_index,
                                 optional,
                                 id,
@@ -197,7 +201,9 @@ namespace mfast
                                 subinstructions,
                                 subinstructions_count,
                                 typeref_name,
-                                typeref_ns)
+                                typeref_ns,
+                                cpp_ns,
+                                tag)
     {
     }
 
@@ -208,8 +214,10 @@ namespace mfast
                          const char*                    ns,
                          const char*                    dictionary,
                          const group_field_instruction* ref_instruction,
-                         const char*                    typeref_name ="",
-                         const char*                    typeref_ns="")
+                         const char*                    typeref_name,
+                         const char*                    typeref_ns,
+                         const char*                    cpp_ns,
+                         instruction_tag                tag = instruction_tag())
       : group_field_instruction(field_index,
                                 optional,
                                 id,
@@ -219,7 +227,9 @@ namespace mfast
                                 ref_instruction->subinstructions(),
                                 ref_instruction->subinstructions_count(),
                                 typeref_name,
-                                typeref_ns)
+                                typeref_ns,
+                                cpp_ns,
+                                tag)
     {
     }
 

@@ -35,9 +35,10 @@ namespace mfast
                          const const_instruction_ptr_t* subinstructions,
                          uint32_t                       subinstructions_count,
                          bool                           reset,
-                         const char*                    typeref_name="",
-                         const char*                    typeref_ns="",
-                         const char*                    cpp_ns="")
+                         const char*                    typeref_name,
+                         const char*                    typeref_ns,
+                         const char*                    cpp_ns,
+                         instruction_tag                tag = instruction_tag())
       : group_field_instruction(0, presence_mandatory,
                                 id,
                                 name,
@@ -47,7 +48,8 @@ namespace mfast
                                 subinstructions_count,
                                 typeref_name,
                                 typeref_ns,
-                                cpp_ns)
+                                cpp_ns,
+                                tag)
       , template_ns_(template_ns)
       , reset_(reset)
     {
@@ -99,10 +101,12 @@ namespace mfast
                             const const_instruction_ptr_t* subinstructions,
                             uint32_t                       subinstructions_count,
                             bool                           reset,
-                            const char*                    typeref_name="",
-                            const char*                    typeref_ns="")
+                            const char*                    typeref_name,
+                            const char*                    typeref_ns,
+                            const char*                    cpp_ns,
+                            instruction_tag                tag = instruction_tag())
       : template_instruction(id, name, ns, template_ns, dictionary,
-                             subinstructions, subinstructions_count, reset, typeref_name, typeref_ns)
+                             subinstructions, subinstructions_count, reset, typeref_name, typeref_ns,cpp_ns, tag)
     {
     }
 
@@ -112,6 +116,7 @@ namespace mfast
     }
 
   };
+
 } /* mfast */
 
 

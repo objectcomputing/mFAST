@@ -37,8 +37,9 @@ namespace mfast
                                    const char*          name,
                                    const char*          ns,
                                    const op_context_t*  context,
-                                   const value_storage& initial_storage)
-      : field_instruction(field_index, operator_id, field_type, optional, id, name, ns)
+                                   const value_storage& initial_storage,
+                                   instruction_tag      tag)
+      : field_instruction(field_index, operator_id, field_type, optional, id, name, ns, tag)
       , op_context_(context)
       , initial_value_(initial_storage)
       , prev_value_(&prev_storage_)
@@ -127,7 +128,8 @@ namespace mfast
                           const char*          name,
                           const char*          ns,
                           const op_context_t*  context,
-                          int_value_storage<T> initial_value = int_value_storage<T>())
+                          int_value_storage<T> initial_value,
+                          instruction_tag      tag = instruction_tag())
       : integer_field_instruction_base(field_index,
                                        operator_id,
                                        field_type_trait<T>::id,
@@ -136,7 +138,8 @@ namespace mfast
                                        name,
                                        ns,
                                        context,
-                                       initial_value.storage_)
+                                       initial_value.storage_,
+                                       tag)
     {
     }
 
@@ -161,7 +164,6 @@ namespace mfast
   {
     return new (alloc) int_field_instruction<T>(*this);
   }
-
 
 } /* mfast */
 

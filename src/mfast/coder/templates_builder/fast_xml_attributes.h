@@ -39,6 +39,7 @@ namespace mfast
       const char* dictionary_;
       const char* presence_;
       const char* charset_;
+      const char* tag_;
 
       fast_xml_attributes()
         : name_(0)
@@ -48,6 +49,7 @@ namespace mfast
         , dictionary_(0)
         , presence_(0)
         , charset_(0)
+        , tag_(0)
       {
       }
 
@@ -59,6 +61,7 @@ namespace mfast
         , dictionary_(0)
         , presence_(0)
         , charset_(0)
+        , tag_(0)
       {
       }
 
@@ -71,6 +74,7 @@ namespace mfast
         dictionary_ = 0;
         presence_ = 0;
         charset_ = 0;
+        tag_ = 0;
 
         set(attr);
       }
@@ -95,6 +99,8 @@ namespace mfast
             presence_ = attr->Value();
           else if (std::strcmp(name, "charset") == 0)
             charset_ = attr->Value();
+          else if (std::strcmp(name, "mfast:tag") == 0)
+            tag_ = attr->Value();
           attr = attr->Next();
         }
       }

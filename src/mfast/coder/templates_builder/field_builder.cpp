@@ -19,6 +19,8 @@
 #include "field_builder.h"
 #include "field_op.h"
 #include "../common/exceptions.h"
+#include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
 
 using namespace tinyxml2;
 using namespace boost::assign; // bring 'map_list_of()' into scope
@@ -94,7 +96,7 @@ namespace mfast
 
         if (std::strcmp(this->charset_, "unicode") == 0 )
         {
-          static unicode_field_instruction prototype (0,operator_none,presence_mandatory,0,0,"",0);
+          static unicode_field_instruction prototype (0,operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
           instruction = &prototype;
         }
       }
@@ -163,7 +165,8 @@ namespace mfast
         get_name(alloc()),
         get_ns(inst, alloc()),
         fop.context_,
-        int_value_storage<IntType>(fop.initial_value_)
+        int_value_storage<IntType>(fop.initial_value_),
+        parse_tag()
         );
 
       parent_->add_instruction(instruction);
@@ -232,7 +235,8 @@ namespace mfast
           get_ns(inst, alloc()),
           exponent_op.context_,
           mantissa_instruction,
-          decimal_value_storage(exponent_op.initial_value_));
+          decimal_value_storage(exponent_op.initial_value_),
+          parse_tag());
       }
       else {
 
@@ -246,7 +250,8 @@ namespace mfast
           get_name(alloc()),
           get_ns(inst, alloc()),
           decimal_op.context_,
-          decimal_value_storage(decimal_op.initial_value_));
+          decimal_value_storage(decimal_op.initial_value_),
+          parse_tag());
       }
 
       parent_->add_instruction(instruction);
@@ -263,7 +268,8 @@ namespace mfast
         get_name(alloc()),
         get_ns(inst, alloc()),
         fop.context_,
-        string_value_storage(fop.initial_value_)
+        string_value_storage(fop.initial_value_),
+        parse_tag()
         );
       parent_->add_instruction(instruction);
     }
@@ -292,7 +298,8 @@ namespace mfast
         string_value_storage(fop.initial_value_),
         get_length_id(inst, length_attrs),
         get_length_name(inst, length_attrs),
-        get_length_ns(inst, length_attrs)
+        get_length_ns(inst, length_attrs),
+        parse_tag()
         );
       parent_->add_instruction(instruction);
     }
@@ -321,7 +328,8 @@ namespace mfast
         string_value_storage(fop.initial_value_),
         get_length_id(inst, length_attrs),
         get_length_name(inst, length_attrs),
-        get_length_ns(inst, length_attrs)
+        get_length_ns(inst, length_attrs),
+        parse_tag()
         );
       parent_->add_instruction(instruction);
     }
@@ -333,7 +341,8 @@ namespace mfast
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
-        get_ns(inst, alloc()));
+        get_ns(inst, alloc()),
+        parse_tag());
       parent_->add_instruction(instruction);
     }
 
@@ -344,7 +353,8 @@ namespace mfast
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
-        get_ns(inst, alloc()));
+        get_ns(inst, alloc()),
+        parse_tag());
       parent_->add_instruction(instruction);
     }
 
@@ -355,7 +365,8 @@ namespace mfast
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
-        get_ns(inst, alloc()));
+        get_ns(inst, alloc()),
+        parse_tag());
       parent_->add_instruction(instruction);
     }
 
@@ -366,7 +377,8 @@ namespace mfast
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
-        get_ns(inst, alloc()));
+        get_ns(inst, alloc()),
+        parse_tag());
       parent_->add_instruction(instruction);
     }
 
@@ -471,7 +483,8 @@ namespace mfast
         subinstructions_count,
         get_typeRef_name(element_),
         get_typeRef_ns(element_),
-        inst->cpp_ns()
+        inst->cpp_ns(),
+        parse_tag()
         );
 
       if (inst->subinstructions_count() == 0) {
@@ -560,7 +573,8 @@ namespace mfast
         get_typeRef_ns(element_),
         inst->cpp_ns(),
         element_instruction,
-        inst->subinstructions_count() == 0 ? 0 : inst
+        inst->subinstructions_count() == 0 ? 0 : inst,
+        parse_tag()
         );
 
 
@@ -592,7 +606,8 @@ namespace mfast
         reset,
         get_typeRef_name(element_),
         get_typeRef_ns(element_),
-        inst->cpp_ns()
+        inst->cpp_ns(),
+        parse_tag()
         );
 
       parent_->add_template(this->resolved_ns(), instruction);
@@ -604,6 +619,35 @@ namespace mfast
                                                     << template_name_info(inst->name())
                                                     << referenced_by_info(parent_->name()));
     }
+
+    bool parse_enum_value(const char**    enum_element_names,
+                          const uint64_t* enum_element_values,
+                          uint64_t        num_elements,
+                          const char*     value_name,
+                          uint64_t&       result)
+    {
+
+      for (uint64_t i = 0; i < num_elements; ++i) {
+        if (std::strcmp(enum_element_names[i], value_name) == 0)
+        {
+          if (enum_element_values)
+            result = enum_element_values[i];
+          else
+            result = i;
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    bool parse_enum_value(const enum_field_instruction* inst, const char* value_name, uint64_t& result)
+    {
+      return parse_enum_value(inst->elements(), inst->element_values(), inst->num_elements(), value_name, result);
+    }
+
+    struct tag_value;
+    typedef boost::error_info<tag_value,std::string> value_info;
 
     void field_builder::visit(const enum_field_instruction* inst, void*)
     {
@@ -668,14 +712,19 @@ namespace mfast
         // In this case, the element names are already defined, but we haven't decide what the specified
         // initial value is.
 
-        for (uint64_t i = 0; i < num_elements; ++i) {
-          if (std::strcmp(enum_element_names[i], init_value_str) == 0)
-          {
-            fop.initial_value_ = value_storage(0); // reset the storage to defined value
-            fop.initial_value_.set<uint64_t>(i);
-            break;
-          }
+        uint64_t init_value;
+        if (parse_enum_value(enum_element_names,
+                             enum_element_values,
+                             num_elements,
+                             init_value_str,
+                             init_value)) {
+          fop.initial_value_ = value_storage(0);   // reset the storage to defined value
+          fop.initial_value_.set<uint64_t>(init_value);
         }
+        else {
+          BOOST_THROW_EXCEPTION(fast_static_error("Unrecognized enum initial value : ") << value_info(init_value_str));
+        }
+
       }
 
       if (!fop.initial_value_.is_defined())
@@ -703,10 +752,38 @@ namespace mfast
         enum_element_values,
         num_elements,
         inst->elements_ == 0 ? 0 : inst,
-        inst->cpp_ns()
+        inst->cpp_ns(),
+        parse_tag()
         );
 
       parent_->add_instruction(instruction);
+    }
+
+    instruction_tag field_builder::parse_tag()
+    {
+      uint64_t value = 0;
+      if (tag_) {
+        try {
+          value = boost::lexical_cast<uint64_t>(tag_);
+        }
+        catch (...) {
+          const enum_field_instruction* inst = dynamic_cast<const enum_field_instruction*>(this->find_type(0, "mfast:tag"));
+          if (inst) {
+            // treat the input tag as a "|" delimited tokens
+            boost::char_separator<char> sep("| ");
+            boost::tokenizer< boost::char_separator<char> > tokens(std::string(tag_), sep);
+            BOOST_FOREACH (const std::string &t, tokens)
+            {
+              uint64_t result;
+              if (parse_enum_value(inst, t.c_str(), result))
+                value |= result;
+              else
+                BOOST_THROW_EXCEPTION(fast_error("invalid tag") << value_info(t));
+            }
+          }
+        }
+      }
+      return instruction_tag(value);
     }
 
   } /* coder */

@@ -201,7 +201,8 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                    1,
                                    "test_decimal","",
                                    0,
-                                   &mantissa_inst);
+                                   &mantissa_inst,
+                                   decimal_value_storage());
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
   }
   {
@@ -613,7 +614,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                   2,
                                   "test_unicode","",
                                   0,
-                                  string_value_storage(f1_initial));
+                                  string_value_storage(f1_initial), 0, "", "");
 
   const field_instruction* instructions[] = {
     &inst0,&inst1
@@ -623,7 +624,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                      3,
                                      "test_group","","",
                                      instructions,
-                                     2);
+                                     2, "", "", "");
 
   BOOST_CHECK_EQUAL(group_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
@@ -709,7 +710,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                   2,
                                   "test_unicode","",
                                   0,
-                                  string_value_storage(f1_initial));
+                                  string_value_storage(f1_initial), 0, "", "");
 
   uint32_field_instruction length_inst(0, operator_none,
                                        presence_mandatory,
@@ -728,7 +729,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                            "test_group","","",
                                            instructions,
                                            2, // subinstructions_count
-                                           &length_inst);
+                                           &length_inst, "", "", "",0,0);
 
   BOOST_CHECK_EQUAL(sequence_inst.subinstructions_count(),    2U);
   BOOST_CHECK_EQUAL(sequence_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
@@ -810,7 +811,7 @@ public:
 
 
   mock_field_instruction()
-    : field_instruction (0, operator_none,field_type_int32,presence_mandatory,0,"","")
+    : field_instruction (0, operator_none,field_type_int32,presence_mandatory,0,"","", instruction_tag())
     , construct_value_called_(0)
     , destruct_value_called_(0)
     , copy_value_deep_called_(0)
@@ -905,7 +906,7 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
                                            "test_group","","",
                                            instructions,
                                            1, // subinstructions_count
-                                           &length_inst);
+                                           &length_inst, "", "", "",0,0);
 
   sequence_inst.construct_value(storage, &alloc);
 

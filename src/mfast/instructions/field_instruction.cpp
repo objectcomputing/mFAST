@@ -27,7 +27,8 @@ namespace mfast {
                                        presence_enum_t optional,
                                        uint32_t        id,
                                        const char*     name,
-                                       const char*     ns)
+                                       const char*     ns,
+                                       instruction_tag tag)
     : field_index_(field_index)
     , operator_id_(operator_id)
     , is_array_(field_type >= field_type_ascii_string && field_type <= field_type_sequence )
@@ -39,6 +40,7 @@ namespace mfast {
     , id_(id)
     , name_(name)
     , ns_(ns)
+    , tag_(tag)
   {
   }
 
@@ -86,4 +88,5 @@ namespace mfast {
   {
     return has_pmap_bit_;
   }
+
 }

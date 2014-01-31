@@ -34,14 +34,16 @@ namespace mfast
                             const char*          name,
                             const char*          ns,
                             const op_context_t*  context,
-                            string_value_storage initial_value = string_value_storage(),
+                            string_value_storage initial_value,
+                            instruction_tag      tag = instruction_tag(),
                             field_type_enum_t    field_type = field_type_ascii_string)
       :  vector_field_instruction_base(field_index,
                                        operator_id,
                                        field_type,
                                        optional,
                                        id, name, ns,
-                                       sizeof(char))
+                                       sizeof(char),
+                                       tag)
       , op_context_(context)
       , initial_value_(initial_value.storage_)
       , prev_value_(&prev_storage_)
@@ -136,16 +138,18 @@ namespace mfast
                               const char*          name,
                               const char*          ns,
                               const op_context_t*  context,
-                              string_value_storage initial_value = string_value_storage(),
-                              uint32_t             length_id = 0,
-                              const char*          length_name = "",
-                              const char*          length_ns = "",
+                              string_value_storage initial_value,// = string_value_storage(),
+                              uint32_t             length_id ,//= 0,
+                              const char*          length_name ,//= "",
+                              const char*          length_ns ,//= "",
+                              instruction_tag      tag = instruction_tag(),
                               field_type_enum_t    field_type = field_type_unicode_string)
       :  ascii_field_instruction(field_index,
                                  operator_id,
                                  optional,
                                  id, name, ns, context,
                                  initial_value,
+                                 tag,
                                  field_type)
       , length_id_(length_id)
       , length_name_(length_name)
