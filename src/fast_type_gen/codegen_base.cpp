@@ -37,7 +37,8 @@ void codegen_base::traverse(mfast::dynamic_templates_description& desc)
   {
     // we use the second parameter to identify wether the instruction is nested. If the
     // second parameter is not 0, it is nested inside another composite types.
-    inst->accept(*this, this);
+     if (!dont_generate(inst))
+       inst->accept(*this, this);
   }
 
   for (size_t i = 0; i < desc.size(); ++i)
@@ -53,9 +54,10 @@ void codegen_base::traverse(const mfast::group_field_instruction* inst, const ch
 
   for (std::size_t i = 0; i < inst->subinstructions_count(); ++i)
   {
+    const mfast::field_instruction* subinst = inst->subinstruction(i);
     // we use the second parameter to identify wether the instruction is nested. If the
     // second parameter is not 0, it is nested inside another composite types.
-    inst->subinstruction(i)->accept(*this, 0);
+    subinst->accept(*this, 0);
   }
   reset_scope(cref_scope_, saved_cref_scope);
 }
@@ -251,4 +253,10 @@ codegen_base::get_element_instruction(const mfast::sequence_field_instruction* i
   if (inst->subinstructions_count() == 1 && inst->subinstruction(0)->name()[0] == 0 )
     return inst->subinstruction(0);
   return 0;
+}
+
+bool
+codegen_base::dont_generate(const mfast::field_instruction* inst) const
+{
+  return std::strncmp("mfast:", inst->name(), 6) == 0;
 }

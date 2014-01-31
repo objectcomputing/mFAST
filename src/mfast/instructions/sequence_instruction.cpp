@@ -33,7 +33,8 @@ namespace mfast
                                                          const char*                       typeref_ns,
                                                          const char*                       cpp_ns,
                                                          const group_field_instruction*    element_instruction,
-                                                         const sequence_field_instruction* ref_inst)
+                                                         const sequence_field_instruction* ref_inst,
+                                                         instruction_tag                   tag)
     : group_field_instruction(field_index,
                               optional,
                               id,
@@ -44,7 +45,8 @@ namespace mfast
                               subinstructions_count,
                               typeref_name,
                               typeref_ns,
-                              cpp_ns)
+                              cpp_ns,
+                              tag)
     , sequence_length_instruction_(sequence_length_instruction)
     , element_instruction_(element_instruction)
   {

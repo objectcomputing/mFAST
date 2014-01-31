@@ -63,12 +63,13 @@ namespace mfast
                              presence_enum_t optional,
                              uint32_t        id,
                              const char*     name,
-                             const char*     ns)
+                             const char*     ns,
+                             instruction_tag tag=instruction_tag())
       :  vector_field_instruction_base(field_index,
                                        operator_none,
                                        detail::vector_field_type<T>::value,
                                        optional,
-                                       id, name, ns, sizeof(T))
+                                       id, name, ns, sizeof(T), tag)
 
     {
     }

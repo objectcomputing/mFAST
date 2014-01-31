@@ -34,10 +34,11 @@ namespace mfast
                                   const char*          name,
                                   const char*          ns,
                                   const op_context_t*  context,
-                                  string_value_storage initial_value = string_value_storage(),
-                                  uint32_t             length_id = 0,
-                                  const char*          length_name = "",
-                                  const char*          length_ns = "")
+                                  string_value_storage initial_value,
+                                  uint32_t             length_id ,
+                                  const char*          length_name,
+                                  const char*          length_ns,
+                                  instruction_tag      tag=instruction_tag())
       :  unicode_field_instruction(field_index,
                                    operator_id,
                                    optional,
@@ -46,6 +47,7 @@ namespace mfast
                                    length_id,
                                    length_name,
                                    length_ns,
+                                   tag,
                                    field_type_byte_vector)
     {
     }

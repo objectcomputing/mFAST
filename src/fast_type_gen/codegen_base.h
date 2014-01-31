@@ -69,6 +69,8 @@ protected:
   bool contains_only_templateref(const mfast::group_field_instruction* inst) const;
 
   const  mfast::field_instruction* get_element_instruction(const mfast::sequence_field_instruction* inst) const;
+
+  bool dont_generate(const mfast::field_instruction* inst) const;
 };
 
 

@@ -29,15 +29,15 @@ namespace mfast
   public:
 
 
-    templateref_instruction(uint16_t                    field_index,
-                            const template_instruction* ref =0)
+    templateref_instruction(uint16_t        field_index,
+                            instruction_tag tag = instruction_tag())
       : field_instruction(field_index, operator_none,
                           field_type_templateref,
                           presence_mandatory,
                           0,
-                          ref ? ref->name() : "",
-                          ref ? ref->ns() : "")
-      , target_(ref)
+                          "",
+                          "",
+                          tag)
     {
     }
 
@@ -61,17 +61,9 @@ namespace mfast
 
     virtual void accept(field_instruction_visitor&, void*) const;
 
-    const template_instruction* target() const
-    {
-      return target_;
-    }
-
     virtual templateref_instruction* clone(arena_allocator& alloc) const;
 
     static const const_instruction_ptr_t* default_instruction();
-
-  private:
-    const template_instruction* target_;
   };
 
 } /* mfast */

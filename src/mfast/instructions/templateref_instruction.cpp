@@ -23,7 +23,7 @@ namespace mfast
   void templateref_instruction::construct_value(value_storage& storage,
                                                 allocator*     alloc) const
   {
-    this->construct_value(storage, alloc, target_, true);
+    this->construct_value(storage, alloc, 0, true);
   }
 
   void templateref_instruction::construct_value(value_storage&              storage,
@@ -82,9 +82,6 @@ namespace mfast
 
   std::size_t templateref_instruction::pmap_size() const
   {
-    if (target_) {
-      return target_->segment_pmap_size();
-    }
     return 0;
   }
 

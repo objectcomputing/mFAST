@@ -31,7 +31,7 @@ namespace mfast
     mantissa_field_instruction(operator_enum_t            operator_id,
                                const op_context_t*        context,
                                int_value_storage<int64_t> initial_value)
-      : int64_field_instruction(0, operator_id, presence_mandatory, 0, 0, 0, context, initial_value)
+      : int64_field_instruction(0, operator_id, presence_mandatory, 0, 0, 0, context, initial_value, instruction_tag())
     {
     }
 
@@ -55,7 +55,8 @@ namespace mfast
                               const char*           name,
                               const char*           ns,
                               const op_context_t*   decimal_context,
-                              decimal_value_storage initial_value = decimal_value_storage())
+                              decimal_value_storage initial_value,
+                              instruction_tag       tag=instruction_tag())
       : integer_field_instruction_base(field_index,
                                        decimal_operator_id,
                                        field_type_decimal,
@@ -64,7 +65,8 @@ namespace mfast
                                        name,
                                        ns,
                                        decimal_context,
-                                       initial_value.storage_)
+                                       initial_value.storage_,
+                                       tag)
       , mantissa_instruction_(0)
     {
     }
@@ -77,7 +79,8 @@ namespace mfast
                               const char*                 ns,
                               const op_context_t*         exponent_context,
                               mantissa_field_instruction* mi,
-                              decimal_value_storage       initial_value = decimal_value_storage())
+                              decimal_value_storage       initial_value,
+                              instruction_tag             tag=instruction_tag())
       : integer_field_instruction_base(field_index,
                                        exponent_operator_id,
                                        field_type_exponent,
@@ -86,7 +89,8 @@ namespace mfast
                                        name,
                                        ns,
                                        exponent_context,
-                                       initial_value.storage_)
+                                       initial_value.storage_,
+                                       tag)
     {
       mantissa_instruction(mi);
     }

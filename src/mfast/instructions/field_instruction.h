@@ -28,6 +28,7 @@
 #include "mfast/arena_allocator.h"
 #include "mfast/allocator.h"
 #include <algorithm>
+#include <iostream>
 
 namespace mfast {
 
@@ -108,6 +109,29 @@ namespace mfast {
   };
 
   class field_instruction_visitor;
+
+  class instruction_tag
+  {
+  public:
+    instruction_tag(uint64_t v=0)
+      : uint64_value_(v)
+    {
+    }
+
+    uint64_t to_uint64() const
+    {
+      return uint64_value_;
+    }
+  private:
+    uint64_t uint64_value_;
+  };
+
+  inline std::ostream&
+  operator << (std::ostream& os, const instruction_tag& tag)
+  {
+    os << "mfast::instruction_tag(" << tag.to_uint64() <<  ")";
+    return os;
+  }
 
 
   class MFAST_EXPORT field_instruction
@@ -192,7 +216,8 @@ namespace mfast {
                       presence_enum_t optional,
                       uint32_t        id,
                       const char*     name,
-                      const char*     ns);
+                      const char*     ns,
+                      instruction_tag tag);
 
 
     void optional(bool v)
@@ -222,6 +247,11 @@ namespace mfast {
       update_invariant();
     }
 
+    const instruction_tag& tag() const
+    {
+      return tag_;
+    }
+
   protected:
 
     virtual void update_invariant()
@@ -241,6 +271,7 @@ namespace mfast {
     uint32_t id_;
     const char* name_;
     const char* ns_;
+    instruction_tag tag_;
   };
 
   template <typename T>
