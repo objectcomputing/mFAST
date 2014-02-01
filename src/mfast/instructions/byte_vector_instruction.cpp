@@ -27,4 +27,47 @@ namespace mfast
     return new (alloc) byte_vector_field_instruction(*this);
   }
 
+  std::ptrdiff_t
+  byte_vector_field_instruction::hex2binary(const char* src, unsigned char* target)
+  {
+    unsigned char* dest = target;
+    char c = 0;
+    int shift_bits = 4;
+
+    for (; *src != '\0'; ++src) {
+
+      char tmp =0;
+
+      if (*src >= '0' && *src <= '9') {
+        tmp = (*src - '0');
+      }
+      else if (*src >= 'A' && *src <= 'F') {
+        tmp = (*src - 'A') + '\x0A';
+      }
+      else if (*src >= 'a' && *src <= 'f') {
+        tmp = (*src - 'a') + '\x0a';
+      }
+      else if (*src == ' ' || *src == '-')
+        continue;
+      else
+        return -1;
+
+      c |= (tmp << shift_bits);
+
+      if (shift_bits == 0) {
+        *dest++ = c;
+        c = 0;
+        shift_bits = 4;
+      }
+      else
+        shift_bits = 0;
+    }
+
+    if (shift_bits == 0)
+      return -1;
+
+    return dest - target;
+  }
+
+
 } /* mfast */

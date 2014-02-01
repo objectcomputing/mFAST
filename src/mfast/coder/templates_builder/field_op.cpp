@@ -46,7 +46,7 @@ namespace mfast
         else if (*src >= 'a' && *src <= 'f') {
           tmp = (*src - 'a') + '\x0a';
         }
-        else if (*src == ' ')
+        else if (*src == ' ' || *src == '-')
           continue;
         else
           return -1;
@@ -117,7 +117,7 @@ namespace mfast
     {
       if (init_value_str) {
         unsigned char* initial_value_buffer = static_cast<unsigned char*>(alloc_->allocate(strlen(init_value_str)/2+1));
-        ptrdiff_t initial_value_len = hex2binary(init_value_str, initial_value_buffer);
+        ptrdiff_t initial_value_len = byte_vector_field_instruction::hex2binary(init_value_str, initial_value_buffer);
         if (initial_value_len == -1) {
           BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid byteVector initial value: ") +  init_value_str ) );
         }

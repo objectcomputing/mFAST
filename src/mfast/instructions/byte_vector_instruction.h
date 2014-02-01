@@ -59,6 +59,8 @@ namespace mfast
 
     virtual void accept(field_instruction_visitor& visitor, void* context) const;
     virtual byte_vector_field_instruction* clone(arena_allocator& alloc) const;
+
+    static std::ptrdiff_t hex2binary(const char* src, unsigned char* target);
   };
 
 } /* mfast */

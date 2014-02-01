@@ -297,8 +297,14 @@ namespace mfast {
         }
       }
 
-      void visit(const mfast::byte_vector_mref&)
+      void visit(const mfast::byte_vector_mref& ref)
       {
+        std::string str;
+        if (get_quoted_string(strm_, &str)) {
+          ref.resize(str.size()/2+1);
+          ptrdiff_t len = byte_vector_field_instruction::hex2binary(str.c_str(), ref.data());
+          ref.resize(len);
+        }
       }
 
       template <typename IntType>
