@@ -127,7 +127,7 @@ namespace mfast
       const group_field_instruction* get_sole_templateref();
       const uint32_field_instruction* get_length_instruction(const sequence_field_instruction* inst);
 
-      instruction_tag parse_tag();
+      instruction_tag parse_tag(const field_instruction* inst);
     };
 
 

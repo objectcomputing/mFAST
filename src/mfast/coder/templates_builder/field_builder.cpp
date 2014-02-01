@@ -166,7 +166,7 @@ namespace mfast
         get_ns(inst, alloc()),
         fop.context_,
         int_value_storage<IntType>(fop.initial_value_),
-        parse_tag()
+        parse_tag(inst)
         );
 
       parent_->add_instruction(instruction);
@@ -236,7 +236,7 @@ namespace mfast
           exponent_op.context_,
           mantissa_instruction,
           decimal_value_storage(exponent_op.initial_value_),
-          parse_tag());
+          parse_tag(inst));
       }
       else {
 
@@ -251,7 +251,7 @@ namespace mfast
           get_ns(inst, alloc()),
           decimal_op.context_,
           decimal_value_storage(decimal_op.initial_value_),
-          parse_tag());
+          parse_tag(inst));
       }
 
       parent_->add_instruction(instruction);
@@ -269,7 +269,7 @@ namespace mfast
         get_ns(inst, alloc()),
         fop.context_,
         string_value_storage(fop.initial_value_),
-        parse_tag()
+        parse_tag(inst)
         );
       parent_->add_instruction(instruction);
     }
@@ -299,7 +299,7 @@ namespace mfast
         get_length_id(inst, length_attrs),
         get_length_name(inst, length_attrs),
         get_length_ns(inst, length_attrs),
-        parse_tag()
+        parse_tag(inst)
         );
       parent_->add_instruction(instruction);
     }
@@ -329,7 +329,7 @@ namespace mfast
         get_length_id(inst, length_attrs),
         get_length_name(inst, length_attrs),
         get_length_ns(inst, length_attrs),
-        parse_tag()
+        parse_tag(inst)
         );
       parent_->add_instruction(instruction);
     }
@@ -342,7 +342,7 @@ namespace mfast
         get_id(inst),
         get_name(alloc()),
         get_ns(inst, alloc()),
-        parse_tag());
+        parse_tag(inst));
       parent_->add_instruction(instruction);
     }
 
@@ -354,7 +354,7 @@ namespace mfast
         get_id(inst),
         get_name(alloc()),
         get_ns(inst, alloc()),
-        parse_tag());
+        parse_tag(inst));
       parent_->add_instruction(instruction);
     }
 
@@ -366,7 +366,7 @@ namespace mfast
         get_id(inst),
         get_name(alloc()),
         get_ns(inst, alloc()),
-        parse_tag());
+        parse_tag(inst));
       parent_->add_instruction(instruction);
     }
 
@@ -378,7 +378,7 @@ namespace mfast
         get_id(inst),
         get_name(alloc()),
         get_ns(inst, alloc()),
-        parse_tag());
+        parse_tag(inst));
       parent_->add_instruction(instruction);
     }
 
@@ -484,7 +484,7 @@ namespace mfast
         get_typeRef_name(element_),
         get_typeRef_ns(element_),
         inst->cpp_ns(),
-        parse_tag()
+        parse_tag(inst)
         );
 
       if (inst->subinstructions_count() == 0) {
@@ -574,7 +574,7 @@ namespace mfast
         inst->cpp_ns(),
         element_instruction,
         inst->subinstructions_count() == 0 ? 0 : inst,
-        parse_tag()
+        parse_tag(inst)
         );
 
 
@@ -607,7 +607,7 @@ namespace mfast
         get_typeRef_name(element_),
         get_typeRef_ns(element_),
         inst->cpp_ns(),
-        parse_tag()
+        parse_tag(inst)
         );
 
       parent_->add_template(this->resolved_ns(), instruction);
@@ -753,18 +753,18 @@ namespace mfast
         num_elements,
         inst->elements_ == 0 ? 0 : inst,
         inst->cpp_ns(),
-        parse_tag()
+        parse_tag(inst)
         );
 
       parent_->add_instruction(instruction);
     }
 
-    instruction_tag field_builder::parse_tag()
+    instruction_tag field_builder::parse_tag(const field_instruction* inst)
     {
-      uint64_t value = 0;
+      uint64_t value = inst->tag().to_uint64();
       if (tag_) {
         try {
-          value = boost::lexical_cast<uint64_t>(tag_);
+          value |= boost::lexical_cast<uint64_t>(tag_);
         }
         catch (...) {
           const enum_field_instruction* inst = dynamic_cast<const enum_field_instruction*>(this->find_type(0, "mfast:tag"));
