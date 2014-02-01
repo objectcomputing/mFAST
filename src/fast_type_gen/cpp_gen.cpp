@@ -17,6 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "cpp_gen.h"
+#include <boost/io/ios_state.hpp>
 
 
 std::string cpp_gen::prefix_string() const
@@ -227,9 +228,14 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
   else {
     out_ << "  "<< "byte_vector_value_storage(\"";
     const char* val = static_cast<const char*>(inst->initial_value().of_array.content_);
-    for (std::size_t i = 0; i < inst->initial_value().array_length(); ++i)
     {
-      out_ << "\\x" << std::hex << std::setfill('0') << std::setw(2) << std::dec << (int) val[i];
+      boost::io::ios_flags_saver ifs( out_ );
+      out_ << std::hex << std::setfill('0') << std::setw(2);
+
+      for (std::size_t i = 0; i < inst->initial_value().array_length(); ++i)
+      {
+        out_ << "\\x" << (0xFF & (int) val[i]);
+      }
     }
     out_<< "\"," <<  inst->initial_value().array_length() << ")";
   }
