@@ -476,7 +476,7 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
       out_ << boost::to_upper_copy(export_symbol_) << " ";
     }
 
-    header_cref_ << inst->name() << "\n"
+    header_cref_ << name << "\n"
                  << indent << "{\n"
                  << indent << "  enum element {";
 

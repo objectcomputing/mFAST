@@ -31,6 +31,13 @@ codegen_base::codegen_base(const char* filebase, const char* fileext)
   }
 }
 
+inline bool
+codegen_base::dont_generate(const mfast::field_instruction* /*inst*/) const
+{
+  // return std::strncmp("mfast:", inst->name(), 6) == 0;
+  return false;
+}
+
 void codegen_base::traverse(mfast::dynamic_templates_description& desc)
 {
   BOOST_FOREACH(const mfast::field_instruction* inst, desc.defined_type_instructions())
@@ -255,8 +262,4 @@ codegen_base::get_element_instruction(const mfast::sequence_field_instruction* i
   return 0;
 }
 
-bool
-codegen_base::dont_generate(const mfast::field_instruction* inst) const
-{
-  return std::strncmp("mfast:", inst->name(), 6) == 0;
-}
+
