@@ -1,4 +1,5 @@
 #include "json.h"
+#include <boost/io/ios_state.hpp>
 
 namespace mfast {
   namespace json {
@@ -68,7 +69,19 @@ namespace mfast {
 
         void visit(const mfast::byte_vector_cref& ref)
         { // json doesn't have byte vector, treat it as string now
-          strm_ <<  separator_ << quoted_string(reinterpret_cast<const char*>(ref.data()));
+          strm_ <<  separator_ << "\"";
+          boost::io::ios_flags_saver  ifs( strm_ );
+          strm_  << std::hex << std::setfill('0') << std::setw(2);
+
+          for (std::size_t i = 0; i < ref.size(); ++i)
+          {
+            // if the size is 16, we treat it as a UUID
+            if (ref.size() == 16 && (i==4 || i==6 || i==8 || i==10))
+              strm_ << '-';
+            strm_   <<  (0xFF & (int) ref[i]) ;
+          }
+
+          strm_ << "\"";
         }
 
         template <typename IntType>
