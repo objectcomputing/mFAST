@@ -245,7 +245,8 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
     out_ << ", // initial value\n"
          << "  " << inst->length_id() << ", // length id\n"
          << "  \"" <<  inst->length_name() << "\", // length name\n"
-         << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
+         << "  \"" << inst->length_ns() << "\", // length ns\n"
+         << "  " << inst->tag() << "); // tag\n\n";
   }
   else {
     out_ << ", // initial_value\n"
@@ -265,7 +266,8 @@ void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_ins
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
        << "  \""<< inst->name() << "\", // name\n"
-       << "  \""<< inst->ns() << "\"); // ns\n";
+       << "  \""<< inst->ns() << "\", // ns\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 
   add_to_instruction_list(name);
 }
@@ -333,8 +335,7 @@ cpp_gen::get_subinstructions(const mfast::group_field_instruction* inst)
     else {
       std::string qualified_name = cpp_type_of(inst);
 
-      subinstruction_arg << "  "<< qualified_name << "::instruction()->subinstructions(),\n"
-                         << "  "<< qualified_name << "::instruction()->subinstructions_count(),\n";
+      subinstruction_arg << "  "<< qualified_name << "::instruction(),\n";
     }
   }
   return subinstruction_arg.str();
@@ -377,12 +378,13 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     out_ << "const static " << name << "::instruction_type\n"
          << "  the_instruction(\n";
   }
-  else if (  to_gen_subinstructions ) {
+  else if (  to_gen_subinstructions )
+  {
     out_ << "const static " << cref_scope() << name << "_cref::instruction_type\n"
          << prefix_string() << name << "_instruction(\n";
   }
   else {
-    out_ << "const static mfast::group_field_instruction\n"
+    out_ << "const static mfast::group_instruction_ex<" << cref_scope() << name << "_cref>\n"
          << prefix_string() << name << "_instruction(\n";
   }
 

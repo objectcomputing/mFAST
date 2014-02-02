@@ -180,6 +180,7 @@ namespace mfast
     : public group_field_instruction
   {
   public:
+    typedef T cref_type;
     group_instruction_ex(uint16_t                       field_index,
                          presence_enum_t                optional,
                          uint32_t                       id,
@@ -231,6 +232,7 @@ namespace mfast
                                 cpp_ns,
                                 tag)
     {
+      this->ref_instruction(ref_instruction);
     }
 
     virtual group_instruction_ex<T>* clone(arena_allocator& alloc) const
