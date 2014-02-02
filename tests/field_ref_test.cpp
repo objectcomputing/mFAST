@@ -450,6 +450,11 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     BOOST_CHECK_EQUAL(ref.size(), strlen(default_value));
     BOOST_CHECK(ref == "initial_string" );
 
+    // testing value
+    std::stringstream strm;
+    strm << ref.value();
+    BOOST_CHECK_EQUAL(strm.str(), std::string("initial_string"));
+
     ref.as("string1");
     BOOST_CHECK(ref == "string1" );
 
