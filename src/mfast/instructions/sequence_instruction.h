@@ -105,6 +105,7 @@ namespace mfast
     : public sequence_field_instruction
   {
   public:
+    typedef T cref_type;
     sequence_instruction_ex(uint16_t                          field_index,
                             presence_enum_t                   optional,
                             uint32_t                          id,

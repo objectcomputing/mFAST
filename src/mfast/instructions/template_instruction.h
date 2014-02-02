@@ -93,6 +93,7 @@ namespace mfast
     : public template_instruction
   {
   public:
+    typedef T cref_type;
     template_instruction_ex(uint32_t                       id,
                             const char*                    name,
                             const char*                    ns,

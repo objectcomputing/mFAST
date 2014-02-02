@@ -347,9 +347,10 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "  public:\n"
                << indent << "    typedef mfast::template_instruction_ex<"<< name << "_cref> instruction_type;\n"
                << indent << "    typedef const instruction_type* instruction_cptr;\n"
+               << indent << "    template <typename T>\n"
                << indent << "    " << name << "_cref(\n"
-               << indent << "      const mfast::value_storage* storage,\n"
-               << indent << "      const instruction_type*     instruction);\n\n"
+               << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, const mfast::value_storage*>::type storage,\n"
+               << indent << "      const T* instruction);\n\n"
                << indent << "    " << name << "_cref(const mfast::message_cref& other);\n\n"
                << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
 
@@ -362,10 +363,11 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "  public:\n"
                << indent << "    typedef mfast::template_instruction_ex<"<< name << "_cref> instruction_type;\n"
                << indent << "    typedef const instruction_type* instruction_cptr;\n"
+               << indent << "    template <typename T>\n"
                << indent << "    " << name << "_mref(\n"
                << indent << "      mfast::allocator*       alloc,\n"
-               << indent << "      mfast::value_storage*   storage,\n"
-               << indent << "      const instruction_type* instruction);\n\n"
+               << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, mfast::value_storage*>::type   storage,\n"
+               << indent << "      const T* instruction);\n\n"
                << indent << "   " << name << "_mref(const mfast::message_mref& other);\n\n"
                << indent << "    explicit " << name << "_mref(const mfast::field_mref_base& other);\n\n";
 
@@ -502,7 +504,6 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
                  << indent << "    typedef mfast::enum_cref_ex<" << name << "_cref, " << name << "> base_type;\n"
                  << indent << "    typedef " << name << "::element element_type;\n"
                  << indent << "    typedef " << name << "::instruction_type instruction_type;\n"
-
                  << indent << "    " << name << "_cref(\n"
                  << indent << "      const mfast::value_storage* storage=0,\n"
                  << indent << "      instruction_cptr            instruction=0);\n\n"

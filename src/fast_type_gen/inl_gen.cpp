@@ -128,7 +128,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
          << "{\n";
     if (inst->optional())
       out_ << "  if (" << "(*this)[" << index << "].absent())\n"
-           << "    return " << cref_type_name << "(0, 0);\n";
+           << "    return " << cref_type_name << "(0, " << cref_type_name << "::instruction_cptr(0));\n";
     out_ << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str() << ");\n"
          << "}\n\n"
          << "inline " << mref_type_name << "\n"
@@ -299,10 +299,11 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
 
   std::string name (cpp_name(inst));
 
-  out_ << "inline\n"
+  out_ << "template <typename T>"
+       << "inline\n"
        << name << "_cref::" << name << "_cref(\n"
-       << "  const mfast::value_storage* storage_array,\n"
-       << "  instruction_cptr            instruction)\n"
+       << "  typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, const mfast::value_storage*>::type storage_array,\n"
+       << "  const T* instruction)\n"
        << "  : base_type(storage_array, instruction)\n"
        << "{\n"
        << "}\n\n"
@@ -319,11 +320,12 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
        << "              static_cast<instruction_cptr>(other.instruction()))\n"
        << "{\n"
        << "}\n\n"
+       << "template <typename T>"
        << "inline\n"
        << name << "_mref::" << name << "_mref(\n"
-       << "  mfast::allocator*     alloc,\n"
-       << "  mfast::value_storage* storage_array,\n"
-       << "  instruction_cptr      instruction)\n"
+       << "  mfast::allocator* alloc,\n"
+       << "  typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, mfast::value_storage*>::type storage_array,\n"
+       << "  const T*          instruction)\n"
        << "  : base_type(alloc, storage_array, instruction)\n"
        << "{\n"
        << "}\n\n"
