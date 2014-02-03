@@ -228,7 +228,9 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
   std::string name( cpp_name( inst ) );
   const mfast::field_instruction* element_instruction = get_element_instruction(inst);
 
-  if (inst->ref_instruction()) {
+  if (inst->ref_instruction() &&
+     inst->ref_instruction()->field_type() != mfast::field_type_template)  // make sure this is not a static templateRef
+  {
     std::string cpp_type = cpp_type_of(inst, &dependency_);
 
     header_cref_ << indent << "typedef " << cpp_type << "_cref " << name << "_cref;\n";

@@ -407,11 +407,15 @@ namespace mfast
         else if (target->subinstructions_count() > 0) {
           // In this case, we do need the clone the subfield instructions because the field
           // index would be different from those in the referenced template.
-
+          field_instruction* new_inst;
           for (size_t i = 0; i < target->subinstructions_count(); ++i) {
-            field_instruction* new_inst = target->subinstruction(i)->clone(alloc());
+            new_inst = target->subinstruction(i)->clone(alloc());
             new_inst->field_index(parent_->num_instructions());
             parent_->add_instruction(new_inst);
+          }
+          if (target->subinstructions_count() == 1 && new_inst->field_type() == field_type_sequence)
+          {
+            static_cast<sequence_field_instruction*>(new_inst)->ref_instruction(target);
           }
         }
       }

@@ -20,21 +20,21 @@
 
 namespace mfast
 {
-  sequence_field_instruction::sequence_field_instruction(uint16_t                          field_index,
-                                                         presence_enum_t                   optional,
-                                                         uint32_t                          id,
-                                                         const char*                       name,
-                                                         const char*                       ns,
-                                                         const char*                       dictionary,
-                                                         const const_instruction_ptr_t*    subinstructions,
-                                                         uint32_t                          subinstructions_count,
-                                                         const uint32_field_instruction*   sequence_length_instruction,
-                                                         const char*                       typeref_name,
-                                                         const char*                       typeref_ns,
-                                                         const char*                       cpp_ns,
-                                                         const group_field_instruction*    element_instruction,
-                                                         const sequence_field_instruction* ref_inst,
-                                                         instruction_tag                   tag)
+  sequence_field_instruction::sequence_field_instruction(uint16_t                        field_index,
+                                                         presence_enum_t                 optional,
+                                                         uint32_t                        id,
+                                                         const char*                     name,
+                                                         const char*                     ns,
+                                                         const char*                     dictionary,
+                                                         const const_instruction_ptr_t*  subinstructions,
+                                                         uint32_t                        subinstructions_count,
+                                                         const uint32_field_instruction* sequence_length_instruction,
+                                                         const char*                     typeref_name,
+                                                         const char*                     typeref_ns,
+                                                         const char*                     cpp_ns,
+                                                         const group_field_instruction*  element_instruction,
+                                                         const group_field_instruction*  ref_inst,
+                                                         instruction_tag                 tag)
     : group_field_instruction(field_index,
                               optional,
                               id,
@@ -53,7 +53,10 @@ namespace mfast
     field_type_ = field_type_sequence;
     if (ref_inst) {
       ref_instruction(ref_inst);
-      element_instruction_=ref_inst->element_instruction();
+      if (ref_inst->field_type() == field_type_sequence) {
+        element_instruction_=
+          static_cast<const sequence_field_instruction*>(ref_inst)->element_instruction();
+      }
     }
     const group_field_instruction* subinst_source = element_instruction_ ? element_instruction_ : ref_inst;
 
