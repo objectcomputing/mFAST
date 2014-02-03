@@ -27,21 +27,21 @@ namespace mfast
     : public group_field_instruction
   {
   public:
-    sequence_field_instruction(uint16_t                          field_index,
-                               presence_enum_t                   optional,
-                               uint32_t                          id,
-                               const char*                       name,
-                               const char*                       ns,
-                               const char*                       dictionary,
-                               const const_instruction_ptr_t*    subinstructions,
-                               uint32_t                          subinstructions_count,
-                               const uint32_field_instruction*   sequence_length_instruction,
-                               const char*                       typeref_name,
-                               const char*                       typeref_ns,
-                               const char*                       cpp_ns,
-                               const group_field_instruction*    element_instruction,
-                               const sequence_field_instruction* ref_instruction,
-                               instruction_tag                   tag = instruction_tag());
+    sequence_field_instruction(uint16_t                        field_index,
+                               presence_enum_t                 optional,
+                               uint32_t                        id,
+                               const char*                     name,
+                               const char*                     ns,
+                               const char*                     dictionary,
+                               const const_instruction_ptr_t*  subinstructions,
+                               uint32_t                        subinstructions_count,
+                               const uint32_field_instruction* sequence_length_instruction,
+                               const char*                     typeref_name,
+                               const char*                     typeref_ns,
+                               const char*                     cpp_ns,
+                               const group_field_instruction*  element_instruction,
+                               const group_field_instruction*  ref_instruction,
+                               instruction_tag                 tag = instruction_tag());
 
 
     virtual void construct_value(value_storage& storage,
@@ -106,21 +106,21 @@ namespace mfast
   {
   public:
     typedef T cref_type;
-    sequence_instruction_ex(uint16_t                          field_index,
-                            presence_enum_t                   optional,
-                            uint32_t                          id,
-                            const char*                       name,
-                            const char*                       ns,
-                            const char*                       dictionary,
-                            const const_instruction_ptr_t*    subinstructions,
-                            uint32_t                          subinstructions_count,
-                            uint32_field_instruction*         sequence_length_instruction,
-                            const char*                       typeref_name,
-                            const char*                       typeref_ns,
-                            const char*                       cpp_ns,
-                            const group_field_instruction*    element_instruction,
-                            const sequence_field_instruction* ref_instruction,
-                            instruction_tag                   tag = instruction_tag())
+    sequence_instruction_ex(uint16_t                       field_index,
+                            presence_enum_t                optional,
+                            uint32_t                       id,
+                            const char*                    name,
+                            const char*                    ns,
+                            const char*                    dictionary,
+                            const const_instruction_ptr_t* subinstructions,
+                            uint32_t                       subinstructions_count,
+                            uint32_field_instruction*      sequence_length_instruction,
+                            const char*                    typeref_name,
+                            const char*                    typeref_ns,
+                            const char*                    cpp_ns,
+                            const group_field_instruction* element_instruction,
+                            const group_field_instruction* ref_instruction,
+                            instruction_tag                tag = instruction_tag())
       : sequence_field_instruction(field_index, optional, id, name, ns, dictionary,
                                    subinstructions, subinstructions_count, sequence_length_instruction,
                                    typeref_name, typeref_ns, cpp_ns,
