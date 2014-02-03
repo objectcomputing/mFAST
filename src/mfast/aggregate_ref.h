@@ -95,6 +95,12 @@ namespace mfast
 
 #endif
 
+    void refers_to(const aggregate_cref& other)
+    {
+      this->instruction_ = other.instruction_;
+      this->storage_array_ = other.storage_array_;
+    }
+
   protected:
     aggregate_cref& operator= (const aggregate_cref&);
 
@@ -147,6 +153,12 @@ namespace mfast
 
 
     void as(const ConstRef& other) const;
+
+    void refers_to(const make_aggregate_mref<ConstRef>& other)
+    {
+      ConstRef::refers_to(other);
+      this->alloc_ = other.alloc_;
+    }
 
   protected:
     template <class FieldMutator> friend class field_mutator_adaptor;
