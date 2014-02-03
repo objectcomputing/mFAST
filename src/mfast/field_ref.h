@@ -146,6 +146,12 @@ namespace mfast {
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
+    void refers_to(const field_cref& other)
+    {
+      this->instruction_ = other.instruction_;
+      this->storage_ = other.storage_;
+    }
+
   protected:
 
     const value_storage* storage () const
@@ -250,6 +256,12 @@ namespace mfast {
     allocator_type* allocator() const
     {
       return alloc_;
+    }
+
+    void refers_to(const make_field_mref& other)
+    {
+      ConstFieldRef::refers_to(other);
+      this->alloc_ = other.alloc_;
     }
 
   protected:
