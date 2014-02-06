@@ -220,7 +220,7 @@ namespace mfast {
     static const field_instruction* element_instruction(const sequence_field_instruction* inst)
 
     {
-      return inst;
+      return inst->element_instruction() ? inst->element_instruction() : inst;
     }
 
   };
