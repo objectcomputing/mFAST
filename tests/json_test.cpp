@@ -115,7 +115,9 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
 
   BOOST_CHECK(person_ref.get_login().present());
 
-  person_ref.set_bankAccounts().resize(1);
+  person_ref.set_bankAccounts().grow_by(1);
+  BOOST_CHECK_EQUAL(person_ref.get_bankAccounts().size(), 1U);
+
   BankAccount_mref acct0 = person_ref.set_bankAccounts()[0].as<BankAccount>();
   acct0.set_number().as(12345678);
   acct0.set_routingNumber().as(87654321);
@@ -275,6 +277,29 @@ BOOST_AUTO_TEST_CASE(test_skip_value)
     BOOST_CHECK_EQUAL(str, std::string(","));
     BOOST_CHECK(strm.eof());
   }
+}
+
+BOOST_AUTO_TEST_CASE(test_seq_codegen)
+{
+  using namespace test3;
+
+  const UsingSeqTemplates::instruction_type* top_inst = UsingSeqTemplates::instruction();
+  BOOST_CHECK_EQUAL(top_inst->subinstructions_count() , 3U);
+
+  const mfast::sequence_field_instruction* seq1_inst = dynamic_cast<const mfast::sequence_field_instruction*>(top_inst->subinstruction(1));
+  BOOST_REQUIRE(seq1_inst);
+  BOOST_CHECK(strcmp(seq1_inst->name(), "seq1")==0);
+  BOOST_CHECK_EQUAL(seq1_inst->subinstructions_count(), 2U);
+  BOOST_CHECK_EQUAL(seq1_inst->ref_instruction(), SeqTemplate1::instruction());
+  BOOST_CHECK_EQUAL(seq1_inst->element_instruction(), (const mfast::group_field_instruction*) 0);
+
+
+  const mfast::sequence_field_instruction* seq2_inst = dynamic_cast<const mfast::sequence_field_instruction*>(top_inst->subinstruction(2));
+  BOOST_REQUIRE(seq2_inst);
+  BOOST_CHECK(strcmp(seq2_inst->name(), "seq2")==0);
+  BOOST_CHECK_EQUAL(seq2_inst->subinstructions_count(), 4U);
+  BOOST_CHECK_EQUAL(seq2_inst->ref_instruction(), SeqTemplate2::instruction());
+  BOOST_CHECK_EQUAL(seq2_inst->element_instruction(), BankAccount::instruction());
 }
 
 

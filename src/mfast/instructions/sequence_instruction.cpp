@@ -54,8 +54,32 @@ namespace mfast
     if (ref_inst) {
       ref_instruction(ref_inst);
       if (ref_inst->field_type() == field_type_sequence) {
+        // This is the case when a sequence reference a predefined sequence type, like
+        //
+        //  <define name="SeqType">
+        //     <sequence name="seq"> ....</sequence>
+        //  </template>
+        //  <template name="AnotherTemplate">
+        //      <int name="field1" />
+        //      <field name="field2"> <type name="SeqType"> </field>
+        //  </template>
+        //
+
         element_instruction_=
           static_cast<const sequence_field_instruction*>(ref_inst)->element_instruction();
+      }
+      else  {
+        // This is a very peculiar case, only used with the following scenario
+        //
+        //  <template name="SeqTemplate">
+        //     <sequence name="seq"> ....</sequence>
+        //  </template>
+        //  <template name="AnotherTemplate">
+        //      <int name="field1" />
+        //      <templateRef name="SeqTemplate" />
+        //  </template>
+        //
+        ref_inst = dynamic_cast<const sequence_field_instruction*>(ref_inst->subinstruction(0));
       }
     }
     const group_field_instruction* subinst_source = element_instruction_ ? element_instruction_ : ref_inst;
