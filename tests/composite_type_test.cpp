@@ -108,8 +108,9 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   Addresses addresses;
 
-  addresses.mref().resize(2);
+  Addresses_mref::iterator it = addresses.mref().grow_by(2);
   BOOST_CHECK_EQUAL(addresses.cref().size(), 2U);
+  BOOST_CHECK(it == addresses.mref().begin());
   index = 0;
 
   for (Addresses_mref::iterator itr = addresses.mref().begin(); itr != addresses.mref().end(); ++itr)
