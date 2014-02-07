@@ -60,5 +60,23 @@
         </sequence>
     </template>
 
+    <template name="SeqTemplate1">
+      <sequence name="seq1">
+        <int32 name="field1" />
+        <int32 name="field2" />
+      </sequence>
+    </template>
+
+    <template name="SeqTemplate2">
+      <sequence name="seq2">
+        <templateRef name="BankAccount" />
+      </sequence>
+    </template>
+
+    <template name="UsingSeqTemplates">
+      <string name="string_field"/>
+      <templateRef name="SeqTemplate1"/>
+      <templateRef name="SeqTemplate2"/>
+    </template>
 </templates>
 

@@ -80,8 +80,7 @@ namespace mfast {
               strm_ << '-';
             strm_   <<  (0xFF & (int) ref[i]) ;
           }
-
-          strm_ << "\"";
+          strm_ << "\"" << std::setfill(' ');
         }
 
         template <typename IntType>
