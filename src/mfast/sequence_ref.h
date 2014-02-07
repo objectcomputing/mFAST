@@ -308,6 +308,17 @@ namespace mfast {
                        element_instruction());
     }
 
+
+    reference front() const
+    {
+      return this->operator [] (0);
+    }
+
+    reference back() const
+    {
+      return this->operator [] (size()-1);
+    }
+
     operator make_sequence_cref<sequence_element_cref,
                                 inline_element_sequence_trait,
                                 sequence_field_instruction>() const
@@ -362,6 +373,10 @@ namespace mfast {
 
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
+
+    /**
+     * @returns true if the sequence contains only one sub-field and the field is unnamed.
+    **/
 
     bool element_unnamed() const
     {
@@ -474,6 +489,16 @@ namespace mfast {
                        this->element_instruction());
     }
 
+    reference front() const
+    {
+      return this->operator [] (0);
+    }
+
+    reference back() const
+    {
+      return this->operator [] (this->size()-1);
+    }
+
     void resize(size_t n) const;
     void reserve(size_t n) const;
 
@@ -517,6 +542,18 @@ namespace mfast {
       return iterator(reference(this->alloc_,
                                 element_storage(this->size()),
                                 this->element_instruction()));
+    }
+
+    /**
+     * Grows this sequence  by delta elements.
+     *
+     * @returns An iterator to first item appended.
+    **/
+    iterator grow_by(std::size_t delta) const
+    {
+      std::size_t old_size = this->size();
+      resize( old_size+delta );
+      return  begin() + old_size;
     }
 
   private:
