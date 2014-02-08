@@ -161,13 +161,7 @@ namespace mfast {
 
     sequence_iterator& operator = (const sequence_iterator& other)
     {
-      // the cref and mref classes in mfast emulate the build-in C++
-      // reference in that they are only copyable but not assignable.
-      // However, I really need the assignment in the place, so I use memcpy
-      // as a workaround.
-
-      std::memcpy(&this->element_, &other.element_, sizeof(ElementRef));
-
+      this->element_.refers_to(other.element_);
       return *this;
     }
 
