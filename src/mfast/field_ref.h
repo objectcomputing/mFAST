@@ -32,7 +32,7 @@ namespace mfast {
 
 
   namespace detail {
-    extern const value_storage null_storage;
+    extern MFAST_EXPORT const value_storage null_storage;
 
     class field_storage_helper
     {

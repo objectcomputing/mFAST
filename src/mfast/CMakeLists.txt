@@ -41,6 +41,7 @@ endif()
 
 add_subdirectory (coder)
 add_subdirectory (json)
+add_subdirectory (sqlite3)
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         DESTINATION "${INSTALL_INCLUDE_DIR}"
