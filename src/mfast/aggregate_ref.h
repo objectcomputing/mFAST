@@ -82,18 +82,18 @@ namespace mfast
       return !absent();
     }
 
-    bool operator ! () const
-    {
-      return this->absent();
-    }
-
-#ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-    explicit operator bool() const
-    {
-      return this->present();
-    }
-
-#endif
+//     bool operator ! () const
+//     {
+//       return this->absent();
+//     }
+//
+// #ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
+//     explicit operator bool() const
+//     {
+//       return this->present();
+//     }
+//
+// #endif
 
     void refers_to(const aggregate_cref& other)
     {
