@@ -21,6 +21,9 @@
 
 #include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/range.hpp>
+
 namespace mfast
 {
 
@@ -82,24 +85,39 @@ namespace mfast
       return !absent();
     }
 
-//     bool operator ! () const
-//     {
-//       return this->absent();
-//     }
-//
-// #ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-//     explicit operator bool() const
-//     {
-//       return this->present();
-//     }
-//
-// #endif
-
     void refers_to(const aggregate_cref& other)
     {
       this->instruction_ = other.instruction_;
       this->storage_array_ = other.storage_array_;
     }
+
+    class iterator
+      : public boost::iterator_facade< iterator
+                                       , field_cref
+                                       , boost::random_access_traversal_tag
+                                       , field_cref>
+    {
+    public:
+      iterator(const value_storage*           storage_array,
+               const const_instruction_ptr_t* instruction_array);
+
+    private:
+      friend class boost::iterator_core_access;
+
+      bool equal(iterator const& other) const;
+      field_cref dereference() const;
+      void advance(int n);
+      void increment();
+      void decrement();
+      std::ptrdiff_t distance_to(iterator const& other) const;
+      const value_storage*           storage_array_;
+      const const_instruction_ptr_t* instruction_array_;
+    };
+
+    typedef iterator const_iterator;
+
+    iterator begin() const;
+    iterator end() const;
 
   protected:
     aggregate_cref& operator= (const aggregate_cref&);
@@ -159,6 +177,37 @@ namespace mfast
       ConstRef::refers_to(other);
       this->alloc_ = other.alloc_;
     }
+
+    class iterator
+      : public boost::iterator_facade< iterator
+                                       , field_mref
+                                       , boost::random_access_traversal_tag
+                                       , field_mref>
+    {
+    public:
+      iterator(mfast::allocator*              alloc,
+               value_storage*                 storage_array,
+               const const_instruction_ptr_t* instruction_array);
+
+    private:
+      friend class boost::iterator_core_access;
+
+      bool equal(iterator const& other) const;
+      field_mref dereference() const;
+      void advance(int n);
+      void increment();
+      void decrement();
+      std::ptrdiff_t distance_to(iterator const& other) const;
+
+      value_storage*           storage_array_;
+      const const_instruction_ptr_t* instruction_array_;
+      mfast::allocator*              alloc_;
+    };
+
+    typedef iterator const_iterator;
+
+    iterator begin() const;
+    iterator end() const;
 
   protected:
     template <class FieldMutator> friend class field_mutator_adaptor;
@@ -259,6 +308,69 @@ namespace mfast
     return instruction()->find_subinstruction_index_by_name(name);
   }
 
+  inline aggregate_cref::iterator
+  aggregate_cref::begin() const
+  {
+    return aggregate_cref::iterator(this->storage_array_,
+                                    this->instruction()->subinstructions());
+  }
+
+  inline aggregate_cref::iterator
+  aggregate_cref::end() const
+  {
+    return aggregate_cref::iterator(this->storage_array_ + this->num_fields(),
+                                    this->instruction()->subinstructions()+ this->num_fields());
+  }
+
+
+////////////////////////////////////////////////
+
+  inline
+  aggregate_cref::iterator::iterator(const value_storage*           storage_array,
+                                     const const_instruction_ptr_t* instruction_array)
+    : storage_array_(storage_array)
+    , instruction_array_(instruction_array)
+  {
+  }
+
+  inline bool
+  aggregate_cref::iterator::equal(aggregate_cref::iterator const& other) const
+  {
+    return (other.storage_array_ == this->storage_array_);
+  }
+
+  inline field_cref
+  aggregate_cref::iterator::dereference() const
+  // ElementRef dereference() const
+  {
+    return field_cref(this->storage_array_, *instruction_array_);
+  }
+
+  inline void
+  aggregate_cref::iterator::advance(int n)
+  {
+    storage_array_+=n;
+    instruction_array_+=n;
+  }
+
+  inline void
+  aggregate_cref::iterator::increment()
+  {
+    advance(1);
+  }
+
+  inline void
+  aggregate_cref::iterator::decrement()
+  {
+    advance(-1);
+  }
+
+  inline std::ptrdiff_t
+  aggregate_cref::iterator::distance_to(aggregate_cref::iterator const& other) const
+  {
+    return (other.storage_array_ - this->storage_array_);
+  }
+
 ///////////////////////////////////////////////////////
 
   template <typename ConstRef>
@@ -325,10 +437,10 @@ namespace mfast
   make_aggregate_mref<ConstRef>::as(const ConstRef& other) const
   {
     // we can only do the assignment when other is present
-    assert(other.present());
+    assert( other.present());
 
     // make sure the type are exactly the same
-    assert(typeid(*this->instruction()) == typeid(*other.instruction()));
+    assert( typeid(*this->instruction()) == typeid(*other.instruction()));
 
 
     std::size_t sz = this->instruction()->group_content_byte_count();
@@ -359,6 +471,81 @@ namespace mfast
 
   }
 
+  template <typename ConstRef>
+  inline typename make_aggregate_mref<ConstRef>::iterator
+  make_aggregate_mref<ConstRef>::begin() const
+  {
+    return iterator(this->alloc_,
+                    this->field_storage(0),
+                    this->instruction()->subinstructions());
+  }
+
+  template <typename ConstRef>
+  inline typename make_aggregate_mref<ConstRef>::iterator
+  make_aggregate_mref<ConstRef>::end() const
+  {
+    return iterator(this->alloc_,
+                    this->field_storage(this->num_fields()),
+                    this->instruction()->subinstructions()+this->num_fields());
+  }
+
+////////////////////////////////////////////////
+
+  template <typename ConstRef>
+  inline
+  make_aggregate_mref<ConstRef>::iterator::iterator(mfast::allocator*              alloc,
+                                                    value_storage*                 storage_array,
+                                                    const const_instruction_ptr_t* instruction_array)
+    : storage_array_(storage_array)
+    , instruction_array_(instruction_array)
+    , alloc_(alloc)
+  {
+  }
+
+  template <typename ConstRef>
+  inline bool
+  make_aggregate_mref<ConstRef>::iterator::equal(make_aggregate_mref<ConstRef>::iterator const& other) const
+  {
+    return (other.storage_array_ == this->storage_array_);
+  }
+
+  template <typename ConstRef>
+  inline field_mref
+  make_aggregate_mref<ConstRef>::iterator::dereference() const
+  // ElementRef dereference() const
+  {
+    return field_mref(this->alloc_, this->storage_array_, *instruction_array_);
+  }
+
+  template <typename ConstRef>
+  inline void
+  make_aggregate_mref<ConstRef>::iterator::advance(int n)
+  {
+    storage_array_+=n;
+    instruction_array_+=n;
+  }
+
+  template <typename ConstRef>
+  inline void
+  make_aggregate_mref<ConstRef>::iterator::increment()
+  {
+    advance(1);
+  }
+
+  template <typename ConstRef>
+  inline void
+  make_aggregate_mref<ConstRef>::iterator::decrement()
+  {
+    advance(-1);
+  }
+
+  template <typename ConstRef>
+  inline std::ptrdiff_t
+  make_aggregate_mref<ConstRef>::iterator::distance_to(
+    typename make_aggregate_mref<ConstRef>::iterator const& other) const
+  {
+    return (other.storage_array_ - this->storage_array_);
+  }
 }
 
 
