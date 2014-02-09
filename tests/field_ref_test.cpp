@@ -629,7 +629,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                      3,
                                      "test_group","","",
                                      instructions,
-                                     2, "", "", "");
+                                     "", "", "");
 
   BOOST_CHECK_EQUAL(group_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
@@ -732,11 +732,10 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
   sequence_field_instruction sequence_inst(0, presence_optional,
                                            3, // id
                                            "test_group","","",
-                                           instructions,
-                                           2, // subinstructions_count
-                                           &length_inst, "", "", "",0,0);
+                                           instructions,0,0,
+                                           &length_inst, "", "", "");
 
-  BOOST_CHECK_EQUAL(sequence_inst.subinstructions_count(),    2U);
+  BOOST_CHECK_EQUAL(sequence_inst.subinstructions().size(),    2U);
   BOOST_CHECK_EQUAL(sequence_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
   sequence_inst.construct_value(storage, &alloc);
@@ -909,9 +908,8 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
   sequence_field_instruction sequence_inst(0, presence_optional,
                                            3, // id
                                            "test_group","","",
-                                           instructions,
-                                           1, // subinstructions_count
-                                           &length_inst, "", "", "",0,0);
+                                           instructions,0,0,
+                                           &length_inst, "", "", "");
 
   sequence_inst.construct_value(storage, &alloc);
 

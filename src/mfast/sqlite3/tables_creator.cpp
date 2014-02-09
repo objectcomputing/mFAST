@@ -105,13 +105,11 @@ namespace mfast
 
     void tables_creator::traverse_subinstructions(const group_field_instruction* inst)
     {
-      const field_instruction* const* subinstructions = inst->subinstructions();
-      std::size_t subinstructions_count = inst->subinstructions_count();
 
-      for (std::size_t i = 0; i < subinstructions_count; ++i)
+      BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
       {
-        if (!masks_.to_skip(subinstructions[i]))
-          subinstructions[i]->accept(*this, 0);
+        if (!masks_.to_skip(subinst))
+          subinst->accept(*this, 0);
       }
     }
 

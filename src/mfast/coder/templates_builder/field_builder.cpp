@@ -102,7 +102,7 @@ namespace mfast
       }
       else if (std::strcmp(type_name, "templateRef") == 0)
       {
-        return *templateref_instruction::default_instruction();
+        return templateref_instruction::default_instruction()[0];
       }
       else if (std::strcmp(type_name, "typeRef") == 0 || std::strcmp(type_name, "length") == 0)
       {
@@ -399,21 +399,21 @@ namespace mfast
         if (parent_->num_instructions() == 0) {
           // if the templateRef is the first in a group or sequence, we don't need the clone the
           // individual field because the field_index remains the same
-          for (size_t i = 0; i < target->subinstructions_count(); ++i) {
+          for (size_t i = 0; i < target->subinstructions().size(); ++i) {
             const field_instruction* sub_inst = target->subinstruction(i);
             parent_->add_instruction(sub_inst);
           }
         }
-        else if (target->subinstructions_count() > 0) {
+        else if (target->subinstructions().size() > 0) {
           // In this case, we do need the clone the subfield instructions because the field
           // index would be different from those in the referenced template.
           field_instruction* new_inst;
-          for (size_t i = 0; i < target->subinstructions_count(); ++i) {
+          for (size_t i = 0; i < target->subinstructions().size(); ++i) {
             new_inst = target->subinstruction(i)->clone(alloc());
             new_inst->field_index(parent_->num_instructions());
             parent_->add_instruction(new_inst);
           }
-          if (target->subinstructions_count() == 1 && new_inst->field_type() == field_type_sequence)
+          if (target->subinstructions().size() == 1 && new_inst->field_type() == field_type_sequence)
           {
             static_cast<sequence_field_instruction*>(new_inst)->ref_instruction(target);
           }
@@ -429,7 +429,7 @@ namespace mfast
       }
     }
 
-    const_instruction_ptr_t*
+    instructions_view_t
     field_builder::build_subfields()
     {
       const XMLElement* child = content_element_->FirstChildElement();
@@ -442,7 +442,7 @@ namespace mfast
 
       const_instruction_ptr_t* result = new (alloc())const_instruction_ptr_t[this->num_instructions()];
       std::copy(instructions_.begin(), instructions_.end(), result);
-      return result;
+      return instructions_view_t(result, this->num_instructions());
     }
 
     const group_field_instruction* field_builder::get_sole_templateref()
@@ -468,12 +468,10 @@ namespace mfast
     void
     field_builder::visit(const group_field_instruction* inst, void*)
     {
-      const const_instruction_ptr_t* subinstructions = inst->subinstructions();
-      uint32_t subinstructions_count = inst->subinstructions_count();
+      instructions_view_t subinstructions = inst->subinstructions();
 
-      if (inst->subinstructions_count() == 0) {
+      if (inst->subinstructions().size() == 0) {
         subinstructions = build_subfields();
-        subinstructions_count = num_instructions();
       }
 
       group_field_instruction* instruction = new (alloc())group_field_instruction (
@@ -484,14 +482,13 @@ namespace mfast
         get_ns(inst, alloc()),
         get_dictionary(inst),
         subinstructions,
-        subinstructions_count,
         get_typeRef_name(element_),
         get_typeRef_ns(element_),
         inst->cpp_ns(),
         parse_tag(inst)
         );
 
-      if (inst->subinstructions_count() == 0) {
+      if (inst->subinstructions().size() == 0) {
         instruction->ref_instruction(get_sole_templateref());
       }
       else {
@@ -544,23 +541,23 @@ namespace mfast
     void
     field_builder::visit(const sequence_field_instruction* inst, void*)
     {
-      const const_instruction_ptr_t* subinstructions = inst->subinstructions();
-      uint32_t subinstructions_count = inst->subinstructions_count();
+      instructions_view_t subinstructions = inst->subinstructions();
 
       sequence_field_instruction* instruction;
       const group_field_instruction* element_instruction =0;
 
-      if (inst->subinstructions_count() == 0) {
+      if (inst->subinstructions().size() == 0) {
         subinstructions = build_subfields();
-        subinstructions_count = num_instructions();
         element_instruction = get_sole_templateref();
-        if (element_instruction  == 0 && subinstructions_count ==1 && subinstructions[0]->name()[0]==0)
+        if (element_instruction  == 0 && subinstructions.size() ==1 && subinstructions[0]->name()[0]==0)
         {
           element_instruction = dynamic_cast<const group_field_instruction*>(subinstructions[0]);
           if (element_instruction)
             element_instruction = static_cast<const group_field_instruction*>(element_instruction->ref_instruction());
         }
       }
+
+      const group_field_instruction* ref_inst = inst->subinstructions().size() == 0 ? 0 : inst;
 
 
       instruction = new (alloc())sequence_field_instruction (
@@ -571,13 +568,12 @@ namespace mfast
         get_ns(inst, alloc()),
         get_dictionary(inst),
         subinstructions,
-        subinstructions_count,
+        element_instruction,
+        ref_inst,
         get_length_instruction(inst),
         get_typeRef_name(element_),
         get_typeRef_ns(element_),
         inst->cpp_ns(),
-        element_instruction,
-        inst->subinstructions_count() == 0 ? 0 : inst,
         parse_tag(inst)
         );
 
@@ -597,16 +593,13 @@ namespace mfast
           reset = true;
       }
 
-      const const_instruction_ptr_t* subinstructions  = build_subfields();
-
       template_instruction* instruction = new (alloc())template_instruction (
         id_ ? boost::lexical_cast<uint32_t>(id_) : 0,
         string_dup(name_,       alloc()),
         string_dup(ns_,         alloc()),
         string_dup(templateNs_, alloc()),
         string_dup(dictionary_, alloc()),
-        subinstructions,
-        num_instructions(),
+        build_subfields(),
         reset,
         get_typeRef_name(element_),
         get_typeRef_ns(element_),

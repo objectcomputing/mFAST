@@ -20,28 +20,30 @@
 #define GROUP_INSTRUCTION_H_JFTB0YOV
 
 #include "field_instruction.h"
+#include "../array_view.h"
+#include <boost/foreach.hpp>
 
 namespace mfast
 {
   typedef const field_instruction*  const_instruction_ptr_t;
+  typedef array_view<const const_instruction_ptr_t> instructions_view_t;
 
   class MFAST_EXPORT group_field_instruction
     : public field_instruction
     , public referable_instruction<group_field_instruction>
   {
   public:
-    group_field_instruction(uint16_t                       field_index,
-                            presence_enum_t                optional,
-                            uint32_t                       id,
-                            const char*                    name,
-                            const char*                    ns,
-                            const char*                    dictionary,
-                            const const_instruction_ptr_t* subinstructions,
-                            uint32_t                       subinstructions_count,
-                            const char*                    typeref_name,
-                            const char*                    typeref_ns,
-                            const char*                    cpp_ns,
-                            instruction_tag                tag = instruction_tag())
+    group_field_instruction(uint16_t            field_index,
+                            presence_enum_t     optional,
+                            uint32_t            id,
+                            const char*         name,
+                            const char*         ns,
+                            const char*         dictionary,
+                            instructions_view_t subinstructions,
+                            const char*         typeref_name,
+                            const char*         typeref_ns,
+                            const char*         cpp_ns,
+                            instruction_tag     tag = instruction_tag())
       : field_instruction(field_index,
                           operator_none,
                           field_type_group,
@@ -55,9 +57,9 @@ namespace mfast
       , typeref_name_(typeref_name)
       , typeref_ns_(typeref_ns)
       , segment_pmap_size_(0)
-
+      , subinstructions_(0,0)
     {
-      set_subinstructions(subinstructions, subinstructions_count);
+      set_subinstructions(subinstructions);
     }
 
     void construct_group_subfields(value_storage* group_content,
@@ -72,7 +74,7 @@ namespace mfast
     /// Returns the number of bytes needed for the content of the group
     uint32_t group_content_byte_count() const
     {
-      return subinstructions_count_ * sizeof(value_storage);
+      return subinstructions_.size() * sizeof(value_storage);
     }
 
     /// Returns the index for the subinstruction with specified id,
@@ -83,14 +85,10 @@ namespace mfast
     /// or -1 if not found.
     int find_subinstruction_index_by_name(const char* name) const;
 
-    uint32_t subinstructions_count() const
-    {
-      return subinstructions_count_;
-    }
 
     const field_instruction* subinstruction(std::size_t index) const
     {
-      assert(index < subinstructions_count_);
+      assert(index < subinstructions_.size());
       return subinstructions_[index];
     }
 
@@ -99,20 +97,35 @@ namespace mfast
       return segment_pmap_size_;
     }
 
-    void set_subinstructions(const const_instruction_ptr_t* subinstructions, uint32_t count)
-    {
-      subinstructions_ = subinstructions;
-      subinstructions_count_ = count;
-      segment_pmap_size_ = 0;
-      for (uint32_t i = 0; i < subinstructions_count_; ++i) {
-        segment_pmap_size_ += subinstruction(i)->pmap_size();
-      }
-      has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
-    }
+    // void set_subinstructions(const const_instruction_ptr_t* subinstructions, uint32_t count)
+    //   {
+    //     subinstructions_ = subinstructions;
+    //     subinstructions_.size() = count;
+    //     segment_pmap_size_ = 0;
+    //     for (uint32_t i = 0; i < subinstructions_.size(); ++i) {
+    //       segment_pmap_size_ += subinstruction(i)->pmap_size();
+    //     }
+    //     has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
+    //   }
 
-    const const_instruction_ptr_t*  subinstructions() const
+    instructions_view_t  subinstructions() const
     {
       return subinstructions_;
+    }
+
+    void  set_subinstructions(instructions_view_t instructions)
+    {
+      subinstructions_ = instructions;
+      segment_pmap_size_ = 0;
+      BOOST_FOREACH(const field_instruction* inst, instructions)
+      {
+        segment_pmap_size_ += inst->pmap_size();
+      }
+
+      // for (uint32_t i = 0; i < subinstructions_.size(); ++i) {
+      //    segment_pmap_size_ += subinstruction(i)->pmap_size();
+      //  }
+
     }
 
     const char* typeref_name() const
@@ -167,11 +180,10 @@ namespace mfast
   protected:
 
     const char* dictionary_;
-    uint32_t subinstructions_count_;
     const char* typeref_name_;
     const char* typeref_ns_;
     std::size_t segment_pmap_size_;
-    const const_instruction_ptr_t* subinstructions_;
+    instructions_view_t subinstructions_;
 
   };
 
@@ -181,18 +193,17 @@ namespace mfast
   {
   public:
     typedef T cref_type;
-    group_instruction_ex(uint16_t                       field_index,
-                         presence_enum_t                optional,
-                         uint32_t                       id,
-                         const char*                    name,
-                         const char*                    ns,
-                         const char*                    dictionary,
-                         const const_instruction_ptr_t* subinstructions,
-                         uint32_t                       subinstructions_count,
-                         const char*                    typeref_name,
-                         const char*                    typeref_ns,
-                         const char*                    cpp_ns,
-                         instruction_tag                tag = instruction_tag())
+    group_instruction_ex(uint16_t            field_index,
+                         presence_enum_t     optional,
+                         uint32_t            id,
+                         const char*         name,
+                         const char*         ns,
+                         const char*         dictionary,
+                         instructions_view_t subinstructions,
+                         const char*         typeref_name,
+                         const char*         typeref_ns,
+                         const char*         cpp_ns,
+                         instruction_tag     tag = instruction_tag())
       : group_field_instruction(field_index,
                                 optional,
                                 id,
@@ -200,7 +211,6 @@ namespace mfast
                                 ns,
                                 dictionary,
                                 subinstructions,
-                                subinstructions_count,
                                 typeref_name,
                                 typeref_ns,
                                 cpp_ns,
@@ -226,7 +236,6 @@ namespace mfast
                                 ns,
                                 dictionary,
                                 ref_instruction->subinstructions(),
-                                ref_instruction->subinstructions_count(),
                                 typeref_name,
                                 typeref_ns,
                                 cpp_ns,

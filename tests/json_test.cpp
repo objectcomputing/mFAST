@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   product_ref.set_name().as("Foo");
   Product_mref::tags_mref tags = product_ref.set_tags();
   BOOST_CHECK_EQUAL(tags.instruction()->field_type(),            mfast::field_type_sequence);
-  BOOST_CHECK_EQUAL(tags.instruction()->subinstructions_count(), 1U);
+  BOOST_CHECK_EQUAL(tags.instruction()->subinstructions().size(), 1U);
 
   tags.resize(2);
   BOOST_CHECK_EQUAL(tags.size(),                                 2U);
@@ -284,12 +284,12 @@ BOOST_AUTO_TEST_CASE(test_seq_codegen)
   using namespace test3;
 
   const UsingSeqTemplates::instruction_type* top_inst = UsingSeqTemplates::instruction();
-  BOOST_CHECK_EQUAL(top_inst->subinstructions_count() , 3U);
+  BOOST_CHECK_EQUAL(top_inst->subinstructions().size() , 3U);
 
   const mfast::sequence_field_instruction* seq1_inst = dynamic_cast<const mfast::sequence_field_instruction*>(top_inst->subinstruction(1));
   BOOST_REQUIRE(seq1_inst);
   BOOST_CHECK(strcmp(seq1_inst->name(), "seq1")==0);
-  BOOST_CHECK_EQUAL(seq1_inst->subinstructions_count(), 2U);
+  BOOST_CHECK_EQUAL(seq1_inst->subinstructions().size(), 2U);
   BOOST_CHECK_EQUAL(seq1_inst->ref_instruction(), SeqTemplate1::instruction());
   BOOST_CHECK_EQUAL(seq1_inst->element_instruction(), (const mfast::group_field_instruction*) 0);
 
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(test_seq_codegen)
   const mfast::sequence_field_instruction* seq2_inst = dynamic_cast<const mfast::sequence_field_instruction*>(top_inst->subinstruction(2));
   BOOST_REQUIRE(seq2_inst);
   BOOST_CHECK(strcmp(seq2_inst->name(), "seq2")==0);
-  BOOST_CHECK_EQUAL(seq2_inst->subinstructions_count(), 4U);
+  BOOST_CHECK_EQUAL(seq2_inst->subinstructions().size(), 4U);
   BOOST_CHECK_EQUAL(seq2_inst->ref_instruction(), SeqTemplate2::instruction());
   BOOST_CHECK_EQUAL(seq2_inst->element_instruction(), BankAccount::instruction());
 }

@@ -57,7 +57,7 @@ namespace mfast {
 
     size_t num_fields() const
     {
-      return instruction()->subinstructions_count();
+      return instruction()->subinstructions().size();
     }
 
     operator aggregate_cref() const;

@@ -45,7 +45,7 @@ namespace mfast {
 
     bool element_unnamed() const
     {
-      return this->instruction()->subinstructions_count() == 1 && this->instruction()->subinstruction(0)->name()[0] == 0;
+      return this->instruction()->subinstructions().size() == 1 && this->instruction()->subinstruction(0)->name()[0] == 0;
     }
 
   };
@@ -335,7 +335,7 @@ namespace mfast {
 
     size_t num_fields() const
     {
-      return instruction()->subinstructions_count();
+      return instruction()->subinstructions().size();
     }
 
     instruction_cptr instruction() const
@@ -374,7 +374,7 @@ namespace mfast {
 
     bool element_unnamed() const
     {
-      return this->instruction()->subinstructions_count() == 1 && this->instruction()->subinstruction(0)->name()[0] == 0;
+      return this->instruction()->subinstructions().size() == 1 && this->instruction()->subinstruction(0)->name()[0] == 0;
     }
 
   protected:

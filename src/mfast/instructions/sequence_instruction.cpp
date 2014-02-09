@@ -20,20 +20,20 @@
 
 namespace mfast
 {
+
   sequence_field_instruction::sequence_field_instruction(uint16_t                        field_index,
                                                          presence_enum_t                 optional,
                                                          uint32_t                        id,
                                                          const char*                     name,
                                                          const char*                     ns,
                                                          const char*                     dictionary,
-                                                         const const_instruction_ptr_t*  subinstructions,
-                                                         uint32_t                        subinstructions_count,
+                                                         instructions_view_t             subinstructions,
+                                                         const group_field_instruction*  element_instruction,
+                                                         const group_field_instruction*  ref_inst,
                                                          const uint32_field_instruction* sequence_length_instruction,
                                                          const char*                     typeref_name,
                                                          const char*                     typeref_ns,
                                                          const char*                     cpp_ns,
-                                                         const group_field_instruction*  element_instruction,
-                                                         const group_field_instruction*  ref_inst,
                                                          instruction_tag                 tag)
     : group_field_instruction(field_index,
                               optional,
@@ -42,7 +42,6 @@ namespace mfast
                               ns,
                               dictionary,
                               subinstructions,
-                              subinstructions_count,
                               typeref_name,
                               typeref_ns,
                               cpp_ns,
@@ -85,8 +84,7 @@ namespace mfast
     const group_field_instruction* subinst_source = element_instruction_ ? element_instruction_ : ref_inst;
 
     if (subinst_source) {
-      this->set_subinstructions(subinst_source->subinstructions(),
-                                subinst_source->subinstructions_count());
+      this->set_subinstructions(subinst_source->subinstructions());
     }
   }
 
@@ -97,7 +95,7 @@ namespace mfast
   {
     value_storage* elements = static_cast<value_storage*>(storage.of_array.content_);
     for (std::size_t i = start; i < start+length; ++i ) {
-      construct_group_subfields(&elements[i*subinstructions_count_], alloc);
+      construct_group_subfields(&elements[i*subinstructions_.size()], alloc);
     }
   }
 
@@ -108,7 +106,7 @@ namespace mfast
   {
     value_storage* elements = static_cast<value_storage*>(storage.of_array.content_);
     for (std::size_t i = start; i < start+length; ++i ) {
-      destruct_group_subfields(&elements[i*subinstructions_count_], alloc);
+      destruct_group_subfields(&elements[i*subinstructions_.size()], alloc);
     }
   }
 
@@ -171,7 +169,7 @@ namespace mfast
       value_storage* dest_elements = static_cast<value_storage*>(dest.of_array.content_);
 
       for (std::size_t i = 0; i < size; ++i ) {
-        std::size_t j = i* this->subinstructions_count_;
+        std::size_t j = i* this->subinstructions_.size();
         copy_group_subfields(&src_elements[j], &dest_elements[j], alloc);
       }
       // we must default construct the extra elements we reserved; otherwise we may deallocate garbage pointers during destruction.

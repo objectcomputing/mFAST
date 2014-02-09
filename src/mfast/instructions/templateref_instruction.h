@@ -63,7 +63,7 @@ namespace mfast
 
     virtual templateref_instruction* clone(arena_allocator& alloc) const;
 
-    static const const_instruction_ptr_t* default_instruction();
+    static instructions_view_t default_instruction();
   };
 
 } /* mfast */

@@ -27,25 +27,23 @@ namespace mfast
     : public group_field_instruction
   {
   public:
-    template_instruction(uint32_t                       id,
-                         const char*                    name,
-                         const char*                    ns,
-                         const char*                    template_ns,
-                         const char*                    dictionary,
-                         const const_instruction_ptr_t* subinstructions,
-                         uint32_t                       subinstructions_count,
-                         bool                           reset,
-                         const char*                    typeref_name,
-                         const char*                    typeref_ns,
-                         const char*                    cpp_ns,
-                         instruction_tag                tag = instruction_tag())
+    template_instruction(uint32_t            id,
+                         const char*         name,
+                         const char*         ns,
+                         const char*         template_ns,
+                         const char*         dictionary,
+                         instructions_view_t subinstructions,
+                         bool                reset,
+                         const char*         typeref_name,
+                         const char*         typeref_ns,
+                         const char*         cpp_ns,
+                         instruction_tag     tag = instruction_tag())
       : group_field_instruction(0, presence_mandatory,
                                 id,
                                 name,
                                 ns,
                                 dictionary,
                                 subinstructions,
-                                subinstructions_count,
                                 typeref_name,
                                 typeref_ns,
                                 cpp_ns,
@@ -94,20 +92,19 @@ namespace mfast
   {
   public:
     typedef T cref_type;
-    template_instruction_ex(uint32_t                       id,
-                            const char*                    name,
-                            const char*                    ns,
-                            const char*                    template_ns,
-                            const char*                    dictionary,
-                            const const_instruction_ptr_t* subinstructions,
-                            uint32_t                       subinstructions_count,
-                            bool                           reset,
-                            const char*                    typeref_name,
-                            const char*                    typeref_ns,
-                            const char*                    cpp_ns,
-                            instruction_tag                tag = instruction_tag())
+    template_instruction_ex(uint32_t            id,
+                            const char*         name,
+                            const char*         ns,
+                            const char*         template_ns,
+                            const char*         dictionary,
+                            instructions_view_t subinstructions,
+                            bool                reset,
+                            const char*         typeref_name,
+                            const char*         typeref_ns,
+                            const char*         cpp_ns,
+                            instruction_tag     tag = instruction_tag())
       : template_instruction(id, name, ns, template_ns, dictionary,
-                             subinstructions, subinstructions_count, reset, typeref_name, typeref_ns,cpp_ns, tag)
+                             subinstructions, reset, typeref_name, typeref_ns,cpp_ns, tag)
     {
     }
 

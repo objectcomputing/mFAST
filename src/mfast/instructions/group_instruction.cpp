@@ -23,22 +23,23 @@ namespace mfast
   void group_field_instruction::construct_group_subfields(value_storage* subfields,
                                                           allocator*     alloc) const
   {
-    for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
+    for (uint32_t i = 0; i < this->subinstructions_.size(); ++i) {
       this->subinstructions_[i]->construct_value(subfields[i], alloc);
     }
+
   }
 
   void group_field_instruction::destruct_group_subfields(value_storage* subfields,
                                                          allocator*     alloc) const
   {
-    for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
+    for (uint32_t i = 0; i < this->subinstructions_.size(); ++i) {
       this->subinstructions_[i]->destruct_value(subfields[i], alloc);
     }
   }
 
   int group_field_instruction::find_subinstruction_index_by_id(uint32_t id) const
   {
-    for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
+    for (uint32_t i = 0; i < this->subinstructions_.size(); ++i) {
       if (this->subinstructions_[i]->id() == id)
         return i;
     }
@@ -47,7 +48,7 @@ namespace mfast
 
   int group_field_instruction::find_subinstruction_index_by_name(const char* name) const
   {
-    for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
+    for (uint32_t i = 0; i < this->subinstructions_.size(); ++i) {
       if (std::strcmp(this->subinstructions_[i]->name(), name) ==0)
         return i;
     }
@@ -59,7 +60,7 @@ namespace mfast
                                                      value_storage*       dest_subfields,
                                                      allocator*           alloc) const
   {
-    for (uint32_t i = 0; i < this->subinstructions_count_; ++i) {
+    for (uint32_t i = 0; i < this->subinstructions_.size(); ++i) {
       this->subinstructions_[i]->copy_construct_value(src_subfields[i], dest_subfields[i], alloc);
     }
 
