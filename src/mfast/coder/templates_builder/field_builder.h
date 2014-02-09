@@ -123,7 +123,7 @@ namespace mfast
 
       virtual void visit(const enum_field_instruction*, void*);
 
-      const_instruction_ptr_t* build_subfields();
+      instructions_view_t build_subfields();
       const group_field_instruction* get_sole_templateref();
       const uint32_field_instruction* get_length_instruction(const sequence_field_instruction* inst);
 

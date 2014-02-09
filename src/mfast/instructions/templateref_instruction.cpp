@@ -85,7 +85,7 @@ namespace mfast
     return 0;
   }
 
-  const const_instruction_ptr_t*
+  instructions_view_t
   templateref_instruction::default_instruction()
   {
     static const templateref_instruction the_instruction(0);

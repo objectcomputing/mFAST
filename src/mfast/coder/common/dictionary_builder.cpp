@@ -139,7 +139,7 @@ namespace mfast {
       current_type_ = qualified_name(type_ns, src->typeref_name());
     }
 
-    std::size_t instructions_count =  src->subinstructions_count();
+    std::size_t instructions_count =  src->subinstructions().size();
     const_instruction_ptr_t* subinstructions =
       static_cast<const_instruction_ptr_t*>( alloc_->allocate( instructions_count *
                                                                sizeof(field_instruction*) ) );
@@ -147,7 +147,8 @@ namespace mfast {
       src->subinstruction(i)->accept(*this, &subinstructions[i]);
     }
 
-    dest->set_subinstructions(subinstructions, instructions_count);
+    dest->set_subinstructions(instructions_view_t(subinstructions,
+                                                  instructions_count));
 
     current_type_ = inherited_type;
     current_ns_ = inherited_ns;

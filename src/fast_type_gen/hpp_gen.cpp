@@ -198,7 +198,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     }
 
     content_<< name << "\n"
-            << "  : private boost::array<mfast::value_storage, " << inst->subinstructions_count() << ">\n"
+            << "  : private boost::array<mfast::value_storage, " << inst->subinstructions().size() << ">\n"
             << "  , public mfast::group_type\n"
             << "{\n"
             << "  typedef mfast::group_type base_type;\n"
@@ -343,7 +343,7 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
 
 void hpp_gen::visit(const mfast::template_instruction* inst, void*)
 {
-  if (inst->subinstructions_count() == 0)
+  if (inst->subinstructions().size() == 0)
     return;
 
   std::string name ( cpp_name(inst) );
@@ -400,7 +400,7 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
   }
 
   content_<< name << "\n"
-          << "  : private boost::array<mfast::value_storage, " << inst->subinstructions_count() << ">\n"
+          << "  : private boost::array<mfast::value_storage, " << inst->subinstructions().size() << ">\n"
           << "  , public mfast::message_type\n"
           << "{\n"
           << "  typedef mfast::message_type base_type;\n"

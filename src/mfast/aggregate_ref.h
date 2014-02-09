@@ -267,7 +267,7 @@ namespace mfast
   inline size_t
   aggregate_cref::num_fields() const
   {
-    return instruction()->subinstructions_count();
+    return instruction()->subinstructions().size();
   }
 
   inline field_cref
@@ -312,14 +312,14 @@ namespace mfast
   aggregate_cref::begin() const
   {
     return aggregate_cref::iterator(this->storage_array_,
-                                    this->instruction()->subinstructions());
+                                    this->instruction()->subinstructions().begin());
   }
 
   inline aggregate_cref::iterator
   aggregate_cref::end() const
   {
     return aggregate_cref::iterator(this->storage_array_ + this->num_fields(),
-                                    this->instruction()->subinstructions()+ this->num_fields());
+                                    this->instruction()->subinstructions().end());
   }
 
 
@@ -477,7 +477,7 @@ namespace mfast
   {
     return iterator(this->alloc_,
                     this->field_storage(0),
-                    this->instruction()->subinstructions());
+                    this->instruction()->subinstructions().begin());
   }
 
   template <typename ConstRef>
@@ -486,7 +486,7 @@ namespace mfast
   {
     return iterator(this->alloc_,
                     this->field_storage(this->num_fields()),
-                    this->instruction()->subinstructions()+this->num_fields());
+                    this->instruction()->subinstructions().end());
   }
 
 ////////////////////////////////////////////////

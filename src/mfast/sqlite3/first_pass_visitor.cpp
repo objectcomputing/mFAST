@@ -45,7 +45,7 @@ namespace mfast
 
       void traverse_aggregate(const group_field_instruction* inst)
       {
-        for (unsigned i = 0; i < inst->subinstructions_count(); ++i)
+        for (unsigned i = 0; i < inst->subinstructions().size(); ++i)
         {
           const field_instruction* subinst = inst->subinstruction(i);
           if (!core_.to_skip(subinst)) {

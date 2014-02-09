@@ -59,7 +59,7 @@ void codegen_base::traverse(const mfast::group_field_instruction* inst, const ch
   std::string saved_cref_scope = cref_scope_.str();
   cref_scope_ << cpp_name(inst) << name_suffix << "_cref::";
 
-  for (std::size_t i = 0; i < inst->subinstructions_count(); ++i)
+  for (std::size_t i = 0; i < inst->subinstructions().size(); ++i)
   {
     const mfast::field_instruction* subinst = inst->subinstruction(i);
     // we use the second parameter to identify wether the instruction is nested. If the
@@ -249,7 +249,7 @@ codegen_base::cpp_type_of(const mfast::field_instruction* inst,
 
 bool codegen_base::contains_only_templateref(const mfast::group_field_instruction* inst) const
 {
-  return inst->subinstructions_count() == 1 && inst->subinstruction(0)->field_type() == mfast::field_type_templateref;
+  return inst->subinstructions().size() == 1 && inst->subinstruction(0)->field_type() == mfast::field_type_templateref;
 }
 
 const mfast::field_instruction*
@@ -257,7 +257,7 @@ codegen_base::get_element_instruction(const mfast::sequence_field_instruction* i
 {
   if (inst->element_instruction())
     return inst->element_instruction();
-  if (inst->subinstructions_count() == 1 && inst->subinstruction(0)->name()[0] == 0 )
+  if (inst->subinstructions().size() == 1 && inst->subinstruction(0)->name()[0] == 0 )
     return inst->subinstruction(0);
   return 0;
 }

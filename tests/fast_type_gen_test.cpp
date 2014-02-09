@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   test1::SampleInfo info(&alloc);
   BOOST_CHECK_EQUAL((int)test1::SampleInfo::the_id,                             1);
   BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->id(),                    1U);
-  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->subinstructions_count(), 4U);
+  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->subinstructions().size(), 4U);
   test1::SampleInfo_cref info_cref = info.cref();
 
   BOOST_CHECK(equal_string(info_cref.get_BeginString(), "FIX4.4"));
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   test2::MDRefreshSample sample(&alloc);
   BOOST_CHECK_EQUAL((int)test2::MDRefreshSample::the_id,                                  2);
   BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->id(),                    2U);
-  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->subinstructions_count(), 3U);
+  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->subinstructions().size(), 3U);
 
   test2::MDRefreshSample_cref sample_cref = sample.cref();
   test1::SampleInfo_cref si = sample_cref.get_info();
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
 
   BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->field_index(),           1);
   BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->field_type(),        mfast::field_type_sequence);
-  // BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->subinstructions_count(), 11U);
+  // BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->subinstructions().size(), 11U);
 
   const mfast::uint32_field_instruction* len_inst = sample.cref().get_MDEntries().instruction()->length_instruction();
 
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   MDEntries_element_cref elem3 = sample.cref().get_MDEntries()[3];
   BOOST_CHECK_EQUAL(elem3.get_MDEntryType().size(),           0U);
 
-  BOOST_CHECK_EQUAL(sample_cref.instruction()->subinstructions_count(), 3U);
+  BOOST_CHECK_EQUAL(sample_cref.instruction()->subinstructions().size(), 3U);
   BOOST_CHECK_EQUAL(sample_cref.instruction()->subinstruction(2)->field_type(), mfast::field_type_sequence);
 
 
