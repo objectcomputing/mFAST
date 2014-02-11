@@ -578,6 +578,12 @@ void cpp_gen::generate(mfast::dynamic_templates_description& desc)
 
   this->traverse(desc);
 
+
+  BOOST_FOREACH(const mfast::aggregate_view_info& info, desc.view_infos())
+  {
+    this->generate(info);
+  }
+
   std::string instructions = template_instructions_.str();
   if (instructions.size())
     instructions.resize(instructions.size() - 2);
@@ -685,4 +691,55 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     out_ << "  return &the_instruction;\n"
          << "}\n\n";
   }
+}
+
+void cpp_gen::generate(const mfast::aggregate_view_info& info)
+{
+  std::string my_name = cpp_name(info.name_);
+
+  std::vector<int> indeces_sizes;
+  indeces_sizes.reserve(info.data_.size());
+
+  out_ << "namespace {\n\n"
+       << "  const static int64_t __"<< my_name << "__indeces__[]={\n";
+
+  int k = 0;
+  for(std::size_t i = 0; i < info.data_.size()-1; ++i)
+  {
+    const mfast::field_view_info& finfo = info.data_[i];
+    out_ << "    ";
+    indeces_sizes.push_back(k);
+    for (std::size_t j=0; finfo.nest_indices[j] != -1; ++j, ++k) {
+      out_ << finfo.nest_indices[j] << ",";
+    };
+    out_ << "-1";
+    if (i != info.data_.size()-2)
+      out_ << ",";
+    out_ << "\n";
+    ++k;
+  }
+  out_ << "  };\n"
+       << "  const static mfast::field_view_info __" << my_name << "_data__[] = {\n";
+
+  for (std::size_t i = 0; i < info.data_.size()-1; ++i)
+  {
+    out_ << "    {" << info.data_[i].prop << "ULL, __"<< my_name << "__indeces__ + " <<  indeces_sizes[i] << "},\n";
+  }
+  out_ << "    {0, 0}\n"
+       << "  };\n\n"
+       << "}//namespace\n\n";
+
+  std::string ns_prefix;
+  if (this->cpp_ns_ != info.instruction_->cpp_ns())
+  {
+    ns_prefix = info.instruction_->cpp_ns();
+    ns_prefix += "::";
+  }
+
+  out_ << "const mfast::aggregate_view_info " <<  my_name << "::info_(\n"
+       << "  \"" << info.name_ <<"\",\n"
+       << "  " << ns_prefix << cpp_name(info.instruction_->name()) << "::instruction(),\n"
+       << "  mfast::array_view<const  mfast::field_view_info>(__" << my_name << "_data__," << info.data_.size() << "),\n"
+       << "  " << info.max_depth_  << "\n"
+       << ");\n\n";
 }

@@ -25,6 +25,8 @@ indent_t indent;
 void hpp_gen::set_export_symbol(const char* symbol)
 {
   export_symbol_ = symbol;
+  export_symbol_uppercase_ = boost::to_upper_copy(export_symbol_) ;
+  export_symbol_uppercase_ += " ";
 }
 
 void hpp_gen::traverse(const mfast::group_field_instruction* inst, const char* name_suffix)
@@ -193,11 +195,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 
     content_<< "class ";
 
-    if (export_symbol_.size()) {
-      content_ << boost::to_upper_copy(export_symbol_) << " ";
-    }
-
-    content_<< name << "\n"
+    content_<< export_symbol_uppercase_ << name << "\n"
             << "  : private boost::array<mfast::value_storage, " << inst->subinstructions().size() << ">\n"
             << "  , public mfast::group_type\n"
             << "{\n"
@@ -312,11 +310,7 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
     header_mref_.str("");
     content_<< "class ";
 
-    if (export_symbol_.size()) {
-      content_ << boost::to_upper_copy(export_symbol_) << " ";
-    }
-
-    content_<< name << "\n"
+    content_<< export_symbol_uppercase_ << name << "\n"
             << "  : public mfast::sequence_type\n"
             << "{\n"
             << "  typedef mfast::sequence_type base_type;\n"
@@ -395,11 +389,7 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
 
   content_<< "class ";
 
-  if (export_symbol_.size()) {
-    content_ << boost::to_upper_copy(export_symbol_) << " ";
-  }
-
-  content_<< name << "\n"
+  content_<< export_symbol_uppercase_ << name << "\n"
           << "  : private boost::array<mfast::value_storage, " << inst->subinstructions().size() << ">\n"
           << "  , public mfast::message_type\n"
           << "{\n"
@@ -459,11 +449,12 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
        << content_.str()
        << "\n";
 
-  if (export_symbol_.size()) {
-    out_ << boost::to_upper_copy(export_symbol_) << " ";
+  BOOST_FOREACH(const mfast::aggregate_view_info& info, desc.view_infos())
+  {
+    this->generate(info);
   }
 
-  out_ << "mfast::templates_description* description();\n\n"
+  out_ << export_symbol_uppercase_ << "mfast::templates_description* description();\n\n"
        << "#include \"" << filebase_ << ".inl\"\n"
        << "}\n\n"
        << "#endif //__" << filebase_upper << "_H__\n";
@@ -482,11 +473,7 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     // this is the enum definition
     header_cref_ << indent << "struct ";
 
-    if (export_symbol_.size()) {
-      out_ << boost::to_upper_copy(export_symbol_) << " ";
-    }
-
-    header_cref_ << name << "\n"
+    header_cref_ << export_symbol_uppercase_ << name << "\n"
                  << indent << "{\n"
                  << indent << "  enum element {";
 
@@ -566,4 +553,31 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     header_mref_.clear();
     header_mref_.str("");
   }
+}
+
+void hpp_gen::generate(const mfast::aggregate_view_info& info)
+{
+  std::string ns_prefix;
+  std::string my_name = cpp_name(info.name_);
+
+  if (this->cpp_ns_ != info.instruction_->cpp_ns())
+  {
+    ns_prefix = info.instruction_->cpp_ns();
+    ns_prefix += "::";
+  }
+
+  out_ << "  class " << export_symbol_uppercase_ << my_name<< "\n"
+       << "  {\n"
+       << "  public:\n"
+       << "    typedef mfast::view_iterator iterator;\n"
+       << "    typedef mfast::view_iterator const_iterator;\n"
+       << "    " << my_name << "(const " << ns_prefix <<  cpp_name(info.instruction_->name()) << "_cref& ref);\n\n"
+       << "    iterator begin() const;\n"
+       << "    iterator end() const;\n"
+       << "    template <typename FieldAccessor>\n"
+       << "    void accept_accessor(FieldAccessor& accessor);\n\n"
+       << "  private:\n"
+       << "    "  << ns_prefix <<  cpp_name(info.instruction_->name()) << "_cref ref_;\n"
+       << "    static const mfast::aggregate_view_info info_;\n"
+       << "  };\n\n";
 }

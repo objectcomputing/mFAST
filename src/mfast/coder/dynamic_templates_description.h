@@ -22,42 +22,54 @@
 #include "mfast_coder_export.h"
 #include "mfast/field_instructions.h"
 #include "mfast/arena_allocator.h"
+#include "mfast/view_iterator.h"
 #include <deque>
 namespace mfast
 {
-namespace coder {
-struct template_registry_impl;
-class templates_builder;
-}
-struct template_registry_impl;
-class MFAST_CODER_EXPORT template_registry
-{
-private:
-  coder::template_registry_impl* impl_;
-  friend class coder::templates_builder;
-public:
-  template_registry();
-  ~template_registry();
+  namespace coder {
+    struct template_registry_impl;
+    class templates_builder;
+  }
 
-  arena_allocator* alloc();
+  struct template_registry_impl;
+  class MFAST_CODER_EXPORT template_registry
+  {
+  private:
+    coder::template_registry_impl* impl_;
+    friend class coder::templates_builder;
 
-  static template_registry* instance();
-};
+  public:
+    template_registry();
+    ~template_registry();
+
+    arena_allocator* alloc();
+
+    static template_registry* instance();
+  };
 
 
-class MFAST_CODER_EXPORT dynamic_templates_description
-  : public templates_description
-{
-public:
-  dynamic_templates_description(const char*        xml_content,
-                                const char*        cpp_ns="",
-                                template_registry* registry = template_registry::instance());
 
-  const std::deque<const field_instruction*>& defined_type_instructions() const;
-private:
-  friend class coder::templates_builder;
-  std::deque<const field_instruction*> defined_type_instructions_;
-};
+
+
+  class MFAST_CODER_EXPORT dynamic_templates_description
+    : public templates_description
+  {
+  public:
+    dynamic_templates_description(const char*        xml_content,
+                                  const char*        cpp_ns="",
+                                  template_registry* registry = template_registry::instance());
+
+    const std::deque<const field_instruction*>& defined_type_instructions() const;
+    const std::deque<aggregate_view_info>& view_infos() const
+    {
+      return view_infos_;
+    }
+
+  private:
+    friend class coder::templates_builder;
+    std::deque<const field_instruction*> defined_type_instructions_;
+    std::deque<aggregate_view_info> view_infos_;
+  };
 
 }
 

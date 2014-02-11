@@ -403,6 +403,10 @@ void inl_gen::visit(const mfast::templateref_instruction* inst, void*)
 void inl_gen::generate(mfast::dynamic_templates_description& desc)
 {
   codegen_base::traverse(desc);
+  BOOST_FOREACH(const mfast::aggregate_view_info& info, desc.view_infos())
+  {
+    this->generate(info);
+  }
 }
 
 void inl_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
@@ -496,4 +500,38 @@ void inl_gen::gen_accessors(const mfast::field_instruction* inst,
          << "  (*this)[" << index << "].omit();\n"
          << "}\n\n";
   }
+}
+
+void inl_gen::generate(const mfast::aggregate_view_info& info)
+{
+  std::string ns_prefix;
+  std::string my_name = cpp_name(info.name_);
+
+  if (this->cpp_ns_ != info.instruction_->cpp_ns())
+  {
+    ns_prefix = info.instruction_->cpp_ns();
+    ns_prefix += "::";
+  }
+
+  out_ << "inline " << my_name << "::"<< my_name << "(const " << ns_prefix <<  cpp_name(info.instruction_->name()) << "_cref& ref)\n"
+       << "  : ref_(ref)\n"
+       << "{\n"
+       << "}\n\n"
+       << "inline mfast::view_iterator " << my_name << "::begin() const\n"
+       << "{\n"
+       << "  return mfast::view_iterator(ref_, info_.data_.begin(), info_.max_depth_);\n"
+       << "}\n\n"
+       << "inline mfast::view_iterator  " << my_name << "::end() const\n"
+       << "{\n"
+       << "  return mfast::view_iterator(info_.data_.end()-1);\n"
+       << "}\n\n"
+       << "template <typename FieldAccessor>\n"
+       << "inline void  " << my_name << "::accept_accessor(FieldAccessor& accessor)\n"
+       << "{\n"
+       << "  BOOST_FOREACH(mfast::field_cref f, *this)\n"
+       << "  {\n"
+       << "    if (FieldAccessor::visit_absent || f.present())"
+       << "      f.accept_accessor(accessor);\n"
+       << "  }\n"
+       << "}\n";
 }
