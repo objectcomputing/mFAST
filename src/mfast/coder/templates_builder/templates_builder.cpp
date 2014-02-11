@@ -16,16 +16,11 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <string>
-#include <map>
-#include <set>
-#include "mfast/field_instructions.h"
-#include "../../../../tinyxml2/tinyxml2.h"
-#include "../common/exceptions.h"
-#include "field_builder.h"
-#include "../dynamic_templates_description.h"
-#include <boost/utility.hpp>
+
+#include "templates_builder.h"
 #include "mfast/boolean_ref.h"
+#include "view_info_builder.h"
+#include "../common/exceptions.h"
 
 using namespace tinyxml2;
 
@@ -35,38 +30,6 @@ namespace mfast
 {
   namespace coder
   {
-
-
-    class templates_builder
-      : public XMLVisitor
-      , public boost::base_from_member<type_map_t>
-      , public field_builder_base
-    {
-    public:
-      templates_builder(dynamic_templates_description* definition,
-                        const char*                    cpp_ns,
-                        template_registry*             registry);
-
-      virtual bool  VisitEnter (const XMLElement & element, const XMLAttribute* attr);
-      virtual bool  VisitExit (const XMLElement & element);
-
-
-      virtual std::size_t num_instructions() const;
-      virtual void add_instruction(const field_instruction*);
-      void add_template(const char* ns, template_instruction* inst);
-
-      virtual const char* name() const
-      {
-        return cpp_ns_;
-      }
-
-    protected:
-      dynamic_templates_description* definition_;
-      const char* cpp_ns_;
-      std::deque<const template_instruction*> templates_;
-      const template_instruction template_instruction_prototype_;
-    };
-
 
     templates_builder::templates_builder(dynamic_templates_description* definition,
                                          const char*                    cpp_ns,
@@ -148,6 +111,16 @@ namespace mfast
       else if (strcmp(element_name, "template") == 0) {
         field_builder builder(this, element);
         builder.build();
+      }
+      else if (strcmp(element_name, "view") == 0) {
+        view_info_builder builder(alloc());
+        const group_field_instruction* inst = dynamic_cast<const group_field_instruction*>(this->find_type(
+                                                                                             get_optional_attr(element,"ns",resolved_ns_),
+                                                                                             get_optional_attr(element,"reference", "")));
+
+        if (inst == 0)
+          BOOST_THROW_EXCEPTION(fast_static_error("Invalid view specification"));
+        definition_->view_infos_.push_back( builder.build(element, inst) );
       }
       return false;
     }

@@ -20,7 +20,7 @@
 #define AGGREGATE_REF_H_J48H7C2R
 
 #include "mfast/field_instructions.h"
-#include "mfast/field_ref.h"
+#include "mfast/field_mref.h"
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/range.hpp>
 
@@ -48,8 +48,8 @@ namespace mfast
     typedef const group_field_instruction* instruction_cptr;
     typedef boost::false_type is_mutable;
 
-    aggregate_cref(const value_storage*           storage_array,
-                   const group_field_instruction* instruction);
+    aggregate_cref(const value_storage*           storage_array=0,
+                   const group_field_instruction* instruction=0);
 
     aggregate_cref(const aggregate_cref& other);
 

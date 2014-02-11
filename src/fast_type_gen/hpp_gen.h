@@ -57,23 +57,7 @@ public:
 private:
   void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix);
-
-#if 0
-  std::string  referenced_type_name(const Instruction* inst)
-  {
-    if (inst->field_type() == mfast::field_type_templateref) {
-      return "mfast::nested_message";
-    }
-    else {
-      const char* cpp_ns = inst->ref_instruction()->cpp_ns();
-
-      if (cpp_ns && cpp_ns[0] != 0 &&  filebase_ != cpp_ns && std::strcmp(cpp_ns, "mfast") != 0) {
-        dependency_.insert(cpp_ns);
-      }
-      return ref_instruction_name(inst);
-    }
-  }
-#endif
+  virtual void generate(const mfast::aggregate_view_info& info);
 
   typedef indented_stringstream ind_stream;
   std::set<std::string> dependency_;
@@ -81,6 +65,8 @@ private:
   ind_stream header_mref_;
   std::stringstream content_;
   std::string export_symbol_;
+  std::string export_symbol_uppercase_;
+
 };
 
 #endif /* end of include guard: HPP_GEN_H_EWCP8CL9 */

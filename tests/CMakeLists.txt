@@ -8,7 +8,7 @@
 
 
 
-FASTTYPEGEN_TARGET(test_types test1.xml test2.xml test3.xml test4.xml)
+FASTTYPEGEN_TARGET(test_types test1.xml test2.xml test3.xml test4.xml test5.xml)
 
 
 add_executable (mfast_test
@@ -27,7 +27,8 @@ add_executable (mfast_test
                 dictionary_builder_test.cpp
                 json_test.cpp
                 int_vector_test.cpp
-                composite_type_test.cpp)
+                composite_type_test.cpp
+			    aggregate_view_test.cpp)
 
 target_link_libraries (mfast_test
                        mfast_static

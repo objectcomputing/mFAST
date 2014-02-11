@@ -52,6 +52,7 @@ public:
 
 private:
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix);
+  virtual void generate(const mfast::aggregate_view_info& info);
 
   void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);
 

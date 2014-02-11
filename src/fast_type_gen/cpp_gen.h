@@ -52,6 +52,8 @@ public:
   virtual void visit(const mfast::enum_field_instruction*, void*);
 
 private:
+  virtual void generate(const mfast::aggregate_view_info& info);
+
   std::string prefix_string() const;
   std::string cref_scope() const;
   void add_to_instruction_list(const std::string& name);

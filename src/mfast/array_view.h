@@ -1,0 +1,106 @@
+#ifndef ARRAY_REF_H_STPDWY3M
+#define ARRAY_REF_H_STPDWY3M
+
+namespace mfast
+{
+
+
+  template <typename T>
+  class array_view
+  {
+  public:
+    array_view(T* data=0, std::size_t sz=0)
+      : data_(data)
+      , sz_(sz)
+    {
+    }
+
+    template <int N>
+    array_view( T (&array)[N])
+      : data_(array)
+      , sz_(N)
+    {
+    }
+
+    typedef T* iterator;
+    typedef const T* const_iterator;
+    typedef T value;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef std::size_t size_type;
+    typedef std::ptrdiff_t difference_type;
+
+    iterator begin()
+    {
+      return data_;
+    }
+
+    iterator end()
+    {
+      return data_+sz_;
+    }
+
+    const_iterator begin() const
+    {
+      return data_;
+    }
+
+    const_iterator end() const
+    {
+      return data_+sz_;
+    }
+
+    std::size_t size() const
+    {
+      return sz_;
+    }
+
+  // element access]
+    reference operator[](size_type i)
+    {
+      return data_[i];
+    }
+
+    const_reference operator[](size_type i) const
+    {
+      return data_[i];
+    }
+
+    reference front()
+    {
+      return data_[0];
+    }
+
+    const_reference front() const
+    {
+      return data_[0];
+    }
+
+    reference back()
+    {
+      return data_[sz_-1];
+    }
+
+    const_reference back() const
+    {
+      return data_[sz_-1];
+    }
+
+    T* data()
+    {
+      return data_;
+    }
+
+    const T* data() const
+    {
+      return data_;
+    }
+
+  private:
+    T* data_;
+    std::size_t sz_;
+  };
+
+} /* mfast */
+
+#endif /* end of include guard: ARRAY_REF_H_STPDWY3M */

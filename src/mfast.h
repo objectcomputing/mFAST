@@ -33,4 +33,5 @@
 #include <mfast/sequence_type.h>
 #include <mfast/enum_ref.h>
 #include <mfast/boolean_ref.h>
+#include <mfast/view_iterator.h>
 #endif /* end of include guard: MFAST_H_4EMINVTV */
