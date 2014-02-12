@@ -66,7 +66,7 @@ namespace mfast
       : view_info_(view_info)
     {
       non_leaves_.reserve(max_depth);
-      non_leaves_.push_back(ref);
+      non_leaves_.push_back(ref.begin());
       access_field();
     }
 
@@ -91,7 +91,7 @@ namespace mfast
     }
 
     const field_view_info* view_info_;
-    typedef std::vector<aggregate_cref> non_leave_stack_t;
+    typedef std::vector<aggregate_cref::iterator> non_leave_stack_t;
     non_leave_stack_t non_leaves_;
     field_cref leaf_;
 
