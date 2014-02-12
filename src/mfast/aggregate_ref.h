@@ -98,9 +98,13 @@ namespace mfast
                                        , field_cref>
     {
     public:
-      iterator(const value_storage*           storage_array,
-               const const_instruction_ptr_t* instruction_array);
+      iterator(const value_storage*           storage_array=0,
+               const const_instruction_ptr_t* instruction_array=0);
 
+      bool null() const
+      {
+        return storage_array_ == 0;
+      }
     private:
       friend class boost::iterator_core_access;
 

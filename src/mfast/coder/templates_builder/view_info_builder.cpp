@@ -56,13 +56,13 @@ namespace mfast
       current_indeces_.push_back(inst->field_index());
       infos_[current_context_] = current_indeces_;
 
-      std::cout << "inserting " << current_context_ << "\n";
+      // std::cout << "inserting " << current_context_ << "\n";
 
       current_context_ += "[]";
       current_indeces_.push_back(-2); // place holder for sequence element index
       infos_[current_context_] = current_indeces_;
 
-      std::cout << "inserting " << current_context_ << "\n";
+      // std::cout << "inserting " << current_context_ << "\n";
 
 
       BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
@@ -204,7 +204,7 @@ namespace mfast
         }
         while (new_pos != std::string::npos);
         // find the field index
-        std::cout << "finding " << ref_name_no_seq_index << "\n";
+        // std::cout << "finding " << ref_name_no_seq_index << "\n";
         field_infos_t::iterator it = infos_.find(ref_name_no_seq_index);
         if (it == infos_.end()) {
           BOOST_THROW_EXCEPTION(fast_static_error("Invalid reference specification, no such reference name exists") << reference_name_info(ref_name));
