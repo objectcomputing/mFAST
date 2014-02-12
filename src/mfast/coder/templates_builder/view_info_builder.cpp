@@ -51,13 +51,20 @@ namespace mfast
       std::size_t current_context_size = current_context_.size();
       if (current_context_size)
         current_context_ += ".";
+
       current_context_ += inst->name();
-      current_context_ += "[]";
-
       current_indeces_.push_back(inst->field_index());
-      current_indeces_.push_back(-2); // place holder for sequence element index
-
       infos_[current_context_] = current_indeces_;
+
+      std::cout << "inserting " << current_context_ << "\n";
+
+      current_context_ += "[]";
+      current_indeces_.push_back(-2); // place holder for sequence element index
+      infos_[current_context_] = current_indeces_;
+
+      std::cout << "inserting " << current_context_ << "\n";
+
+
       BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
       {
         subinst->accept(*this, 0);
@@ -177,12 +184,12 @@ namespace mfast
           // find the first occurence of '['
           new_pos = ref_name.find_first_of('[', pos );
           if (new_pos != std::string::npos) {
-            ref_name_no_seq_index += ref_name.substr(pos, ++new_pos);
+            ++new_pos;
+            ref_name_no_seq_index += ref_name.substr(pos, (new_pos-pos));
             pos = new_pos;
             new_pos = ref_name.find_first_of(']', pos );
             if (new_pos !=  std::string::npos) {
               try {
-                // std::cout << "converting " << ref_name.substr(pos, new_pos-pos) << " to integer\n";
                 sequence_indeces.push_back(boost::lexical_cast<unsigned>(ref_name.substr(pos, new_pos-pos)));
                 pos = new_pos;
               }
@@ -197,7 +204,7 @@ namespace mfast
         }
         while (new_pos != std::string::npos);
         // find the field index
-        // std::cout << "finding " << ref_name_no_seq_index << "\n";
+        std::cout << "finding " << ref_name_no_seq_index << "\n";
         field_infos_t::iterator it = infos_.find(ref_name_no_seq_index);
         if (it == infos_.end()) {
           BOOST_THROW_EXCEPTION(fast_static_error("Invalid reference specification, no such reference name exists") << reference_name_info(ref_name));
