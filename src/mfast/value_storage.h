@@ -50,7 +50,8 @@ namespace mfast
     struct {
       uint32_t present_;                ///< indicate if the value is present,
       uint32_t own_content_ : 1;        ///< indicate if \a content_ should be deallocated
-      uint32_t padding_ : 30;
+      uint32_t is_link_ : 1;           ///< indicate wheter this is a link so that we shouldn't destruct subfields.
+      uint32_t padding_ : 29;
       uint32_t defined_bit_ : 1;
       value_storage* content_;
     } of_group; ///< used for group or template

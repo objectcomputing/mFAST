@@ -101,10 +101,6 @@ namespace mfast
       iterator(const value_storage*           storage_array=0,
                const const_instruction_ptr_t* instruction_array=0);
 
-      bool null() const
-      {
-        return storage_array_ == 0;
-      }
     private:
       friend class boost::iterator_core_access;
 
@@ -217,6 +213,9 @@ namespace mfast
     template <class FieldMutator> friend class field_mutator_adaptor;
 
     value_storage* field_storage(size_t index) const;
+
+    void link_group_at(size_t index, const make_aggregate_mref<aggregate_cref>& ref) const;
+    void unlink_group_at(size_t index) const;
 
   private:
     template <typename U> friend class make_aggregate_mref;
@@ -491,6 +490,32 @@ namespace mfast
     return iterator(this->alloc_,
                     this->field_storage(this->num_fields()),
                     this->instruction()->subinstructions().end());
+  }
+
+
+  template <typename ConstRef>
+  void
+  make_aggregate_mref<ConstRef>::link_group_at(size_t index, const aggregate_mref& ref) const
+  {
+    value_storage* storage = this->field_storage(index);
+    if (ref.present()) {
+      const group_field_instruction* inst = static_cast<const group_field_instruction*>(this->instruction()->subinstruction(index));
+      inst->link_value(*storage, const_cast<value_storage*>(ref.storage_array_), this->alloc_);
+    }
+    else {
+      storage->of_group.present_ = false;
+    }
+  }
+
+  template <typename ConstRef>
+  inline void
+  make_aggregate_mref<ConstRef>::unlink_group_at(size_t index) const
+  {
+    value_storage* storage = this->field_storage(index);
+    if (storage->of_group.is_link_) {
+      const field_instruction* inst =  this->instruction()->subinstruction(index);
+      inst->construct_value(*storage, this->alloc_);
+    }
   }
 
 ////////////////////////////////////////////////

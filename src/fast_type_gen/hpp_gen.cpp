@@ -25,7 +25,7 @@ indent_t indent;
 void hpp_gen::set_export_symbol(const char* symbol)
 {
   export_symbol_ = symbol;
-  export_symbol_uppercase_ = boost::to_upper_copy(export_symbol_) ;
+  export_symbol_uppercase_ = boost::to_upper_copy(export_symbol_);
   export_symbol_uppercase_ += " ";
 }
 
@@ -138,6 +138,9 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
       if (inst->optional()) {
         header_mref_ << indent << "void omit_" << name << "() const;\n";
       }
+
+      header_mref_ << indent << "void link_" << name << "(const " << name << "_mref& ref) const;\n"
+                   << indent << "void unlink_" << name << "() const;\n";
     }
   }
   else

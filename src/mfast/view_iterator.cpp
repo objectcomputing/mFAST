@@ -8,7 +8,7 @@ namespace mfast
     if (view_info_->prefix_diff() < non_leaves_.size())
       non_leaves_.resize(view_info_->prefix_diff());
 
-    while (non_leaves_.back().null()) {
+    while (non_leaves_.back() == aggregate_cref::iterator()) {
       // if the field is nesting inside a sequence, a null
       // object could be inserted into the stack in order to
       // keep nesting level correct.
