@@ -97,17 +97,6 @@ namespace mfast
       return segment_pmap_size_;
     }
 
-    // void set_subinstructions(const const_instruction_ptr_t* subinstructions, uint32_t count)
-    //   {
-    //     subinstructions_ = subinstructions;
-    //     subinstructions_.size() = count;
-    //     segment_pmap_size_ = 0;
-    //     for (uint32_t i = 0; i < subinstructions_.size(); ++i) {
-    //       segment_pmap_size_ += subinstruction(i)->pmap_size();
-    //     }
-    //     has_pmap_bit_ = segment_pmap_size() > 0 ? 1 : 0;
-    //   }
-
     instructions_view_t  subinstructions() const
     {
       return subinstructions_;
@@ -176,6 +165,11 @@ namespace mfast
 
     virtual void accept(field_instruction_visitor&, void*) const;
     virtual group_field_instruction* clone(arena_allocator& alloc) const;
+
+
+    void link_value(value_storage& storage,
+                    value_storage* fields_storage,
+                    allocator*     alloc) const;
 
   protected:
 

@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   index = 0;
 
 
-  BOOST_FOREACH (const Address_mref& addr,  addresses.mref())
+  BOOST_FOREACH (const Address_mref &addr, addresses.mref())
   {
     addr.set_postalCode().as(index+10000);
     ++index;
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   index = 0;
 
-  BOOST_FOREACH(const Address_cref& addr,  addresses.cref())
+  BOOST_FOREACH(const Address_cref &addr, addresses.cref())
   {
     BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
     ++index;
@@ -164,11 +164,11 @@ BOOST_AUTO_TEST_CASE(test_template)
   BOOST_CHECK_EQUAL(strcmp(person_mref.get_discrete().value_name(), "Five"), 0);
 
   person_mref.set_salary().as(20.0);
-  BOOST_CHECK_EQUAL(person_mref.get_salary().exponent(),                     -2);
-  BOOST_CHECK_EQUAL(person_mref.get_salary().mantissa(),                     2000);
+  BOOST_CHECK_EQUAL(person_mref.get_salary().exponent(),                    -2);
+  BOOST_CHECK_EQUAL(person_mref.get_salary().mantissa(),                  2000);
 
 
-  BOOST_CHECK_EQUAL(person_mref.get_id().size(),                             16U);
+  BOOST_CHECK_EQUAL(person_mref.get_id().size(),                           16U);
 
   debug_allocator alloc2;
 
@@ -187,13 +187,21 @@ BOOST_AUTO_TEST_CASE(test_template)
   person1.mref().set_education().as( tmp_person.cref().get_education() );
   BOOST_CHECK(person1.cref().get_education() == tmp_person.cref().get_education());
 
+
+  // testing group link
+  person1.mref().set_education().set_college().as("UMSTL");
+  // tmp_person.mref().link_education( person1.mref().set_education() );
+  // BOOST_CHECK_EQUAL( tmp_person.cref().get_education().get_college().value(),
+  //                    person1.cref().get_education().get_college().value());
+
+
   // testing sequence assignment
   person1.mref().set_addresses().resize(4);
   BOOST_CHECK_EQUAL(person1.cref().get_addresses().size(), 4U);
 
 
   unsigned index = 0;
-  BOOST_FOREACH (const Address_mref& addr,  person1.mref().set_addresses())
+  BOOST_FOREACH (const Address_mref &addr, person1.mref().set_addresses())
   {
     addr.set_postalCode().as(index+10000);
     ++index;
@@ -201,7 +209,7 @@ BOOST_AUTO_TEST_CASE(test_template)
 
   index = 0;
 
-  BOOST_FOREACH(const Address_cref& addr,  person1.cref().get_addresses())
+  BOOST_FOREACH(const Address_cref &addr, person1.cref().get_addresses())
   {
     BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
     ++index;

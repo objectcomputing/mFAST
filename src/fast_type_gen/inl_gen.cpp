@@ -147,6 +147,19 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
            << "  (*this)[" << inst->field_index() << "].omit();\n"
            << "}\n\n";
     }
+
+    if (inst->ref_instruction()) {
+      out_ << "inline void\n"
+           << mref_scope_.str() << "link_" << name << "(const " << mref_type_name << "& ref) const\n"
+           << "{\n"
+           << "  this->link_group_at(" << index << ", ref);\n"
+           << "}\n\n"
+           << "inline void\n"
+           << mref_scope_.str() << "unlink_" << name << "() const\n"
+           << "{\n"
+           << "  this->unlink_group_at(" << index << ");\n"
+           << "}\n\n";
+    }
   }
 
   if (inst->ref_instruction() == 0 && !embed_only_dyn_tempateref) {
