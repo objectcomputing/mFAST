@@ -583,10 +583,16 @@ namespace mfast {
       // In the case when the this->capacity == 0 && this->size() > 0,
       // reserve() could be invoked with n < this->size(). Thus, we can
       // only copy min(size(), n) elements to the new buffer.
-      if (this->storage()->array_length() > 0 && n > 0) {
+      if (this->storage()->of_array.len_ > 1) {
+        if (n > 0)
         std::memcpy(this->storage()->of_array.content_,
                     old_addr,
                     std::min<size_t>(this->size(), n)*sizeof(value_type) );
+      }
+      else {
+        // if this->storage()->of_array.len_ was 0, it needs to be set to 1 to indicate
+        // buffer has been allocated yet no data be written to it yet.
+        this->storage()->of_array.len_  = 1;
       }
     }
 
@@ -610,6 +616,7 @@ namespace mfast {
     if (offset < this->size()) {
       std::memmove(src+(n*sizeof(value_type)), src, (this->size()+1-offset) * sizeof(value_type));
     }
+
     this->storage()->of_array.len_ += n;
     return src;
   }

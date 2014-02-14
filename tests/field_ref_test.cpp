@@ -445,6 +445,9 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     ascii_string_mref ref(&alloc, &storage, &inst);
     BOOST_CHECK(!ref.present());
 
+    ref.push_back('c');
+    BOOST_CHECK_EQUAL(ref.size(), 1U);
+
     ref.to_initial_value();
     BOOST_CHECK(ref.present());
     BOOST_CHECK_EQUAL(ref.size(), strlen(default_value));
