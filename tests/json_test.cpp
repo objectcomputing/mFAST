@@ -29,7 +29,10 @@
 
 namespace mfast {
   namespace json {
-    bool get_quoted_string(std::istream& strm, std::string* pstr, bool first_quote_extracted);
+    bool get_quoted_string(std::istream&                  strm,
+                           std::string*                   pstr,
+                           const mfast::byte_vector_mref* pref,
+                           bool                           first_quote_extracted=false);
     bool get_decimal_string(std::istream& strm, std::string& str);
     bool skip_value (std::istream& strm);
   }
@@ -48,14 +51,14 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   product_ref.set_price().as(12356, -2);
   product_ref.set_name().as("Foo");
   Product_mref::tags_mref tags = product_ref.set_tags();
-  BOOST_CHECK_EQUAL(tags.instruction()->field_type(),            mfast::field_type_sequence);
+  BOOST_CHECK_EQUAL(tags.instruction()->field_type(),             mfast::field_type_sequence);
   BOOST_CHECK_EQUAL(tags.instruction()->subinstructions().size(), 1U);
 
   tags.resize(2);
-  BOOST_CHECK_EQUAL(tags.size(),                                 2U);
+  BOOST_CHECK_EQUAL(tags.size(),                                  2U);
 
   mfast::ascii_string_mref tag0 = tags[0];
-  BOOST_CHECK_EQUAL(tag0.instruction()->field_type(),            mfast::field_type_ascii_string);
+  BOOST_CHECK_EQUAL(tag0.instruction()->field_type(),             mfast::field_type_ascii_string);
 
 
   tags[0].as("Bar with \"quote\"");
@@ -67,11 +70,17 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   stock.set_warehouse().as(300);
   stock.set_retail().as(20);
 
+  const char ext_data[] = "{\"test1\":1}";
+  const unsigned char* uext_data = reinterpret_cast<const unsigned char*>(ext_data);
+  product_ref.set_ext().assign(uext_data, uext_data+sizeof(ext_data)-1);
+
   std::ostringstream ostrm;
-  mfast::json::encode(ostrm, product_ref);
+  mfast::json::encode(ostrm,
+                      product_ref,
+                      mfast_tag::JSON_UNKNOWN);
 
 
-  const char* result = "{\"id\":1,\"name\":\"Foo\",\"price\":123.56,\"tags\":[\"Bar with \\\"quote\\\"\",\"Eek with \\\\\"],\"stock\":{\"warehouse\":300,\"retail\":20}}";
+  const char* result = "{\"id\":1,\"name\":\"Foo\",\"price\":123.56,\"tags\":[\"Bar with \\\"quote\\\"\",\"Eek with \\\\\"],\"stock\":{\"warehouse\":300,\"retail\":20},\"ext\":{\"test1\":1}}";
   // std::cout << strm.str() << "\n";
   // std::cout << result << "\n";
 
@@ -83,7 +92,9 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
 
   Product product3_holder;
   std::istringstream istrm(result);
-  BOOST_CHECK(mfast::json::decode(istrm, product3_holder.mref()));
+  BOOST_CHECK(mfast::json::decode(istrm,
+                                  product3_holder.mref(),
+                                  mfast_tag::JSON_UNKNOWN));
   //
   BOOST_CHECK(product3_holder.cref() == product_ref);
 
@@ -149,29 +160,62 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
 
 BOOST_AUTO_TEST_CASE(test_get_quoted_string)
 {
+  using namespace mfast;
   using namespace mfast::json;
+  debug_allocator alloc;
+
   std::string str;
+
+  const byte_vector_field_instruction byte_vector_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
+  value_storage storage;
+
+  byte_vector_field_instruction_prototype.construct_value(storage, &alloc);
+
+  byte_vector_mref bv_ref(&alloc,
+                          &storage,
+                          &byte_vector_field_instruction_prototype);
+
+
   {
-    std::stringstream strm("\"abcd\",");
-    BOOST_CHECK(get_quoted_string(strm, &str, false));
-    BOOST_CHECK_EQUAL(str, std::string("abcd"));
+    const char data[] = "\"abcd\",";
+    std::stringstream strm(data);
+    BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
+    BOOST_CHECK_EQUAL(str,           std::string("abcd"));
+
+    BOOST_CHECK_EQUAL(bv_ref.size(), sizeof(data)-2 );
+    BOOST_CHECK(memcmp(data, bv_ref.data(), sizeof(data)-2 ) ==0);
+
     strm >> str;
     BOOST_CHECK_EQUAL(str, std::string(","));
   }
   {
-    std::stringstream strm("\"abc\\\"d\",");
-    BOOST_CHECK(get_quoted_string(strm, &str, false));
-    BOOST_CHECK_EQUAL(str, std::string("abc\"d"));
+    bv_ref.clear();
+    const char data[] = "\"abc\\\"d\",";
+    std::stringstream strm(data);
+    BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
+    BOOST_CHECK_EQUAL(str,           std::string("abc\"d"));
+
+    BOOST_CHECK_EQUAL(bv_ref.size(), sizeof(data)-2 );
+    BOOST_CHECK(memcmp(data, bv_ref.data(), sizeof(data)-2) == 0);
+
     strm >> str;
     BOOST_CHECK_EQUAL(str, std::string(","));
   }
   {
-    std::stringstream strm("\"abc\\nd\",");
-    BOOST_CHECK(get_quoted_string(strm, &str, false));
-    BOOST_CHECK_EQUAL(str, std::string("abc\nd"));
+    bv_ref.clear();
+    const char data[] = "\"abc\\nd\",";
+    std::stringstream strm(data);
+    BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
+    BOOST_CHECK_EQUAL(str,           std::string("abc\nd"));
+
+    BOOST_CHECK_EQUAL(bv_ref.size(), sizeof(data)-2);
+    BOOST_CHECK(memcmp(data, bv_ref.data(), sizeof(data)-2) ==0);
+
     strm >> str;
     BOOST_CHECK_EQUAL(str, std::string(","));
   }
+  byte_vector_field_instruction_prototype.destruct_value(storage, &alloc);
+
 }
 
 BOOST_AUTO_TEST_CASE(test_get_decimal_string)
@@ -284,22 +328,22 @@ BOOST_AUTO_TEST_CASE(test_seq_codegen)
   using namespace test3;
 
   const UsingSeqTemplates::instruction_type* top_inst = UsingSeqTemplates::instruction();
-  BOOST_CHECK_EQUAL(top_inst->subinstructions().size() , 3U);
+  BOOST_CHECK_EQUAL(top_inst->subinstructions().size(), 3U);
 
   const mfast::sequence_field_instruction* seq1_inst = dynamic_cast<const mfast::sequence_field_instruction*>(top_inst->subinstruction(1));
   BOOST_REQUIRE(seq1_inst);
   BOOST_CHECK(strcmp(seq1_inst->name(), "seq1")==0);
   BOOST_CHECK_EQUAL(seq1_inst->subinstructions().size(), 2U);
-  BOOST_CHECK_EQUAL(seq1_inst->ref_instruction(), SeqTemplate1::instruction());
-  BOOST_CHECK_EQUAL(seq1_inst->element_instruction(), (const mfast::group_field_instruction*) 0);
+  BOOST_CHECK_EQUAL(seq1_inst->ref_instruction(),        SeqTemplate1::instruction());
+  BOOST_CHECK_EQUAL(seq1_inst->element_instruction(),    (const mfast::group_field_instruction*) 0);
 
 
   const mfast::sequence_field_instruction* seq2_inst = dynamic_cast<const mfast::sequence_field_instruction*>(top_inst->subinstruction(2));
   BOOST_REQUIRE(seq2_inst);
   BOOST_CHECK(strcmp(seq2_inst->name(), "seq2")==0);
   BOOST_CHECK_EQUAL(seq2_inst->subinstructions().size(), 4U);
-  BOOST_CHECK_EQUAL(seq2_inst->ref_instruction(), SeqTemplate2::instruction());
-  BOOST_CHECK_EQUAL(seq2_inst->element_instruction(), BankAccount::instruction());
+  BOOST_CHECK_EQUAL(seq2_inst->ref_instruction(),        SeqTemplate2::instruction());
+  BOOST_CHECK_EQUAL(seq2_inst->element_instruction(),    BankAccount::instruction());
 }
 
 

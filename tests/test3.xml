@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.ociweb.com/ns/templates/mfast_json" ns="http://www.ociweb.com/ns/mfast">
 
+  <define name="mfast:tag">
+    <enum>
+      <element name="JSON_UNKNOWN" value="1" />
+    </enum>
+  </define>
+
     <template name="Stock">
         <uInt32 name="warehouse" />
         <uInt32 name="retail" />
@@ -21,6 +27,8 @@
         <sequence name="resalers" presence="optional">
             <string  name="name"/>
         </sequence>
+
+        <byteVector name="ext" mfast:tag="JSON_UNKNOWN"/>
     </template>
 
     <template name="LoginAccount">

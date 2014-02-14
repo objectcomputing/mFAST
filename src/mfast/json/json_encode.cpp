@@ -33,6 +33,7 @@ namespace mfast {
       private:
         std::ostream& strm_;
         char separator_[2];
+        unsigned json_object_tag_mask_;
 
       public:
 
@@ -40,8 +41,10 @@ namespace mfast {
           visit_absent = 0
         };
 
-        json_visitor(std::ostream& strm)
+        json_visitor(std::ostream& strm,
+                     unsigned      json_object_tag_mask)
           : strm_(strm)
+          , json_object_tag_mask_(json_object_tag_mask)
         {
           separator_[0] = 0;
           separator_[1] = 0;
@@ -68,19 +71,30 @@ namespace mfast {
         }
 
         void visit(const mfast::byte_vector_cref& ref)
-        { // json doesn't have byte vector, treat it as string now
-          strm_ <<  separator_ << "\"";
-          boost::io::ios_flags_saver  ifs( strm_ );
-          strm_  << std::hex << std::setfill('0') << std::setw(2);
-
-          for (std::size_t i = 0; i < ref.size(); ++i)
+        {
+          if (ref.instruction()->tag().to_uint64() & json_object_tag_mask_)
           {
-            // if the size is 16, we treat it as a UUID
-            if (ref.size() == 16 && (i==4 || i==6 || i==8 || i==10))
-              strm_ << '-';
-            strm_   <<  (0xFF & (int) ref[i]) ;
+            // if the json_object_tag_mask is on, that means the field contains
+            // json encoded object already, just write it as it is without any processing.
+
+            strm_.rdbuf()->sputn( reinterpret_cast<const char*>(ref.data()), ref.size());
           }
-          strm_ << "\"" << std::setfill(' ');
+          else
+          {
+            // json doesn't have byte vector, treat it as hex string now
+            strm_ <<  separator_ << "\"";
+            boost::io::ios_flags_saver ifs( strm_ );
+            strm_ << std::hex << std::setfill('0') << std::setw(2);
+
+            for (std::size_t i = 0; i < ref.size(); ++i)
+            {
+              // if the size is 16, we treat it as a UUID
+              if (ref.size() == 16 && (i==4 || i==6 || i==8 || i==10))
+                strm_ << '-';
+              strm_ <<  (0xFF & (int) ref[i]);
+            }
+            strm_ << "\"" << std::setfill(' ');
+          }
         }
 
         template <typename IntType>
@@ -152,16 +166,20 @@ namespace mfast {
 
     } // namspace encode_detail
 
-    bool encode(std::ostream& os, const mfast::aggregate_cref& msg)
+    bool encode(std::ostream&                os,
+                const mfast::aggregate_cref& msg,
+                unsigned                     json_object_tag_mask)
     {
-      encode_detail::json_visitor visitor(os);
+      encode_detail::json_visitor visitor(os, json_object_tag_mask);
       visitor.visit(msg, 0);
       return os.good();
     }
 
-    bool encode(std::ostream& os, const mfast::sequence_cref& seq)
+    bool encode(std::ostream&               os,
+                const mfast::sequence_cref& seq,
+                unsigned                    json_object_tag_mask)
     {
-      encode_detail::json_visitor visitor(os);
+      encode_detail::json_visitor visitor(os, json_object_tag_mask);
       visitor.visit(seq, 0);
       return os.good();
     }
