@@ -41,6 +41,9 @@ namespace mfast
       const char* cpp_ns_;
       std::deque<const template_instruction*> templates_;
       const template_instruction template_instruction_prototype_;
+      const group_field_instruction group_field_instruction_prototype_;
+      const sequence_field_instruction sequence_field_instruction_prototype_;
+      const enum_field_instruction enum_field_instruction_prototype_;
     };
 
   } /* coder */
