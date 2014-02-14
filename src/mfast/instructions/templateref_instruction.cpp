@@ -92,7 +92,7 @@ namespace mfast
     static const field_instruction* array[] = {
       &the_instruction,
     };
-    return array;
+    return instructions_view_t(array, 1);
   }
 
 } /* mfast */

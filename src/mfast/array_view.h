@@ -9,7 +9,13 @@ namespace mfast
   class array_view
   {
   public:
-    array_view(T* data=0, std::size_t sz=0)
+    array_view()
+      : data_(0)
+      , sz_(0)
+    {
+    }
+
+    array_view(T* data, std::size_t sz)
       : data_(data)
       , sz_(sz)
     {
