@@ -5,28 +5,41 @@ namespace mfast {
 
   namespace json {
 
-    bool get_quoted_string(std::istream& strm, std::string* pstr, bool first_quote_extracted=false)
+    bool get_quoted_string(std::istream& strm,
+                           std::string*  pstr,
+                           const mfast::byte_vector_mref* pref,
+                           bool          first_quote_extracted=false)
     {
-      char c1;
+      std::streambuf* buf = strm.rdbuf();
+
+      char c;
       if (!first_quote_extracted) {
         // make sure the first non-whitespace character is a quote
-        strm >> std::skipws >> c1;
-        if (c1 != '"') {
+
+        strm >> std::skipws >> c;
+
+        if (c != '"') {
           strm.setstate(std::ios::failbit);
         }
+
         if (!strm)
           return false;
+
+        if (pref)
+          pref->push_back(c);
       }
 
       if (pstr)
         pstr->clear();
 
-      std::streambuf* buf = strm.rdbuf();
-      int c;
       bool escaped = false;
 
       do {
         c = buf->sbumpc();
+
+        if (pref)
+          pref->push_back(c);
+
         if (c != EOF) {
           if (!escaped) {
             if (c=='\\') {
@@ -62,7 +75,9 @@ namespace mfast {
       return false;
     }
 
-    bool skip_matching(std::istream& strm, char left_bracket)
+    bool skip_matching(std::istream&                  strm,
+                       char                           left_bracket,
+                       const mfast::byte_vector_mref* pref)
     {
       char right_bracket;
 
@@ -81,6 +96,8 @@ namespace mfast {
 
       while ( (c = buf->sbumpc()) != EOF )
       {
+        if (pref)
+          pref->push_back(c);
         if (c == left_bracket)
           ++count;
         else if (c == right_bracket) {
@@ -88,7 +105,7 @@ namespace mfast {
             return true;
         }
         else if (c == '"') {
-          if (!get_quoted_string(strm, 0, true))
+          if (!get_quoted_string(strm, 0, pref, true))
             return false;
         }
       }
@@ -102,9 +119,9 @@ namespace mfast {
 
       strm >> std::skipws >> c1;
       if (c1 == '{' || c1 == '[')
-        return skip_matching(strm, c1);
+        return skip_matching(strm, c1, 0);
       else if (c1 == '"')
-        return get_quoted_string(strm, 0, true);
+        return get_quoted_string(strm, 0, 0, true);
       else if (c1 == 'n') {
         // check if it's null
         strm.get(rest, 4);
@@ -205,13 +222,16 @@ namespace mfast {
     struct decode_visitor
     {
       std::istream& strm_;
+      unsigned json_object_tag_mask_;
 
       enum {
         visit_absent = true
       };
 
-      decode_visitor(std::istream& strm)
+      decode_visitor(std::istream& strm,
+                     unsigned      json_object_tag_mask)
         : strm_(strm)
+        , json_object_tag_mask_(json_object_tag_mask)
       {
       }
 
@@ -292,18 +312,33 @@ namespace mfast {
       void visit(const mfast::string_mref<Char>& ref)
       {
         std::string str;
-        if (get_quoted_string(strm_, &str)) {
+        if (get_quoted_string(strm_, &str, 0)) {
           ref.as(str);
         }
       }
 
       void visit(const mfast::byte_vector_mref& ref)
       {
-        std::string str;
-        if (get_quoted_string(strm_, &str)) {
-          ref.resize(str.size()/2+1);
-          ptrdiff_t len = byte_vector_field_instruction::hex2binary(str.c_str(), ref.data());
-          ref.resize(len);
+        if (ref.instruction()->tag().to_uint64() & json_object_tag_mask_) {
+          // if the json_object_tag_mask is on, that means the field shouldn't be unpakced
+          char c;
+          strm_ >> std::skipws >> c;
+          if (strm_.good() && c == '{') {
+            ref.push_back(c);
+            if (skip_matching(strm_, c, &ref)) {
+              return;
+            }
+          }
+          strm_.setstate(std::ios::failbit);
+        }
+        else {
+          // write it as a hex string
+          std::string str;
+          if (get_quoted_string(strm_, &str, 0)) {
+            ref.resize(str.size()/2+1);
+            ptrdiff_t len = byte_vector_field_instruction::hex2binary(str.c_str(), ref.data());
+            ref.resize(len);
+          }
         }
       }
 
@@ -381,7 +416,7 @@ namespace mfast {
 
         do {
           std::string key;
-          if (!get_quoted_string(strm_, &key))
+          if (!get_quoted_string(strm_, &key, 0))
             return false;
 
           strm_ >> c;
@@ -452,16 +487,20 @@ namespace mfast {
       strm_.setstate(std::ios::failbit);
     }
 
-    bool decode(std::istream& is, const mfast::aggregate_mref& msg)
+    bool decode(std::istream&                is,
+                const mfast::aggregate_mref& msg,
+                unsigned                     json_object_tag_mask)
     {
-      decode_visitor visitor(is);
+      decode_visitor visitor(is, json_object_tag_mask);
       visitor.visit_impl(msg);
       return !is.fail();
     }
 
-    bool decode(std::istream& is, const mfast::sequence_mref& seq)
+    bool decode(std::istream&               is,
+                const mfast::sequence_mref& seq,
+                unsigned                    json_object_tag_mask)
     {
-      decode_visitor visitor(is);
+      decode_visitor visitor(is, json_object_tag_mask);
       visitor.visit(seq, 0);
       return !is.fail();
     }
