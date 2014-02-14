@@ -31,6 +31,8 @@ namespace mfast
   namespace coder
   {
 
+    static const uint32_field_instruction length_instruction_prototype(0,operator_none,presence_mandatory,0,"__length__","",0, int_value_storage<uint32_t>());
+
     templates_builder::templates_builder(dynamic_templates_description* definition,
                                          const char*                    cpp_ns,
                                          template_registry*             registry)
@@ -38,6 +40,9 @@ namespace mfast
       , definition_(definition)
       , cpp_ns_(string_dup(cpp_ns, this->alloc()))
       , template_instruction_prototype_(0,0,"","","",instructions_view_t(0,0),0,0,0,cpp_ns_)
+      , group_field_instruction_prototype_(0,presence_mandatory,0,0,"","",instructions_view_t(0,0), "", "", cpp_ns_)
+      , sequence_field_instruction_prototype_(0,presence_mandatory,0,0,"","",instructions_view_t(0,0),0,0,&length_instruction_prototype, "", "", cpp_ns_)
+      , enum_field_instruction_prototype_(0,operator_none,presence_mandatory,0,0,"",0,0,0,0,0,0,cpp_ns_)
     {
       static const int32_field_instruction int32_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, int_value_storage<int32_t>());
       this->member["int32"] = &int32_field_instruction_prototype;
@@ -72,19 +77,11 @@ namespace mfast
       static const uint64_vector_field_instruction uint64_vector_field_instruction_prototype(0,presence_mandatory,0,0,"");
       this->member["uInt64Vector"] = &uint64_vector_field_instruction_prototype;
 
-      static const group_field_instruction group_field_instruction_prototype(0,presence_mandatory,0,0,"","",instructions_view_t(0,0), "", "", "");
-      this->member["group"] = &group_field_instruction_prototype;
-
-      static const uint32_field_instruction length_instruction_prototype(0,operator_none,presence_mandatory,0,"__length__","",0, int_value_storage<uint32_t>());
-      static const sequence_field_instruction sequence_field_instruction_prototype(0,presence_mandatory,0,0,"","",instructions_view_t(0,0),0,0,&length_instruction_prototype, "", "", "");
-      this->member["sequence"] = &sequence_field_instruction_prototype;
-
+      this->member["group"] = &group_field_instruction_prototype_;
+      this->member["sequence"] = &sequence_field_instruction_prototype_;
       this->member["template"] = &template_instruction_prototype_;
-
       this->member["boolean"] = mfast::boolean::instruction();
-
-      static const enum_field_instruction enum_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0,0,0,0,0,0,0);
-      this->member["enum"] = &enum_field_instruction_prototype;
+      this->member["enum"] = &enum_field_instruction_prototype_;
     }
 
     bool
@@ -115,7 +112,7 @@ namespace mfast
       else if (strcmp(element_name, "view") == 0) {
         view_info_builder builder(alloc());
         const group_field_instruction* inst = dynamic_cast<const group_field_instruction*>(this->find_type(
-                                                                                             get_optional_attr(element,"ns",resolved_ns_),
+                                                                                             get_optional_attr(element,"ns",        resolved_ns_),
                                                                                              get_optional_attr(element,"reference", "")));
 
         if (inst == 0)
