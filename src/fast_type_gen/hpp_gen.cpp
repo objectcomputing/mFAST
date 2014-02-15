@@ -578,7 +578,7 @@ void hpp_gen::generate(const mfast::aggregate_view_info& info)
        << "    iterator begin() const;\n"
        << "    iterator end() const;\n"
        << "    template <typename FieldAccessor>\n"
-       << "    void accept_accessor(FieldAccessor& accessor);\n\n"
+       << "    void accept_accessor(FieldAccessor& accessor) const;\n\n"
        << "  private:\n"
        << "    "  << ns_prefix <<  cpp_name(info.instruction_->name()) << "_cref ref_;\n"
        << "    static const mfast::aggregate_view_info info_;\n"

@@ -539,7 +539,7 @@ void inl_gen::generate(const mfast::aggregate_view_info& info)
        << "  return mfast::view_iterator(info_.data_.end()-1);\n"
        << "}\n\n"
        << "template <typename FieldAccessor>\n"
-       << "inline void  " << my_name << "::accept_accessor(FieldAccessor& accessor)\n"
+       << "inline void  " << my_name << "::accept_accessor(FieldAccessor& accessor) const\n"
        << "{\n"
        << "  BOOST_FOREACH(mfast::field_cref f, *this)\n"
        << "  {\n"
