@@ -13,7 +13,7 @@
     </template>
 
     <template name="Product" >
-        <uInt32 name="id" />
+        <uInt32 name="id" presence="optional"/>
         <string name="name" />
         <decimal name="price">
           <delta value="0" />

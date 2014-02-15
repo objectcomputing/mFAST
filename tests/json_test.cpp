@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   Product product_holder;
   Product_mref product_ref = product_holder.mref();
 
-  product_ref.set_id().as(1);
+  // product_ref.set_id().as(1);
   product_ref.set_price().as(12356, -2);
   product_ref.set_name().as("Foo");
   Product_mref::tags_mref tags = product_ref.set_tags();
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
                       mfast_tag::JSON_UNKNOWN);
 
 
-  const char* result = "{\"id\":1,\"name\":\"Foo\",\"price\":123.56,\"tags\":[\"Bar with \\\"quote\\\"\",\"Eek with \\\\\"],\"stock\":{\"warehouse\":300,\"retail\":20},\"ext\":{\"test1\":1}}";
+  const char* result = "{\"name\":\"Foo\",\"price\":123.56,\"tags\":[\"Bar with \\\"quote\\\"\",\"Eek with \\\\\"],\"stock\":{\"warehouse\":300,\"retail\":20},\"ext\":{\"test1\":1}}";
   // std::cout << strm.str() << "\n";
   // std::cout << result << "\n";
 
