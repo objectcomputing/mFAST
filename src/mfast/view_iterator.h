@@ -52,7 +52,7 @@ namespace mfast
   };
 
 
-  class view_iterator
+  class MFAST_EXPORT view_iterator
     : public boost::iterator_facade<view_iterator,
                                     field_cref,
                                     boost::forward_traversal_tag,
