@@ -129,8 +129,8 @@ namespace mfast {
               strm_ << separator_ << quoted_string(ref[i].name()) << ":";
               separator_[0] = '\0';
               ref[i].accept_accessor(*this);
+              separator_[0] = ',';
             }
-            separator_[0] = ',';
           }
 
           strm_ << "}";
