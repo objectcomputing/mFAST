@@ -505,8 +505,8 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
                  << indent << "    " << name << "_cref(\n"
                  << indent << "      const mfast::value_storage* storage=0,\n"
                  << indent << "      instruction_cptr            instruction=0);\n\n"
-
-                 << indent << "    explicit " << name << "_cref(const field_cref& other);\n\n";
+                 << indent << "    explicit " << name << "_cref(const field_cref& other);\n\n"
+                 << indent << "    element_type value() const;\n\n";
 
 
     for (uint64_t i = 0; i < inst->num_elements_; ++i) {
