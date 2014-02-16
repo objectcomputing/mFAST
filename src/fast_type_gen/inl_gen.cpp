@@ -425,7 +425,6 @@ void inl_gen::generate(mfast::dynamic_templates_description& desc)
 void inl_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
 {
   std::string name (cpp_name(inst));
-
   std::string cref_type_name = cref_scope_.str() + name + "_cref";
   std::string mref_type_name = mref_scope_.str() + name + "_mref";
 
@@ -458,6 +457,12 @@ void inl_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
          << "  const mfast::field_mref_base& other)\n"
          << "  : base_type(other)\n"
          << "{\n"
+         << "}\n\n"
+         << "inline\n"
+         << cref_type_name << "::element_type\n"
+         << cref_type_name << "::value() const\n"
+         << "{\n"
+         << "  return static_cast<" << name << "::element>(base_type::value());\n"
          << "}\n\n";
 
 
