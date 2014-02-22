@@ -41,6 +41,15 @@ namespace mfast {
 
   typedef boost::multiprecision::backends::cpp_dec_float<18> decimal_backend;
   typedef boost::multiprecision::number<decimal_backend> decimal;
+
+  inline decimal
+  make_decimal(int64_t mantissa, int16_t exponent)
+  {
+    decimal r(mantissa);
+    r *= decimal_backend(1.0, exponent);
+    return r;
+  }
+
   class allocator;
 
   namespace detail {
