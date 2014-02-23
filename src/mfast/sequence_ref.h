@@ -550,6 +550,12 @@ namespace mfast {
       return  begin() + old_size;
     }
 
+    void swap(const make_sequence_mref& other) const
+    {
+      assert(this->allocator() == other.allocator());
+      std::swap(*this->storage(), *other.storage());
+    }
+
   private:
     value_storage* element_storage(std::size_t index) const
     {

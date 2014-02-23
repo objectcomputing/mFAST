@@ -339,6 +339,11 @@ namespace mfast {
       base_type::shallow_assign(str, std::strlen(str));
     }
 
+    void swap(const string_mref_base<T>& other) const
+    {
+      base_type::swap(other);
+    }
+
   };
 
   template <>
@@ -648,6 +653,8 @@ namespace mfast {
     typedef string_mref<T> type;
   };
 
+  typedef vector_type<ascii_string_cref> ascii_string_type;
+  typedef vector_type<unicode_string_cref> unicode_string_type;
 
 }
 

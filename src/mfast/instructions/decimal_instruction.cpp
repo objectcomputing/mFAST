@@ -44,4 +44,12 @@ namespace mfast
   {
     return new (alloc) decimal_field_instruction(*this);
   }
+
+
+  const decimal_field_instruction*
+  decimal_field_instruction::default_instruction()
+  {
+    static const decimal_field_instruction inst(0,operator_none,presence_mandatory,0,"","",0, decimal_value_storage());
+    return &inst;
+  }
 } /* mfast */

@@ -375,14 +375,14 @@ namespace mfast {
         d *= decimal(decimal_backend(1.0, 18-exp));
         // Don't be distract by the method name -- extract_unsigned_long_long()
         // the returned value is signed
-        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long() ;
+        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
         this->storage()->of_decimal.exponent_ = exp-18;
         normalize();
       }
       else {
         const int8_t const_exp = instruction()->initial_value().of_decimal.exponent_;
         d *= decimal(decimal_backend(1.0, -1*const_exp));
-        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long() ;
+        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
         this->storage()->of_decimal.exponent_ = const_exp;
       }
       this->storage()->present(1);
@@ -454,6 +454,31 @@ namespace mfast {
       *this->storage() = v;
     }
 
+  };
+
+
+  class decimal_type
+  {
+  public:
+    typedef const decimal_field_instruction* instruction_cptr;
+    typedef decimal_cref cref_type;
+    typedef decimal_mref mref_type;
+
+    decimal_type(mfast::allocator* =0,
+                 instruction_cptr  instruction = decimal_field_instruction::default_instruction())
+      : instruction_(instruction)
+    {
+      instruction_->construct_value(my_storage_, 0);
+    }
+
+    mref_type ref() { return mref_type(0, &my_storage_, instruction_); }
+    mref_type mref()  { return mref_type(0, &my_storage_, instruction_); }
+    cref_type ref() const  { return cref_type(&my_storage_, instruction_); }
+    cref_type cref() const  { return cref_type(&my_storage_, instruction_); }
+
+  private:
+    instruction_cptr instruction_;
+    value_storage my_storage_;
   };
 
   template <>
