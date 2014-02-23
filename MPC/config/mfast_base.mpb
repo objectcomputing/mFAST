@@ -1,0 +1,14 @@
+project : boost_base {
+
+  exeout = $(MFAST_ROOT)/bin
+  libout = $(MFAST_ROOT)/lib
+  libpaths += $(MFAST_ROOT)/lib
+  includes += $(MFAST_ROOT)/src
+
+  specific (make) {
+    configurations = Debug Release
+    use_lib_modifier =
+    ccflags += -Wall
+  }
+
+}

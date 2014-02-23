@@ -1,0 +1,4 @@
+project : mfast_base {
+  after += mfast_core
+  libs += mfast
+}
