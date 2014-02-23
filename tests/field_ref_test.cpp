@@ -553,6 +553,26 @@ BOOST_AUTO_TEST_CASE(string_field_test)
 
   }
 
+
+  {
+    // testing swap operation
+
+    ascii_string_type string_holder1(&alloc);
+    ascii_string_type string_holder2(&alloc);
+
+    string_holder1.mref().as("abc");
+
+    BOOST_CHECK_EQUAL(string_holder1.cref().size(), 3U);
+    BOOST_CHECK_EQUAL(boost::string_ref("abc"), string_holder1.cref().value());
+
+
+    string_holder2.mref().as("def");
+    string_holder1.mref().swap(string_holder2.mref());
+
+    BOOST_CHECK_EQUAL(boost::string_ref("def"), string_holder1.cref().value());
+    BOOST_CHECK_EQUAL(boost::string_ref("abc"), string_holder2.cref().value());
+  }
+
   inst.destruct_value(storage, &alloc);
 
 }

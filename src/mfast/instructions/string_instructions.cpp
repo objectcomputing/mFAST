@@ -57,10 +57,25 @@ namespace mfast
 
   const value_storage ascii_field_instruction::default_value_("");
 
+
+  const ascii_field_instruction* ascii_field_instruction::default_instruction()
+  {
+    static const ascii_field_instruction inst(0,operator_none,presence_mandatory,0,"","",0, string_value_storage());
+    return &inst;
+  }
+
+
+
   unicode_field_instruction*
   unicode_field_instruction::clone(arena_allocator& alloc) const
   {
     return new (alloc) unicode_field_instruction(*this);
+  }
+
+  const unicode_field_instruction* unicode_field_instruction::default_instruction()
+  {
+    static const unicode_field_instruction inst(0,operator_none,presence_mandatory,0,"","",0, string_value_storage(), 0, "", "");
+    return &inst;
   }
 
 } /* mfast */

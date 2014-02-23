@@ -81,6 +81,8 @@ namespace mfast
 
     virtual void accept(field_instruction_visitor& visitor, void* context) const;
     virtual vector_field_instruction<T>* clone(arena_allocator& alloc) const;
+    static const vector_field_instruction<T>* default_instruction();
+
   };
 
   typedef vector_field_instruction<int32_t> int32_vector_field_instruction;
@@ -95,6 +97,16 @@ namespace mfast
   {
     return new (alloc) vector_field_instruction<T>(*this);
   }
+
+  template <typename T>
+  const vector_field_instruction<T>*
+  vector_field_instruction<T>::default_instruction()
+  {
+    static const vector_field_instruction<T> inst(0,presence_mandatory,0,"","");
+    return &inst;
+  }
+
+
 } /* mfast */
 
 #endif /* end of include guard: INT_VECTOR_INSTRUCTIONS_H_8SBDP7DE */

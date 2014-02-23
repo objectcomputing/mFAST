@@ -61,6 +61,8 @@ namespace mfast
     virtual byte_vector_field_instruction* clone(arena_allocator& alloc) const;
 
     static std::ptrdiff_t hex2binary(const char* src, unsigned char* target);
+
+    static const byte_vector_field_instruction* default_instruction();
   };
 
 } /* mfast */

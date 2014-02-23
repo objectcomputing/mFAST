@@ -423,10 +423,12 @@ namespace mfast {
                  const value_type* addr, size_t count2 ) const;
 
   protected:
-    // explicit vector_mref_base(const field_mref& other)
-    //   : base_type(other)
-    // {
-    // }
+
+    void swap(const vector_mref_base& other) const
+    {
+      assert(this->allocator() == other.allocator());
+      std::swap( *this->storage(), *other.storage());
+    }
 
     friend class mfast::detail::codec_helper;
     void copy_from(const value_storage& v) const
@@ -503,6 +505,11 @@ namespace mfast {
     {
     }
 
+    void swap(const vector_mref<T>& other) const
+    {
+      base_type::swap(other);
+    }
+
   };
 
 
@@ -538,6 +545,12 @@ namespace mfast {
     operator int_vector_cref<T> () const {
       return int_vector_cref<T>(this->storage(), this->instruction());
     }
+
+    void swap(const int_vector_cref<T>& other) const
+    {
+      base_type::swap(other);
+    }
+
   };
 
 
@@ -559,7 +572,64 @@ namespace mfast {
     typedef int_vector_mref<T> type;
   };
 
+  template <typename CREF>
+  class vector_type
+  {
+  public:
+    typedef typename CREF::instruction_type instruction_type;
+    typedef typename CREF::instruction_cptr instruction_cptr;
+    typedef CREF cref_type;
+    typedef typename mref_of<CREF>::type mref_type;
 
+    vector_type(mfast::allocator* alloc=0,
+                instruction_cptr  instruction = instruction_type::default_instruction())
+      : alloc_(alloc)
+      , instruction_(instruction)
+    {
+      instruction_->construct_value(my_storage_, alloc);
+    }
+
+    ~vector_type()
+    {
+      instruction_->destruct_value(my_storage_, alloc_);
+    }
+
+    mref_type ref()
+    {
+      return mref_type(alloc_, &my_storage_, instruction_);
+    }
+
+    mref_type mref()
+    {
+      return mref_type(alloc_, &my_storage_, instruction_);
+    }
+
+    cref_type ref() const
+    {
+      return cref_type(&my_storage_, instruction_);
+    }
+
+    cref_type cref() const
+    {
+      return cref_type(&my_storage_, instruction_);
+    }
+
+    instruction_cptr instruction() const
+    {
+      return instruction_;
+    }
+
+  private:
+    mfast::allocator* alloc_;
+    instruction_cptr instruction_;
+    value_storage my_storage_;
+  };
+
+  typedef vector_type<byte_vector_cref> byte_vector_type;
+  typedef int_vector_mref<int32_vector_cref> int32_vector_type;
+  typedef int_vector_mref<uint32_vector_cref> uint32_vector_type;
+  typedef int_vector_mref<int64_vector_cref> int64_vector_type;
+  typedef int_vector_mref<uint64_vector_cref> uint64_vector_type;
 
   template <typename T>
   void
@@ -585,9 +655,9 @@ namespace mfast {
       // only copy min(size(), n) elements to the new buffer.
       if (this->storage()->of_array.len_ > 1) {
         if (n > 0)
-        std::memcpy(this->storage()->of_array.content_,
-                    old_addr,
-                    std::min<size_t>(this->size(), n)*sizeof(value_type) );
+          std::memcpy(this->storage()->of_array.content_,
+                      old_addr,
+                      std::min<size_t>(this->size(), n)*sizeof(value_type) );
       }
       else {
         // if this->storage()->of_array.len_ was 0, it needs to be set to 1 to indicate

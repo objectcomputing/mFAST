@@ -109,6 +109,8 @@ namespace mfast
       mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
     }
 
+    static const ascii_field_instruction* default_instruction();
+
   protected:
 
     virtual void update_invariant()
@@ -197,6 +199,8 @@ namespace mfast
     {
       length_ns_ = v;
     }
+
+    static const unicode_field_instruction* default_instruction();
 
   protected:
     uint32_t length_id_;

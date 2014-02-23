@@ -140,6 +140,8 @@ namespace mfast
       }
     }
 
+    static const decimal_field_instruction* default_instruction();
+
   protected:
 
     friend class dictionary_builder;
