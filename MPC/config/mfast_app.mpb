@@ -1,0 +1,13 @@
+project : mfast_core {
+
+  after += fast_type_gen
+
+  Define_Custom(MFAST) {
+    command = $(MFAST_ROOT)/bin/fast_type_gen
+    automatic_in = 0
+    inputext = .xml
+    source_outputext = .cpp
+    header_outputext = .h
+    inline_outputext = .inl
+  }
+}
