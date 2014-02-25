@@ -4,7 +4,7 @@ project (mfast_test) : mfast_app, mfast_coder, mfast_json, boost_unit_test_frame
 
   MFAST_Files {
     commandflags += test1.xml
-    test2.xml >> test1.h test1.cpp test2.h test2.cpp << test1.xml
+    test2.xml >> test1.h test1.cpp << test1.xml
   }
 
   MFAST_Files {
