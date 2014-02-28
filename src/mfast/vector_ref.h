@@ -414,7 +414,7 @@ namespace mfast {
         this->allocator()->deallocate(this->storage()->of_array.content_,
                                       this->storage()->of_array.capacity_in_bytes_);
       }
-      this->storage()->of_array.content_ = const_cast<char*>(addr);
+      this->storage()->of_array.content_ = const_cast<void*>(static_cast<const void*>(addr));
       this->storage()->array_length(n);
       this->storage()->of_array.capacity_in_bytes_ = 0;
     }
