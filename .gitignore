@@ -1,16 +1,1 @@
 build
-examples/performance_test/example.h
-examples/performance_test/example.inl
-examples/performance_test/example.cpp
-examples/simple/MDRefreshSample.h
-examples/simple/MDRefreshSample.inl
-examples/simple/MDRefreshSample.cpp
-tests/test1.h
-tests/test1.inl
-tests/test1.cpp
-tests/test2.h
-tests/test2.inl
-tests/test2.cpp
-examples/message_printer/MDRefreshSample.cpp
-examples/message_printer/MDRefreshSample.h
-examples/message_printer/MDRefreshSample.inl
