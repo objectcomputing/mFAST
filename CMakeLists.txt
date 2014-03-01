@@ -1,12 +1,12 @@
 # The name of our project is "mFAST". CMakeLists files in this project can
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
-cmake_minimum_required (VERSION 2.8.8)
+cmake_minimum_required (VERSION 2.6.0)
 project (mFAST)
 
 
 set(MFAST_MAJOR_VERSION 1)
-set(MFAST_MINOR_VERSION 0)
+set(MFAST_MINOR_VERSION 1)
 set(MFAST_PATCH_VERSION 0)
 set(MFAST_VERSION ${MFAST_MAJOR_VERSION}.${MFAST_MINOR_VERSION}.${MFAST_PATCH_VERSION})
 
@@ -30,7 +30,7 @@ else()
     set(DEF_INSTALL_CMAKE_DIR     lib/cmake/mFAST)
   endif()
 endif()
-set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH 
+set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
 "Installation directory for CMake files")
 
 # Make relative paths absolute (needed later on)
@@ -96,18 +96,18 @@ foreach (input ${ARGN})
 	set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
 endforeach(input)
 
-## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated. 
-## Not at the time when "make" is called. 
+## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated.
+## Not at the time when "make" is called.
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_command(
   OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-  COMMAND $<TARGET_FILE:fast_type_gen>
+  COMMAND ${CMAKE_BINARY_DIR}/bin/fast_type_gen
   ARGS ${INPUTS}
   DEPENDS ${ARGN} fast_type_gen
   COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-  
+
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 set(FASTTYPEGEN_${Name}_DEFINED TRUE)
 set(FASTTYPEGEN_${Name}_INPUTS ${ARGN})
@@ -117,6 +117,7 @@ endmacro()
 # Recurse into the "src" and "unit-tests" subdirectories. This does not actually
 # cause another cmake executable to run. The same process will walk through
 # the project's entire directory structure.
+enable_testing()
 
 add_subdirectory (tests)
 
@@ -139,28 +140,31 @@ add_custom_target(dist
         | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-# Provide mfast-config.cmake and mfast-config.version to be used by other applications 
+# Provide mfast-config.cmake and mfast-config.version to be used by other applications
 # ===============================
 
-export(PACKAGE ${CMAKE_PROJECT_NAME})
+if (NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
+  export(PACKAGE ${CMAKE_PROJECT_NAME})
+endif(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
+
 export(TARGETS fast_type_gen ${MFAST_LIBRARIES} FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
 
 # Create the mFASTConfig.cmake for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src" "${PROJECT_BINARY_DIR}")
 configure_file(mFASTConfig.cmake.in
-               "${PROJECT_BINARY_DIR}/mFASTConfig.cmake" 
+               "${PROJECT_BINARY_DIR}/mFASTConfig.cmake"
                @ONLY)
 
 # Create the mFASTConfig.cmake for the install tree
 file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
 set(CONF_INCLUDE_DIRS "\${MFAST_CMAKE_DIR}/${REL_INCLUDE_DIR}")
 configure_file(mFASTConfig.cmake.in
-               "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/mFASTConfig.cmake" 
+               "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/mFASTConfig.cmake"
                @ONLY)
 
 # Create the mFASTConfigVersion.cmake for both
 configure_file(mFASTConfigVersion.cmake.in
-               "${PROJECT_BINARY_DIR}/mFASTConfigVersion.cmake" 
+               "${PROJECT_BINARY_DIR}/mFASTConfigVersion.cmake"
                @ONLY)
 
 # Install the mFASTConfig.cmake and mFASTConfigVersion.cmake
