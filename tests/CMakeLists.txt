@@ -35,3 +35,7 @@ target_link_libraries (mfast_test
                        mfast_coder_static
                        mfast_json_static
                        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+
+add_test(mfast_test mfast_test)
+
