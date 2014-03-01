@@ -91,7 +91,7 @@ The build system can be configured via `-DOption=Value` syntax when invoking cma
 * CMAKE\_BUILD\_TYPE : Specify the building mode such as debug or release. Valid values are
     - None (default)
     - Debug
-    - Relase
+    - Release
     - RelWithDebInfo
     - MinSizeRel
 * BUILD\_SHARED\_LIBS : whether to build mFAST as shared/dynamic linked library. Valid values are ON and OFF with default OFF. If the value is ON,  both static and shared library would be built. Notice that for application to link against mFAST shared libraries, the preprocessor macro MAST\_DYN\_LINK must be defined for the application sources.
