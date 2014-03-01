@@ -152,11 +152,13 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
                  << indent << "{\n"
                  << indent << "  typedef mfast::aggregate_cref base_type;\n"
                  << indent << "  public:\n"
-                 << indent << "    typedef mfast::group_field_instruction instruction_type;\n"
+                 << indent << "    typedef mfast::group_instruction_ex<" << name << "_cref> instruction_type;\n\n"
                  << indent << "    typedef const instruction_type* instruction_cptr;\n"
+                 << indent << "    " << name << "_cref();\n"
+                 << indent << "    template <typename T>\n"
                  << indent << "    " << name << "_cref(\n"
-                 << indent << "      const mfast::value_storage*   storage,\n"
-                 << indent << "      instruction_cptr              instruction);\n\n"
+                 << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, const mfast::value_storage*>::type storage,\n"
+                 << indent << "      const T* instruction);\n\n"
                  << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
 
     std::stringstream mref_base_type;
@@ -168,10 +170,12 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
                  << indent << "{\n"
                  << indent << "  typedef " << mref_base_type.str() << " base_type;\n"
                  << indent << "  public:\n"
+                 << indent << "    " << name << "_mref();\n"
+                 << indent << "    template <typename T>\n"
                  << indent << "    " << name << "_mref(\n"
-                 << indent << "      mfast::allocator*             alloc,\n"
-                 << indent << "      mfast::value_storage*         storage,\n"
-                 << indent << "      instruction_cptr              instruction);\n\n"
+                 << indent << "      mfast::allocator*       alloc,\n"
+                 << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, mfast::value_storage*>::type   storage,\n"
+                 << indent << "      const T* instruction);\n\n"
                  << indent << "    explicit " << name << "_mref(const mfast::field_mref_base& other);\n\n";
 
     this->traverse(inst, "");
@@ -352,6 +356,7 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "  public:\n"
                << indent << "    typedef mfast::template_instruction_ex<"<< name << "_cref> instruction_type;\n"
                << indent << "    typedef const instruction_type* instruction_cptr;\n"
+               << indent << "    " << name << "_cref();\n"
                << indent << "    template <typename T>\n"
                << indent << "    " << name << "_cref(\n"
                << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, const mfast::value_storage*>::type storage,\n"
@@ -368,6 +373,7 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "  public:\n"
                << indent << "    typedef mfast::template_instruction_ex<"<< name << "_cref> instruction_type;\n"
                << indent << "    typedef const instruction_type* instruction_cptr;\n"
+               << indent << "    " << name << "_mref();\n"
                << indent << "    template <typename T>\n"
                << indent << "    " << name << "_mref(\n"
                << indent << "      mfast::allocator*       alloc,\n"
