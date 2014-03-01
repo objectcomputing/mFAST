@@ -143,7 +143,7 @@ $ make
 <ul>
 <li>None (default)</li>
 <li>Debug</li>
-<li>Relase</li>
+<li>Release</li>
 <li>RelWithDebInfo</li>
 <li>MinSizeRel</li>
 </ul>
@@ -311,12 +311,12 @@ entries.resize(4);
 entries[0].set_MDUpdateAction(1);
 // ...
 
-// using omit_xxx() to make optional field absent after assigning value 
+// using omit_xxx() to make optional field absent after assigning value
 mref.omit_ApplVerID();
 assert(!mref.get_ApplVerID().present());
 assert(mref.get_ApplVerID().size() == 0);
 
-// clear() can also make optional field absent 
+// clear() can also make optional field absent
 mref.set_ApplVerID("A");
 assert(mref.get_ApplVerID().present());
 mref.set_ApplVerID().clear();
@@ -324,7 +324,7 @@ assert(!mref.get_ApplVerID().present());
 assert(mref.get_ApplVerID().size() == 0);
 
 
-// However, clear() make the size to 0 for 
+// However, clear() make the size to 0 for
 // mandatory vectors, strings and sequences.
 
 assert(mref.set_SenderCompID.present());
@@ -521,7 +521,7 @@ std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const mfast::message_
       </footer>
     </div>
 
-    
+
 
   </body>
 </html>
