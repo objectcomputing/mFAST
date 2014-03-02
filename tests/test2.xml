@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.fixprotocol.org/ns/templates/test2" ns="http://www.fixprotocol.org/ns/fix">
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1" templateNs="http://www.fixprotocol.org/ns/templates/test2" ns="http://www.fixprotocol.org/ns/fix">
     <template name="StandardTrailer">
         <typeRef name="StandardTrailer"/>
     </template>
 
     <template name="MDRefreshSample" id="2">
         <group name="info">
-            <templateRef name="SampleInfo" ns="http://www.fixprotocol.org/ns/templates/test1"/>
+            <templateRef name="SampleInfo" templateNs="http://www.fixprotocol.org/ns/templates/test1"/>
         </group>
         <sequence name="MDEntries">
             <length name="NoMDEntries" id="268"/>
@@ -56,7 +56,7 @@
             </byteVector>
         </sequence>
         <sequence name="extra" >
-            <templateRef name="SampleInfo" ns="http://www.fixprotocol.org/ns/templates/test1"/>
+            <templateRef name="SampleInfo" templateNs="http://www.fixprotocol.org/ns/templates/test1"/>
         </sequence>
         <templateRef name="StandardTrailer" />
     </template>

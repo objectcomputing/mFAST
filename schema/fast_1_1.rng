@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar ns="http://www.fixprotocol.org/ns/fast/td/1.1" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="">
+  <start>
+    <choice>
+      <ref name="templates"/>
+      <ref name="template"/>
+    </choice>
+  </start>
+  <define name="templates">
+    <element name="templates">
+      <interleave>
+        <group>
+          <optional>
+            <ref name="nsAttr"/>
+          </optional>
+          <optional>
+            <ref name="templateNsAttr"/>
+          </optional>
+          <optional>
+            <ref name="dictionaryAttr"/>
+          </optional>
+          <zeroOrMore>
+            <ref name="template"/>
+          </zeroOrMore>
+        </group>
+        <ref name="other"/>
+      </interleave>
+    </element>
+  </define>
+  <define name="template">
+    <element name="template">
+      <interleave>
+        <group>
+          <ref name="templateNsName"/>
+          <optional>
+            <ref name="nsAttr"/>
+          </optional>
+          <optional>
+            <ref name="dictionaryAttr"/>
+          </optional>
+          <optional>
+            <ref name="typeRef"/>
+          </optional>
+          <zeroOrMore>
+            <ref name="instruction"/>
+          </zeroOrMore>
+        </group>
+        <ref name="other"/>
+      </interleave>
+    </element>
+  </define>
+  <define name="typeRef">
+    <element name="typeRef">
+      <ref name="nameAttr"/>
+      <optional>
+        <ref name="nsAttr"/>
+      </optional>
+      <ref name="other"/>
+    </element>
+  </define>
+  <define name="instruction">
+    <choice>
+      <ref name="field"/>
+      <ref name="templateRef"/>
+    </choice>
+  </define>
+  <define name="fieldInstrContent">
+    <interleave>
+      <group>
+        <ref name="nsName"/>
+        <optional>
+          <ref name="presenceAttr"/>
+        </optional>
+        <optional>
+          <ref name="fieldOp"/>
+        </optional>
+      </group>
+      <ref name="other"/>
+    </interleave>
+  </define>
+  <define name="field">
+    <choice>
+      <ref name="integerField"/>
+      <ref name="decimalField"/>
+      <ref name="asciiStringField"/>
+      <ref name="unicodeStringField"/>
+      <ref name="byteVectorField"/>
+      <ref name="sequence"/>
+      <ref name="group"/>
+    </choice>
+  </define>
+  <define name="integerField">
+    <choice>
+      <element name="int32">
+        <ref name="fieldInstrContent"/>
+      </element>
+      <element name="uInt32">
+        <ref name="fieldInstrContent"/>
+      </element>
+      <element name="int64">
+        <ref name="fieldInstrContent"/>
+      </element>
+      <element name="uInt64">
+        <ref name="fieldInstrContent"/>
+      </element>
+    </choice>
+  </define>
+  <define name="decimalField">
+    <element name="decimal">
+      <interleave>
+        <group>
+          <ref name="nsName"/>
+          <optional>
+            <ref name="presenceAttr"/>
+          </optional>
+          <choice>
+            <ref name="fieldOp"/>
+            <ref name="decFieldOp"/>
+          </choice>
+        </group>
+        <ref name="other"/>
+      </interleave>
+    </element>
+  </define>
+  <define name="decFieldOp">
+    <optional>
+      <element name="exponent">
+        <interleave>
+          <ref name="fieldOp"/>
+          <ref name="other"/>
+        </interleave>
+      </element>
+    </optional>
+    <optional>
+      <element name="mantissa">
+        <interleave>
+          <ref name="fieldOp"/>
+          <ref name="other"/>
+        </interleave>
+      </element>
+    </optional>
+  </define>
+  <define name="asciiStringField">
+    <element name="string">
+      <ref name="fieldInstrContent"/>
+      <optional>
+        <attribute name="charset">
+          <value>ascii</value>
+        </attribute>
+      </optional>
+    </element>
+  </define>
+  <define name="unicodeStringField">
+    <element name="string">
+      <optional>
+        <ref name="byteVectorLength"/>
+      </optional>
+      <ref name="fieldInstrContent"/>
+      <attribute name="charset">
+        <value>unicode</value>
+      </attribute>
+    </element>
+  </define>
+  <define name="byteVectorField">
+    <element name="byteVector">
+      <optional>
+        <ref name="byteVectorLength"/>
+      </optional>
+      <ref name="fieldInstrContent"/>
+    </element>
+  </define>
+  <define name="byteVectorLength">
+    <element name="length">
+      <ref name="nsName"/>
+    </element>
+  </define>
+  <define name="sequence">
+    <element name="sequence">
+      <interleave>
+        <group>
+          <ref name="nsName"/>
+          <optional>
+            <ref name="presenceAttr"/>
+          </optional>
+          <optional>
+            <ref name="dictionaryAttr"/>
+          </optional>
+          <optional>
+            <ref name="typeRef"/>
+          </optional>
+          <optional>
+            <ref name="length"/>
+          </optional>
+          <zeroOrMore>
+            <ref name="instruction"/>
+          </zeroOrMore>
+        </group>
+        <ref name="other"/>
+      </interleave>
+    </element>
+  </define>
+  <define name="length">
+    <element name="length">
+      <interleave>
+        <group>
+          <optional>
+            <ref name="nsName"/>
+          </optional>
+          <optional>
+            <ref name="fieldOp"/>
+          </optional>
+        </group>
+        <ref name="other"/>
+      </interleave>
+    </element>
+  </define>
+  <define name="group">
+    <element name="group">
+      <interleave>
+        <group>
+          <ref name="nsName"/>
+          <optional>
+            <ref name="presenceAttr"/>
+          </optional>
+          <optional>
+            <ref name="dictionaryAttr"/>
+          </optional>
+          <optional>
+            <ref name="typeRef"/>
+          </optional>
+          <zeroOrMore>
+            <ref name="instruction"/>
+          </zeroOrMore>
+        </group>
+        <ref name="other"/>
+      </interleave>
+    </element>
+  </define>
+  <define name="fieldOp">
+    <choice>
+      <ref name="constant"/>
+      <ref name="default"/>
+      <ref name="copy"/>
+      <ref name="increment"/>
+      <ref name="delta"/>
+      <ref name="tail"/>
+    </choice>
+  </define>
+  <define name="constant">
+    <element name="constant">
+      <interleave>
+        <ref name="initialValueAttr"/>
+        <ref name="other"/>
+      </interleave>
+    </element>
+  </define>
+  <define name="default">
+    <element name="default">
+      <interleave>
+        <optional>
+          <ref name="initialValueAttr"/>
+        </optional>
+        <ref name="other"/>
+      </interleave>
+    </element>
+  </define>
+  <define name="copy">
+    <element name="copy">
+      <ref name="opContext"/>
+    </element>
+  </define>
+  <define name="increment">
+    <element name="increment">
+      <ref name="opContext"/>
+    </element>
+  </define>
+  <define name="delta">
+    <element name="delta">
+      <ref name="opContext"/>
+    </element>
+  </define>
+  <define name="tail">
+    <element name="tail">
+      <ref name="opContext"/>
+    </element>
+  </define>
+  <define name="initialValueAttr">
+    <attribute name="value"/>
+  </define>
+  <define name="opContext">
+    <interleave>
+      <group>
+        <optional>
+          <ref name="dictionaryAttr"/>
+        </optional>
+        <optional>
+          <ref name="nsKey"/>
+        </optional>
+        <optional>
+          <ref name="initialValueAttr"/>
+        </optional>
+      </group>
+      <ref name="other"/>
+    </interleave>
+  </define>
+  <define name="dictionaryAttr">
+    <attribute name="dictionary">
+      <choice>
+        <value>template</value>
+        <value>type</value>
+        <value>global</value>
+        <data type="string"/>
+      </choice>
+    </attribute>
+  </define>
+  <define name="nsKey">
+    <ref name="keyAttr"/>
+    <optional>
+      <ref name="nsAttr"/>
+    </optional>
+  </define>
+  <define name="keyAttr">
+    <attribute name="key">
+      <data type="token"/>
+    </attribute>
+  </define>
+  <define name="templateRef">
+    <element name="templateRef">
+      <optional>
+        <ref name="nameAttr"/>
+        <optional>
+          <ref name="templateNsAttr"/>
+        </optional>
+      </optional>
+      <ref name="other"/>
+    </element>
+  </define>
+  <define name="presenceAttr">
+    <attribute name="presence">
+      <choice>
+        <value>mandatory</value>
+        <value>optional</value>
+      </choice>
+    </attribute>
+  </define>
+  <define name="nsName">
+    <ref name="nameAttr"/>
+    <optional>
+      <ref name="nsAttr"/>
+    </optional>
+    <optional>
+      <ref name="idAttr"/>
+    </optional>
+  </define>
+  <define name="templateNsName">
+    <ref name="nameAttr"/>
+    <optional>
+      <ref name="templateNsAttr"/>
+    </optional>
+    <optional>
+      <ref name="idAttr"/>
+    </optional>
+  </define>
+  <define name="nameAttr">
+    <attribute name="name">
+      <data type="token"/>
+    </attribute>
+  </define>
+  <define name="nsAttr">
+    <attribute name="ns"/>
+  </define>
+  <define name="templateNsAttr">
+    <attribute name="templateNs"/>
+  </define>
+  <define name="idAttr">
+    <attribute name="id">
+      <data type="token"/>
+    </attribute>
+  </define>
+  <define name="other">
+    <zeroOrMore>
+      <ref name="foreignAttr"/>
+    </zeroOrMore>
+    <zeroOrMore>
+      <ref name="foreignElm"/>
+    </zeroOrMore>
+  </define>
+  <define name="foreignElm">
+    <element>
+      <anyName>
+        <except>
+          <nsName/>
+        </except>
+      </anyName>
+      <ref name="any"/>
+    </element>
+  </define>
+  <define name="foreignAttr">
+    <attribute>
+      <anyName>
+        <except>
+          <nsName ns=""/>
+          <nsName/>
+        </except>
+      </anyName>
+    </attribute>
+  </define>
+  <define name="any">
+    <zeroOrMore>
+      <attribute>
+        <anyName/>
+      </attribute>
+    </zeroOrMore>
+    <zeroOrMore>
+      <choice>
+        <text/>
+        <element>
+          <anyName/>
+          <ref name="any"/>
+        </element>
+      </choice>
+    </zeroOrMore>
+  </define>
+</grammar>

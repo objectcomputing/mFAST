@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
-<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.ociweb.com/ns/templates/mfast_json" ns="http://www.ociweb.com/ns/mfast">
+<templates xmlns="http://www.ociweb.com/ns/mfast/td/1.2"
+  xmlns:mfast="http://www.ociweb.com/ns/mfast/td/1.2"
+  templateNs="http://www.ociweb.com/ns/templates/mfast_json"
+  ns="http://www.ociweb.com/ns/mfast">
 
   <define name="mfast:tag">
     <enum>
