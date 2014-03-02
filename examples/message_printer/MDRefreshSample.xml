@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.fixprotocol.org/ns/templates/sample" ns="http://www.fixprotocol.org/ns/fix">
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1" templateNs="http://www.fixprotocol.org/ns/templates/sample" ns="http://www.fixprotocol.org/ns/fix">
     <template name="MDRefreshSample">
         <typeRef name="MarketDataIncrementalRefresh"/>
         <string name="BeginString" id="8">

@@ -1,3 +1,5 @@
+default namespace td = "http://www.fixprotocol.org/ns/fast/td/1.1"
+namespace local = ""
 start = templates | template
 templates = element templates { ( nsAttr?, templateNsAttr?, dictionaryAttr?, template* ) & other }
 template = element template { ( templateNsName, nsAttr?, dictionaryAttr?, typeRef?, instruction* ) & other }

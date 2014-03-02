@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="view_test" ns="http://www.ociweb.com/ns/mfast">
+<templates xmlns="http://www.ociweb.com/ns/mfast/td/1.2" templateNs="view_test" ns="http://www.ociweb.com/ns/mfast">
     <template name="LoginAccount">
         <string name="userName" />
         <string name="password" />
