@@ -387,7 +387,7 @@ namespace mfast
       templateref_instruction* instruction;
 
       if (name_) {
-        const char* resolved_ns = get_optional_attr(element_, "ns", parent_->resolved_ns());
+        const char* resolved_ns = get_optional_attr(element_, "templateNs", parent_->resolved_ns());
         const template_instruction* target =
           dynamic_cast<const template_instruction*> (this->find_type( resolved_ns, name_));
 
