@@ -451,7 +451,7 @@ namespace mfast
       if (strcmp(child->Name(), "templateRef") == 0 && child->NextSibling() == 0) {
         const char* target_name = child->Attribute("name", 0);
         if (target_name) {
-          const char* target_ns = get_optional_attr(*child, "ns",  parent_->resolved_ns());
+          const char* target_ns = get_optional_attr(*child, "templateNs",  parent_->resolved_ns());
 
           const group_field_instruction* target =
             dynamic_cast<const group_field_instruction*>(this->find_type(target_ns, target_name));
