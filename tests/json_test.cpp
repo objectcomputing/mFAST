@@ -156,7 +156,19 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
   Person person_holder2(person_ref, &alloc);
 }
 
+BOOST_AUTO_TEST_CASE(json_decode_null_test)
+{
+  using namespace test3;
 
+  LoginAccount account_holder;
+
+  const char result[] = "{\"userName\":\"test\",\"password\":null}";
+  std::stringstream strm(result);
+
+  BOOST_CHECK( mfast::json::decode(strm, account_holder.mref()) );
+  BOOST_CHECK_EQUAL(account_holder.cref().get_userName().value(), "test");
+  BOOST_CHECK( account_holder.cref().get_password().absent() );
+}
 
 BOOST_AUTO_TEST_CASE(test_get_quoted_string)
 {

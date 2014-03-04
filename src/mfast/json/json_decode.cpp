@@ -428,8 +428,20 @@ namespace mfast {
           }
 
           int index = ref.field_index_with_name(key.c_str());
-          if (index != -1)
-            ref[index].accept_mutator(*this);
+          if (index != -1) {
+            // we need to check if the value is null
+            strm_ >> std::skipws;
+            if (strm_.good() && strm_.peek() == 'n') {
+              char buf[5];
+              strm_ >> std::noskipws >> std::setw(5) >> buf;
+              if (strncmp(buf, "null", 4) != 0) {
+                strm_.setstate(std::ios::failbit);
+                return false;
+              }
+            }
+            else
+              ref[index].accept_mutator(*this);
+          }
           else {
             // the field is unkown to us,
             skip_value(strm_);

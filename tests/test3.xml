@@ -36,7 +36,7 @@
 
     <template name="LoginAccount">
         <string name="userName" />
-        <string name="password" />
+        <string name="password" presence="optional" />
     </template>
 
     <template name="BankAccount">
