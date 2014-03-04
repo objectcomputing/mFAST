@@ -59,9 +59,9 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 # Select flags.
 # Initialize CXXFLAGS.
 if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-	set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
 elseif (MSVC)
-	add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # variables to be used later
@@ -84,16 +84,16 @@ macro(FASTTYPEGEN_TARGET Name)
 set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]")
 
 foreach (input ${ARGN})
-	get_filename_component(noext_name ${input} NAME_WE)
-	set(FASTTYPEGEN_${Name}_INPUTS_NOEXT ${FASTTYPEGEN_${Name}_INPUTS_NOEXT} ${noext_name})
+    get_filename_component(noext_name ${input} NAME_WE)
+    set(FASTTYPEGEN_${Name}_INPUTS_NOEXT ${FASTTYPEGEN_${Name}_INPUTS_NOEXT} ${noext_name})
 endforeach(input)
 
 foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
-	set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
+    set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
 endforeach(var)
 
 foreach (input ${ARGN})
-	set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
+    set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
 endforeach(input)
 
 ## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated.
@@ -175,3 +175,9 @@ install(FILES
 
 # Install the export set for use with the install-tree
 install(EXPORT mFASTTargets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+FILE(GLOB schema_files "${CMAKE_CURRENT_SOURCE_DIR}/schema/*.*")
+
+install(FILES
+        ${schema_files}
+        DESTINATION ${INSTALL_DATA_DIR}/mfast)
