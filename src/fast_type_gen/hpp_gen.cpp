@@ -460,7 +460,8 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
 
   BOOST_FOREACH(const std::string& dep, dependency_)
   {
-    out_ << "#include \"" << dep << ".h\"\n";
+    if (dep != "mfast")
+      out_ << "#include \"" << dep << ".h\"\n";
   }
 
   if (export_symbol_.size()) {
