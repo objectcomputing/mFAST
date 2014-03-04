@@ -100,6 +100,7 @@
       <ref name="sequence"/>
       <ref name="group"/>
       <ref name="altField"/>
+      <ref name="intVectorField"/>
     </choice>
   </define>
   <define name="integerField">
@@ -493,6 +494,13 @@
       <ref name="groupType"/>
       <ref name="sequenceType"/>
       <ref name="enumType"/>
+      <ref name="intVectorType"/>
+      <element name="field">
+        <optional>
+          <ref name="tagAttr"/>
+        </optional>
+        <ref name="fieldType"/>
+      </element>
     </choice>
   </define>
   <define name="intergerType">
@@ -674,7 +682,7 @@
             <zeroOrMore>
               <ref name="instruction"/>
             </zeroOrMore>
-            <ref name="fieldType"/>
+            <ref name="declaredType"/>
           </choice>
         </group>
         <ref name="other"/>
@@ -711,6 +719,55 @@
       <ref name="nameAttr"/>
       <ref name="declaredType"/>
     </element>
+  </define>
+  <define name="intVectorFieldContent">
+    <ref name="nsName"/>
+    <optional>
+      <ref name="presenceAttr"/>
+    </optional>
+    <optional>
+      <ref name="tagAttr"/>
+    </optional>
+  </define>
+  <define name="intVectorField">
+    <choice>
+      <element name="int32Vector">
+        <ref name="intVectorFieldContent"/>
+      </element>
+      <element name="uInt32Vector">
+        <ref name="intVectorFieldContent"/>
+      </element>
+      <element name="int64Vector">
+        <ref name="intVectorFieldContent"/>
+      </element>
+      <element name="uInt64Vector">
+        <ref name="intVectorFieldContent"/>
+      </element>
+    </choice>
+  </define>
+  <define name="intVectorType">
+    <choice>
+      <element name="int32Vector">
+        <optional>
+          <ref name="tagAttr"/>
+        </optional>
+      </element>
+      <element name="uInt32Vector">
+        <optional>
+          <ref name="tagAttr"/>
+        </optional>
+      </element>
+      <element name="int64Vector">
+        <optional>
+          <ref name="tagAttr"/>
+        </optional>
+      </element>
+      <element name="uInt64Vector">
+        <optional>
+          <ref name="tagAttr"/>
+        </optional>
+      </element>
+    </choice>
   </define>
   <define name="referenceAttr">
     <attribute name="reference">
