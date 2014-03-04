@@ -30,15 +30,21 @@ namespace mfast
   template <typename U>
   inline fast_istream& operator >> (fast_istream& strm, const int_mref<U>& mref)
   {
+    U value;
     if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
       mref.omit();
+    else
+      mref.as(value);
     return strm;
   }
 
   inline fast_istream& operator >> (fast_istream& strm, const exponent_mref& mref)
   {
-    if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
+    int8_t value;
+    if (!strm.decode(value, mref.instruction()->is_nullable()))
       mref.omit();
+    else
+      mref.as(value);
     return strm;
   }
 

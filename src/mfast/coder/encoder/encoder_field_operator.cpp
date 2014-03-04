@@ -437,7 +437,7 @@ namespace mfast
       template <typename T>
       bool operator()(const T& v, const value_storage& previous) const
       {
-        return v.value() == reinterpret_cast<const typename T::value_type&>(previous.of_uint.content_) + 1;
+        return v.value() == previous.get<const typename T::value_type>() + 1;
       }
 
     };

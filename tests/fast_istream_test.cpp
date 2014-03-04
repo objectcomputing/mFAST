@@ -135,7 +135,7 @@ decode_byte_vector(const byte_stream& bs, bool nullable, const char* result, std
   fast_istreambuf sb(bs.data(), bs.size());
   fast_istream strm(&sb);
 
-  const unsigned char* str;
+  const unsigned char* str=0;
   uint32_t len;
 
   bool not_null = strm.decode(str, len, nullable, 0);
@@ -244,8 +244,7 @@ decode_pmap(const byte_stream& bs, const char* result_bits, std::size_t maxbits)
   decoder_presence_map pmap;
   strm.decode(pmap);
 
-  char bits[16];
-  memset(bits, 16, 0);
+  char bits[16]="";
 
   char* pos = bits;
 
