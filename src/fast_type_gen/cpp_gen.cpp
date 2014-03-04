@@ -494,8 +494,11 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
          << "  the_instruction(\n";
   }
   else {
-    out_ << "const static " << cref_scope() << name << "_cref::instruction_type\n"
-         << prefix_string() << name << "_instruction(\n";
+    if (name == "_")
+      out_ << "const static " << cref_scope() << "instruction_type\n";
+    else
+      out_ << "const static " << cref_scope() << name << "_cref::instruction_type\n";
+    out_ << prefix_string() << name << "_instruction(\n";
   }
 
   out_ << "  "<<  index << ",\n"

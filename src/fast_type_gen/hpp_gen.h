@@ -58,6 +58,7 @@ private:
   void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix);
   virtual void generate(const mfast::aggregate_view_info& info);
+  void gen_sequence_typedef(const mfast::sequence_field_instruction* inst, const std::string& name);
 
   typedef indented_stringstream ind_stream;
   std::set<std::string> dependency_;

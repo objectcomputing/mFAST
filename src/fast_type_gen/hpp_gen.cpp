@@ -228,6 +228,31 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
   }
 }
 
+void hpp_gen::gen_sequence_typedef(const mfast::sequence_field_instruction* inst, const std::string& name)
+{
+  std::string element_type;
+  std::string trait;
+  const mfast::field_instruction* element_instruction = get_element_instruction(inst);
+  element_type = cpp_type_of(element_instruction, &dependency_);
+
+  if (inst->element_instruction())
+    trait = "mfast::defined_element_sequence_trait";
+  else {
+    trait = "mfast::sole_element_sequence_trait";
+  }
+
+  if (element_type.size() == 0) {
+    // in this case, it's most likely to be a sequence of sequnece
+    const mfast::sequence_field_instruction* nested_inst = dynamic_cast<const mfast::sequence_field_instruction*>(element_instruction);
+    if (nested_inst) {
+      element_type = name + "_element";
+      gen_sequence_typedef(nested_inst, element_type);
+    }
+  }
+  header_cref_ << indent << "typedef mfast::make_sequence_cref<" << element_type << "_cref, " << trait << "> " << name << "_cref;\n";
+  header_mref_ << indent << "typedef mfast::make_sequence_mref<" << element_type << "_mref, " << trait << "> " << name << "_mref;\n";
+}
+
 void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_level)
 {
   std::string name( cpp_name( inst ) );
@@ -285,19 +310,7 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
 
   }
   else {
-
-    std::string element_type;
-    std::string trait;
-
-    element_type = cpp_type_of(element_instruction,&dependency_);
-
-    if (inst->element_instruction())
-      trait = "mfast::defined_element_sequence_trait";
-    else
-      trait = "mfast::sole_element_sequence_trait";
-
-    header_cref_ << indent << "typedef mfast::make_sequence_cref<" << element_type << "_cref, " << trait << "> " << name << "_cref;\n";
-    header_mref_ << indent << "typedef mfast::make_sequence_mref<" << element_type << "_mref, " << trait << "> " << name << "_mref;\n";
+    gen_sequence_typedef(inst, name);
   }
 
   if (!top_level) {

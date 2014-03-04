@@ -113,5 +113,12 @@
     <field name="education" presence="optional">
       <type name="Education" />
     </field>
+    <int32Vector name="test_vector" />
+
+    <sequence name="twoDimSequence">
+      <sequence>
+        <string />
+      </sequence>
+    </sequence>
   </template>
 </templates>
