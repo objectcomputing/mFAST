@@ -424,7 +424,7 @@ namespace mfast
       template <typename T>
       void operator()(T&, value_storage& previous) const
       {
-        ++reinterpret_cast<typename T::value_type&>(previous.of_uint.content_);
+        previous.set<typename T::value_type>(previous.get<typename T::value_type>() + 1 );
       }
 
     };
@@ -609,7 +609,7 @@ namespace mfast
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
 
           uint32_t delta_len;
-          const typename T::value_type* delta_str;
+          const typename T::value_type* delta_str=0;
           stream.decode(delta_str, delta_len, false, mref.instruction());
 
           this->apply_string_delta(mref,
