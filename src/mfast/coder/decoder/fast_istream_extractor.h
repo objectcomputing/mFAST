@@ -31,7 +31,7 @@ namespace mfast
   inline fast_istream& operator >> (fast_istream& strm, const int_mref<U>& mref)
   {
     U value;
-    if (!strm.decode(mref.value_ref(), mref.instruction()->is_nullable()))
+    if (!strm.decode(value, mref.instruction()->is_nullable()))
       mref.omit();
     else
       mref.as(value);

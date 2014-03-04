@@ -172,11 +172,11 @@ namespace mfast {
 
   protected:
 
-    T& value_ref() const
-    {
-      this->storage()->present(1);
-      return *reinterpret_cast<T*>(&this->storage()->of_uint.content_);
-    }
+    // T& value_ref() const
+    // {
+    //   this->storage()->present(1);
+    //   return *reinterpret_cast<T*>(&this->storage()->of_uint.content_);
+    // }
 
     void as_present(bool present) const
     {

@@ -342,7 +342,7 @@ namespace mfast
       template <typename T>
       bool operator()(const int_cref<T>& v, const value_storage& prev) const
       {
-        return v.absent() == prev.is_empty() && v.value() == reinterpret_cast<const T&>(prev.of_uint.content_);
+        return v.absent() == prev.is_empty() && v.value() == prev.get<T>();
       }
 
       bool operator()(const exponent_cref& v, const value_storage& prev) const
