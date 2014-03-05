@@ -55,6 +55,7 @@ namespace mfast {
     typedef std::size_t size_t;
     typedef const T* iterator;
     typedef iterator const_iterator;
+    typedef const T& const_reference;
     typedef InstructionType instruction_type;
     typedef const instruction_type* instruction_cptr;
     typedef std::reverse_iterator<iterator> reverse_iterator;
@@ -266,6 +267,7 @@ namespace mfast {
   public:
     typedef std::size_t size_t;
     typedef typename base_type::value_type value_type;
+    typedef value_type& reference;
     typedef value_type* iterator;
     typedef typename base_type::instruction_cptr instruction_cptr;
     typedef std::reverse_iterator<iterator> reverse_iterator;
