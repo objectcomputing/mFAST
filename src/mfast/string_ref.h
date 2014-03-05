@@ -57,15 +57,15 @@ namespace mfast {
       return boost::string_ref(this->data(), this->size());
     }
 
-    bool operator == (const char* other) const
+    bool operator == (const boost::string_ref& other) const
     {
       return compare(other) == 0;
     }
 
-    bool operator == (const std::string& other) const
-    {
-      return compare(other) == 0;
-    }
+    // bool operator == (const std::string& other) const
+    // {
+    //   return compare(other) == 0;
+    // }
 
     template <typename OtherIntruction>
     bool operator == (const string_cref_base<OtherIntruction>& other) const
@@ -73,15 +73,15 @@ namespace mfast {
       return compare(other) == 0;
     }
 
-    bool operator != (const char* other) const
+    bool operator != (const boost::string_ref& other) const
     {
       return compare(other) != 0;
     }
 
-    bool operator != (const std::string& other) const
-    {
-      return compare(other) != 0;
-    }
+    // bool operator != (const std::string& other) const
+    // {
+    //   return compare(other) != 0;
+    // }
 
     template <typename OtherIntruction>
     bool operator != (const string_cref_base<OtherIntruction>& other) const
@@ -89,15 +89,15 @@ namespace mfast {
       return compare(other) != 0;
     }
 
-    bool operator > (const char* other) const
+    bool operator > (const boost::string_ref& other) const
     {
       return compare(other) > 0;
     }
 
-    bool operator > (const std::string& other) const
-    {
-      return compare(other) > 0;
-    }
+    // bool operator > (const std::string& other) const
+    // {
+    //   return compare(other) > 0;
+    // }
 
     template <typename OtherIntruction>
     bool operator > (const string_cref_base<OtherIntruction>& other) const
@@ -105,15 +105,15 @@ namespace mfast {
       return compare(other) >= 0;
     }
 
-    bool operator >= (const char* other) const
+    bool operator >= (const boost::string_ref& other) const
     {
       return compare(other) >= 0;
     }
 
-    bool operator >= (const std::string& other) const
-    {
-      return compare(other) >= 0;
-    }
+    // bool operator >= (const std::string& other) const
+    // {
+    //   return compare(other) >= 0;
+    // }
 
     template <typename OtherIntruction>
     bool operator >=(const string_cref_base<OtherIntruction>& other) const
@@ -121,15 +121,15 @@ namespace mfast {
       return compare(other) >= 0;
     }
 
-    bool operator < (const char* other) const
+    bool operator < (const boost::string_ref& other) const
     {
       return compare(other) < 0;
     }
-
-    bool operator < (const std::string& other) const
-    {
-      return compare(other) < 0;
-    }
+    //
+    // bool operator < (const std::string& other) const
+    // {
+    //   return compare(other) < 0;
+    // }
 
     template <typename OtherIntruction>
     bool operator < (const string_cref_base<OtherIntruction>& other) const
@@ -137,15 +137,15 @@ namespace mfast {
       return compare(other) < 0;
     }
 
-    bool operator <= (const char* other) const
+    bool operator <= (const boost::string_ref& other) const
     {
       return compare(other) <= 0;
     }
 
-    bool operator <= (const std::string& other) const
-    {
-      return compare(other) <= 0;
-    }
+    // bool operator <= (const std::string& other) const
+   //  {
+   //    return compare(other) <= 0;
+   //  }
 
     template <typename OtherIntruction>
     bool operator <=(const string_cref_base<OtherIntruction>& other) const
@@ -153,18 +153,15 @@ namespace mfast {
       return compare(other) <= 0;
     }
 
-    int compare(const char* other) const
+    int compare(const boost::string_ref& other) const
     {
-      int result = strncmp(this->data(), other, this->size());
-      if (result != 0 ) return result;
-      if (other[this->size()] == '\0') return 0;
-      return -1;
+      return this->value().compare(other);
     }
 
-    int compare(const std::string& other) const
-    {
-      return -other.compare(0, other.size(), this->data(), this->size());
-    }
+    // int compare(const std::string& other) const
+   //  {
+   //    return -other.compare(0, other.size(), this->data(), this->size());
+   //  }
 
     template <typename OtherIntruction>
     int compare(const string_cref_base<OtherIntruction>& other) const
@@ -324,19 +321,19 @@ namespace mfast {
         this->assign(s.begin(), s.end());
     }
 
-    void as (const char* s) const
-    {
-      this->assign(s, s+strlen(s));
-    }
-
-    void as (const std::string& s) const
+    void as (const boost::string_ref& s) const
     {
       this->assign(s.begin(), s.end());
     }
 
-    void refers_to (const char* str) const
+    // void as (const std::string& s) const
+    // {
+    //   this->assign(s.begin(), s.end());
+    // }
+
+    void refers_to (const boost::string_ref& s) const
     {
-      base_type::refers_to(str, std::strlen(str));
+      base_type::refers_to(s.data(), s.size());
     }
 
     void shallow_assign (const char* str) const
@@ -353,6 +350,8 @@ namespace mfast {
     {
       this->resize(this->size() -1);
     }
+
+    using base_type::operator==;
 
   };
 
@@ -388,34 +387,34 @@ namespace mfast {
     {
     }
 
-    vector_mref& operator = (const char* s)
-    {
-      this->assign(s, s+strlen(s));
-      return *this;
-    }
-
-    vector_mref& operator = (const std::string& s)
+    vector_mref& operator = (const boost::string_ref& s)
     {
       this->assign(s.begin(), s.end());
       return *this;
     }
 
-    const vector_mref& append (const std::string& str) const
+    // vector_mref& operator = (const std::string& s)
+    // {
+    //   this->assign(s.begin(), s.end());
+    //   return *this;
+    // }
+
+    const vector_mref& append (const boost::string_ref& str) const
     {
       this->insert(this->end(), str.begin(), str.end());
       return *this;
     }
 
-    const vector_mref& append (const std::string& str, size_t subpos, size_t sublen) const
+    const vector_mref& append (const boost::string_ref& str, size_t subpos, size_t sublen) const
     {
       this->insert(this->end(), &str[subpos], &str[subpos+sublen]);
       return *this;
     }
 
-    const vector_mref& append (const char* s) const
-    {
-      return this->append(s, std::strlen(s));
-    }
+    // const vector_mref& append (const char* s) const
+    // {
+    //   return this->append(s, std::strlen(s));
+    // }
 
     const vector_mref& append (const char* s, size_t n) const
     {
@@ -436,15 +435,15 @@ namespace mfast {
       return *this;
     }
 
-    const vector_mref& operator+= (const std::string& str) const
+    const vector_mref& operator+= (const boost::string_ref& str) const
     {
       return this->append(str);
     }
 
-    const vector_mref& operator+= (const char* s) const
-    {
-      return this->append(s);
-    }
+    // const vector_mref& operator+= (const char* s) const
+    // {
+    //   return this->append(s);
+    // }
 
     const vector_mref& operator+= (char c) const
     {
@@ -485,34 +484,34 @@ namespace mfast {
     {
     }
 
-    vector_mref& operator = (const char* s)
-    {
-      this->assign(s, s+strlen(s));
-      return *this;
-    }
+    // vector_mref& operator = (const char* s)
+    // {
+    //   this->assign(s, s+strlen(s));
+    //   return *this;
+    // }
 
-    vector_mref& operator = (const std::string& s)
+    vector_mref& operator = (const boost::string_ref& s)
     {
       this->assign(s.begin(), s.end());
       return *this;
     }
 
-    const vector_mref& append (const std::string& str) const
+    const vector_mref& append (const boost::string_ref& str) const
     {
       this->insert(this->end(), str.begin(), str.end());
       return *this;
     }
 
-    const vector_mref& append (const std::string& str, size_t subpos, size_t sublen) const
+    const vector_mref& append (const boost::string_ref& str, size_t subpos, size_t sublen) const
     {
       this->insert(this->end(), &str[subpos], &str[subpos+sublen]);
       return *this;
     }
 
-    const vector_mref& append (const char* s) const
-    {
-      return this->append(s, std::strlen(s));
-    }
+    // const vector_mref& append (const char* s) const
+  //   {
+  //     return this->append(s, std::strlen(s));
+  //   }
 
     const vector_mref& append (const char* s, size_t n) const
     {
@@ -533,15 +532,15 @@ namespace mfast {
       return *this;
     }
 
-    const vector_mref& operator+= (const std::string& str) const
+    const vector_mref& operator+= (const boost::string_ref& str) const
     {
       return this->append(str);
     }
 
-    const vector_mref& operator+= (const char* s) const
-    {
-      return this->append(s);
-    }
+    // const vector_mref& operator+= (const char* s) const
+   //  {
+   //    return this->append(s);
+   //  }
 
     const vector_mref& operator+= (char c) const
     {
@@ -586,34 +585,34 @@ namespace mfast {
       return string_cref<T>(this->storage(), this->instruction());
     }
 
-    string_mref& operator = (const char* s)
-    {
-      this->assign(s, s+strlen(s));
-      return *this;
-    }
+    // string_mref& operator = (const char* s)
+    // {
+    //   this->assign(s, s+strlen(s));
+    //   return *this;
+    // }
 
-    string_mref& operator = (const std::string& s)
+    string_mref& operator = (const boost::string_ref& s)
     {
       this->assign(s.begin(), s.end());
       return *this;
     }
 
-    const string_mref& append (const std::string& str) const
+    const string_mref& append (const boost::string_ref& str) const
     {
       this->insert(this->end(), str.begin(), str.end());
       return *this;
     }
 
-    const string_mref& append (const std::string& str, size_t subpos, size_t sublen) const
+    const string_mref& append (const boost::string_ref& str, size_t subpos, size_t sublen) const
     {
       this->insert(this->end(), &str[subpos], &str[subpos+sublen]);
       return *this;
     }
 
-    const string_mref& append (const char* s) const
-    {
-      return this->append(s, std::strlen(s));
-    }
+    // const string_mref& append (const char* s) const
+    // {
+    //   return this->append(s, std::strlen(s));
+    // }
 
     const string_mref& append (const char* s, size_t n) const
     {
@@ -634,15 +633,15 @@ namespace mfast {
       return *this;
     }
 
-    const string_mref& operator+= (const std::string& str) const
+    const string_mref& operator+= (const boost::string_ref& str) const
     {
       return this->append(str);
     }
 
-    const string_mref& operator+= (const char* s) const
-    {
-      return this->append(s);
-    }
+    // const string_mref& operator+= (const char* s) const
+   //  {
+   //    return this->append(s);
+   //  }
 
     const string_mref& operator+= (char c) const
     {
