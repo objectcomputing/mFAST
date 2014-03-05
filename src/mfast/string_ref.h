@@ -334,14 +334,24 @@ namespace mfast {
       this->assign(s.begin(), s.end());
     }
 
+    void refers_to (const char* str) const
+    {
+      base_type::refers_to(str, std::strlen(str));
+    }
+
     void shallow_assign (const char* str) const
     {
-      base_type::shallow_assign(str, std::strlen(str));
+      base_type::refers_to(str, std::strlen(str));
     }
 
     void swap(const string_mref_base<T>& other) const
     {
       base_type::swap(other);
+    }
+
+    void pop_back() const
+    {
+      this->resize(this->size() -1);
     }
 
   };

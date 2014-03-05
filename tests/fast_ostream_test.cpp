@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(inserter_test)
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref mref(&alloc, &storage, &inst);
-    mref.shallow_assign("AAA");
+    mref.refers_to("AAA");
 
     BOOST_CHECK(insert_to_stream(mref, "\x41\x41\xC1"));
   }

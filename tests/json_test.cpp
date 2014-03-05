@@ -70,9 +70,10 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   stock.set_warehouse().as(300);
   stock.set_retail().as(20);
 
-  const char ext_data[] = "{\"test1\":1}";
-  const unsigned char* uext_data = reinterpret_cast<const unsigned char*>(ext_data);
-  product_ref.set_ext().assign(uext_data, uext_data+sizeof(ext_data)-1);
+  const unsigned char ext_data[] = "{\"test1\":1}";
+  // product_ref.set_ext().assign(ext_data, ext_data+sizeof(ext_data)-1);
+
+  product_ref.set_ext().refers_to(ext_data, sizeof(ext_data)-1);
 
   std::ostringstream ostrm;
   mfast::json::encode(ostrm,

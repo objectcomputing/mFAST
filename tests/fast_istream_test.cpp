@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref mref(&alloc, &storage, &inst);
-    mref.shallow_assign("AAA");
+    mref.refers_to("AAA");
 
     BOOST_CHECK(extract_from_stream("\x41\x41\xC1", mref));
   }
