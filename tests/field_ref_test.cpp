@@ -482,9 +482,12 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     ref.replace(4, 2, "aaaa", 4);
     BOOST_CHECK(ref == "xxxxaaaa");
 
-    ref.shallow_assign("abcde");
+    ref.refers_to("abcde");
     BOOST_CHECK(ref == "abcde");
     BOOST_CHECK_EQUAL(storage.of_array.capacity_in_bytes_, 0U);
+
+    ref.pop_back();
+    BOOST_CHECK(ref == "abcd");
 
     ref.omit();
     BOOST_CHECK(ref.absent());
@@ -711,6 +714,10 @@ BOOST_AUTO_TEST_CASE(group_field_test)
 
     BOOST_CHECK_EQUAL(mf0.size(),                            4U);
     BOOST_CHECK_EQUAL(memcmp(mf0.data(), bytes, mf0.size()), 0);
+
+    mf0.refers_to(bytes, 4);
+    BOOST_CHECK_EQUAL(mf0.data(), bytes);
+    BOOST_CHECK_EQUAL(mf0.size(), 4U);
   }
 
   group_inst.destruct_value(storage, &alloc);

@@ -371,6 +371,12 @@ namespace mfast {
       insert(end(), c);
     }
 
+    void pop_back() const
+    {
+      if (this->size())
+        this->storage()->of_array.len_ -= 1;
+    }
+
     iterator insert (iterator position, value_type val) const
     {
       iterator itr = this->shift(position, 1);
@@ -405,7 +411,7 @@ namespace mfast {
       std::memcpy(begin(), val, n*sizeof(value_type));
     }
 
-    void shallow_assign(const value_type* addr, size_t n) const
+    void refers_to(const value_type* addr, size_t n) const
     {
 
       assert( n < static_cast<size_t>((std::numeric_limits<int32_t>::max)()) );
@@ -418,6 +424,11 @@ namespace mfast {
       this->storage()->array_length(n);
       this->storage()->of_array.capacity_in_bytes_ = 0;
     }
+
+     void shallow_assign(const value_type* addr, size_t n) const
+     {
+       this->refers_to(addr, n);
+     }
 
     void replace(size_t pos, size_t count,
                  const value_type* addr, size_t count2 ) const;

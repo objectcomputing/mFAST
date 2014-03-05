@@ -1154,7 +1154,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 
     ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
     // change the previous value to "ABCDE" so we can verified the case with defined previous value
-    prev.shallow_assign( "ABCDE" );
+    prev.refers_to( "ABCDE" );
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  assigned – the value of the field is the previous value.
     result.as("ABCDE");
