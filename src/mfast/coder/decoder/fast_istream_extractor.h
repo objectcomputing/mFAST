@@ -49,7 +49,8 @@ inline fast_istream& operator >> (fast_istream& strm, const ascii_string_mref& m
   uint32_t len;
   if (strm.decode(buf, len, mref.instruction()->is_nullable(), mref.instruction())) {
     mref.assign(buf, buf+len);
-    mref[len-1] &= '\x7F';
+    if (len > 0)
+      mref[len-1] &= '\x7F';
   }
   else {
     mref.as_absent();
