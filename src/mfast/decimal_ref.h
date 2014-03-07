@@ -361,12 +361,14 @@ namespace mfast {
     }
 
     void as (decimal d) const
+#ifndef _MSC_VER
     {
-      as<18,boost::int32_t, void>(d);
+      this->as<18,boost::int32_t, void>(d);
     }
 
     template <unsigned Digits10, class ExponentType, class Allocator>
-    void as(boost::multiprecision::number<boost::multiprecision::cpp_dec_float<Digits10,ExponentType,Allocator> > d) const
+    void as(boost::multiprecision::number<boost::multiprecision::backends::cpp_dec_float<Digits10,ExponentType,Allocator> > d) const
+#endif
     {
       double m;
       int32_t exp;
@@ -397,9 +399,11 @@ namespace mfast {
         this->storage()->present(1);
       }
       else {
-        as(decimal(decimal_backend(mant, exp)));
+        as(make_decimal(mant, exp));
       }
     }
+
+
 
     void set_mantissa(int64_t v) const
     {
@@ -465,16 +469,31 @@ namespace mfast {
     typedef decimal_mref mref_type;
 
     decimal_type(mfast::allocator* =0,
-                 instruction_cptr  instruction = decimal_field_instruction::default_instruction())
+                 instruction_cptr instruction = decimal_field_instruction::default_instruction())
       : instruction_(instruction)
     {
       instruction_->construct_value(my_storage_, 0);
     }
 
-    mref_type ref() { return mref_type(0, &my_storage_, instruction_); }
-    mref_type mref()  { return mref_type(0, &my_storage_, instruction_); }
-    cref_type ref() const  { return cref_type(&my_storage_, instruction_); }
-    cref_type cref() const  { return cref_type(&my_storage_, instruction_); }
+    mref_type ref()
+    {
+      return mref_type(0, &my_storage_, instruction_);
+    }
+
+    mref_type mref()
+    {
+      return mref_type(0, &my_storage_, instruction_);
+    }
+
+    cref_type ref() const
+    {
+      return cref_type(&my_storage_, instruction_);
+    }
+
+    cref_type cref() const
+    {
+      return cref_type(&my_storage_, instruction_);
+    }
 
   private:
     instruction_cptr instruction_;

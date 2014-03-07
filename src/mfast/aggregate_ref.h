@@ -533,7 +533,7 @@ namespace mfast
 
   template <typename ConstRef>
   inline bool
-  make_aggregate_mref<ConstRef>::iterator::equal(make_aggregate_mref<ConstRef>::iterator const& other) const
+  make_aggregate_mref<ConstRef>::iterator::equal(typename make_aggregate_mref<ConstRef>::iterator const& other) const
   {
     return (other.storage_array_ == this->storage_array_);
   }
