@@ -1,9 +1,14 @@
 # The name of our project is "mFAST". CMakeLists files in this project can
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
-cmake_minimum_required (VERSION 2.6.0)
-project (mFAST)
 
+if(WIN32)
+	cmake_minimum_required (VERSION 2.8.8)
+else()
+	cmake_minimum_required (VERSION 2.6.4)
+endif()
+
+project (mFAST)
 
 set(MFAST_MAJOR_VERSION 1)
 set(MFAST_MINOR_VERSION 1)
@@ -76,6 +81,16 @@ add_subdirectory (src)
 link_directories (${PROJECT_BINARY_DIR}/src)
 
 #============================================================
+# Install fast_type_gen batch file to set up the PATH environment
+# variable for using BOOST libraries
+
+if(WIN32)
+configure_file(invoke.bat.in
+               "${PROJECT_BINARY_DIR}/bin/invoke.bat"
+               @ONLY)
+endif(WIN32)
+
+#============================================================
 # FASTTYPEGEN_TARGET (public macro)
 #============================================================
 #
@@ -100,18 +115,32 @@ endforeach(input)
 ## Not at the time when "make" is called.
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-add_custom_command(
-  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-  COMMAND ${CMAKE_BINARY_DIR}/bin/fast_type_gen
-  ARGS ${INPUTS}
-  DEPENDS ${ARGN} fast_type_gen
-  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+if (WIN32)
+	add_custom_command(
+	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat
+	  ARGS $<TARGET_FILE:fast_type_gen>  ${INPUTS}
+	  DEPENDS ${ARGN} fast_type_gen
+	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+else()
+	add_custom_command(
+	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+	  COMMAND ${PROJECT_BINARY_DIR}/bin/fast_type_gen
+	  ARGS ${INPUTS}
+	  DEPENDS ${ARGN} fast_type_gen
+	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 set(FASTTYPEGEN_${Name}_DEFINED TRUE)
 set(FASTTYPEGEN_${Name}_INPUTS ${ARGN})
 endmacro()
+
+
+
 #============================================================
 
 # Recurse into the "src" and "unit-tests" subdirectories. This does not actually

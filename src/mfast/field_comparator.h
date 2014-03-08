@@ -12,7 +12,7 @@ namespace mfast
     class field_comparator
     {
     private:
-      const T& parent_;
+      T parent_;
 
     public:
 
@@ -62,10 +62,8 @@ namespace mfast
     template <>
     class field_comparator<sequence_cref>
     {
-    public:
-
     private:
-      const sequence_cref& parent_;
+      sequence_cref parent_;
 
     public:
       enum {
