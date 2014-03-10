@@ -20,6 +20,19 @@
 
 namespace mfast
 {
+
+  templateref_instruction::templateref_instruction(uint16_t        field_index,
+                                                   instruction_tag tag)
+    : field_instruction(field_index, operator_none,
+                        field_type_templateref,
+                        presence_mandatory,
+                        0,
+                        "",
+                        "",
+                        tag)
+  {
+  }
+
   void templateref_instruction::construct_value(value_storage& storage,
                                                 allocator*     alloc) const
   {

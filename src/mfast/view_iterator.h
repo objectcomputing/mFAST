@@ -18,7 +18,7 @@ namespace mfast
 
     bool cont() const
     {
-      return prop & CONTINUE_BIT;
+      return (prop & CONTINUE_BIT) != 0;
     }
 
     uint64_t prefix_diff() const
@@ -50,7 +50,17 @@ namespace mfast
   };
 
 
-  class MFAST_EXPORT view_iterator
+  class view_iterator;
+
+  class MFAST_EXPORT view_iterator_helper
+  {
+  public:
+    static bool access_field(view_iterator* itr);
+    static void increment(view_iterator* itr);
+  };
+
+
+  class view_iterator
     : public boost::iterator_facade<view_iterator,
                                     field_cref,
                                     boost::forward_traversal_tag,
@@ -75,14 +85,15 @@ namespace mfast
 
   private:
     friend class boost::iterator_core_access;
+    friend class view_iterator_helper;
 
     field_cref dereference() const
     {
       return leaf_;
     }
 
-    bool access_field();
-    void increment();
+    bool access_field() { return view_iterator_helper::access_field(this); }
+    void increment()  { return view_iterator_helper::increment(this); }
     bool equal(const view_iterator& other) const
     {
       return this->view_info_ == other.view_info_;
@@ -92,8 +103,6 @@ namespace mfast
     typedef std::vector<aggregate_cref::iterator> non_leave_stack_t;
     non_leave_stack_t non_leaves_;
     field_cref leaf_;
-
-
   };
 
 

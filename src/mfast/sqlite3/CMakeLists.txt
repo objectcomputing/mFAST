@@ -32,6 +32,8 @@ if (BUILD_SHARED_LIBS)
 	set_target_properties(mfast_sqlite3 PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   target_link_libraries(mfast_sqlite3 mfast sqlite3)
+  set_target_properties(mfast_sqlite3 PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+
 
   install(TARGETS mfast_sqlite3
           EXPORT  mFASTTargets

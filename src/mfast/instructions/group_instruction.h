@@ -74,7 +74,7 @@ namespace mfast
     /// Returns the number of bytes needed for the content of the group
     uint32_t group_content_byte_count() const
     {
-      return subinstructions_.size() * sizeof(value_storage);
+      return static_cast<uint32_t>(subinstructions_.size() * sizeof(value_storage));
     }
 
     /// Returns the index for the subinstruction with specified id,
@@ -86,37 +86,18 @@ namespace mfast
     int find_subinstruction_index_by_name(const char* name) const;
 
 
-    const field_instruction* subinstruction(std::size_t index) const
-    {
-      assert(index < subinstructions_.size());
-      return subinstructions_[index];
-    }
-
+    const field_instruction* subinstruction(std::size_t index) const;
     std::size_t segment_pmap_size() const
     {
       return segment_pmap_size_;
     }
 
-    instructions_view_t  subinstructions() const
+    const instructions_view_t&  subinstructions() const
     {
       return subinstructions_;
     }
 
-    void  set_subinstructions(instructions_view_t instructions)
-    {
-      subinstructions_ = instructions;
-      segment_pmap_size_ = 0;
-      BOOST_FOREACH(const field_instruction* inst, instructions)
-      {
-        segment_pmap_size_ += inst->pmap_size();
-      }
-
-      // for (uint32_t i = 0; i < subinstructions_.size(); ++i) {
-      //    segment_pmap_size_ += subinstruction(i)->pmap_size();
-      //  }
-
-    }
-
+    void  set_subinstructions(instructions_view_t instructions);
     const char* typeref_name() const
     {
       return typeref_name_;
@@ -177,8 +158,14 @@ namespace mfast
     const char* typeref_name_;
     const char* typeref_ns_;
     std::size_t segment_pmap_size_;
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable : 4251 )
+#endif
     instructions_view_t subinstructions_;
-
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
   };
 
   template <typename T>

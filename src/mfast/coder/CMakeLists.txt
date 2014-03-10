@@ -33,6 +33,8 @@ if (BUILD_SHARED_LIBS)
 	set_target_properties(mfast_coder PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   target_link_libraries(mfast_coder mfast)
+  set_target_properties(mfast_coder PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+
 
   install(TARGETS mfast_coder
           EXPORT  mFASTTargets

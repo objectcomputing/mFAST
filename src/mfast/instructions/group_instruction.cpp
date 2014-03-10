@@ -139,4 +139,20 @@ namespace mfast
     storage.of_group.content_ = fields_storage;
   }
 
+  void  group_field_instruction::set_subinstructions(instructions_view_t instructions)
+  {
+    subinstructions_ = instructions;
+    segment_pmap_size_ = 0;
+    BOOST_FOREACH(const field_instruction* inst, instructions)
+    {
+      segment_pmap_size_ += inst->pmap_size();
+    }
+  }
+
+  const field_instruction* group_field_instruction::subinstruction(std::size_t index) const
+  {
+    assert(index < subinstructions_.size());
+    return subinstructions_[index];
+  }
+
 } /* mfast */

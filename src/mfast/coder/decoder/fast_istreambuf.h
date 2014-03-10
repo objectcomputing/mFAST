@@ -61,7 +61,7 @@ namespace mfast
     friend class decoder_presence_map;
     friend class fast_decoder;
 
-    void gbump (int n)
+    void gbump (std::ptrdiff_t n)
     {
       gptr_ += n;
     }

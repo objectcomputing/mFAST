@@ -601,7 +601,7 @@ namespace mfast {
   make_sequence_mref<ElementType, SequenceTrait, SequenceInstructionType>::resize(size_t n) const
   {
     this->reserve (n);
-    this->storage()->array_length(n);
+    this->storage()->array_length(static_cast<uint32_t>(n));
   }
 
   template <typename ElementType, typename SequenceTrait, typename SequenceInstructionType>

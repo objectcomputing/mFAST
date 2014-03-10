@@ -230,7 +230,7 @@ namespace mfast
         // the nest_indeces must terminiated with a -1
         nest_indices[i] = -1;
         result.nest_indices = nest_indices;
-        max_depth = std::max<unsigned>(max_depth, field_indeces.size());
+        max_depth = std::max<unsigned>(max_depth, static_cast<unsigned>(field_indeces.size()));
         result.prop += 1;
         if (fields.size()) {
           result.prop += std::mismatch(nest_indices, nest_indices+i, fields.back().nest_indices).first - nest_indices;

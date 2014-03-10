@@ -75,5 +75,14 @@ namespace mfast {
   }
 
 ///////////////////////////////////////////////////////
+
+#ifdef _MSC_VER
+
+  template class MFAST_EXPORT int_field_instruction<int32_t>;
+  template class MFAST_EXPORT int_field_instruction<uint32_t>;
+  template class MFAST_EXPORT int_field_instruction<int64_t>;
+  template class MFAST_EXPORT int_field_instruction<uint64_t>;
+#endif
+
 } // namespace mfast
 #endif /* end of include guard: FIELD_INSTRUCTION_H_PMKVDZOC */

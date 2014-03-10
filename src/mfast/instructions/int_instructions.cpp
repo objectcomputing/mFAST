@@ -20,6 +20,35 @@
 
 namespace mfast
 {
+
+  integer_field_instruction_base::integer_field_instruction_base(uint16_t             field_index,
+                                                                 operator_enum_t      operator_id,
+                                                                 int                  field_type,
+                                                                 presence_enum_t      optional,
+                                                                 uint32_t             id,
+                                                                 const char*          name,
+                                                                 const char*          ns,
+                                                                 const op_context_t*  context,
+                                                                 const value_storage& initial_storage,
+                                                                 instruction_tag      tag)
+    : field_instruction(field_index, operator_id, field_type, optional, id, name, ns, tag)
+    , op_context_(context)
+    , initial_value_(initial_storage)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_storage.is_empty() ? &default_value_ : &initial_value_)
+  {
+    mandatory_no_initial_value_ = !optional && initial_storage.is_empty();
+  }
+
+  integer_field_instruction_base::integer_field_instruction_base(const integer_field_instruction_base& other)
+    : field_instruction(other)
+    , op_context_(other.op_context_)
+    , initial_value_(other.initial_value_)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+  {
+  }
+
   void integer_field_instruction_base::construct_value(value_storage& storage,
                                                        allocator* /* alloc */) const
   {

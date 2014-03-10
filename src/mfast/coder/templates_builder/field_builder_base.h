@@ -21,16 +21,18 @@
 
 #include <deque>
 #include <map>
-#include "mfast/field_instructions.h"
 #include "xml_util.h"
 #include "template_registry_impl.h"
 namespace mfast
 {
+  class field_instruction;
+  class template_instruction;
+
   namespace coder
   {
     using namespace tinyxml2;
 
-    typedef std::map<std::string, const_instruction_ptr_t> type_map_t;
+    typedef std::map<std::string, const field_instruction*> type_map_t;
 
     class field_builder_base
     {

@@ -130,7 +130,7 @@ namespace mfast
 
         definition_->instructions_ = new (alloc())const_template_instruction_ptr_t[this->num_instructions()];
         std::copy(templates_.begin(), templates_.end(), definition_->instructions_);
-        definition_->instructions_count_ = templates_.size();
+        definition_->instructions_count_ = static_cast<uint32_t>(templates_.size());
       }
       return true;
     }

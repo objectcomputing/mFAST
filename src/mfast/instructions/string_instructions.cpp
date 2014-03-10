@@ -20,6 +20,44 @@
 
 namespace mfast
 {
+
+  const value_storage ascii_field_instruction::default_value_("");
+
+
+  ascii_field_instruction::ascii_field_instruction(uint16_t             field_index,
+                                                   operator_enum_t      operator_id,
+                                                   presence_enum_t      optional,
+                                                   uint32_t             id,
+                                                   const char*          name,
+                                                   const char*          ns,
+                                                   const op_context_t*  context,
+                                                   string_value_storage initial_value,
+                                                   instruction_tag      tag,
+                                                   field_type_enum_t    field_type)
+    :  vector_field_instruction_base(field_index,
+                                     operator_id,
+                                     field_type,
+                                     optional,
+                                     id, name, ns,
+                                     sizeof(char),
+                                     tag)
+    , op_context_(context)
+    , initial_value_(initial_value.storage_)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+  {
+    mandatory_no_initial_value_ = !optional && initial_value.storage_.is_empty();
+  }
+
+  ascii_field_instruction::ascii_field_instruction(const ascii_field_instruction& other)
+    : vector_field_instruction_base(other)
+    , op_context_(other.op_context_)
+    , initial_value_(other.initial_value_)
+    , prev_value_(&prev_storage_)
+    , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
+  {
+  }
+
   void ascii_field_instruction::construct_value(value_storage& storage,
                                                 allocator*       ) const
   {
@@ -45,9 +83,8 @@ namespace mfast
       dest.of_array.content_ = src.of_array.content_;
       dest.of_array.capacity_in_bytes_ = 0;
     }
-    dest.of_array.len_ = len;
+    dest.of_array.len_ = static_cast<uint32_t>(len);
   }
-
 
   ascii_field_instruction*
   ascii_field_instruction::clone(arena_allocator& alloc) const
@@ -55,16 +92,18 @@ namespace mfast
     return new (alloc) ascii_field_instruction(*this);
   }
 
-  const value_storage ascii_field_instruction::default_value_("");
-
-
   const ascii_field_instruction* ascii_field_instruction::default_instruction()
   {
     static const ascii_field_instruction inst(0,operator_none,presence_mandatory,0,"","",0, string_value_storage());
     return &inst;
   }
 
-
+  void ascii_field_instruction::initial_value(const value_storage& v)
+  {
+    initial_value_ = v;
+    initial_or_default_value_ = initial_value_.is_empty() ? &default_value_ : &initial_value_;
+    mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
+  }
 
   unicode_field_instruction*
   unicode_field_instruction::clone(arena_allocator& alloc) const
@@ -77,5 +116,7 @@ namespace mfast
     static const unicode_field_instruction inst(0,operator_none,presence_mandatory,0,"","",0, string_value_storage(), 0, "", "");
     return &inst;
   }
+
+
 
 } /* mfast */

@@ -230,7 +230,7 @@ namespace mfast
     string_value_storage(const char* v)
     {
       storage_.of_array.defined_bit_ = 1;
-      storage_.of_array.len_ = std::strlen(v) +1;
+      storage_.of_array.len_ = static_cast<uint32_t>(std::strlen(v) +1);
       storage_.of_array.content_ = const_cast<char*>(v);
       storage_.of_array.capacity_in_bytes_ = 0;
     }
@@ -238,7 +238,7 @@ namespace mfast
     string_value_storage(const char* v, std::size_t n)
     {
       storage_.of_array.defined_bit_ = 1;
-      storage_.of_array.len_ = n+1;
+      storage_.of_array.len_ = static_cast<uint32_t>(n+1);
       storage_.of_array.content_ = const_cast<char*>(v);
       storage_.of_array.capacity_in_bytes_ = 0;
     }

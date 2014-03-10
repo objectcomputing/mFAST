@@ -359,11 +359,11 @@ namespace mfast {
       size_t len = n+1;
       if ( len > this->capacity()) {
         reserve(n);
-        int bytes_to_set = n - this->size();
+        int64_t bytes_to_set = n - this->size();
         if (bytes_to_set > 0)
           std::memset(end(), c, bytes_to_set);
       }
-      this->storage()->array_length(n);
+      this->storage()->array_length(static_cast<uint32_t>(n));
     }
 
     void reserve(size_t n) const;
@@ -700,7 +700,7 @@ namespace mfast {
       std::memmove(src+(n*sizeof(value_type)), src, (this->size()+1-offset) * sizeof(value_type));
     }
 
-    this->storage()->of_array.len_ += n;
+    this->storage()->of_array.len_ += static_cast<uint32_t>(n);
     return src;
   }
 

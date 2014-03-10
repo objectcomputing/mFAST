@@ -18,7 +18,11 @@
 //
 #include <cstddef>
 #include <set>
+#include <boost/assign.hpp>
 #include "field_op.h"
+#include "mfast/instructions/decimal_instruction.h"
+#include "mfast/instructions/byte_vector_instruction.h"
+using namespace boost::assign;
 
 namespace mfast
 {

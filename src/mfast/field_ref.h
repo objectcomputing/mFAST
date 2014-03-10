@@ -57,7 +57,7 @@ namespace mfast {
   template <typename ElementRef, bool IsElementAggregate>
   struct sequence_iterator_base;
 
-  class field_cref
+  class MFAST_EXPORT field_cref
   {
   public:
 

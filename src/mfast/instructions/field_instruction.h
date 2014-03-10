@@ -110,7 +110,7 @@ namespace mfast {
 
   class field_instruction_visitor;
 
-  class instruction_tag
+  class MFAST_EXPORT instruction_tag
   {
   public:
     instruction_tag(uint64_t v=0)
@@ -219,6 +219,7 @@ namespace mfast {
                       const char*     ns,
                       instruction_tag tag);
 
+    field_instruction(const field_instruction& other);
 
     void optional(bool v)
     {

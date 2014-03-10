@@ -3,8 +3,6 @@
 
 namespace mfast
 {
-
-
   template <typename T>
   class array_view
   {

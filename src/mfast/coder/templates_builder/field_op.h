@@ -20,20 +20,30 @@
 #define FIELD_OP_H_CWKVZBY7
 #include <cstring>
 #include <map>
-#include <boost/assign/list_of.hpp> // for 'map_list_of()'
 #include <boost/lexical_cast.hpp>
-
 #include "mfast/arena_allocator.h"
-#include "mfast/field_instructions.h"
+#include "mfast/instructions/field_instruction.h"
 #include "xml_util.h"
 #include "../common/exceptions.h"
 
 namespace mfast {
+  class decimal_field_instruction;
+  template <typename T>
+  class int_field_instruction;
+
+  typedef int_field_instruction<int32_t> int32_field_instruction;
+  typedef int_field_instruction<uint32_t> uint32_field_instruction;
+  typedef int_field_instruction<int64_t> int64_field_instruction;
+  typedef int_field_instruction<uint64_t> uint64_field_instruction;
+
+  class ascii_field_instruction;
+  class enum_field_instruction;
+  class byte_vector_field_instruction;
+
   namespace coder {
 
 
     using namespace tinyxml2;
-    using namespace boost::assign; // bring 'map_list_of()' into scope
 
     struct tag_reason;
     typedef boost::error_info<tag_referenced_by,std::string> reason_info;

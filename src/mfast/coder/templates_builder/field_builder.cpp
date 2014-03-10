@@ -21,9 +21,9 @@
 #include "../common/exceptions.h"
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
+#include "mfast/field_instructions.h"
 
 using namespace tinyxml2;
-using namespace boost::assign; // bring 'map_list_of()' into scope
 
 
 namespace mfast
@@ -158,7 +158,7 @@ namespace mfast
       field_op fop(inst, &element_, alloc());
 
       field_instruction* instruction = new (alloc())int_field_instruction<IntType> (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -227,7 +227,7 @@ namespace mfast
         field_op exponent_op(inst, exponent_element, alloc());
 
         instruction = new (alloc())decimal_field_instruction(
-          parent_->num_instructions(),
+          static_cast<uint16_t>(parent_->num_instructions()),
           exponent_op.op_,
           get_presence(inst),
           get_id(inst),
@@ -243,7 +243,7 @@ namespace mfast
         field_op decimal_op(inst, &element_, alloc());
 
         instruction = new (alloc())decimal_field_instruction(
-          parent_->num_instructions(),
+          static_cast<uint16_t>(parent_->num_instructions()),
           decimal_op.op_,
           get_presence(inst),
           get_id(inst),
@@ -261,7 +261,7 @@ namespace mfast
     {
       field_op fop(inst, &element_, alloc());
       field_instruction* instruction = new (alloc())ascii_field_instruction  (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -288,7 +288,7 @@ namespace mfast
       fast_xml_attributes length_attrs(length_attributes);
 
       field_instruction* instruction = new (alloc())unicode_field_instruction  (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -318,7 +318,7 @@ namespace mfast
       fast_xml_attributes length_attrs(length_attributes);
 
       field_instruction* instruction = new (alloc())byte_vector_field_instruction  (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -337,7 +337,7 @@ namespace mfast
     void field_builder::visit(const int32_vector_field_instruction* inst, void*)
     {
       field_instruction* instruction = new (alloc())int32_vector_field_instruction  (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -349,7 +349,7 @@ namespace mfast
     void field_builder::visit(const uint32_vector_field_instruction* inst, void*)
     {
       field_instruction* instruction = new (alloc())uint32_vector_field_instruction  (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -361,7 +361,7 @@ namespace mfast
     void field_builder::visit(const int64_vector_field_instruction* inst, void*)
     {
       field_instruction* instruction = new (alloc())int64_vector_field_instruction  (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -373,7 +373,7 @@ namespace mfast
     void field_builder::visit(const uint64_vector_field_instruction* inst, void*)
     {
       field_instruction* instruction = new (alloc())uint64_vector_field_instruction  (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -410,7 +410,7 @@ namespace mfast
           field_instruction* new_inst;
           for (size_t i = 0; i < target->subinstructions().size(); ++i) {
             new_inst = target->subinstruction(i)->clone(alloc());
-            new_inst->field_index(parent_->num_instructions());
+            new_inst->field_index(static_cast<uint16_t>(parent_->num_instructions()));
             parent_->add_instruction(new_inst);
           }
           if (target->subinstructions().size() == 1 && new_inst->field_type() == field_type_sequence)
@@ -422,7 +422,7 @@ namespace mfast
       else {
 
         instruction = new (alloc())templateref_instruction(
-          parent_->num_instructions());
+          static_cast<uint16_t>(parent_->num_instructions()));
 
         parent_->add_instruction(instruction);
 
@@ -475,7 +475,7 @@ namespace mfast
       }
 
       group_field_instruction* instruction = new (alloc())group_field_instruction (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -522,7 +522,7 @@ namespace mfast
           int_value_storage<uint32_t>(length_fop.initial_value_)
           );
       }
-      else if (length_instruction->optional() != get_presence(inst))
+    else if (length_instruction->optional() != (get_presence(inst) == mfast::presence_optional))
       {
         length_instruction = new (alloc())uint32_field_instruction(
           0,
@@ -561,7 +561,7 @@ namespace mfast
 
 
       instruction = new (alloc())sequence_field_instruction (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -737,7 +737,7 @@ namespace mfast
       }
 
       enum_field_instruction* instruction = new (alloc())enum_field_instruction (
-        parent_->num_instructions(),
+        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -767,8 +767,10 @@ namespace mfast
           const enum_field_instruction* inst = dynamic_cast<const enum_field_instruction*>(this->find_type(0, "mfast:tag"));
           if (inst) {
             // treat the input tag as a "|" delimited tokens
+
             boost::char_separator<char> sep("| ");
-            boost::tokenizer< boost::char_separator<char> > tokens(std::string(tag_), sep);
+            std::string tag (tag_);
+            boost::tokenizer< boost::char_separator<char> > tokens(tag, sep);
             BOOST_FOREACH (const std::string &t, tokens)
             {
               uint64_t result;

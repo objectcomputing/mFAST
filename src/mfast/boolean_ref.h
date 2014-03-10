@@ -64,7 +64,7 @@ namespace mfast
 
     bool value() const
     {
-      return base_type::value();
+      return base_type::value() != 0;
     }
 
   };

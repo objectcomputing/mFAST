@@ -36,30 +36,9 @@ namespace mfast
                             const op_context_t*  context,
                             string_value_storage initial_value,
                             instruction_tag      tag = instruction_tag(),
-                            field_type_enum_t    field_type = field_type_ascii_string)
-      :  vector_field_instruction_base(field_index,
-                                       operator_id,
-                                       field_type,
-                                       optional,
-                                       id, name, ns,
-                                       sizeof(char),
-                                       tag)
-      , op_context_(context)
-      , initial_value_(initial_value.storage_)
-      , prev_value_(&prev_storage_)
-      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
-    {
-      mandatory_no_initial_value_ = !optional && initial_value.storage_.is_empty();
-    }
+                            field_type_enum_t    field_type = field_type_ascii_string);
 
-    ascii_field_instruction(const ascii_field_instruction& other)
-      : vector_field_instruction_base(other)
-      , op_context_(other.op_context_)
-      , initial_value_(other.initial_value_)
-      , prev_value_(&prev_storage_)
-      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
-    {
-    }
+    ascii_field_instruction(const ascii_field_instruction& other);
 
     virtual void construct_value(value_storage& storage,
                                  allocator*     alloc) const;
@@ -102,12 +81,7 @@ namespace mfast
       return *initial_or_default_value_;
     }
 
-    void initial_value(const value_storage& v)
-    {
-      initial_value_ = v;
-      initial_or_default_value_ = initial_value_.is_empty() ? &default_value_ : &initial_value_;
-      mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
-    }
+    void initial_value(const value_storage& v);
 
     static const ascii_field_instruction* default_instruction();
 

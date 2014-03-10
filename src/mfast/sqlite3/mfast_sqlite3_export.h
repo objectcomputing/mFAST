@@ -8,7 +8,6 @@
 #  ifdef mfast_sqlite3_EXPORTS
       /* We are building the shared variant of this library */
 #    define MFAST_SQLITE3_EXPORT BOOST_SYMBOL_EXPORT
-#    define MFAST_DYN_LINK // we are using shared variant of mfast
 #    define MFAST_SQLITE3_BUILD_SHARED_LIBS
 #  elif defined(MFAST_DYN_LINK)
      /* We are using the shared variant of this library */

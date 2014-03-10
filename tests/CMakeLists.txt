@@ -8,7 +8,10 @@
 
 
 
-FASTTYPEGEN_TARGET(test_types test1.xml test2.xml test3.xml test4.xml test5.xml)
+FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
+FASTTYPEGEN_TARGET(test_types3 test3.xml)
+FASTTYPEGEN_TARGET(test_types4 test4.xml)
+FASTTYPEGEN_TARGET(test_types5 test5.xml)
 
 
 add_executable (mfast_test
@@ -22,7 +25,10 @@ add_executable (mfast_test
                 field_comparator_test.cpp
                 coder_test.cpp
                 value_storage_test.cpp
-                ${FASTTYPEGEN_test_types_OUTPUTS}
+                ${FASTTYPEGEN_test_types1_OUTPUTS}
+                ${FASTTYPEGEN_test_types3_OUTPUTS}
+                ${FASTTYPEGEN_test_types4_OUTPUTS}
+                ${FASTTYPEGEN_test_types5_OUTPUTS}
                 fast_type_gen_test.cpp
                 dictionary_builder_test.cpp
                 json_test.cpp

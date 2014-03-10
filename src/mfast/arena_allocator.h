@@ -94,14 +94,6 @@ namespace mfast {
 
   };
 
-  inline
-  arena_allocator::arena_allocator()
-    : free_list_head_(0)
-  {
-    void* block = malloc(default_chunk_size);
-    current_list_head_ = new (block) memory_chunk(default_chunk_size, 0);
-  }
-
 }
 
 inline void*

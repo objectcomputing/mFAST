@@ -86,7 +86,9 @@ public:
   }
 
   bool is_boolean() const;
+private:
 
+  enum_cref& operator = (const enum_cref&);
 };
 
 inline bool operator == (const enum_cref& lhs, const enum_cref& rhs)

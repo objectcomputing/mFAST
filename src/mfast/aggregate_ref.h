@@ -301,7 +301,7 @@ namespace mfast
   inline int
   aggregate_cref::field_index_with_id(std::size_t id) const
   {
-    return instruction()->find_subinstruction_index_by_id(id);
+    return instruction()->find_subinstruction_index_by_id(static_cast<uint32_t>(id));
   }
 
 /// return -1 if no such field is found

@@ -637,18 +637,18 @@ namespace mfast
         difference_type common_suffix_delta_len = cref.rend() - common_suffix_positions.first;
 
         if ( common_prefix_delta_len <= common_suffix_delta_len ) {
-          substraction_len = prev_cref.end() - common_prefix_positions.second;
+          substraction_len = static_cast<int32_t>(prev_cref.end() - common_prefix_positions.second);
           delta_iterator = common_prefix_positions.first;
-          delta_len = common_prefix_delta_len;
+          delta_len = static_cast<uint32_t>(common_prefix_delta_len);
         }
         else {
           // Characters are removed from the front when the subtraction length is negative.
           // The subtraction length uses an excess-1 encoding: if the value is negative when decoding,
           // it is incremented by one to get the number of characters to subtract. This makes it possible
           // to encode negative zero as -1,
-          substraction_len = ~(prev_cref.rend() - common_suffix_positions.second);
+          substraction_len = static_cast<int32_t>(~(prev_cref.rend() - common_suffix_positions.second));
           delta_iterator = cref.begin();
-          delta_len = common_suffix_delta_len;
+          delta_len = static_cast<uint32_t>(common_suffix_delta_len);
         }
 
         stream.encode(substraction_len, cref.instruction()->is_nullable(), false);
@@ -799,11 +799,11 @@ namespace mfast
               = std::mismatch(cref.begin(), cref.end(), base_cref.begin());
 
             tail_itr = positions.first;
-            tail_len = cref.end()-positions.first;
+            tail_len = static_cast<uint32_t>(cref.end()-positions.first);
           }
           else {
             tail_itr = cref.begin();
-            tail_len = cref.size();
+            tail_len = static_cast<uint32_t>(cref.size());
           }
           stream.encode(tail_itr,
                         tail_len,

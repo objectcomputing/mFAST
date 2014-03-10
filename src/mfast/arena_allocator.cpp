@@ -38,6 +38,13 @@ namespace mfast {
     };
   }
 
+  arena_allocator::arena_allocator()
+    : free_list_head_(0)
+  {
+    void* block = malloc(default_chunk_size);
+    current_list_head_ = new (block) memory_chunk(default_chunk_size, 0);
+  }
+
   arena_allocator::~arena_allocator()
   {
     free_list(current_list_head_);

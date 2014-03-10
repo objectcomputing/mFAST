@@ -62,7 +62,7 @@ namespace mfast {
       {
         for (std::size_t j = 0; j < ref.size(); ++j) {
           sequence_element_cref element(ref[j]);
-          accssor_.visit(element, j);
+          accssor_.visit(element, static_cast<int>(j));
         }
       }
 
@@ -199,7 +199,7 @@ namespace mfast {
       {
         for (std::size_t j = 0; j < ref.size(); ++j) {
           sequence_element_mref element(ref[j]);
-          mutator_.visit(element, j);
+          mutator_.visit(element, static_cast<int>(j));
         }
       }
 

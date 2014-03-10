@@ -4,7 +4,8 @@
 #include <limits>
 #include <boost/type_traits.hpp>
 
-#include "mfast/field_instructions.h"
+#include "mfast/instructions/string_instructions.h"
+#include "mfast/instructions/byte_vector_instruction.h"
 #include "fast_istreambuf.h"
 #include "decoder_presence_map.h"
 
@@ -92,7 +93,7 @@ namespace mfast
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D9"));
       }
 
-      len = buf_->get_entity_length();
+      len = static_cast<uint32_t>(buf_->get_entity_length());
       buf_->gbump(len);
       return true;
     }

@@ -23,19 +23,19 @@ namespace mfast
 
   inline fast_ostream& operator << (fast_ostream& strm, const ascii_string_cref& cref)
   {
-    strm.encode(cref.c_str(), cref.size(), cref.instruction()->is_nullable(), cref.instruction());
+    strm.encode(cref.c_str(),static_cast<uint32_t>( cref.size()), cref.instruction()->is_nullable(), cref.instruction());
     return strm;
   }
 
   inline fast_ostream& operator << (fast_ostream& strm, const unicode_string_cref& cref)
   {
-    strm.encode(cref.c_str(), cref.size(), cref.instruction()->is_nullable(), cref.instruction());
+    strm.encode(cref.c_str(), static_cast<uint32_t>(cref.size()), cref.instruction()->is_nullable(), cref.instruction());
     return strm;
   }
 
   inline fast_ostream& operator << (fast_ostream& strm, const byte_vector_cref& cref)
   {
-    strm.encode(cref.begin(), cref.size(), cref.instruction()->is_nullable(), cref.instruction());
+    strm.encode(cref.begin(), static_cast<uint32_t>(cref.size()), cref.instruction()->is_nullable(), cref.instruction());
     return strm;
   }
 

@@ -38,25 +38,9 @@ namespace mfast
                                    const char*          ns,
                                    const op_context_t*  context,
                                    const value_storage& initial_storage,
-                                   instruction_tag      tag)
-      : field_instruction(field_index, operator_id, field_type, optional, id, name, ns, tag)
-      , op_context_(context)
-      , initial_value_(initial_storage)
-      , prev_value_(&prev_storage_)
-      , initial_or_default_value_(initial_storage.is_empty() ? &default_value_ : &initial_value_)
-    {
-      mandatory_no_initial_value_ = !optional && initial_storage.is_empty();
-    }
+                                   instruction_tag      tag);
 
-    integer_field_instruction_base(const integer_field_instruction_base& other)
-      : field_instruction(other)
-      , op_context_(other.op_context_)
-      , initial_value_(other.initial_value_)
-      , prev_value_(&prev_storage_)
-      , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
-    {
-    }
-
+    integer_field_instruction_base(const integer_field_instruction_base& other);
     virtual void construct_value(value_storage& storage,
                                  allocator*     alloc) const;
 
@@ -129,34 +113,43 @@ namespace mfast
                           const char*          ns,
                           const op_context_t*  context,
                           int_value_storage<T> initial_value,
-                          instruction_tag      tag = instruction_tag())
-      : integer_field_instruction_base(field_index,
-                                       operator_id,
-                                       field_type_trait<T>::id,
-                                       optional,
-                                       id,
-                                       name,
-                                       ns,
-                                       context,
-                                       initial_value.storage_,
-                                       tag)
-    {
-    }
+                          instruction_tag      tag = instruction_tag());
 
-    int_field_instruction(const int_field_instruction& other)
-      : integer_field_instruction_base(other)
-    {
-    }
-
+    int_field_instruction(const int_field_instruction& other);
     virtual void accept(field_instruction_visitor& visitor, void* context) const;
     virtual int_field_instruction<T>* clone(arena_allocator& alloc) const;
   };
 
 
-  typedef int_field_instruction<int32_t> int32_field_instruction;
-  typedef int_field_instruction<uint32_t> uint32_field_instruction;
-  typedef int_field_instruction<int64_t> int64_field_instruction;
-  typedef int_field_instruction<uint64_t> uint64_field_instruction;
+
+  template <typename T>
+  int_field_instruction<T>::int_field_instruction(uint16_t             field_index,
+                                                  operator_enum_t      operator_id,
+                                                  presence_enum_t      optional,
+                                                  uint32_t             id,
+                                                  const char*          name,
+                                                  const char*          ns,
+                                                  const op_context_t*  context,
+                                                  int_value_storage<T> initial_value,
+                                                  instruction_tag      tag)
+    : integer_field_instruction_base(field_index,
+                                     operator_id,
+                                     field_type_trait<T>::id,
+                                     optional,
+                                     id,
+                                     name,
+                                     ns,
+                                     context,
+                                     initial_value.storage_,
+                                     tag)
+  {
+  }
+
+  template <typename T>
+  inline int_field_instruction<T>::int_field_instruction(const int_field_instruction& other)
+    : integer_field_instruction_base(other)
+  {
+  }
 
   template <typename T>
   int_field_instruction<T>*
@@ -164,6 +157,13 @@ namespace mfast
   {
     return new (alloc) int_field_instruction<T>(*this);
   }
+
+
+
+  typedef int_field_instruction<int32_t> int32_field_instruction;
+  typedef int_field_instruction<uint32_t> uint32_field_instruction;
+  typedef int_field_instruction<int64_t> int64_field_instruction;
+  typedef int_field_instruction<uint64_t> uint64_field_instruction;
 
 } /* mfast */
 

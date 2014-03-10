@@ -44,6 +44,22 @@ namespace mfast {
   {
   }
 
+  field_instruction::field_instruction(const field_instruction& other)
+    : field_index_(other.field_index_)
+    , operator_id_(other.operator_id_)
+    , is_array_(other.is_array_ )
+    , optional_flag_(other.optional_flag_)
+    , nullable_flag_( other.nullable_flag_ )
+    , has_pmap_bit_(other.has_pmap_bit_)
+    , mandatory_no_initial_value_(other.mandatory_no_initial_value_)
+    , field_type_(other.field_type_)
+    , id_(other.id_)
+    , name_(other.name_)
+    , ns_(other.ns_)
+    , tag_(other.tag_)
+  {
+  }
+
   void
   field_instruction::destruct_value(value_storage&,
                                     allocator*) const

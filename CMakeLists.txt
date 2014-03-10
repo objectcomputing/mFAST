@@ -97,7 +97,7 @@ endif(WIN32)
 
 macro(FASTTYPEGEN_TARGET Name)
 set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]")
-
+set(INPUTS)
 foreach (input ${ARGN})
     get_filename_component(noext_name ${input} NAME_WE)
     set(FASTTYPEGEN_${Name}_INPUTS_NOEXT ${FASTTYPEGEN_${Name}_INPUTS_NOEXT} ${noext_name})
