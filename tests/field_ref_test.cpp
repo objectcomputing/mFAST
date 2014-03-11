@@ -384,6 +384,26 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
 
   }
 
+  {
+    mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
+    decimal_field_instruction inst(0, operator_default,
+                                   presence_optional,
+                                   1,
+                                   "test_decimal2","",
+                                   0,
+                                   &mantissa_inst,
+                                   decimal_value_storage());
+
+    inst.construct_value(storage, &allocator);
+
+    decimal_mref ref(&allocator, &storage, &inst);
+    ref.as(1,1); // set the value so it's present
+
+    // The exponent initial value is absent, therefore, the entire value should be absent().
+    ref.for_exponent().as_initial_value();
+    BOOST_CHECK(ref.absent());
+  }
+
 }
 
 BOOST_AUTO_TEST_CASE(string_field_instruction_test)
@@ -426,9 +446,9 @@ BOOST_AUTO_TEST_CASE(string_field_test)
                                string_value_storage(default_value));
 
   inst.construct_value(storage, &alloc);
-  BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
+  BOOST_CHECK_EQUAL(inst.initial_value().is_empty(),     false);
 
-  BOOST_CHECK_EQUAL(storage.of_array.capacity_in_bytes_,      0U);
+  BOOST_CHECK_EQUAL(storage.of_array.capacity_in_bytes_, 0U);
 
   {
     ascii_string_cref cref(&storage, &inst);
@@ -850,29 +870,30 @@ public:
 class simple_debug_allocator
   : public debug_allocator
 {
-  public:
+public:
 
-    simple_debug_allocator()
-    {
-    }
+  simple_debug_allocator()
+  {
+  }
 
-    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)
-    {
-      void* old_ptr = pointer;
-      if (pointer) {
-        pointer = std::realloc(pointer, new_size);
-        std::memset(static_cast<char*>(pointer)+old_size, 0xFF, new_size-old_size);
-      }
-      else
-        pointer = std::malloc(new_size);
-      leased_addresses_.erase(old_ptr);
-      if (pointer == 0) {
-        std::free(old_ptr);
-        throw std::bad_alloc();
-      }
-      leased_addresses_.insert(pointer);
-      return new_size;
+  virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)
+  {
+    void* old_ptr = pointer;
+    if (pointer) {
+      pointer = std::realloc(pointer, new_size);
+      std::memset(static_cast<char*>(pointer)+old_size, 0xFF, new_size-old_size);
     }
+    else
+      pointer = std::malloc(new_size);
+    leased_addresses_.erase(old_ptr);
+    if (pointer == 0) {
+      std::free(old_ptr);
+      throw std::bad_alloc();
+    }
+    leased_addresses_.insert(pointer);
+    return new_size;
+  }
+
 };
 
 
