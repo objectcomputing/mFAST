@@ -20,7 +20,7 @@
 #define FAST_ISTREAMBUF_H_7X1JL4X6
 #include <stdexcept>
 
-#include "../common/exceptions.h"
+#include "mfast/exceptions.h"
 #include <iostream>
 
 namespace mfast

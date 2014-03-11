@@ -26,7 +26,7 @@ using namespace boost::assign;
 
 namespace mfast
 {
-  namespace coder
+  namespace xml_parser
   {
 
 
@@ -182,6 +182,6 @@ namespace mfast
       }
     }
 
-  } /* coder */
+  } /* xml_parser */
 
 } /* mfast */

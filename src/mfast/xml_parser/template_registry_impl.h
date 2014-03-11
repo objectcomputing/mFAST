@@ -21,10 +21,10 @@
 
 #include <map>
 #include <string>
-#include "../dynamic_templates_description.h"
+#include "dynamic_templates_description.h"
 
 namespace mfast {
-  namespace coder {
+  namespace xml_parser {
 
     struct template_registry_impl
     {

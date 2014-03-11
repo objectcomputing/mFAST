@@ -1,0 +1,10 @@
+project(mfast_coder) : mfast_core {
+  sharedname = mfast_xml_parser
+  dynamicflags += mfast_xml_parser_EXPORTS
+
+  includes += ". ../../../tinyxml2/"
+  Source_Files {
+    ../../../tinyxml2/tinyxml2.cpp
+    *.cpp
+  }
+}

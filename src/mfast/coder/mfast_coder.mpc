@@ -5,19 +5,9 @@ project(mfast_coder) : mfast_core {
   includes += "."
   recurse = 1
   Source_Files {
-    ../../../tinyxml2/tinyxml2.cpp
     common/*.cpp
     decoder/*.cpp
     encoder/*.cpp
-    templates_builder/*.cpp
     *.cpp
   }
-  //
-  // Header_Files {
-  //   common/*.h
-  //   decoder/*.h
-  //   encoder/*.h
-  //   templates_builder/*.h
-  //   *.h
-  // }
 }

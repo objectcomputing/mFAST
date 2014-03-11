@@ -28,7 +28,7 @@ namespace mfast
   class field_instruction;
   class template_instruction;
 
-  namespace coder
+  namespace xml_parser
   {
     using namespace tinyxml2;
 
@@ -111,7 +111,7 @@ namespace mfast
     };
 
 
-  } /* coder */
+  } /* xml_parser */
 
 } /* mfast */
 

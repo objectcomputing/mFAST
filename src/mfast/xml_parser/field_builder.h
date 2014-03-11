@@ -24,7 +24,7 @@
 #include "fast_xml_attributes.h"
 namespace mfast
 {
-  namespace coder
+  namespace xml_parser
   {
     typedef std::deque<const field_instruction*> instruction_list_t;
 
@@ -131,7 +131,7 @@ namespace mfast
     };
 
 
-  } /* coder */
+  } /* xml_parser */
 
 } /* mfast */
 

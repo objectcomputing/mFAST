@@ -18,7 +18,7 @@
 //
 #include "field_builder.h"
 #include "field_op.h"
-#include "../common/exceptions.h"
+#include "mfast/exceptions.h"
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 #include "mfast/field_instructions.h"
@@ -28,7 +28,7 @@ using namespace tinyxml2;
 
 namespace mfast
 {
-  namespace coder
+  namespace xml_parser
   {
 
 

@@ -19,7 +19,7 @@
 
 #include <sstream>
 #include "mfast.h"
-#include <mfast/coder/dynamic_templates_description.h>
+#include <mfast/xml_parser/dynamic_templates_description.h>
 #include "test5.h"
 
 #define BOOST_TEST_DYN_LINK

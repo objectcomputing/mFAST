@@ -40,6 +40,7 @@ target_link_libraries (mfast_test
                        mfast_static
                        mfast_coder_static
                        mfast_json_static
+					   mfast_xml_parser_static
                        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 

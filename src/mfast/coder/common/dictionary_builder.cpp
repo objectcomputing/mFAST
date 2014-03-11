@@ -16,7 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "../common/exceptions.h"
+#include "../mfast_coder_export.h"
+#include "mfast/exceptions.h"
 #include "dictionary_builder.h"
 #include <cstring>
 #include <iostream>

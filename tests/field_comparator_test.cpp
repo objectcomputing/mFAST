@@ -18,7 +18,7 @@
 //
 #include <mfast.h>
 #include <mfast/field_comparator.h>
-#include <mfast/coder/dynamic_templates_description.h>
+#include <mfast/xml_parser/dynamic_templates_description.h>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>

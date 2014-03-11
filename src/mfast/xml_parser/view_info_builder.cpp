@@ -1,11 +1,11 @@
 #include <cstring>
 #include <string.h>
 #include "view_info_builder.h"
-#include "../common/exceptions.h"
+#include "mfast/exceptions.h"
 #include <algorithm>
 namespace mfast
 {
-  namespace coder
+  namespace xml_parser
   {
 
     void view_info_builder::visit_basic(const field_instruction* inst)
@@ -293,5 +293,5 @@ namespace mfast
       }
     }
 
-  } /* coder */
+  } /* xml_parser */
 } /* mfast */

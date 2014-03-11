@@ -19,24 +19,24 @@
 #ifndef TEMPLATE_LOADER_H_L6DO08PL
 #define TEMPLATE_LOADER_H_L6DO08PL
 
-#include "mfast_coder_export.h"
+#include "mfast_xml_parser_export.h"
 #include "mfast/field_instructions.h"
 #include "mfast/arena_allocator.h"
 #include "mfast/view_iterator.h"
 #include <deque>
 namespace mfast
 {
-  namespace coder {
+  namespace xml_parser {
     struct template_registry_impl;
     class templates_builder;
   }
 
   struct template_registry_impl;
-  class MFAST_CODER_EXPORT template_registry
+  class MFAST_XML_PARSER_EXPORT template_registry
   {
   private:
-    coder::template_registry_impl* impl_;
-    friend class coder::templates_builder;
+    xml_parser::template_registry_impl* impl_;
+    friend class xml_parser::templates_builder;
 
   public:
     template_registry();
@@ -51,7 +51,7 @@ namespace mfast
 
 
 
-  class MFAST_CODER_EXPORT dynamic_templates_description
+  class MFAST_XML_PARSER_EXPORT dynamic_templates_description
     : public templates_description
   {
   public:
@@ -66,7 +66,7 @@ namespace mfast
     }
 
   private:
-    friend class coder::templates_builder;
+    friend class xml_parser::templates_builder;
     std::deque<const field_instruction*> defined_type_instructions_;
     std::deque<aggregate_view_info> view_infos_;
   };

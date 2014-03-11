@@ -19,7 +19,7 @@
 #include <mfast.h>
 #include <mfast/coder/fast_decoder.h>
 #include <mfast/coder/fast_encoder.h>
-#include <mfast/coder/dynamic_templates_description.h>
+#include <mfast/xml_parser/dynamic_templates_description.h>
 #include <cstdio>
 #include <iostream>
 #include <cstring>

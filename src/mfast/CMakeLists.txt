@@ -46,6 +46,7 @@ else()
 endif()
 
 add_subdirectory (coder)
+add_subdirectory (xml_parser)
 add_subdirectory (json)
 add_subdirectory (sqlite3 EXCLUDE_FROM_ALL)
 

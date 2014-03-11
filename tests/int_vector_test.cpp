@@ -22,7 +22,7 @@
 #include <mfast/coder/fast_encoder.h>
 #include <mfast/vector_ref.h>
 #include <mfast/coder/common/codec_helper.h>
-#include <mfast/coder/dynamic_templates_description.h>
+#include <mfast/xml_parser/dynamic_templates_description.h>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>

@@ -151,10 +151,10 @@ enable_testing()
 add_subdirectory (tests)
 
 if (BUILD_SHARED_LIBS)
-  set(MFAST_LIBRARIES mfast_coder mfast)
+  set(MFAST_LIBRARIES mfast_coder mfast_xml_parser mfast)
   add_definitions( -DMFAST_DYN_LINK )
 else()
-  set(MFAST_LIBRARIES mfast_coder_static mfast_static)
+  set(MFAST_LIBRARIES mfast_coder_static mfast_xml_parser_static mfast_static)
 endif()
 
 add_subdirectory (examples)

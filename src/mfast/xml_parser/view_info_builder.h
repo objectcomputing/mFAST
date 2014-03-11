@@ -4,13 +4,13 @@
 #include <map>
 #include <deque>
 #include <mfast.h>
-#include "../../../../tinyxml2/tinyxml2.h"
+#include "tinyxml2.h"
 #include "mfast/view_iterator.h"
 
 
 namespace mfast
 {
-  namespace coder
+  namespace xml_parser
   {
     class view_info_builder
       : public field_instruction_visitor
@@ -64,7 +64,7 @@ namespace mfast
       std::string current_context_;
     };
 
-  } /* coder */
+  } /* xml_parser */
 } /* mfast */
 
 

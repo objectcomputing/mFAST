@@ -18,8 +18,7 @@
 //
 #ifndef EXCEPTIONS_H_87B9JUIK
 #define EXCEPTIONS_H_87B9JUIK
-#include "../mfast_coder_export.h"
-#include "../../mfast_export.h"
+#include "mfast_export.h"
 #include <boost/exception/all.hpp>
 
 #ifdef BOOST_MSVC
@@ -33,7 +32,7 @@ namespace mfast
 // we should always export exception classes; otherwise, the vtable won't
 // be available for application when they are in shared libraries.
 
-  class MFAST_CODER_EXPORT fast_error
+  class MFAST_EXPORT fast_error
     : public virtual boost::exception, public virtual std::exception
   {
   public:
@@ -46,7 +45,7 @@ namespace mfast
   };
 
 
-  class MFAST_CODER_EXPORT fast_static_error
+  class MFAST_EXPORT fast_static_error
     : public fast_error
   {
   public:
@@ -60,7 +59,7 @@ namespace mfast
 
   };
 
-  class MFAST_CODER_EXPORT fast_dynamic_error
+  class MFAST_EXPORT fast_dynamic_error
     : public fast_error
   {
   public:
@@ -71,7 +70,7 @@ namespace mfast
 
   };
 
-  class MFAST_CODER_EXPORT fast_reportable_error
+  class MFAST_EXPORT fast_reportable_error
     : public fast_error
   {
   public:
@@ -104,7 +103,7 @@ namespace mfast {
   typedef boost::error_info<tag_template_id,unsigned> template_id_info;
   typedef boost::error_info<tag_template_name,std::string> template_name_info;
 
-  class MFAST_CODER_EXPORT duplicate_template_id_error
+  class MFAST_EXPORT duplicate_template_id_error
     : public fast_static_error
   {
   public:
@@ -115,7 +114,7 @@ namespace mfast {
 
   };
 
-  class MFAST_CODER_EXPORT template_not_found_error
+  class MFAST_EXPORT template_not_found_error
     : public fast_dynamic_error
   {
   public:

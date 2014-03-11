@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     ref.as(1,1); // set the value so it's present
 
     // The exponent initial value is absent, therefore, the entire value should be absent().
-    ref.for_exponent().as_initial_value();
+    ref.set_exponent().to_initial_value();
     BOOST_CHECK(ref.absent());
   }
 

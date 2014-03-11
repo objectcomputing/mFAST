@@ -19,14 +19,14 @@
 #ifndef FAST_XML_ATTRIBUTES_H_XP6T9R90
 #define FAST_XML_ATTRIBUTES_H_XP6T9R90
 
-#include "../../../../tinyxml2/tinyxml2.h"
+#include "tinyxml2.h"
 #include "mfast/instructions/field_instruction.h"
 #include <cstring>
 #include <boost/lexical_cast.hpp>
 
 namespace mfast
 {
-  namespace coder
+  namespace xml_parser
   {
 
     using namespace tinyxml2;

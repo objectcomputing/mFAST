@@ -20,7 +20,7 @@
 #include "templates_builder.h"
 #include "mfast/boolean_ref.h"
 #include "view_info_builder.h"
-#include "../common/exceptions.h"
+#include "mfast/exceptions.h"
 
 using namespace tinyxml2;
 
@@ -28,7 +28,7 @@ using namespace tinyxml2;
 //////////////////////////////////////////////////////////////////////////////////////
 namespace mfast
 {
-  namespace coder
+  namespace xml_parser
   {
 
     static const uint32_field_instruction length_instruction_prototype(0,operator_none,presence_mandatory,0,"__length__","",0, int_value_storage<uint32_t>());
@@ -164,7 +164,7 @@ namespace mfast
 
 
   template_registry::template_registry()
-    : impl_(new coder::template_registry_impl)
+    : impl_(new xml_parser::template_registry_impl)
   {
   }
 
@@ -191,7 +191,7 @@ namespace mfast
   {
     XMLDocument document;
     if (document.Parse(xml_content) == 0) {
-      coder::templates_builder builder(this, cpp_ns, registry);
+      xml_parser::templates_builder builder(this, cpp_ns, registry);
       document.Accept(&builder);
     }
     else {

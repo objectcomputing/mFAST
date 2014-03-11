@@ -20,7 +20,7 @@
 #define CODEC_HELPER_H_QI11HSL8
 
 #include "mfast/string_ref.h"
-#include "exceptions.h"
+#include "mfast/exceptions.h"
 #include <boost/type_traits.hpp>
 #include <stdexcept>
 

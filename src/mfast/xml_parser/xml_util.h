@@ -19,12 +19,12 @@
 #ifndef XML_UTIL_H_N23DJCGA
 #define XML_UTIL_H_N23DJCGA
 
-#include "../../../../tinyxml2/tinyxml2.h"
+#include "tinyxml2.h"
 #include "mfast/arena_allocator.h"
 
 namespace mfast
 {
-  namespace coder
+  namespace xml_parser
   {
     using namespace tinyxml2;
     inline const char* get_optional_attr(const XMLElement & element,
@@ -49,7 +49,7 @@ namespace mfast
       return result;
     }
 
-  } /* coder */
+  } /* xml_parser */
 
 } /* mfast */
 

@@ -24,7 +24,7 @@
 #include "mfast/arena_allocator.h"
 #include "mfast/instructions/field_instruction.h"
 #include "xml_util.h"
-#include "../common/exceptions.h"
+#include "mfast/exceptions.h"
 
 namespace mfast {
   class decimal_field_instruction;
@@ -40,7 +40,7 @@ namespace mfast {
   class enum_field_instruction;
   class byte_vector_field_instruction;
 
-  namespace coder {
+  namespace xml_parser {
 
 
     using namespace tinyxml2;

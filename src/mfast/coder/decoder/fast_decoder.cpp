@@ -24,7 +24,7 @@
 #include "mfast/malloc_allocator.h"
 #include "mfast/output.h"
 #include "mfast/composite_type.h"
-#include "../common/exceptions.h"
+#include "mfast/exceptions.h"
 #include "../common/debug_stream.h"
 #include "../common/dictionary_builder.h"
 #include "../common/codec_helper.h"
