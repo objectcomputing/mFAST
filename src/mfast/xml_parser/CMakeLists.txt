@@ -48,6 +48,6 @@ endif()
 
 SET(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} coder_static CACHE INTERNAL "")
 
-install(FILES mfast_xml_parser_export_export.h dynamic_templates_description.h
+install(FILES mfast_xml_parser_export.h dynamic_templates_description.h
         DESTINATION "${INSTALL_INCLUDE_DIR}/mfast/xml_parser")
 
