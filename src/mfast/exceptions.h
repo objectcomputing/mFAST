@@ -84,24 +84,34 @@ namespace mfast
   struct tag_referenced_by;
   struct tag_template_id;
   struct tag_template_name;
-}
 
-#if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
-namespace  boost {
-  // For Clang, we must use extern template and explicit template instantiation;
-  //     otherwise, we will have duplicated definition link error when building shared library.
-  // For GCC, we must nest the explicit instantiation statement inside their original namespace;
-  //     otherwise, the code won't compile.
-  extern template class error_info<mfast::tag_referenced_by,std::string>;
-  extern template class error_info<mfast::tag_template_id,unsigned>;
-  extern template class error_info<mfast::tag_template_name,std::string>;
-}
-#endif
 
-namespace mfast {
-  typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info;
-  typedef boost::error_info<tag_template_id,unsigned> template_id_info;
-  typedef boost::error_info<tag_template_name,std::string> template_name_info;
+  struct MFAST_EXPORT referenced_by_info
+    : public boost::error_info<tag_referenced_by,std::string>
+  {
+    referenced_by_info(const std::string& str)
+      : boost::error_info<tag_referenced_by,std::string>(str)
+    {
+    }
+  };
+
+  struct MFAST_EXPORT template_id_info
+    : public boost::error_info<tag_referenced_by,unsigned>
+  {
+    template_id_info(unsigned id)
+      : boost::error_info<tag_referenced_by,unsigned>(id)
+    {
+    }
+  };
+
+  struct MFAST_EXPORT template_name_info
+    : public boost::error_info<tag_template_name,std::string>
+  {
+    template_name_info(const std::string& str)
+      : boost::error_info<tag_template_name,std::string>(str)
+    {
+    }
+  };
 
   class MFAST_EXPORT duplicate_template_id_error
     : public fast_static_error
