@@ -80,62 +80,6 @@ namespace mfast
     }
 
   };
-
-  struct tag_referenced_by;
-  struct tag_template_id;
-  struct tag_template_name;
-
-
-  struct MFAST_EXPORT referenced_by_info
-    : public boost::error_info<tag_referenced_by,std::string>
-  {
-    referenced_by_info(const std::string& str)
-      : boost::error_info<tag_referenced_by,std::string>(str)
-    {
-    }
-  };
-
-  struct MFAST_EXPORT template_id_info
-    : public boost::error_info<tag_referenced_by,unsigned>
-  {
-    template_id_info(unsigned id)
-      : boost::error_info<tag_referenced_by,unsigned>(id)
-    {
-    }
-  };
-
-  struct MFAST_EXPORT template_name_info
-    : public boost::error_info<tag_template_name,std::string>
-  {
-    template_name_info(const std::string& str)
-      : boost::error_info<tag_template_name,std::string>(str)
-    {
-    }
-  };
-
-  class MFAST_EXPORT duplicate_template_id_error
-    : public fast_static_error
-  {
-  public:
-    duplicate_template_id_error(unsigned tid)
-    {
-      *this << template_id_info(tid);
-    }
-
-  };
-
-  class MFAST_EXPORT template_not_found_error
-    : public fast_dynamic_error
-  {
-  public:
-    template_not_found_error(const char* template_name, const char* referenced_by)
-      : fast_dynamic_error("D8")
-    {
-      *this << template_name_info(template_name) << referenced_by_info(referenced_by);
-    }
-
-  };
-
 }
 
 

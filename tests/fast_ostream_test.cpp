@@ -94,7 +94,7 @@ encode_string(const char* str,std::size_t len, bool nullable, const byte_stream&
   strm.rdbuf(&sb);
 
 
-  strm.encode(str, len, nullable, instruction);
+  strm.encode(str, static_cast<uint32_t>(len), nullable, instruction);
 
   if (byte_stream(sb) == result)
     return true;
@@ -129,7 +129,7 @@ encode_byte_vector(const char* bv,std::size_t len, bool nullable, const byte_str
   strm.rdbuf(&sb);
 
 
-  strm.encode(reinterpret_cast<const unsigned char*>(bv), len, nullable, 0);
+  strm.encode(reinterpret_cast<const unsigned char*>(bv), static_cast<uint32_t>(len), nullable, 0);
 
   if (byte_stream(sb) == result)
     return true;

@@ -95,17 +95,17 @@ namespace mfast
     switch (this->instruction()->field_type())
     {
     case field_type_int32:
-      static_cast<int32_mref>(*this).as(value);
+      static_cast<int32_mref>(*this).as(static_cast<int32_t>(value));
       break;
     case field_type_uint32:
-      static_cast<uint32_mref>(*this).as(value);
+      static_cast<uint32_mref>(*this).as(static_cast<uint32_t>(value));
       break;
     case field_type_int64:
-      static_cast<int64_mref>(*this).as(value);
+      static_cast<int64_mref>(*this).as(static_cast<int64_t>(value));
       break;
     case field_type_uint64:
     case field_type_enum:
-      static_cast<uint64_mref>(*this).as(value);
+      static_cast<uint64_mref>(*this).as(static_cast<uint64_t>(value));
       break;
     case field_type_decimal:
       static_cast<decimal_mref>(*this).as(value);

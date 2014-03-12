@@ -17,7 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "../mfast_coder_export.h"
-#include "mfast/exceptions.h"
+#include "exceptions.h"
 #include "dictionary_builder.h"
 #include <cstring>
 #include <iostream>
@@ -32,48 +32,51 @@ namespace mfast {
     return str == 0 || str[0] == '\0';
   }
 
-  struct tag_key {};
+  namespace {
+    struct tag_key;
 
-  typedef boost::error_info<tag_key,std::string> key_info;
+    typedef boost::error_info<tag_key,std::string> key_info;
 
-  struct tag_first_type {};
+    struct tag_first_type;
 
-  typedef boost::error_info<tag_first_type,std::string> first_type_info;
+    typedef boost::error_info<tag_first_type,std::string> first_type_info;
 
-  struct tag_second_type {};
+    struct tag_second_type;
 
-  typedef boost::error_info<tag_second_type,std::string> second_type_info;
+    typedef boost::error_info<tag_second_type,std::string> second_type_info;
 
-  class MFAST_CODER_EXPORT key_type_mismatch_error
-    : public fast_dynamic_error
-  {
-  public:
-    key_type_mismatch_error(const std::string& keyname,
-                            field_type_enum_t  first_type,
-                            field_type_enum_t  second_type)
-      : fast_dynamic_error("D4")
+    class key_type_mismatch_error
+      : public fast_dynamic_error
     {
-      const char* field_type_name [] = {
-        "int32",
-        "uInt32",
-        "int64",
-        "uInt64",
-        "decimal",
-        "exponent",
-        "ascii string",
-        "unicode string",
-        "byteVector",
-        "int32Vector",
-        "uInt32Vector",
-        "int64Vector",
-        "uInt64Vector"
-      };
-      *this << key_info(keyname)
-            << first_type_info(field_type_name[first_type] )
-            << second_type_info(field_type_name[second_type] );
-    }
+    public:
+      key_type_mismatch_error(const std::string& keyname,
+                              field_type_enum_t  first_type,
+                              field_type_enum_t  second_type)
+        : fast_dynamic_error("D4")
+      {
+        const char* field_type_name [] = {
+          "int32",
+          "uInt32",
+          "int64",
+          "uInt64",
+          "decimal",
+          "exponent",
+          "ascii string",
+          "unicode string",
+          "byteVector",
+          "int32Vector",
+          "uInt32Vector",
+          "int64Vector",
+          "uInt64Vector"
+        };
+        *this << key_info(keyname)
+              << first_type_info(field_type_name[first_type] )
+              << second_type_info(field_type_name[second_type] );
+      }
 
-  };
+    };
+
+  }
 
 
   std::string qualified_name(const char* ns, const char* name)
@@ -106,6 +109,7 @@ namespace mfast {
 
       if (inst->id() > 0) {
         if (template_id_map_.count(inst->id())) {
+          using namespace coder;
           BOOST_THROW_EXCEPTION(duplicate_template_id_error(inst->id()) << template_name_info(inst->name()));
         }
 
@@ -177,7 +181,7 @@ namespace mfast {
       dest = itr->second;
     }
     else {
-      BOOST_THROW_EXCEPTION(template_not_found_error(src_inst->name(), current_template_.c_str()));
+      BOOST_THROW_EXCEPTION(coder::template_not_found_error(src_inst->name(), current_template_.c_str()));
     }
   }
 

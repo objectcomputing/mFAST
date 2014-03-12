@@ -184,7 +184,7 @@ namespace mfast {
     const IntType no_significant_bits = (value > 0 ? 0 : -1);
 
     const unsigned max_encoded_length= sizeof(IntType)*8/7+1;
-    char buffer[max_encoded_length];
+    char buffer[max_encoded_length]= {'\0'};
     int i = max_encoded_length-1;
 
     for (; i >= 0 && value != no_significant_bits; --i) {

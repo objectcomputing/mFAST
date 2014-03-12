@@ -23,7 +23,7 @@
 #include "mfast/malloc_allocator.h"
 #include "../fast_encoder.h"
 #include "../common/dictionary_builder.h"
-#include "mfast/exceptions.h"
+#include "../common/exceptions.h"
 #include "mfast/output.h"
 #include "encoder_presence_map.h"
 #include "encoder_field_operator.h"
@@ -237,6 +237,7 @@ namespace mfast
       current_pmap().init(&this->strm_, instruction->segment_pmap_size());
     }
     else {
+      using namespace coder;
       BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id));
     }
 

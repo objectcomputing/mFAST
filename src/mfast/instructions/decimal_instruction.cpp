@@ -16,7 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "decimal_instruction.h"
+#include "../field_instructions.h"
 
 namespace mfast
 {

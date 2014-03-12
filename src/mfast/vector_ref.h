@@ -423,7 +423,7 @@ namespace mfast {
                                       this->storage()->of_array.capacity_in_bytes_);
       }
       this->storage()->of_array.content_ = const_cast<void*>(static_cast<const void*>(addr));
-      this->storage()->array_length(n);
+      this->storage()->array_length(static_cast<uint32_t>(n));
       this->storage()->of_array.capacity_in_bytes_ = 0;
     }
 
@@ -715,7 +715,7 @@ namespace mfast {
       this->resize(pos+count2);
     }
     else {
-      int diff = count2-count;
+	  std::ptrdiff_t diff = count2-count;
       if (diff > 0) {
         // some elements has to be shift back
         this->shift(data()+pos, diff);

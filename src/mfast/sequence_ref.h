@@ -179,7 +179,7 @@ namespace mfast {
       return this->element_;
     }
 
-    void advance(int n)
+    void advance(std::ptrdiff_t n)
     {
       this->content_storage( this->content_storage() + n * this->element_group_content_byte_count() );
     }
@@ -545,9 +545,10 @@ namespace mfast {
     **/
     iterator grow_by(std::size_t delta) const
     {
+      assert( delta +  this->size() <= static_cast<std::size_t>(std::numeric_limits<int32_t>::max()/this->instruction()->group_content_byte_count()) );
       std::size_t old_size = this->size();
       resize( old_size+delta );
-      return  begin() + old_size;
+      return  begin() + static_cast<std::ptrdiff_t>(old_size);
     }
 
     void swap(const make_sequence_mref& other) const

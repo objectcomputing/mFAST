@@ -47,9 +47,10 @@ namespace mfast
     static template_registry* instance();
   };
 
-
-
-
+#ifdef _MSC_VER
+  template class MFAST_XML_PARSER_EXPORT std::deque<const field_instruction*>;
+  template class MFAST_XML_PARSER_EXPORT std::deque<aggregate_view_info>;
+#endif
 
   class MFAST_XML_PARSER_EXPORT dynamic_templates_description
     : public templates_description

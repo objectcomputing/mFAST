@@ -12,8 +12,3 @@ namespace mfast {
 
 }
 
-namespace boost {
-  template class error_info<mfast::tag_referenced_by,std::string>;
-  template class error_info<mfast::tag_template_id,unsigned>;
-  template class error_info<mfast::tag_template_name,std::string>;
-}

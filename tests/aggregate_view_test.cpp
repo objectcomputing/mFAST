@@ -132,47 +132,47 @@ BOOST_AUTO_TEST_CASE(parse_view_test)
     BOOST_CHECK_EQUAL( boost::string_ref(info.name_) , boost::string_ref("PersonView") );
     BOOST_CHECK_EQUAL( info.data_.size(), 8U);
 
-    BOOST_CHECK_EQUAL( info.data_[0].cont(), 0);
+    BOOST_CHECK_EQUAL( info.data_[0].cont(),false);
     BOOST_CHECK_EQUAL( info.data_[0].prefix_diff(), 1U);
     BOOST_CHECK_EQUAL( info.data_[0].nest_indices[0], 1);
     BOOST_CHECK_EQUAL( info.data_[0].nest_indices[1], -1);
 
-    BOOST_CHECK_EQUAL( info.data_[1].cont(), 0);
+    BOOST_CHECK_EQUAL( info.data_[1].cont(),false);
     BOOST_CHECK_EQUAL( info.data_[1].prefix_diff(), 1U);
     BOOST_CHECK_EQUAL( info.data_[1].nest_indices[0], 0);
     BOOST_CHECK_EQUAL( info.data_[1].nest_indices[1], -1);
 
-    BOOST_CHECK_EQUAL( info.data_[2].cont(), 0);
+    BOOST_CHECK_EQUAL( info.data_[2].cont(),false);
     BOOST_CHECK_EQUAL( info.data_[2].prefix_diff(), 1U);
     BOOST_CHECK_EQUAL( info.data_[2].nest_indices[0], 3);
     BOOST_CHECK_EQUAL( info.data_[2].nest_indices[1], 3);
     BOOST_CHECK_EQUAL( info.data_[2].nest_indices[2], -1);
 
-    BOOST_CHECK_EQUAL( info.data_[3].cont(), 0);
+    BOOST_CHECK_EQUAL( info.data_[3].cont(),false);
     BOOST_CHECK_EQUAL( info.data_[3].prefix_diff(), 2U);
     BOOST_CHECK_EQUAL( info.data_[3].nest_indices[0], 3);
     BOOST_CHECK_EQUAL( info.data_[3].nest_indices[1], 1);
     BOOST_CHECK_EQUAL( info.data_[3].nest_indices[2], -1);
 
-    BOOST_CHECK_EQUAL( info.data_[4].cont(), 0);
+    BOOST_CHECK_EQUAL( info.data_[4].cont(),false);
     BOOST_CHECK_EQUAL( info.data_[4].prefix_diff(), 1U);
     BOOST_CHECK_EQUAL( info.data_[4].nest_indices[0], 4);
     BOOST_CHECK_EQUAL( info.data_[4].nest_indices[1], 0);
     BOOST_CHECK_EQUAL( info.data_[4].nest_indices[2], 1);
     BOOST_CHECK_EQUAL( info.data_[4].nest_indices[3], -1);
 
-    BOOST_CHECK_EQUAL( info.data_[5].cont(), 1);
+    BOOST_CHECK_EQUAL( info.data_[5].cont(), true);
     BOOST_CHECK_EQUAL( info.data_[5].prefix_diff(), 1U);
     BOOST_CHECK_EQUAL( info.data_[5].nest_indices[0], 6);
     BOOST_CHECK_EQUAL( info.data_[5].nest_indices[1], 0);
     BOOST_CHECK_EQUAL( info.data_[5].nest_indices[2], -1);
 
-    BOOST_CHECK_EQUAL( info.data_[6].cont(), 0);
+    BOOST_CHECK_EQUAL( info.data_[6].cont(), false);
     BOOST_CHECK_EQUAL( info.data_[6].prefix_diff(), 1U);
     BOOST_CHECK_EQUAL( info.data_[6].nest_indices[0], 0);
     BOOST_CHECK_EQUAL( info.data_[6].nest_indices[1], -1);
 
-    BOOST_CHECK_EQUAL( info.data_[7].cont(), 0);
+    BOOST_CHECK_EQUAL( info.data_[7].cont(), false);
     BOOST_CHECK_EQUAL( info.data_[7].nest_indices, (int64_t*) 0);
   }
   catch(boost::exception& e)

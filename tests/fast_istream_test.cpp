@@ -259,7 +259,7 @@ decode_pmap(const byte_stream& bs, const char* result_bits, std::size_t maxbits)
 
   pos[0] <<= ( 8 - (maxbits%8) );
 
-  int nbytes = (maxbits + 7)/8; // i.e. ceiling(maxbits/8)
+  std::size_t nbytes = (maxbits + 7)/8; // i.e. ceiling(maxbits/8)
   if (memcmp(bits, result_bits, nbytes) == 0)
     return true;
 

@@ -30,6 +30,23 @@ namespace mfast
 {
   namespace xml_parser
   {
+    struct tag_referenced_by;
+    struct tag_template_name;
+
+    typedef boost::error_info<tag_referenced_by,std::string> referenced_by_info;
+    typedef boost::error_info<tag_template_name,std::string> template_name_info;
+
+    class template_not_found_error
+      : public fast_dynamic_error
+    {
+    public:
+      template_not_found_error(const char* template_name, const char* referenced_by)
+        : fast_dynamic_error("D8")
+      {
+        *this << template_name_info(template_name) << referenced_by_info(referenced_by);
+      }
+
+    };
 
 
     const char* field_builder::name() const

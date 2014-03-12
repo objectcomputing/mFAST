@@ -46,7 +46,7 @@ namespace mfast {
     using namespace tinyxml2;
 
     struct tag_reason;
-    typedef boost::error_info<tag_referenced_by,std::string> reason_info;
+    typedef boost::error_info<tag_reason,std::string> reason_info;
 
 
     class field_op

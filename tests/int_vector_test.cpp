@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE (test_fast_encoding)
 
       sequence_mref f1 = static_cast<sequence_mref>(mref[1]);
       f1.resize(SIZE);
-      for (int i = 0; i < SIZE; ++i) {
+      for (uint32_t i = 0; i < SIZE; ++i) {
         f1[i][0].as<int64_t>(i);
       }
 

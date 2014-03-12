@@ -622,11 +622,11 @@ BOOST_AUTO_TEST_CASE(string_delta_test)
     const char* base_str = "base_value";
     value_storage base_value;
     base_value.of_array.content_ = const_cast<char*>(base_str);
-    base_value.array_length( strlen(base_str) );
+    base_value.array_length( static_cast<uint32_t>(strlen(base_str)) );
 
 
     const char* delta_str = "\x41\x42\x43\x44\xC5"; // "ABCDE"
-    uint32_t delta_len = strlen(delta_str);
+    uint32_t delta_len = static_cast<uint32_t>(strlen(delta_str));
 
     helper.apply_string_delta(mref, base_value, 5, delta_str, delta_len);
 

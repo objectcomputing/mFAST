@@ -24,7 +24,7 @@
 #include "mfast/malloc_allocator.h"
 #include "mfast/output.h"
 #include "mfast/composite_type.h"
-#include "mfast/exceptions.h"
+#include "../common/exceptions.h"
 #include "../common/debug_stream.h"
 #include "../common/dictionary_builder.h"
 #include "../common/codec_helper.h"
@@ -276,6 +276,8 @@ namespace mfast {
         active_message_ = &itr->second;
       }
       else {
+        using namespace coder;
+
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
                                                        << referenced_by_info(active_message_->name()));
       }
@@ -316,7 +318,7 @@ namespace mfast {
         active_message_ = &itr->second;
       }
       else {
-        BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id));
+        BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
       }
     }
 

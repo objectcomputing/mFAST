@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   for (Addresses_mref::iterator itr = addresses.mref().begin(); itr != addresses.mref().end(); ++itr)
   {
-    itr->set_postalCode().as(index+10000);
+    itr->set_postalCode().as(static_cast<uint32_t>(index+10000));
     ++index;
   }
 
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   BOOST_FOREACH (const Address_mref &addr, addresses.mref())
   {
-    addr.set_postalCode().as(index+10000);
+    addr.set_postalCode().as(static_cast<uint32_t>(index+10000));
     ++index;
   }
 

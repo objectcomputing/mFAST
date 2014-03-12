@@ -255,7 +255,7 @@ namespace mfast {
     void to_initial_value() const
     {
       this->storage()->of_decimal.exponent_ = this->instruction()->initial_value().of_decimal.exponent_;
-      this->storage()->present(this->instruction()->initial_value().of_decimal.present_);
+      this->storage()->of_decimal.present_= this->instruction()->initial_value().of_decimal.present_;
     }
 
     void as(int8_t v) const

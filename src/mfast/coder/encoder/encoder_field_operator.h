@@ -17,7 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ENCODER_FIELD_OPERATOR_H_MNM3YM8Xo
+#ifndef ENCODER_FIELD_OPERATOR_H_MNM3YM8X
 #define ENCODER_FIELD_OPERATOR_H_MNM3YM8X
 
 #include "mfast/int_ref.h"
