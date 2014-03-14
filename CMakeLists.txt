@@ -2,7 +2,7 @@
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
 
-if(WIN32)
+if(MSVC_IDE)
 	cmake_minimum_required (VERSION 2.8.8)
 else()
 	cmake_minimum_required (VERSION 2.6.4)
@@ -84,11 +84,11 @@ link_directories (${PROJECT_BINARY_DIR}/src)
 # Install fast_type_gen batch file to set up the PATH environment
 # variable for using BOOST libraries
 
-if(WIN32)
+if(MSVC_IDE)
 configure_file(invoke.bat.in
                "${PROJECT_BINARY_DIR}/bin/invoke.bat"
                @ONLY)
-endif(WIN32)
+endif(MSVC_IDE)
 
 #============================================================
 # FASTTYPEGEN_TARGET (public macro)
@@ -116,7 +116,7 @@ endforeach(input)
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 
-if (WIN32)
+if (MSVC_IDE)
 	add_custom_command(
 	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
 	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat

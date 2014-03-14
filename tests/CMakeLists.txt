@@ -43,6 +43,10 @@ target_link_libraries (mfast_test
 					   mfast_xml_parser_static
                        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
-
-add_test(mfast_test mfast_test)
+if (MSVC_IDE)
+	add_test(NAME mfast_test
+	         COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat $<TARGET_FILE:mfast_test>)
+else()
+	add_test(mfast_test mfast_test)
+endif()
 
