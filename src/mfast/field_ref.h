@@ -159,7 +159,6 @@ namespace mfast {
       return storage_;
     }
 
-    field_cref& operator = (const field_cref&);
 
     const field_instruction* instruction_;
     const value_storage* storage_;
@@ -167,6 +166,10 @@ namespace mfast {
     friend class mfast::detail::field_storage_helper;
     template <typename ElementRef, bool IsElementAggregate>
     friend struct sequence_iterator_base;
+
+  private:
+    field_cref& operator = (const field_cref&);
+
   };
 
 //////////////////////////////////////////////////////////////////

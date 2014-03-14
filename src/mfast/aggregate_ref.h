@@ -120,9 +120,6 @@ namespace mfast
     iterator end() const;
 
   protected:
-    aggregate_cref& operator= (const aggregate_cref&);
-
-
     const value_storage* storage() const
     {
       return storage_array_;
@@ -136,6 +133,8 @@ namespace mfast
 
     template <typename ElementRef, bool IsElementAggregate>
     friend struct sequence_iterator_base;
+  private:
+    aggregate_cref& operator= (const aggregate_cref&);
 
   };
 
