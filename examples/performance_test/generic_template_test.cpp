@@ -136,7 +136,11 @@ int main(int argc, const char** argv)
         const char *last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
-          mfast::message_cref  msg = coder.decode(first, last, force_reset || first_message );
+#ifdef WITH_ENCODE
+          mfast::message_cref  msg =
+#endif
+            coder.decode(first, last, force_reset || first_message );
+
 #ifdef WITH_ENCODE
           encoder.encode(msg, buffer, force_reset || first_message);
 #endif

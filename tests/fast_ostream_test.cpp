@@ -226,7 +226,7 @@ encode_pmap(const char* bits, std::size_t maxbits, const byte_stream& result)
   encoder_presence_map pmap;
   pmap.init(&strm, maxbits);
 
-  unsigned byte;
+  unsigned byte=0;
 
   for (std::size_t i = 0; i < maxbits; ++i ) {
 
