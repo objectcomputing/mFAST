@@ -389,7 +389,8 @@ namespace mfast {
     void insert (iterator position, size_t n, value_type val) const
     {
       assert(position >= begin() && position <= end());
-      std::memset(this->shift(position, n), val, n*sizeof(value_type));
+      iterator itr = this->shift(position, n);
+      std::fill(itr, itr+n, val);
     }
 
     template <class InputIterator>
@@ -410,7 +411,7 @@ namespace mfast {
     void assign (size_t n, value_type val) const
     {
       resize(n);
-      std::memcpy(begin(), val, n*sizeof(value_type));
+      std::fill(begin(),end(), val);
     }
 
     void refers_to(const value_type* addr, size_t n) const

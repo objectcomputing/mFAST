@@ -509,13 +509,20 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     ref.pop_back();
     BOOST_CHECK(ref == "abcd");
 
+    ref.clear();
+    BOOST_CHECK(ref.absent());
+    ref.as("cde");
+    BOOST_CHECK(ref == "cde");
+
     ref.omit();
     BOOST_CHECK(ref.absent());
+
 
 
     detail::codec_helper helper;
 
     BOOST_CHECK(!helper.previous_value_of(ref).is_defined() );
+
 
     // testing delta base value
 
