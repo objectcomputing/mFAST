@@ -1,5 +1,6 @@
 #ifndef ARRAY_REF_H_STPDWY3M
 #define ARRAY_REF_H_STPDWY3M
+#include <boost/iterator/reverse_iterator.hpp>
 
 namespace mfast
 {
@@ -33,6 +34,8 @@ namespace mfast
     typedef const T& const_reference;
     typedef std::size_t size_type;
     typedef std::ptrdiff_t difference_type;
+    typedef boost::reverse_iterator<iterator> reverse_iterator;
+    typedef reverse_iterator const_reverse_iterator;
 
     iterator begin()
     {
@@ -59,7 +62,7 @@ namespace mfast
       return sz_;
     }
 
-  // element access]
+    // element access]
     reference operator[](size_type i)
     {
       return data_[i];
@@ -98,6 +101,16 @@ namespace mfast
     const T* data() const
     {
       return data_;
+    }
+
+    reverse_iterator rbegin() const
+    {
+      return boost::make_reverse_iterator(this->end());
+    }
+
+    reverse_iterator rend() const
+    {
+      return boost::make_reverse_iterator(this->begin());
     }
 
   private:
