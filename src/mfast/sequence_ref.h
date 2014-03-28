@@ -302,7 +302,6 @@ namespace mfast {
                        element_instruction());
     }
 
-
     reference front() const
     {
       return this->operator [] (0);
@@ -345,14 +344,20 @@ namespace mfast {
 
     iterator begin() const
     {
-      return iterator(reference(element_storage(0),
-                                element_instruction()));
+      if (storage_)
+        return iterator(reference(element_storage(0),
+                                  element_instruction()));
+      else
+        return iterator();
     }
 
     iterator end() const
     {
-      return iterator(reference(element_storage(this->size()),
-                                element_instruction()));
+      if (storage_)
+        return iterator(reference(element_storage(this->size()),
+                                  element_instruction()));
+      else
+        return iterator();
     }
 
     iterator cbegin() const
@@ -370,7 +375,7 @@ namespace mfast {
 
     /**
      * @returns true if the sequence contains only one sub-field and the field is unnamed.
-    **/
+     **/
 
     bool element_unnamed() const
     {
@@ -526,29 +531,35 @@ namespace mfast {
 
     iterator begin() const
     {
-      return iterator(reference(this->alloc_,
-                                element_storage(0),
-                                this->element_instruction()));
+      if (this->storage())
+        return iterator(reference(this->alloc_,
+                                  element_storage(0),
+                                  this->element_instruction()));
+      else
+        return iterator();
     }
 
     iterator end() const
     {
-      return iterator(reference(this->alloc_,
-                                element_storage(this->size()),
-                                this->element_instruction()));
+      if (this->storage())
+        return iterator(reference(this->alloc_,
+                                  element_storage(this->size()),
+                                  this->element_instruction()));
+      else
+        return iterator();
     }
 
     /**
      * Grows this sequence  by delta elements.
      *
      * @returns An iterator to first item appended.
-    **/
+     **/
     iterator grow_by(std::size_t delta) const
     {
       assert( delta +  this->size() <= static_cast<std::size_t>(std::numeric_limits<int32_t>::max()/this->instruction()->group_content_byte_count()) );
       std::size_t old_size = this->size();
       resize( old_size+delta );
-      return  begin() + static_cast<std::ptrdiff_t>(old_size);
+      return begin() + static_cast<std::ptrdiff_t>(old_size);
     }
 
     void swap(const make_sequence_mref& other) const

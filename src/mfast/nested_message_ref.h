@@ -34,6 +34,10 @@ namespace mfast
     typedef const templateref_instruction* instruction_cptr;
     typedef boost::false_type is_mutable;
 
+    nested_message_cref()
+    {
+    }
+
     nested_message_cref(const value_storage* storage,
                         instruction_cptr     inst)
       : field_cref(storage, inst)
@@ -76,6 +80,10 @@ namespace mfast
   public:
     typedef boost::true_type is_mutable;
     typedef mfast::allocator allocator_type;
+
+    nested_message_mref()
+    {
+    }
 
     nested_message_mref(allocator_type*                alloc,
                         value_storage*                 storage,

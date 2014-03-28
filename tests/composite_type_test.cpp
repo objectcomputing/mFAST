@@ -108,6 +108,10 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   Addresses addresses;
 
+  BOOST_FOREACH (const Address_mref &addr, addresses.mref())
+  {
+  }
+
   Addresses_mref::iterator it = addresses.mref().grow_by(2);
   BOOST_CHECK_EQUAL(addresses.cref().size(), 2U);
   BOOST_CHECK(it == addresses.mref().begin());
@@ -169,6 +173,16 @@ BOOST_AUTO_TEST_CASE(test_template)
 
 
   BOOST_CHECK_EQUAL(person_mref.get_id().size(),                           16U);
+
+
+  int num_addresses = 0;
+
+  BOOST_FOREACH(Address_cref addr, person_mref.get_addresses())
+  {
+    num_addresses += 1;
+  }
+
+  BOOST_CHECK_EQUAL(num_addresses, 0);
 
   debug_allocator alloc2;
 

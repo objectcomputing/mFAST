@@ -126,7 +126,7 @@ namespace mfast
     uint32_t array_length() const
     {
       return of_array.len_ == 0 ? 0 : of_array.len_ -1;
-    }
+    };
 
     void array_length(uint32_t n)
     {
