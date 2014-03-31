@@ -62,12 +62,13 @@ cpp_gen::gen_op_context(const char*                name,
 {
   if (context == 0)
     return "0";
-
-  out_ << "const static " << "op_context_t " << prefix_string() << name << "_opContext ={\n"
+  std::string prefix = prefix_string();
+  out_ << "const static " << "op_context_t " << prefix << name << "_opContext ={\n"
        << "  \"" << context->key_ << "\", \n"
        << "  \"" << context->ns_ << "\", \n"
        << "  \"" << context->dictionary_ << "\"};";
   std::string result = "&";
+  result += prefix;
   result += name;
   result += "_opContext";
   return result;
