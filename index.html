@@ -463,7 +463,7 @@ struct message_printer
   void visit(const PrimitiveTypes&amp; ref) const
   { // for int_cref&lt;T&gt;, decimal_cref, string_cref&lt;T&gt;, byte_vector_cref
     // and int_vector_cref&lt;T&gt;
-      std::cout &lt;&lt; indenter_ &lt;&lt; ref.name() &lt;&lt; ":" &lt;&lt; ref &lt;&lt; "\n";
+      std::cout &lt;&lt; indent_ &lt;&lt; ref.name() &lt;&lt; ":" &lt;&lt; ref &lt;&lt; "\n";
   }
 
   template &lt;typename CompositeTypeRef&gt;
