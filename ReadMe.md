@@ -336,7 +336,7 @@ try {
     // Caveat 1: the variable *first* would be updated to the start of next unread position after decode().
     // Caveat 2: msg is only valid before next decoder.decode() is called or decoder object is destroyed.
 
-    if (msg.id() == MarketData_cref::the_id)
+    if (msg.id() == MarketData::the_id)
     {
         MarketData_cref sample = static_cast<MarketData_cref>(msg);
         print_sample(sample);
