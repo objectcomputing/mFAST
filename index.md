@@ -91,7 +91,7 @@ The build system can be configured via `-DOption=Value` syntax when invoking cma
 * CMAKE\_BUILD\_TYPE : Specify the building mode such as debug or release. Valid values are
     - None (default)
     - Debug
-    - Relase
+    - Release
     - RelWithDebInfo
     - MinSizeRel
 * BUILD\_SHARED\_LIBS : whether to build mFAST as shared/dynamic linked library. Valid values are ON and OFF with default OFF. If the value is ON,  both static and shared library would be built. Notice that for application to link against mFAST shared libraries, the preprocessor macro MAST\_DYN\_LINK must be defined for the application sources.
@@ -333,7 +333,7 @@ try {
     // Caveat 1: the variable *first* would be updated to the start of next unread position after decode().
     // Caveat 2: msg is only valid before next decoder.decode() is called or decoder object is destroyed.
 
-    if (msg.id() == MarketData_cref::the_id)
+    if (msg.id() == MarketData::the_id)
     {
         MarketData_cref sample = static_cast<MarketData_cref>(msg);
         print_sample(sample);
