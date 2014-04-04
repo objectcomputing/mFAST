@@ -122,6 +122,10 @@ namespace mfast
       if (init_value_str) {
         unsigned char* initial_value_buffer = static_cast<unsigned char*>(alloc_->allocate(strlen(init_value_str)/2+1));
         ptrdiff_t initial_value_len = byte_vector_field_instruction::hex2binary(init_value_str, initial_value_buffer);
+        if (initial_value_len == -1) {
+          BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid byteVector initial value: ") +  init_value_str ) );
+        }
+
         initial_value_ = byte_vector_value_storage(initial_value_buffer, initial_value_len).storage_;
       }
     }
