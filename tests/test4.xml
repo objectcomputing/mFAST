@@ -72,7 +72,9 @@
       <string name="elementary-school" presence="optional" />
     </group>
   </define>
-  <template name="Person">
+
+  <define name="Person">
+    <group>
     <field name="firstName">
       <string charset="unicode"/>
     </field>
@@ -120,5 +122,6 @@
         <string />
       </sequence>
     </sequence>
-  </template>
+  </group>
+  </define>
 </templates>

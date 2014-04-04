@@ -588,22 +588,23 @@ void cpp_gen::generate(mfast::dynamic_templates_description& desc)
   }
 
   std::string instructions = template_instructions_.str();
-  if (instructions.size())
+  if (instructions.size()) {
     instructions.resize(instructions.size() - 2);
 
-  out_ << "const template_instruction* "<< filebase_ << "_templates_instructions[] ={\n"
-       << instructions
-       << "};\n\n"
-       << "mfast::templates_description* description()\n"
-       << "{\n"
-       << "  static mfast::templates_description desc(\n"
-       << "    \"" << desc.ns()  << "\", // ns\n"
-       << "    \"" << desc.template_ns()<< "\", // templateNs\n"
-       << "    \"" << desc.dictionary() << "\", // dictionary\n"
-       << "    " << filebase_ << "_templates_instructions);\n"
-       << "  return &desc;\n"
-       << "}\n\n"
-       << "\n}\n";
+    out_ << "const template_instruction* "<< filebase_ << "_templates_instructions[] ={\n"
+         << instructions
+         << "};\n\n"
+         << "mfast::templates_description* description()\n"
+         << "{\n"
+         << "  static mfast::templates_description desc(\n"
+         << "    \"" << desc.ns()  << "\", // ns\n"
+         << "    \"" << desc.template_ns()<< "\", // templateNs\n"
+         << "    \"" << desc.dictionary() << "\", // dictionary\n"
+         << "    " << filebase_ << "_templates_instructions);\n"
+         << "  return &desc;\n"
+         << "}\n\n";
+  }
+  out_ << "\n}\n";
 }
 
 void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)

@@ -477,8 +477,10 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
     this->generate(info);
   }
 
-  out_ << export_symbol_uppercase_ << "mfast::templates_description* description();\n\n"
-       << "#include \"" << filebase_ << ".inl\"\n"
+  if (desc.size())
+    out_ << export_symbol_uppercase_ << "mfast::templates_description* description();\n\n";
+
+  out_ << "#include \"" << filebase_ << ".inl\"\n"
        << "}\n\n"
        << "#endif //__" << filebase_upper << "_H__\n";
 }
