@@ -262,6 +262,10 @@ namespace mfast {
 
   };
 
+  namespace detial
+  {
+    extern const value_storage default_sequence_stroage;
+  }
 
 
   template <typename ElementType,
@@ -281,6 +285,7 @@ namespace mfast {
     typedef iterator const_iterator;
 
     make_sequence_cref()
+      : field_cref(&detial::default_sequence_stroage, 0)
     {
     }
 
@@ -344,20 +349,15 @@ namespace mfast {
 
     iterator begin() const
     {
-      if (storage_)
-        return iterator(reference(element_storage(0),
-                                  element_instruction()));
-      else
-        return iterator();
+      return iterator(reference(element_storage(0),
+                                element_instruction()));
+
     }
 
     iterator end() const
     {
-      if (storage_)
-        return iterator(reference(element_storage(this->size()),
-                                  element_instruction()));
-      else
-        return iterator();
+      return iterator(reference(element_storage(this->size()),
+                                element_instruction()));
     }
 
     iterator cbegin() const
@@ -446,9 +446,9 @@ namespace mfast {
     typedef sequence_iterator<ElementType, is_element_aggregate> iterator;
     typedef iterator const_iterator;
 
-    make_sequence_mref()
-    {
-    }
+    // make_sequence_mref()
+    // {
+    // }
 
     make_sequence_mref(mfast::allocator* alloc,
                        value_storage*    storage,
@@ -531,22 +531,17 @@ namespace mfast {
 
     iterator begin() const
     {
-      if (this->storage())
-        return iterator(reference(this->alloc_,
-                                  element_storage(0),
-                                  this->element_instruction()));
-      else
-        return iterator();
+      return iterator(reference(this->alloc_,
+                                element_storage(0),
+                                this->element_instruction()));
     }
 
     iterator end() const
     {
-      if (this->storage())
-        return iterator(reference(this->alloc_,
-                                  element_storage(this->size()),
-                                  this->element_instruction()));
-      else
-        return iterator();
+      return iterator(reference(this->alloc_,
+                                element_storage(this->size()),
+                                this->element_instruction()));
+
     }
 
     /**

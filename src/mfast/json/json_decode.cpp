@@ -105,7 +105,7 @@ namespace mfast {
 
       if (left_bracket == '{')
         right_bracket = '}';
-      else if (left_bracket == '[')
+      else // if (left_bracket == '[')
         right_bracket = ']';
 
       std::streambuf* buf = strm.rdbuf();
