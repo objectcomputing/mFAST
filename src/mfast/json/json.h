@@ -15,10 +15,10 @@ namespace mfast
     MFAST_JSON_EXPORT bool encode(std::ostream&                 is,
                                   const ::mfast::sequence_cref& seq,
                                   unsigned json_object_tag_mask=0);
-    MFAST_JSON_EXPORT bool decode(std::istream&                  is,
+    MFAST_JSON_EXPORT void decode(std::istream&                  is,
                                   const ::mfast::aggregate_mref& msg,
                                   unsigned json_object_tag_mask=0);
-    MFAST_JSON_EXPORT bool decode(std::istream&                 is,
+    MFAST_JSON_EXPORT void decode(std::istream&                 is,
                                   const ::mfast::sequence_mref& seq,
                                   unsigned json_object_tag_mask=0);
   } // namespace json

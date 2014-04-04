@@ -17,9 +17,16 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "byte_vector_instruction.h"
+#include "../exceptions.h"
 
 namespace mfast
 {
+  struct tag_reason_info;
+  typedef boost::error_info<tag_reason_info,std::string> reason_info;
+  struct tag_invalid_hexadecimal_digit;
+  typedef boost::error_info<tag_invalid_hexadecimal_digit,char> invalid_hexadecimal_digit_error_info;
+  struct tag_from_info;
+  typedef boost::error_info<tag_from_info,std::string> from_info;
 
   byte_vector_field_instruction*
   byte_vector_field_instruction::clone(arena_allocator& alloc) const
@@ -50,7 +57,9 @@ namespace mfast
       else if (*src == ' ' || *src == '-')
         continue;
       else
-        return -1;
+        BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info("Invalid hexadecimal string" )
+                                                        << invalid_hexadecimal_digit_error_info(*src)
+                                                        << from_info(src) );
 
       c |= (tmp << shift_bits);
 
@@ -64,7 +73,8 @@ namespace mfast
     }
 
     if (shift_bits == 0)
-      return -1;
+      BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info("Invalid hexadecimal string, it must contain even number of hexadecimal digits" )
+                                                      << from_info(src) );
 
     return dest - target;
   }

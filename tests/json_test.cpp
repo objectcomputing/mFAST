@@ -93,9 +93,9 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
 
   Product product3_holder;
   std::istringstream istrm(result);
-  BOOST_CHECK(mfast::json::decode(istrm,
-                                  product3_holder.mref(),
-                                  mfast_tag::JSON_UNKNOWN));
+  mfast::json::decode(istrm,
+                      product3_holder.mref(),
+                      mfast_tag::JSON_UNKNOWN);
   //
   BOOST_CHECK(product3_holder.cref() == product_ref);
 
@@ -161,14 +161,20 @@ BOOST_AUTO_TEST_CASE(json_decode_null_test)
 {
   using namespace test3;
 
-  LoginAccount account_holder;
+  try {
+    LoginAccount account_holder;
 
-  const char result[] = "{\"userName\":\"test\",\"password\":null}";
-  std::stringstream strm(result);
+    const char result[] = "{\"userName\":\"test\",\"password\": null}";
+    std::stringstream strm(result);
 
-  BOOST_CHECK( mfast::json::decode(strm, account_holder.mref()) );
-  BOOST_CHECK_EQUAL(account_holder.cref().get_userName().value(), "test");
-  BOOST_CHECK( account_holder.cref().get_password().absent() );
+    mfast::json::decode(strm, account_holder.mref());
+    BOOST_CHECK_EQUAL(account_holder.cref().get_userName().value(), "test");
+    BOOST_CHECK( account_holder.cref().get_password().absent() );
+  }
+  catch (boost::exception& ex)
+  {
+    std::cerr << diagnostic_information(ex);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_get_quoted_string)
