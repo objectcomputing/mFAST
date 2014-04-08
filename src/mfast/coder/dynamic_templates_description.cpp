@@ -328,21 +328,10 @@ public:
     return false;
   }
 
-  instruction_cptr* current_instructions(bool fix_protocol_ordered=false)
+  instruction_cptr* current_instructions()
   {
     instruction_cptr* instructions = new (*alloc_)instruction_cptr[current().size()];
     std::copy(current().begin(), current().end(), instructions);
-
-    if (fix_protocol_ordered) {
-      // for FIX protocol, the header fields must be in the following order
-      uint32_t fix_protocol_header_field_ids[] = {8, 35, 49, 56, 1128};
-      instruction_cptr* first = instructions;
-      instruction_cptr* last = instructions + current().size();
-      for (size_t i = 0; i < 5 && first != last; ++i) {
-        if (ensure_instruction_id(fix_protocol_header_field_ids[i], first, last))
-          ++first;
-      }
-    }
     return instructions;
   }
 
@@ -505,7 +494,7 @@ public:
       get_ns(element),
       get_templateNs(element),
       get_dictionary(element),
-      current_instructions(is_fix_protocol_),
+      current_instructions(),
       current().size(),
       reset,
       get_typeRef_name(element),

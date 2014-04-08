@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(sequence_coder_test)
   message_type msg(&alloc, test_case.template_with_id(1));
   message_mref msg_ref = msg.mref();
 
-  msg_ref[0].as(1);
+  msg_ref[0].as(1)
   sequence_mref seq(msg_ref[1]);
   seq.resize(2);
   seq[0][0].as(2);
