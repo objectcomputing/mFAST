@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   m2ref[2].as(2);
   m2ref[3].as("abcd");
 
-
+  BOOST_CHECK(m1ref[0] == m2ref[0]);
   BOOST_CHECK(m1ref == m2ref);
 
   m2ref[2].as(3);
