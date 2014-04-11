@@ -29,8 +29,7 @@ namespace mfast
   public:
 
 
-    templateref_instruction(uint16_t        field_index,
-                            instruction_tag tag = instruction_tag());
+    templateref_instruction(instruction_tag tag = instruction_tag());
 
     virtual void construct_value(value_storage& storage,
                                  allocator*     alloc) const;

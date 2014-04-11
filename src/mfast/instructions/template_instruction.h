@@ -38,7 +38,7 @@ namespace mfast
                          const char*         typeref_ns,
                          const char*         cpp_ns,
                          instruction_tag     tag = instruction_tag())
-      : group_field_instruction(0, presence_mandatory,
+      : group_field_instruction(presence_mandatory,
                                 id,
                                 name,
                                 ns,

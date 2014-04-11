@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
   BOOST_CHECK(!null_ref.present() );
 
   {
-    uint64_field_instruction inst(0, operator_delta,
+    uint64_field_instruction inst(operator_delta,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_copy,
+    uint64_field_instruction inst(operator_copy,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
   }
 
   {
-    int32_field_instruction inst(0, operator_copy,
+    int32_field_instruction inst(operator_copy,
                                  presence_mandatory,
                                  1,
                                  "test_int32","",
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
   }
 
 
-  uint32_field_instruction inst(0, operator_copy,
+  uint32_field_instruction inst(operator_copy,
                                 presence_mandatory,
                                 1,
                                 "test_uint32","",
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
 BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
 {
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
   }
 
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                              0,
                                              int_value_storage<int64_t>());
 
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                              0,
                                              int_value_storage<int64_t>());
 
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -227,7 +227,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
   value_storage storage;
 
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
 
   {
     mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal2","",
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
 
   {
     mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
-    decimal_field_instruction inst(0, operator_default,
+    decimal_field_instruction inst(operator_default,
                                    presence_optional,
                                    1,
                                    "test_decimal2","",
@@ -416,7 +416,7 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
   value_storage storage;
   const char* default_value = "initial_string";
   {
-    ascii_field_instruction inst(0, operator_copy,
+    ascii_field_instruction inst(operator_copy,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -426,7 +426,7 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
   }
   {
-    ascii_field_instruction inst(0, operator_copy,
+    ascii_field_instruction inst(operator_copy,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -442,7 +442,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
   debug_allocator alloc;
   value_storage storage;
   const char* default_value = "initial_string";
-  ascii_field_instruction inst(0, operator_copy,
+  ascii_field_instruction inst(operator_copy,
                                presence_optional,
                                1,
                                "test_ascii","",
@@ -614,7 +614,7 @@ BOOST_AUTO_TEST_CASE(string_delta_test)
   debug_allocator alloc;
   value_storage storage;
   const char* default_value = "initial_string";
-  ascii_field_instruction inst(0, operator_copy,
+  ascii_field_instruction inst(operator_copy,
                                presence_optional,
                                1,
                                "test_ascii","",
@@ -659,7 +659,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
   unsigned char f0_initial[] = "\x01\x02\x03\x04\x05";
   const char* f1_initial = "abcdefg";
 
-  byte_vector_field_instruction inst0(0, operator_copy,
+  byte_vector_field_instruction inst0(operator_copy,
                                       presence_optional,
                                       1,
                                       "test_byte_vector","",
@@ -667,7 +667,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                       byte_vector_value_storage(f0_initial,sizeof(f0_initial)),
                                       0, 0, 0);
 
-  unicode_field_instruction inst1(1, operator_copy,
+  unicode_field_instruction inst1(operator_copy,
                                   presence_optional,
                                   2,
                                   "test_unicode","",
@@ -678,7 +678,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     &inst0,&inst1
   };
 
-  group_field_instruction group_inst(0, presence_optional,
+  group_field_instruction group_inst(presence_optional,
                                      3,
                                      "test_group","","",
                                      instructions,
@@ -759,7 +759,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
   unsigned char f0_initial[] = "\x01\x02\x03\x04\x05";
   const char* f1_initial = "abcdefg";
 
-  byte_vector_field_instruction inst0(0, operator_copy,
+  byte_vector_field_instruction inst0(operator_copy,
                                       presence_optional,
                                       1,
                                       "test_byte_vector","",
@@ -767,14 +767,14 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                       byte_vector_value_storage(f0_initial,sizeof(f0_initial)),
                                       0, 0, 0);
 
-  unicode_field_instruction inst1(1, operator_copy,
+  unicode_field_instruction inst1(operator_copy,
                                   presence_optional,
                                   2,
                                   "test_unicode","",
                                   0,
                                   string_value_storage(f1_initial), 0, "", "");
 
-  uint32_field_instruction length_inst(0, operator_none,
+  uint32_field_instruction length_inst(operator_none,
                                        presence_mandatory,
                                        4,
                                        "","",
@@ -786,7 +786,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
     &inst0,&inst1
   };
 
-  sequence_field_instruction sequence_inst(0, presence_optional,
+  sequence_field_instruction sequence_inst(presence_optional,
                                            3, // id
                                            "test_group","","",
                                            instructions,0,0,
@@ -872,7 +872,7 @@ public:
 
 
   mock_field_instruction()
-    : field_instruction (0, operator_none,field_type_int32,presence_mandatory,0,"","", instruction_tag())
+    : field_instruction (operator_none,field_type_int32,presence_mandatory,0,"","", instruction_tag())
     , construct_value_called_(0)
     , destruct_value_called_(0)
     , copy_value_deep_called_(0)
@@ -956,14 +956,14 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
     &mock0
   };
 
-  uint32_field_instruction length_inst(0, operator_none,
+  uint32_field_instruction length_inst(operator_none,
                                        presence_mandatory,
                                        4,
                                        "","",
                                        0,
                                        int_value_storage<uint32_t>(0));
 
-  sequence_field_instruction sequence_inst(0, presence_optional,
+  sequence_field_instruction sequence_inst(presence_optional,
                                            3, // id
                                            "test_group","","",
                                            instructions,0,0,

@@ -185,12 +185,12 @@ namespace mfast {
     }
   }
 
-  void dictionary_builder::visit(const templateref_instruction* src_inst, void* dest_inst)
+  void dictionary_builder::visit(const templateref_instruction* /*src_inst*/, void* dest_inst)
   {
     templateref_instruction*& dest = *static_cast<templateref_instruction**>(dest_inst);
 
     // this is dynamic templateRef, it can only be binded at decoding time
-    dest = new (*alloc_)templateref_instruction( src_inst->field_index());
+    dest = new (*alloc_)templateref_instruction;
   }
 
   void dictionary_builder::visit(const group_field_instruction* src_inst, void* dest_inst)
@@ -214,7 +214,6 @@ namespace mfast {
     }
     else {
       dest->sequence_length_instruction_ = new (*alloc_)uint32_field_instruction(
-        0,
         operator_none,
         presence_mandatory,
         0,

@@ -59,14 +59,12 @@ namespace mfast
     : public vector_field_instruction_base
   {
   public:
-    vector_field_instruction(uint16_t        field_index,
-                             presence_enum_t optional,
+    vector_field_instruction(presence_enum_t optional,
                              uint32_t        id,
                              const char*     name,
                              const char*     ns,
                              instruction_tag tag=instruction_tag())
-      :  vector_field_instruction_base(field_index,
-                                       operator_none,
+      :  vector_field_instruction_base(operator_none,
                                        detail::vector_field_type<T>::value,
                                        optional,
                                        id, name, ns, sizeof(T), tag)
@@ -102,7 +100,7 @@ namespace mfast
   const vector_field_instruction<T>*
   vector_field_instruction<T>::default_instruction()
   {
-    static const vector_field_instruction<T> inst(0,presence_mandatory,0,"","");
+    static const vector_field_instruction<T> inst(presence_mandatory,0,"","");
     return &inst;
   }
 

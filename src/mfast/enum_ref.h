@@ -168,8 +168,7 @@ class enum_field_instruction_ex
   : public enum_field_instruction
 {
 public:
-  enum_field_instruction_ex(uint16_t                      field_index,
-                            operator_enum_t               operator_id,
+  enum_field_instruction_ex(operator_enum_t               operator_id,
                             presence_enum_t               optional,
                             uint32_t                      id,
                             const char*                   name,
@@ -182,8 +181,7 @@ public:
                             const enum_field_instruction* ref,
                             const char*                   cpp_ns,
                             instruction_tag               tag=instruction_tag())
-    : enum_field_instruction(field_index,
-                             operator_id,
+    : enum_field_instruction(operator_id,
                              optional,
                              id,
                              name,

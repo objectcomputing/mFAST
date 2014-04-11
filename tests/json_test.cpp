@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
 
   std::string str;
 
-  const byte_vector_field_instruction byte_vector_field_instruction_prototype(0,operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
+  const byte_vector_field_instruction byte_vector_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
   value_storage storage;
 
   byte_vector_field_instruction_prototype.construct_value(storage, &alloc);

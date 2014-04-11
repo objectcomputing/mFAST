@@ -21,8 +21,7 @@
 namespace mfast
 {
 
-  sequence_field_instruction::sequence_field_instruction(uint16_t                        field_index,
-                                                         presence_enum_t                 optional,
+  sequence_field_instruction::sequence_field_instruction(presence_enum_t                 optional,
                                                          uint32_t                        id,
                                                          const char*                     name,
                                                          const char*                     ns,
@@ -35,8 +34,7 @@ namespace mfast
                                                          const char*                     typeref_ns,
                                                          const char*                     cpp_ns,
                                                          instruction_tag                 tag)
-    : group_field_instruction(field_index,
-                              optional,
+    : group_field_instruction(optional,
                               id,
                               name,
                               ns,

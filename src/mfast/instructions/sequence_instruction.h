@@ -27,8 +27,7 @@ namespace mfast
     : public group_field_instruction
   {
   public:
-    sequence_field_instruction(uint16_t                        field_index,
-                               presence_enum_t                 optional,
+    sequence_field_instruction(presence_enum_t                 optional,
                                uint32_t                        id,
                                const char*                     name,
                                const char*                     ns,
@@ -107,8 +106,7 @@ namespace mfast
     typedef T cref_type;
 
 
-    sequence_instruction_ex(uint16_t                       field_index,
-                            presence_enum_t                optional,
+    sequence_instruction_ex(presence_enum_t                optional,
                             uint32_t                       id,
                             const char*                    name,
                             const char*                    ns,
@@ -121,7 +119,7 @@ namespace mfast
                             const char*                    typeref_ns,
                             const char*                    cpp_ns,
                             instruction_tag                tag = instruction_tag())
-      : sequence_field_instruction(field_index, optional, id, name, ns, dictionary,
+      : sequence_field_instruction(optional, id, name, ns, dictionary,
                                    subinstructions, element_instruction, ref_instruction, sequence_length_instruction,
                                    typeref_name, typeref_ns, cpp_ns,tag)
     {

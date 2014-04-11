@@ -27,8 +27,7 @@ namespace mfast
     : public unicode_field_instruction
   {
   public:
-    byte_vector_field_instruction(uint16_t             field_index,
-                                  operator_enum_t      operator_id,
+    byte_vector_field_instruction(operator_enum_t      operator_id,
                                   presence_enum_t      optional,
                                   uint32_t             id,
                                   const char*          name,
@@ -39,8 +38,7 @@ namespace mfast
                                   const char*          length_name,
                                   const char*          length_ns,
                                   instruction_tag      tag=instruction_tag())
-      :  unicode_field_instruction(field_index,
-                                   operator_id,
+      :  unicode_field_instruction(operator_id,
                                    optional,
                                    id, name, ns, context,
                                    initial_value,

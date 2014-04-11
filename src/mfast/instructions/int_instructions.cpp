@@ -21,8 +21,7 @@
 namespace mfast
 {
 
-  integer_field_instruction_base::integer_field_instruction_base(uint16_t             field_index,
-                                                                 operator_enum_t      operator_id,
+  integer_field_instruction_base::integer_field_instruction_base(operator_enum_t      operator_id,
                                                                  int                  field_type,
                                                                  presence_enum_t      optional,
                                                                  uint32_t             id,
@@ -31,7 +30,7 @@ namespace mfast
                                                                  const op_context_t*  context,
                                                                  const value_storage& initial_storage,
                                                                  instruction_tag      tag)
-    : field_instruction(field_index, operator_id, field_type, optional, id, name, ns, tag)
+    : field_instruction(operator_id, field_type, optional, id, name, ns, tag)
     , op_context_(context)
     , initial_value_(initial_storage)
     , prev_value_(&prev_storage_)

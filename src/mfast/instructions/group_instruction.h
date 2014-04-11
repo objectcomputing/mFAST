@@ -33,8 +33,7 @@ namespace mfast
     , public referable_instruction<group_field_instruction>
   {
   public:
-    group_field_instruction(uint16_t            field_index,
-                            presence_enum_t     optional,
+    group_field_instruction(presence_enum_t     optional,
                             uint32_t            id,
                             const char*         name,
                             const char*         ns,
@@ -44,8 +43,7 @@ namespace mfast
                             const char*         typeref_ns,
                             const char*         cpp_ns,
                             instruction_tag     tag = instruction_tag())
-      : field_instruction(field_index,
-                          operator_none,
+      : field_instruction(operator_none,
                           field_type_group,
                           optional,
                           id,
@@ -174,8 +172,7 @@ namespace mfast
   {
   public:
     typedef T cref_type;
-    group_instruction_ex(uint16_t            field_index,
-                         presence_enum_t     optional,
+    group_instruction_ex(presence_enum_t     optional,
                          uint32_t            id,
                          const char*         name,
                          const char*         ns,
@@ -185,8 +182,7 @@ namespace mfast
                          const char*         typeref_ns,
                          const char*         cpp_ns,
                          instruction_tag     tag = instruction_tag())
-      : group_field_instruction(field_index,
-                                optional,
+      : group_field_instruction(optional,
                                 id,
                                 name,
                                 ns,
@@ -199,8 +195,7 @@ namespace mfast
     {
     }
 
-    group_instruction_ex(uint16_t                       field_index,
-                         presence_enum_t                optional,
+    group_instruction_ex(presence_enum_t                optional,
                          uint32_t                       id,
                          const char*                    name,
                          const char*                    ns,
@@ -210,8 +205,7 @@ namespace mfast
                          const char*                    typeref_ns,
                          const char*                    cpp_ns,
                          instruction_tag                tag = instruction_tag())
-      : group_field_instruction(field_index,
-                                optional,
+      : group_field_instruction(optional,
                                 id,
                                 name,
                                 ns,

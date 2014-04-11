@@ -52,8 +52,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_int_vector, T, test_types )
 {
   debug_allocator alloc;
   value_storage storage;
-  vector_field_instruction<T> inst(0, //field_index
-                                   presence_optional,
+  vector_field_instruction<T> inst(presence_optional,
                                    1, // id
                                    "int_vector","");
 

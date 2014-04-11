@@ -21,9 +21,8 @@
 namespace mfast
 {
 
-  templateref_instruction::templateref_instruction(uint16_t        field_index,
-                                                   instruction_tag tag)
-    : field_instruction(field_index, operator_none,
+  templateref_instruction::templateref_instruction(instruction_tag tag)
+    : field_instruction(operator_none,
                         field_type_templateref,
                         presence_mandatory,
                         0,
@@ -101,7 +100,7 @@ namespace mfast
   instructions_view_t
   templateref_instruction::default_instruction()
   {
-    static const templateref_instruction the_instruction(0);
+    static const templateref_instruction the_instruction;
     static const field_instruction* array[] = {
       &the_instruction,
     };

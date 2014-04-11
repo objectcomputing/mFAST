@@ -29,8 +29,7 @@ namespace mfast
   {
   public:
 
-    enum_field_instruction(uint16_t                      field_index,
-                           operator_enum_t               operator_id,
+    enum_field_instruction(operator_enum_t               operator_id,
                            presence_enum_t               optional,
                            uint32_t                      id,
                            const char*                   name,
@@ -43,8 +42,7 @@ namespace mfast
                            const enum_field_instruction* ref,
                            const char*                   cpp_ns,
                            instruction_tag               tag= instruction_tag())
-      : integer_field_instruction_base(field_index,
-                                       operator_id,
+      : integer_field_instruction_base(operator_id,
                                        field_type_enum,
                                        optional,
                                        id,

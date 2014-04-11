@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
   value_storage storage;
   {
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_copy,
+    ascii_field_instruction inst(operator_copy,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
   }
 
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",

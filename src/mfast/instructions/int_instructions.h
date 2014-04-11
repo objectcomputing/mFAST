@@ -29,8 +29,7 @@ namespace mfast
     : public field_instruction
   {
   public:
-    integer_field_instruction_base(uint16_t             field_index,
-                                   operator_enum_t      operator_id,
+    integer_field_instruction_base(operator_enum_t      operator_id,
                                    int                  field_type,
                                    presence_enum_t      optional,
                                    uint32_t             id,
@@ -105,8 +104,7 @@ namespace mfast
     : public integer_field_instruction_base
   {
   public:
-    int_field_instruction(uint16_t             field_index,
-                          operator_enum_t      operator_id,
+    int_field_instruction(operator_enum_t      operator_id,
                           presence_enum_t      optional,
                           uint32_t             id,
                           const char*          name,
@@ -123,8 +121,7 @@ namespace mfast
 
 
   template <typename T>
-  int_field_instruction<T>::int_field_instruction(uint16_t             field_index,
-                                                  operator_enum_t      operator_id,
+  int_field_instruction<T>::int_field_instruction(operator_enum_t      operator_id,
                                                   presence_enum_t      optional,
                                                   uint32_t             id,
                                                   const char*          name,
@@ -132,8 +129,7 @@ namespace mfast
                                                   const op_context_t*  context,
                                                   int_value_storage<T> initial_value,
                                                   instruction_tag      tag)
-    : integer_field_instruction_base(field_index,
-                                     operator_id,
+    : integer_field_instruction_base(operator_id,
                                      field_type_trait<T>::id,
                                      optional,
                                      id,

@@ -113,7 +113,7 @@ namespace mfast
 
         if (std::strcmp(this->charset_, "unicode") == 0 )
         {
-          static unicode_field_instruction prototype (0,operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
+          static unicode_field_instruction prototype (operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
           instruction = &prototype;
         }
       }
@@ -175,7 +175,6 @@ namespace mfast
       field_op fop(inst, &element_, alloc());
 
       field_instruction* instruction = new (alloc())int_field_instruction<IntType> (
-        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -244,7 +243,6 @@ namespace mfast
         field_op exponent_op(inst, exponent_element, alloc());
 
         instruction = new (alloc())decimal_field_instruction(
-          static_cast<uint16_t>(parent_->num_instructions()),
           exponent_op.op_,
           get_presence(inst),
           get_id(inst),
@@ -260,7 +258,6 @@ namespace mfast
         field_op decimal_op(inst, &element_, alloc());
 
         instruction = new (alloc())decimal_field_instruction(
-          static_cast<uint16_t>(parent_->num_instructions()),
           decimal_op.op_,
           get_presence(inst),
           get_id(inst),
@@ -278,7 +275,6 @@ namespace mfast
     {
       field_op fop(inst, &element_, alloc());
       field_instruction* instruction = new (alloc())ascii_field_instruction  (
-        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -305,7 +301,6 @@ namespace mfast
       fast_xml_attributes length_attrs(length_attributes);
 
       field_instruction* instruction = new (alloc())unicode_field_instruction  (
-        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -335,7 +330,6 @@ namespace mfast
       fast_xml_attributes length_attrs(length_attributes);
 
       field_instruction* instruction = new (alloc())byte_vector_field_instruction  (
-        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -354,7 +348,6 @@ namespace mfast
     void field_builder::visit(const int32_vector_field_instruction* inst, void*)
     {
       field_instruction* instruction = new (alloc())int32_vector_field_instruction  (
-        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -366,7 +359,6 @@ namespace mfast
     void field_builder::visit(const uint32_vector_field_instruction* inst, void*)
     {
       field_instruction* instruction = new (alloc())uint32_vector_field_instruction  (
-        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -378,7 +370,6 @@ namespace mfast
     void field_builder::visit(const int64_vector_field_instruction* inst, void*)
     {
       field_instruction* instruction = new (alloc())int64_vector_field_instruction  (
-        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -390,7 +381,6 @@ namespace mfast
     void field_builder::visit(const uint64_vector_field_instruction* inst, void*)
     {
       field_instruction* instruction = new (alloc())uint64_vector_field_instruction  (
-        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -413,26 +403,38 @@ namespace mfast
                                                          parent_->name()));
         }
 
-        if (parent_->num_instructions() == 0) {
-          // if the templateRef is the first in a group or sequence, we don't need the clone the
-          // individual field because the field_index remains the same
+        // if (parent_->num_instructions() == 0) {
+        //   // if the templateRef is the first in a group or sequence, we don't need the clone the
+        //   // individual field because the field_index remains the same
+        //   for (size_t i = 0; i < target->subinstructions().size(); ++i) {
+        //     const field_instruction* sub_inst = target->subinstruction(i);
+        //     parent_->add_instruction(sub_inst);
+        //   }
+        // }
+        // else if (target->subinstructions().size() > 0) {
+        //   // In this case, we do need the clone the subfield instructions because the field
+        //   // index would be different from those in the referenced template.
+        //   field_instruction* new_inst;
+        //   for (size_t i = 0; i < target->subinstructions().size(); ++i) {
+        //     new_inst = target->subinstruction(i)->clone(alloc());
+        //     parent_->add_instruction(new_inst);
+        //   }
+        //   if (target->subinstructions().size() == 1 && new_inst->field_type() == field_type_sequence)
+        //   {
+        //     static_cast<sequence_field_instruction*>(new_inst)->ref_instruction(target);
+        //   }
+        // }
+
+        if (target->subinstructions().size() == 1 && target->subinstruction(0)->field_type() == field_type_sequence)
+        {
+          field_instruction* new_inst = target->subinstruction(0)->clone(alloc());
+          parent_->add_instruction(new_inst);
+          static_cast<sequence_field_instruction*>(new_inst)->ref_instruction(target);
+        }
+        else {
           for (size_t i = 0; i < target->subinstructions().size(); ++i) {
             const field_instruction* sub_inst = target->subinstruction(i);
             parent_->add_instruction(sub_inst);
-          }
-        }
-        else if (target->subinstructions().size() > 0) {
-          // In this case, we do need the clone the subfield instructions because the field
-          // index would be different from those in the referenced template.
-          field_instruction* new_inst;
-          for (size_t i = 0; i < target->subinstructions().size(); ++i) {
-            new_inst = target->subinstruction(i)->clone(alloc());
-            new_inst->field_index(static_cast<uint16_t>(parent_->num_instructions()));
-            parent_->add_instruction(new_inst);
-          }
-          if (target->subinstructions().size() == 1 && new_inst->field_type() == field_type_sequence)
-          {
-            static_cast<sequence_field_instruction*>(new_inst)->ref_instruction(target);
           }
         }
       }
@@ -492,7 +494,6 @@ namespace mfast
       }
 
       group_field_instruction* instruction = new (alloc())group_field_instruction (
-        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -529,7 +530,6 @@ namespace mfast
         field_op length_fop(length_instruction, length_element, alloc());
 
         length_instruction = new (alloc())uint32_field_instruction(
-          0,
           length_fop.op_,
           get_presence(inst),
           length_attributes.get_id(length_instruction),
@@ -542,7 +542,6 @@ namespace mfast
     else if (length_instruction->optional() != (get_presence(inst) == mfast::presence_optional))
       {
         length_instruction = new (alloc())uint32_field_instruction(
-          0,
           length_instruction->field_operator(),
           get_presence(inst),
           length_instruction->id(),
@@ -578,7 +577,6 @@ namespace mfast
 
 
       instruction = new (alloc())sequence_field_instruction (
-        static_cast<uint16_t>(parent_->num_instructions()),
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -754,7 +752,6 @@ namespace mfast
       }
 
       enum_field_instruction* instruction = new (alloc())enum_field_instruction (
-        static_cast<uint16_t>(parent_->num_instructions()),
         fop.op_,
         get_presence(inst),
         get_id(inst),

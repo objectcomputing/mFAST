@@ -24,8 +24,7 @@ namespace mfast
   const value_storage ascii_field_instruction::default_value_("");
 
 
-  ascii_field_instruction::ascii_field_instruction(uint16_t             field_index,
-                                                   operator_enum_t      operator_id,
+  ascii_field_instruction::ascii_field_instruction(operator_enum_t      operator_id,
                                                    presence_enum_t      optional,
                                                    uint32_t             id,
                                                    const char*          name,
@@ -34,8 +33,7 @@ namespace mfast
                                                    string_value_storage initial_value,
                                                    instruction_tag      tag,
                                                    field_type_enum_t    field_type)
-    :  vector_field_instruction_base(field_index,
-                                     operator_id,
+    :  vector_field_instruction_base(operator_id,
                                      field_type,
                                      optional,
                                      id, name, ns,
@@ -94,7 +92,7 @@ namespace mfast
 
   const ascii_field_instruction* ascii_field_instruction::default_instruction()
   {
-    static const ascii_field_instruction inst(0,operator_none,presence_mandatory,0,"","",0, string_value_storage());
+    static const ascii_field_instruction inst(operator_none,presence_mandatory,0,"","",0, string_value_storage());
     return &inst;
   }
 
@@ -113,7 +111,7 @@ namespace mfast
 
   const unicode_field_instruction* unicode_field_instruction::default_instruction()
   {
-    static const unicode_field_instruction inst(0,operator_none,presence_mandatory,0,"","",0, string_value_storage(), 0, "", "");
+    static const unicode_field_instruction inst(operator_none,presence_mandatory,0,"","",0, string_value_storage(), 0, "", "");
     return &inst;
   }
 

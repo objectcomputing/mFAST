@@ -187,16 +187,6 @@ namespace mfast {
       return static_cast<operator_enum_t>(operator_id_);
     }
 
-    uint16_t field_index() const
-    {
-      return field_index_;
-    }
-
-    void field_index(uint16_t i)
-    {
-      field_index_ = i;
-    }
-
     bool mandatory_without_initial_value() const
     {
       return mandatory_no_initial_value_;
@@ -210,8 +200,7 @@ namespace mfast {
 
     const char* field_type_name() const;
 
-    field_instruction(uint16_t        field_index,
-                      operator_enum_t operator_id,
+    field_instruction(operator_enum_t operator_id,
                       int             field_type,
                       presence_enum_t optional,
                       uint32_t        id,

@@ -28,8 +28,7 @@ namespace mfast
   {
   public:
 
-    vector_field_instruction_base(uint16_t          field_index,
-                                  operator_enum_t   operator_id,
+    vector_field_instruction_base(operator_enum_t   operator_id,
                                   field_type_enum_t field_type,
                                   presence_enum_t   optional,
                                   uint32_t          id,
@@ -37,8 +36,7 @@ namespace mfast
                                   const char*       ns,
                                   std::size_t       element_size,
                                   instruction_tag   tag)
-      : field_instruction(field_index,
-                          operator_id,
+      : field_instruction(operator_id,
                           field_type,
                           optional,
                           id,
