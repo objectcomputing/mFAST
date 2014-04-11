@@ -113,7 +113,7 @@ void hpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
   gen_primitive("uint64_vector", inst);
 }
 
-void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
+void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
 
@@ -129,7 +129,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 
   if (cpp_type.size()) {
 
-    if (!top_level) {
+    if (pIndex) {
       header_cref_ << indent << "typedef " << cpp_type << "_cref " << name << "_cref;\n";
       header_mref_ << indent << "typedef " << cpp_type << "_mref " << name << "_mref;\n";
       header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
@@ -182,7 +182,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 
     header_cref_ << indent << "};\n\n";
     header_mref_ << indent << "};\n\n";
-    if (!top_level) {
+    if (pIndex) {
       header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
       header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
       if (inst->optional()) {
@@ -191,7 +191,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     }
   }
 
-  if (top_level)
+  if (pIndex == 0)
   {
     content_<< header_cref_.str() << header_mref_.str();
 
@@ -253,7 +253,7 @@ void hpp_gen::gen_sequence_typedef(const mfast::sequence_field_instruction* inst
   header_mref_ << indent << "typedef mfast::make_sequence_mref<" << element_type << "_mref, " << trait << "> " << name << "_mref;\n";
 }
 
-void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_level)
+void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
   const mfast::field_instruction* element_instruction = get_element_instruction(inst);
@@ -313,14 +313,14 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
     gen_sequence_typedef(inst, name);
   }
 
-  if (!top_level) {
+  if (pIndex) {
     header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
     header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
     if (inst->optional())
       header_mref_ << indent << "void omit_" << name << "() const;\n";
   }
 
-  if (top_level)
+  if (pIndex==0)
   {
     content_<< header_cref_.str() << header_mref_.str();
 
@@ -440,10 +440,11 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
 
 }
 
-void hpp_gen::visit(const mfast::templateref_instruction* inst, void*)
+void hpp_gen::visit(const mfast::templateref_instruction* , void* pIndex)
 {
-  header_cref_ << indent << "mfast::nested_message_cref get_nested_message" << inst->field_index() << "() const;\n";
-  header_mref_ << indent << "mfast::nested_message_mref set_nested_message" << inst->field_index() << "() const;\n";
+  std::size_t index = *static_cast<std::size_t*>(pIndex);
+  header_cref_ << indent << "mfast::nested_message_cref get_nested_message" << index << "() const;\n";
+  header_mref_ << indent << "mfast::nested_message_mref set_nested_message" << index << "() const;\n";
 }
 
 void hpp_gen::generate(mfast::dynamic_templates_description& desc)
@@ -485,7 +486,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
        << "#endif //__" << filebase_upper << "_H__\n";
 }
 
-void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
+void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* pIndex)
 {
   std::string name (cpp_name(inst));
 
@@ -561,7 +562,7 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     header_mref_ << indent << "};\n\n";
   }
 
-  if (!top_level)
+  if (pIndex)
   {
     header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
     if (inst->field_operator() != mfast::operator_constant)

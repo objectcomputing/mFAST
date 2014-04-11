@@ -61,14 +61,20 @@ private:
                              const mfast::op_context_t* context);
   void gen_field(const mfast::field_instruction* inst,
                  const std::string&              context,
-                 const char*                     cpp_type);
+                 const char*                     cpp_type,
+                 void*                           pIndex);
   void gen_integer(const mfast::integer_field_instruction_base* inst,
                    const char*                                  cpp_type,
-                   const std::string&                           initial_value);
+                   const std::string&                           initial_value,
+                   void*                                        pIndex);
   void gen_string(const mfast::ascii_field_instruction* inst,
-                  const char*                           charset);
+                  const char*                           charset,
+                  void*                                 pIndex);
 
-  void gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst);
+  void gen_int_vector(const char*                                 cpp_type,
+                      const mfast::vector_field_instruction_base* inst,
+                      void*                                       pIndex);
+
   void output_subinstructions();
   std::string get_subinstructions(const mfast::group_field_instruction* inst);
   bool need_generate_subinstructions(const mfast::group_field_instruction* inst);

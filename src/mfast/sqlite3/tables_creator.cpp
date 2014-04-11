@@ -82,13 +82,14 @@ namespace mfast
     }
 
     const char* tables_creator::extra(const field_instruction* inst,
-                                      const char*              type)
+                                      const char*              type,
+                                      void*                    pIndex)
     {
       if (masks_.is_primary_key(inst))
       {
         primary_key_name_ = inst->name();
         primary_key_type_ = type;
-        primary_key_index_ = inst->field_index();
+        primary_key_index_ = (pIndex == 0) ? 0 : *static_cast<std::size_t*>(pIndex);
         return " PRIMARY KEY,";
       }
       return ",";
@@ -105,43 +106,44 @@ namespace mfast
 
     void tables_creator::traverse_subinstructions(const group_field_instruction* inst)
     {
-
+      std::size_t i = 0;
       BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
       {
         if (!masks_.to_skip(subinst))
-          subinst->accept(*this, 0);
+          subinst->accept(*this, &i);
+        ++i;
       }
     }
 
-    void tables_creator::visit(const int32_field_instruction* inst,  void*)
+    void tables_creator::visit(const int32_field_instruction* inst,  void* pIndex)
     {
-      create_current_ << "  " << inst->name() << " INT" << extra(inst, "INT") << "\n";
+      create_current_ << "  " << inst->name() << " INT" << extra(inst, "INT", pIndex) << "\n";
       parameters_.push_back(inst->name());
       num_columns_++;
     }
 
-    void tables_creator::visit(const uint32_field_instruction* inst,  void*)
+    void tables_creator::visit(const uint32_field_instruction* inst,  void* pIndex)
     {
-      create_current_ << "  " << inst->name() << " INT" << extra(inst, "INT") << "\n";
+      create_current_ << "  " << inst->name() << " INT" << extra(inst, "INT", pIndex) << "\n";
       parameters_.push_back(inst->name());
       num_columns_++;
     }
 
-    void tables_creator::visit(const int64_field_instruction* inst,  void*)
+    void tables_creator::visit(const int64_field_instruction* inst,  void* pIndex)
     {
-      create_current_ << "  " << inst->name() << " INT" << extra(inst, "INT") << "\n";
+      create_current_ << "  " << inst->name() << " INT" << extra(inst, "INT", pIndex) << "\n";
       parameters_.push_back(inst->name());
       num_columns_++;
     }
 
-    void tables_creator::visit(const uint64_field_instruction* inst,  void*)
+    void tables_creator::visit(const uint64_field_instruction* inst,  void* pIndex)
     {
-      create_current_ << "  " << inst->name() << " INT" << extra(inst, "INT") << "\n";
+      create_current_ << "  " << inst->name() << " INT" << extra(inst, "INT", pIndex) << "\n";
       parameters_.push_back(inst->name());
       num_columns_++;
     }
 
-    void tables_creator::visit(const decimal_field_instruction* inst,  void*)
+    void tables_creator::visit(const decimal_field_instruction* inst, void*)
     {
       if (masks_.has_constant_exponent(inst))
         create_current_ << "  " << inst->name() << " INT,\n";
@@ -166,9 +168,9 @@ namespace mfast
       num_columns_++;
     }
 
-    void tables_creator::visit(const byte_vector_field_instruction* inst,  void*)
+    void tables_creator::visit(const byte_vector_field_instruction* inst,  void* pIndex)
     {
-      create_current_ << "  " << inst->name() << " BLOB" << extra(inst, "BLOB") << "\n";
+      create_current_ << "  " << inst->name() << " BLOB" << extra(inst, "BLOB", pIndex) << "\n";
       parameters_.push_back(inst->name());
       num_columns_++;
     }

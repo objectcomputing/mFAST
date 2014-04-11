@@ -54,12 +54,15 @@ private:
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix);
   virtual void generate(const mfast::aggregate_view_info& info);
 
-  void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);
+  void gen_primitive (const char*                     cpp_type,
+                      const mfast::field_instruction* inst,
+                      void*                           pIndex);
 
   void gen_accessors (const mfast::field_instruction* inst,
-                      const std::string&       name,
-                      const std::string&       cref_type_name,
-                      const std::string&       mref_type_name);
+                      const std::string&              name,
+                      const std::string&              cref_type_name,
+                      const std::string&              mref_type_name,
+                      void*                           pIndex);
 
   std::stringstream mref_scope_;
 };

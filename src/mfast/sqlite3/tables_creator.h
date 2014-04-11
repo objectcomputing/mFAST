@@ -76,7 +76,8 @@ namespace mfast
 
     private:
       const char* extra(const field_instruction* inst,
-                        const char*              type);
+                        const char*              type,
+                        void*                    pIndex);
       void add_foreign_key(std::ostream& os,
                            const char*   tablename,
                            const char*   primary_key_name,

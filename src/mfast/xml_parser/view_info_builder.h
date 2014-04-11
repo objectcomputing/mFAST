@@ -48,7 +48,8 @@ namespace mfast
             const mfast::group_field_instruction* inst);
 
     private:
-      void visit_basic(const field_instruction* inst);
+      void visit_basic(const field_instruction* inst,
+                       void* pIndex);
 
       void
       build_field_view(const tinyxml2::XMLElement & element,

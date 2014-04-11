@@ -45,12 +45,12 @@ void codegen_base::traverse(mfast::dynamic_templates_description& desc)
     // we use the second parameter to identify wether the instruction is nested. If the
     // second parameter is not 0, it is nested inside another composite types.
      if (!dont_generate(inst))
-       inst->accept(*this, this);
+       inst->accept(*this, 0);
   }
 
   for (size_t i = 0; i < desc.size(); ++i)
   {
-    desc[i]->accept(*this, this);
+    desc[i]->accept(*this, 0);
   }
 }
 
@@ -62,9 +62,9 @@ void codegen_base::traverse(const mfast::group_field_instruction* inst, const ch
   for (std::size_t i = 0; i < inst->subinstructions().size(); ++i)
   {
     const mfast::field_instruction* subinst = inst->subinstruction(i);
-    // we use the second parameter to identify wether the instruction is nested. If the
+    // we use the second parameter to identify the index of the instruction. If the
     // second parameter is not 0, it is nested inside another composite types.
-    subinst->accept(*this, 0);
+    subinst->accept(*this, &i);
   }
   reset_scope(cref_scope_, saved_cref_scope);
 }
@@ -165,10 +165,10 @@ public:
     name_ = "mfast::byte_vector";
   }
 
-  virtual void visit(const group_field_instruction* inst, void*)
+  virtual void visit(const group_field_instruction* inst, void* pIndex)
   {
     if (inst->ref_instruction()) {
-      inst->ref_instruction()->accept(*this, 0);
+      inst->ref_instruction()->accept(*this, pIndex);
     }
     else if (inst->cpp_ns()==0 || inst->cpp_ns()[0] == 0 ||
              strcmp(caller_cpp_ns_, inst->cpp_ns()) ==0)
@@ -218,10 +218,10 @@ public:
     name_ = "mfast::uint64_vector";
   }
 
-  virtual void visit(const enum_field_instruction* inst, void*)
+  virtual void visit(const enum_field_instruction* inst, void* pIndex)
   {
     if (inst->ref_instruction()) {
-      inst->ref_instruction()->accept(*this, 0);
+      inst->ref_instruction()->accept(*this, pIndex);
     }
     else if (inst->cpp_ns()==0 || inst->cpp_ns()[0] == 0 ||
              strcmp(caller_cpp_ns_, inst->cpp_ns()) ==0)

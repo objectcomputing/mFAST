@@ -85,10 +85,11 @@ cpp_gen::gen_op_context(const char*                name,
 
 void cpp_gen::gen_field(const mfast::field_instruction* inst,
                         const std::string&              context,
-                        const char*                     cpp_type)
+                        const char*                     cpp_type,
+                        void*                           pIndex)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
+  std::size_t index = *static_cast<std::size_t*>(pIndex);
   // std::string context = gen_op_context(inst->name(), inst->op_context());
 
   out_ << "const static " << cpp_type << "_field_instruction\n"
@@ -118,34 +119,35 @@ get_initial_value(const mfast::value_storage& storage, const char* suffix)
 
 void cpp_gen::gen_integer(const mfast::integer_field_instruction_base* inst,
                           const char*                                  cpp_type,
-                          const std::string&                           initial_value)
+                          const std::string&                           initial_value,
+                          void*                                        pIndex)
 {
-  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), cpp_type);
+  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), cpp_type, pIndex);
   out_ << "  int_value_storage<"<< cpp_type << "_t>(" << initial_value   << "), // initial_value\n"
        << "  " << inst->tag() << "); // tag\n\n";
 }
 
-void cpp_gen::visit(const mfast::int32_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::int32_field_instruction* inst, void* pIndex)
 {
-  gen_integer(inst, "int32", get_initial_value<int32_t>(inst->initial_value(), "") );
+  gen_integer(inst, "int32", get_initial_value<int32_t>(inst->initial_value(), ""), pIndex );
 }
 
-void cpp_gen::visit(const mfast::uint32_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::uint32_field_instruction* inst, void* pIndex)
 {
-  gen_integer(inst, "uint32", get_initial_value<uint32_t>(inst->initial_value(), "U") );
+  gen_integer(inst, "uint32", get_initial_value<uint32_t>(inst->initial_value(), "U"), pIndex  );
 }
 
-void cpp_gen::visit(const mfast::int64_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::int64_field_instruction* inst, void* pIndex)
 {
-  gen_integer(inst, "int64", get_initial_value<int64_t>(inst->initial_value(), "LL") );
+  gen_integer(inst, "int64", get_initial_value<int64_t>(inst->initial_value(), "LL"), pIndex  );
 }
 
-void cpp_gen::visit(const mfast::uint64_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::uint64_field_instruction* inst, void* pIndex)
 {
-  gen_integer(inst, "uint64", get_initial_value<uint64_t>(inst->initial_value(), "ULL") );
+  gen_integer(inst, "uint64", get_initial_value<uint64_t>(inst->initial_value(), "ULL"), pIndex  );
 }
 
-void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
   if (inst->mantissa_instruction() ) {
@@ -163,7 +165,7 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
          << "));// mantissa inital value\n\n";
   }
 
-  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "decimal");
+  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "decimal", pIndex);
 
   if ( inst->field_type() == mfast::field_type_exponent)  {
     if (inst->mantissa_instruction() )
@@ -183,9 +185,10 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
 }
 
 void cpp_gen::gen_string(const mfast::ascii_field_instruction* inst,
-                         const char*                           charset)
+                         const char*                           charset,
+                         void*                                 pIndex)
 {
-  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), charset);
+  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), charset, pIndex);
 
   if (inst->initial_value().is_empty()) {
     out_ << "  "<< "string_value_storage()";
@@ -196,16 +199,16 @@ void cpp_gen::gen_string(const mfast::ascii_field_instruction* inst,
   }
 }
 
-void cpp_gen::visit(const mfast::ascii_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::ascii_field_instruction* inst, void* pIndex)
 {
-  gen_string(inst, "ascii");
+  gen_string(inst, "ascii", pIndex);
   out_ <<  ", // initial_value\n"
        << "  " << inst->tag() << "); // tag\n\n";
 }
 
-void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void* pIndex)
 {
-  gen_string(inst, "unicode");
+  gen_string(inst, "unicode", pIndex);
   if (inst->length_name()) {
     out_ << ", // initial value\n"
          << "  " << inst->length_id() << ", // length id\n"
@@ -218,9 +221,9 @@ void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void*)
   }
 }
 
-void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void* pIndex)
 {
-  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "byte_vector");
+  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "byte_vector", pIndex);
 
   if (inst->initial_value().is_empty()) {
     out_ << "  "<< "byte_vector_value_storage()";
@@ -254,10 +257,10 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
   }
 }
 
-void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst)
+void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
+  std::size_t index = *static_cast<std::size_t*>(pIndex);
   // std::string context = gen_op_context(inst->name(), inst->op_context());
 
   out_ << "const static " << cpp_type << "_field_instruction\n"
@@ -272,24 +275,24 @@ void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_ins
   add_to_instruction_list(name);
 }
 
-void cpp_gen::visit(const mfast::int32_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::int32_vector_field_instruction* inst, void* pIndex)
 {
-  gen_int_vector("int32_vector", inst);
+  gen_int_vector("int32_vector", inst, pIndex);
 }
 
-void cpp_gen::visit(const mfast::uint32_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::uint32_vector_field_instruction* inst, void* pIndex)
 {
-  gen_int_vector("uint32_vector", inst);
+  gen_int_vector("uint32_vector", inst, pIndex);
 }
 
-void cpp_gen::visit(const mfast::int64_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::int64_vector_field_instruction* inst, void* pIndex)
 {
-  gen_int_vector("int64_vector", inst);
+  gen_int_vector("int64_vector", inst, pIndex);
 }
 
-void cpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void* pIndex)
 {
-  gen_int_vector("uint64_vector", inst);
+  gen_int_vector("uint64_vector", inst, pIndex);
 }
 
 void cpp_gen::output_subinstructions()
@@ -340,10 +343,10 @@ cpp_gen::get_subinstructions(const mfast::group_field_instruction* inst)
 
 }
 
-void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
+void cpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
+  std::size_t index = (pIndex == 0) ? 0 : *static_cast<std::size_t*>(pIndex);
 
   std::string qualified_name = name;
   if (inst->ref_instruction())
@@ -351,7 +354,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     qualified_name = cpp_type_of(inst);
   }
 
-  if (top_level) {
+  if (pIndex == 0) {
     out_ << "const " << qualified_name << "::instruction_type*\n"
          << name << "::instruction()\n"
          << "{\n";
@@ -372,7 +375,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
 
   std::string subinstruction_arg = get_subinstructions(inst);
 
-  if (top_level) {
+  if (pIndex == 0) {
     out_ << "const static " << name << "::instruction_type\n"
          << "  the_instruction(\n";
   }
@@ -398,16 +401,16 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
        << "  \"\", // cpp_ns\n"
        << "  " << inst->tag() << "); // tag\n\n";
 
-  if (top_level) {
+  if (pIndex == 0) {
     out_ << "  return &the_instruction;\n"
          << "}\n\n";
   }
 }
 
-void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_level)
+void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
+  std::size_t index = (pIndex == 0) ? 0 : *static_cast<std::size_t*>(pIndex);
   bool to_gen_subinstruction =  inst->ref_instruction() == 0 && inst->element_instruction()==0;
 
   std::string qualified_name = name;
@@ -416,7 +419,7 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
     qualified_name = cpp_type_of(inst);
   }
 
-  if (top_level) {
+  if (pIndex == 0) {
     out_ << "const " << qualified_name << "::instruction_type*\n"
          << name << "::instruction()\n"
          << "{\n";
@@ -489,7 +492,7 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
 
   prefixes_.pop_back();
 
-  if (top_level) {
+  if (pIndex == 0) {
     out_ << "const static " << name << "::instruction_type\n"
          << "  the_instruction(\n";
   }
@@ -514,7 +517,7 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
        << "  \"\", // cpp_ns\n"
        << "  " << inst->tag() << "); //tag \n\n";
 
-  if (top_level) {
+  if (pIndex == 0) {
     out_ << "  return &the_instruction;\n"
          << "}\n\n";
   }
@@ -558,9 +561,9 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
        << "}\n\n";
 }
 
-void cpp_gen::visit(const mfast::templateref_instruction* inst, void*)
+void cpp_gen::visit(const mfast::templateref_instruction* inst, void* pIndex)
 {
-  std::size_t index = inst->field_index();
+  std::size_t index = *static_cast<std::size_t*>(pIndex);
 
   out_ << "static const templateref_instruction\n"
        << prefix_string() << "templateref" << index << "_instruction(\n"
@@ -607,10 +610,10 @@ void cpp_gen::generate(mfast::dynamic_templates_description& desc)
   out_ << "\n}\n";
 }
 
-void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
+void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
+  std::size_t index = (pIndex == 0) ? 0 : *static_cast<std::size_t*>(pIndex);
   std::string qualified_name = name;
   std::string instruction_variable_name;
   std::stringstream elements_variable_name;
@@ -623,7 +626,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     qualified_name = cpp_type_of(inst);
   }
 
-  if (top_level) {
+  if (pIndex == 0) {
     out_ << "const " << qualified_name << "::instruction_type*\n"
          << name << "::instruction()\n"
          << "{\n";
@@ -691,7 +694,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
        << "  0, // cpp_ns\n"
        << "  " << inst->tag() << "); //tag \n\n";
 
-  if (top_level) {
+  if (pIndex == 0) {
     out_ << "  return &the_instruction;\n"
          << "}\n\n";
   }

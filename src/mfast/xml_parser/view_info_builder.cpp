@@ -8,52 +8,53 @@ namespace mfast
   namespace xml_parser
   {
 
-    void view_info_builder::visit_basic(const field_instruction* inst)
+    void view_info_builder::visit_basic(const field_instruction* inst, void* pIndex)
     {
       std::size_t current_context_size = current_context_.size();
       if (current_context_size)
         current_context_ += ".";
       current_context_ += inst->name();
 
-      current_indeces_.push_back(inst->field_index());
+      current_indeces_.push_back(pIndex == 0 ? 0 : *static_cast<std::size_t*>(pIndex));
       infos_[current_context_] = current_indeces_;
 
       current_indeces_.pop_back();
       current_context_.resize(current_context_size);
     }
 
-    void view_info_builder::visit(const group_field_instruction* inst, void* is_top_level)
+    void view_info_builder::visit(const group_field_instruction* inst, void* pIndex)
     {
       std::size_t current_context_size = current_context_.size();
 
-      if (!is_top_level) {
-        current_indeces_.push_back(inst->field_index());
+      if (pIndex) {
+        current_indeces_.push_back( *static_cast<std::size_t*>(pIndex) );
         if (current_context_size)
           current_context_ += ".";
         current_context_ += inst->name();
 
         infos_[current_context_] = current_indeces_;
       }
-
+      std::size_t i = 0;
       BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
       {
-        subinst->accept(*this, 0);
+        subinst->accept(*this, &i);
+        ++i;
       }
 
-      if (!is_top_level) {
+      if (pIndex) {
         current_indeces_.pop_back();
         current_context_.resize(current_context_size);
       }
     }
 
-    void view_info_builder::visit(const sequence_field_instruction* inst, void*)
+    void view_info_builder::visit(const sequence_field_instruction* inst, void* pIndex)
     {
       std::size_t current_context_size = current_context_.size();
       if (current_context_size)
         current_context_ += ".";
 
       current_context_ += inst->name();
-      current_indeces_.push_back(inst->field_index());
+      current_indeces_.push_back( pIndex == 0 ? 0 : *static_cast<std::size_t*>(pIndex) );
       infos_[current_context_] = current_indeces_;
 
       // std::cout << "inserting " << current_context_ << "\n";
@@ -64,10 +65,11 @@ namespace mfast
 
       // std::cout << "inserting " << current_context_ << "\n";
 
-
+      std::size_t i = 0;
       BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
       {
-        subinst->accept(*this, 0);
+        subinst->accept(*this, &i);
+        ++i;
       }
 
       current_indeces_.pop_back();
@@ -75,79 +77,79 @@ namespace mfast
       current_context_.resize(current_context_size);
     }
 
-    void view_info_builder::visit(const int32_field_instruction* inst, void*)
+    void view_info_builder::visit(const int32_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const uint32_field_instruction* inst, void*)
+    void view_info_builder::visit(const uint32_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const int64_field_instruction* inst, void*)
+    void view_info_builder::visit(const int64_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const uint64_field_instruction* inst, void*)
+    void view_info_builder::visit(const uint64_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const decimal_field_instruction* inst, void*)
+    void view_info_builder::visit(const decimal_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const ascii_field_instruction* inst, void*)
+    void view_info_builder::visit(const ascii_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const unicode_field_instruction* inst, void*)
+    void view_info_builder::visit(const unicode_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const byte_vector_field_instruction* inst, void*)
+    void view_info_builder::visit(const byte_vector_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const template_instruction* inst, void* data)
+    void view_info_builder::visit(const template_instruction* inst, void* pIndex)
     {
-      visit(static_cast<const group_field_instruction*>(inst), data );
+      visit(static_cast<const group_field_instruction*>(inst), pIndex );
     }
 
-    void view_info_builder::visit(const templateref_instruction* inst, void*)
+    void view_info_builder::visit(const templateref_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const int32_vector_field_instruction* inst, void*)
+    void view_info_builder::visit(const int32_vector_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const uint32_vector_field_instruction* inst, void*)
+    void view_info_builder::visit(const uint32_vector_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const int64_vector_field_instruction* inst, void*)
+    void view_info_builder::visit(const int64_vector_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const uint64_vector_field_instruction* inst, void*)
+    void view_info_builder::visit(const uint64_vector_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
-    void view_info_builder::visit(const enum_field_instruction* inst, void*)
+    void view_info_builder::visit(const enum_field_instruction* inst, void* pIndex)
     {
-      visit_basic(inst);
+      visit_basic(inst, pIndex);
     }
 
     struct tag_reference_name;
@@ -249,7 +251,7 @@ namespace mfast
         BOOST_THROW_EXCEPTION(fast_static_error("A view must has a name attribute"));
 
 
-      this->visit(inst, this);
+      this->visit(inst, 0);
       aggregate_view_info result;
       result.max_depth_ = 0;
 

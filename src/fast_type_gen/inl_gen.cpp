@@ -26,7 +26,7 @@ void inl_gen::traverse(const mfast::group_field_instruction* inst, const char* n
   reset_scope(mref_scope_, saved_mref_scope);
 }
 
-void inl_gen::gen_primitive (const char* cpp_type, const mfast::field_instruction* inst)
+void inl_gen::gen_primitive (const char* cpp_type, const mfast::field_instruction* inst, void* pIndex)
 {
   std::string name (cpp_name(inst));
   std::stringstream cref_type_name;
@@ -34,75 +34,75 @@ void inl_gen::gen_primitive (const char* cpp_type, const mfast::field_instructio
   std::stringstream mref_type_name;
   mref_type_name << "mfast::" << cpp_type << "_mref";
 
-  gen_accessors(inst, name, cref_type_name.str(), mref_type_name.str());
+  gen_accessors(inst, name, cref_type_name.str(), mref_type_name.str(), pIndex);
 }
 
-void inl_gen::visit(const mfast::int32_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::int32_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("int32", inst);
+  gen_primitive("int32", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::uint32_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::uint32_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("uint32", inst);
+  gen_primitive("uint32", inst, pIndex);
 
 }
 
-void inl_gen::visit(const mfast::int64_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::int64_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("int64", inst);
+  gen_primitive("int64", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::uint64_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::uint64_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("uint64", inst);
+  gen_primitive("uint64", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::decimal_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::decimal_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("decimal", inst);
+  gen_primitive("decimal", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::ascii_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::ascii_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("ascii_string", inst);
+  gen_primitive("ascii_string", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::unicode_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::unicode_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("unicode_string", inst);
+  gen_primitive("unicode_string", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::byte_vector_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("byte_vector", inst);
+  gen_primitive("byte_vector", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::int32_vector_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::int32_vector_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("int32_vector", inst);
+  gen_primitive("int32_vector", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::uint32_vector_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::uint32_vector_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("uint32_vector", inst);
+  gen_primitive("uint32_vector", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::int64_vector_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::int64_vector_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("int64_vector", inst);
+  gen_primitive("int64_vector", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
+void inl_gen::visit(const mfast::uint64_vector_field_instruction* inst, void* pIndex)
 {
-  gen_primitive("uint64_vector", inst);
+  gen_primitive("uint64_vector", inst, pIndex);
 }
 
-void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
+void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
 {
   std::string name (cpp_name(inst));
 
-  std::size_t index = inst->field_index();
+  std::size_t index = pIndex == 0 ? 0 : *static_cast<std::size_t*>(pIndex);
 
   std::string cref_type_name = cref_scope_.str() + name + "_cref";
   std::string mref_type_name = mref_scope_.str() + name + "_mref";
@@ -121,8 +121,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
     mref_strm << "(*this)[" << index << "]";
   }
 
-  if (!top_level) {
-
+  if (pIndex) {
     out_ << "\ninline " << cref_type_name << "\n"
          << cref_scope_.str() << "get_" << name << "() const\n"
          << "{\n";
@@ -144,7 +143,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
            << "void\n"
            << mref_scope_.str() << "omit_" << name << "() const\n"
            << "{\n"
-           << "  (*this)[" << inst->field_index() << "].omit();\n"
+           << "  (*this)[" << index << "].omit();\n"
            << "}\n\n";
     }
 
@@ -204,7 +203,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
          << "{\n"
          << "}\n\n";
 
-    if (top_level)
+    if (!pIndex)
     {
       out_ << "inline\n"
            << name << "::" << name << "(\n"
@@ -245,16 +244,14 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* top_level)
   }
 }
 
-void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* top_level)
+void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 {
   std::string name (cpp_name(inst));
 
   std::string cref_type_name = cref_scope_.str() + name + "_cref";
   std::string mref_type_name = mref_scope_.str() + name + "_mref";
 
-  if (!top_level) {
-    gen_accessors(inst, name, cref_type_name, mref_type_name);
-  }
+  gen_accessors(inst, name, cref_type_name, mref_type_name, pIndex);
 
   const mfast::field_instruction* element_instruction = get_element_instruction(inst);
 
@@ -278,7 +275,7 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* top_lev
     traverse(inst, "_element");
   }
 
-  if (top_level)
+  if (pIndex == 0)
   {
     out_ << "inline\n"
          << name << "::" << name << "(\n"
@@ -415,9 +412,9 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
   this->traverse(inst, "");
 }
 
-void inl_gen::visit(const mfast::templateref_instruction* inst, void*)
+void inl_gen::visit(const mfast::templateref_instruction* , void* pIndex)
 {
-  std::size_t index = inst->field_index();
+  std::size_t index = *static_cast<std::size_t*>(pIndex);
 
   out_ << "\n"
        << "inline\n"
@@ -444,7 +441,7 @@ void inl_gen::generate(mfast::dynamic_templates_description& desc)
   }
 }
 
-void inl_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
+void inl_gen::visit(const mfast::enum_field_instruction* inst, void* pIndex)
 {
   std::string name (cpp_name(inst));
   std::string cref_type_name = cref_scope_.str() + name + "_cref";
@@ -507,38 +504,38 @@ void inl_gen::visit(const mfast::enum_field_instruction* inst, void* top_level)
     }
   }
 
-  if (!top_level)
-  {
-    gen_accessors(inst, name, cref_type_name, mref_type_name);
-  }
 
+  gen_accessors(inst, name, cref_type_name, mref_type_name, pIndex);
 }
 
 void inl_gen::gen_accessors(const mfast::field_instruction* inst,
                             const std::string&              name,
                             const std::string&              cref_type_name,
-                            const std::string&              mref_type_name)
+                            const std::string&              mref_type_name,
+                            void*                           pIndex)
 {
-  std::size_t index = inst->field_index();
-  out_ << "inline " << cref_type_name << "\n"
-       << cref_scope_.str() << "get_" << name << "() const\n"
-       << "{\n"
-       << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
-       << "}\n\n";
-  if (!is_const_field(inst)) {
-    out_ << "inline " << mref_type_name << "\n"
-         << mref_scope_.str() << "set_" << name << "() const\n"
+  if (pIndex) {
+    std::size_t index = *static_cast<std::size_t*>(pIndex);
+    out_ << "inline " << cref_type_name << "\n"
+         << cref_scope_.str() << "get_" << name << "() const\n"
          << "{\n"
-         << "  return static_cast<" << mref_type_name << ">((*this)[" << index << "]);\n"
+         << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
          << "}\n\n";
-  }
-  if (inst->optional()) {
-    out_ << "inline\n"
-         << "void\n"
-         << mref_scope_.str() << "omit_" << name << "() const\n"
-         << "{\n"
-         << "  (*this)[" << index << "].omit();\n"
-         << "}\n\n";
+    if (!is_const_field(inst)) {
+      out_ << "inline " << mref_type_name << "\n"
+           << mref_scope_.str() << "set_" << name << "() const\n"
+           << "{\n"
+           << "  return static_cast<" << mref_type_name << ">((*this)[" << index << "]);\n"
+           << "}\n\n";
+    }
+    if (inst->optional()) {
+      out_ << "inline\n"
+           << "void\n"
+           << mref_scope_.str() << "omit_" << name << "() const\n"
+           << "{\n"
+           << "  (*this)[" << index << "].omit();\n"
+           << "}\n\n";
+    }
   }
 }
 
