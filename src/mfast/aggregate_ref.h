@@ -53,7 +53,7 @@ namespace mfast
 
     aggregate_cref(const aggregate_cref& other);
 
-    aggregate_cref(const field_cref& other);
+    explicit aggregate_cref(const field_cref& other);
 
     size_t num_fields() const;
 
@@ -158,7 +158,7 @@ namespace mfast
                         value_storage*    storage,
                         instruction_cptr  instruction);
 
-    make_aggregate_mref(const field_mref_base& other);
+    explicit make_aggregate_mref(const field_mref_base& other);
 
     field_mref operator[](size_t index) const;
 
