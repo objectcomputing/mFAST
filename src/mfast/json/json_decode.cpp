@@ -5,20 +5,52 @@ namespace mfast {
 
   namespace json {
 
+    struct tag_reason;
+    struct tag_got;
+    struct tag_error_occurs_before;
 
-    struct tag_undecoded_input;
-
-    struct undecoded_input
-      : public boost::error_info<tag_undecoded_input, std::string>
+    struct error_occurs_before_info
+      : public boost::error_info<tag_error_occurs_before, std::string>
     {
-      undecoded_input(std::istream& is)
-        : boost::error_info<tag_undecoded_input, std::string>("")
+      error_occurs_before_info(std::istream& is)
+        : boost::error_info<tag_error_occurs_before, std::string>("")
       {
         std::streambuf* buf = is.rdbuf();
         char unconsumed[127];
         std::streamsize n = buf->sgetn( unconsumed, 127 );
         this->value().assign(unconsumed, n);
       }
+
+    };
+
+    typedef boost::error_info<tag_reason, std::string> reason_info;
+    typedef boost::error_info<tag_got, std::string> got_info;
+
+
+    class json_decode_error
+      : public std::runtime_error
+      , public boost::exception
+    {
+    public:
+      json_decode_error(std::istream& is, const char* reason, const char* got=0)
+        : std::runtime_error(reason)
+      {
+        if (got)
+          *this << got_info(got);
+        *this << error_occurs_before_info(is);
+      }
+
+      json_decode_error(std::istream& is, const char* reason, char got)
+        : std::runtime_error(reason)
+      {
+        if (got) {
+          char buf[2]= {'\0','\0'};
+          buf[0] =  got;
+          *this << got_info(buf);
+        }
+        *this << error_occurs_before_info(is);
+      }
+
 
     };
 
@@ -41,7 +73,7 @@ namespace mfast {
         }
 
         if (!strm)
-          BOOST_THROW_EXCEPTION(std::runtime_error("No opening quotation mark for a string"));
+          BOOST_THROW_EXCEPTION(json_decode_error(strm, "No opening quotation mark"));
 
         if (pref)
           pref->push_back(c);
@@ -79,7 +111,7 @@ namespace mfast {
             }
             else {
               strm.setstate(std::ios::failbit);
-              BOOST_THROW_EXCEPTION(std::runtime_error("Not a valid escape character"));
+              BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid escape character"));
             }
           }
           if (pstr)
@@ -87,7 +119,7 @@ namespace mfast {
         }
         else {
           strm.setstate(std::ios::failbit);
-          BOOST_THROW_EXCEPTION(std::runtime_error("No closing quotation mark for a string"));
+          BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect closing quotation mark"));
         }
       }
       while (1);
@@ -127,7 +159,7 @@ namespace mfast {
             return false;
         }
       }
-      BOOST_THROW_EXCEPTION(std::runtime_error("No closing bracket found"));
+      BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect closing bracket"));
     }
 
     bool skip_value (std::istream& strm)
@@ -166,7 +198,7 @@ namespace mfast {
         return strm.good();
       }
       strm.setstate(std::ios::failbit);
-      BOOST_THROW_EXCEPTION(std::runtime_error("Unknown value"));
+      BOOST_THROW_EXCEPTION(json_decode_error(strm, "Unknown value"));
       return false;
 
     }
@@ -182,7 +214,7 @@ namespace mfast {
       strm >> std::skipws >> c;
       if (c != '-' && !isdigit(c)) {
         strm.setstate(std::ios::failbit);
-        BOOST_THROW_EXCEPTION(std::runtime_error("expect decimal"));
+        BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal", c));
       }
       *ptr++ = c;
       std::streambuf* sbuf = strm.rdbuf();
@@ -224,7 +256,7 @@ namespace mfast {
       strm >> std::skipws >> c;
       if (!strm.good() || c != '[') {
         strm.setstate(std::ios::failbit);
-        BOOST_THROW_EXCEPTION(std::runtime_error("expect [ for an array"));
+        BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect [ for an array"));
       }
 
       strm >> std::ws;
@@ -259,7 +291,7 @@ namespace mfast {
         if (strm_ >> value, strm_.good())
           ref.as(value);
         else
-          BOOST_THROW_EXCEPTION(std::runtime_error("expect number value"));
+          BOOST_THROW_EXCEPTION(json_decode_error(strm_, "Expect number value"));
       }
 
       void visit(const enum_mref& ref)
@@ -294,7 +326,7 @@ namespace mfast {
             break;
           }
 
-          BOOST_THROW_EXCEPTION(std::runtime_error("expect boolean value"));
+          BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect boolean value", c1));
         }
         else {
           // treat it is an integer
@@ -323,7 +355,7 @@ namespace mfast {
         }
         catch (...) {
           strm_.setstate(std::ios::failbit);
-          BOOST_THROW_EXCEPTION(std::runtime_error("expect decimal value"));
+          BOOST_THROW_EXCEPTION(json_decode_error(strm_, "Expect decimal value"));
         }
       }
 
@@ -349,7 +381,7 @@ namespace mfast {
             }
           }
           strm_.setstate(std::ios::failbit);
-          BOOST_THROW_EXCEPTION(std::runtime_error("expect JSON object"));
+          BOOST_THROW_EXCEPTION(json_decode_error(strm_, "Expect JSON object"));
         }
         else {
           // write it as a hex string
@@ -378,7 +410,7 @@ namespace mfast {
           strm_ >> ref[i] >> std::skipws >> c;
 
           if (!strm_.good())
-            BOOST_THROW_EXCEPTION(std::runtime_error("expect integer"));
+            BOOST_THROW_EXCEPTION(json_decode_error(strm_, "Expect integer"));
         }
         while (c == ',');
 
@@ -386,7 +418,7 @@ namespace mfast {
           return;
 
         strm_.setstate(std::ios::failbit);
-        BOOST_THROW_EXCEPTION(std::runtime_error("expect ] or ,"));
+        BOOST_THROW_EXCEPTION(json_decode_error(strm_, "Expect ] or ,"));
       }
 
       // return false only when the parsed result is empty or error
@@ -442,7 +474,7 @@ namespace mfast {
           if (!strm_.good() || c != ':')
           {
             strm_.setstate(std::ios::failbit);
-            BOOST_THROW_EXCEPTION(std::runtime_error("expect :"));
+            BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect :", c));
           }
 
           int index = ref.field_index_with_name(key.c_str());
@@ -454,7 +486,7 @@ namespace mfast {
               strm_ >> std::noskipws >> std::setw(5) >> buf;
               if (strncmp(buf, "null", 4) != 0) {
                 strm_.setstate(std::ios::failbit);
-                BOOST_THROW_EXCEPTION(std::runtime_error("expect null"));
+                BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect null", buf));
               }
             }
             else
@@ -466,7 +498,7 @@ namespace mfast {
           }
 
           if (!strm_.good() )
-            BOOST_THROW_EXCEPTION(std::runtime_error("expect }"));
+            BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect }"));
 
           strm_ >> c;
 
@@ -484,7 +516,7 @@ namespace mfast {
           return false;
       }
       strm_.setstate(std::ios::failbit);
-      BOOST_THROW_EXCEPTION(std::runtime_error("expect {"));
+      BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect {", c));
     }
 
     void decode_visitor::visit(const mfast::sequence_mref& ref, int)
@@ -514,37 +546,23 @@ namespace mfast {
       if (c == ']')
         return;
       strm_.setstate(std::ios::failbit);
-      BOOST_THROW_EXCEPTION(std::runtime_error("expect ]"));
+      BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect ]", c));
     }
 
     void decode(std::istream&                is,
                 const mfast::aggregate_mref& msg,
                 unsigned                     json_object_tag_mask)
     {
-      try {
-        decode_visitor visitor(is, json_object_tag_mask);
-        visitor.visit_impl(msg);
-      }
-      catch (boost::exception& ex)
-      {
-        ex << undecoded_input(is);
-        throw;
-      }
+      decode_visitor visitor(is, json_object_tag_mask);
+      visitor.visit_impl(msg);
     }
 
     void decode(std::istream&               is,
                 const mfast::sequence_mref& seq,
                 unsigned                    json_object_tag_mask)
     {
-      try {
-        decode_visitor visitor(is, json_object_tag_mask);
-        visitor.visit(seq, 0);
-      }
-      catch (boost::exception& ex)
-      {
-        ex << undecoded_input(is);
-        throw;
-      }
+      decode_visitor visitor(is, json_object_tag_mask);
+      visitor.visit(seq, 0);
     }
 
   }
