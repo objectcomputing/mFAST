@@ -71,6 +71,8 @@ namespace mfast {
     for (std::size_t i = 0; i < cref.size(); ++i) {
       os << std::setw(2) <<  static_cast<unsigned>(cref[i]);
     }
+
+    os_ << std::setfill(' ');
     return os;
   }
 
