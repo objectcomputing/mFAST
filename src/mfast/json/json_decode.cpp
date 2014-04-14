@@ -483,7 +483,7 @@ namespace mfast {
             strm_ >> std::ws;
             if (strm_.good() && strm_.peek() == 'n') {
               char buf[5];
-              strm_ >> std::noskipws >> std::setw(5) >> buf;
+              strm_ >> std::noskipws >> std::setw(5) >> buf >> std::skipws;
               if (strncmp(buf, "null", 4) != 0) {
                 strm_.setstate(std::ios::failbit);
                 BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect null", buf));
@@ -511,7 +511,7 @@ namespace mfast {
       else if (c == 'n') {
         // check if the result is null
         char buf[4];
-        strm_ >> std::noskipws >> std::setw(3) >> buf;
+        strm_ >> std::noskipws >> std::setw(3) >> buf >> std::skipws;
         if (strncmp(buf, "ull", 3) == 0)
           return false;
       }
