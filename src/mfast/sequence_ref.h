@@ -264,7 +264,7 @@ namespace mfast {
 
   namespace detail
   {
-    extern const value_storage default_sequence_stroage;
+    extern MFAST_EXPORT const value_storage default_sequence_storage;
   }
 
 
@@ -285,7 +285,7 @@ namespace mfast {
     typedef iterator const_iterator;
 
     make_sequence_cref()
-      : field_cref(&detail::default_sequence_stroage, 0)
+      : field_cref(&detail::default_sequence_storage, 0)
     {
     }
 

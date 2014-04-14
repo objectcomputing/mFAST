@@ -22,7 +22,7 @@
 namespace mfast {
   namespace detail {
 
-    const value_storage default_sequence_stroage;
+    const value_storage default_sequence_storage;
 
     void sequence_mref_helper::reserve(const sequence_field_instruction* instruction,
                                        value_storage*                    storage,
