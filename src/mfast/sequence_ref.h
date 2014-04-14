@@ -262,7 +262,7 @@ namespace mfast {
 
   };
 
-  namespace detial
+  namespace detail
   {
     extern const value_storage default_sequence_stroage;
   }
@@ -285,7 +285,7 @@ namespace mfast {
     typedef iterator const_iterator;
 
     make_sequence_cref()
-      : field_cref(&detial::default_sequence_stroage, 0)
+      : field_cref(&detail::default_sequence_stroage, 0)
     {
     }
 
