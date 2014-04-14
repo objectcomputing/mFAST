@@ -72,7 +72,7 @@ namespace mfast {
       os << std::setw(2) <<  static_cast<unsigned>(cref[i]);
     }
 
-    os_ << std::setfill(' ');
+    os << std::setfill(' ');
     return os;
   }
 
