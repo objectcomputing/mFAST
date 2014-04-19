@@ -15,7 +15,9 @@ namespace mfast
         current_context_ += ".";
       current_context_ += inst->name();
 
-      current_indeces_.push_back(pIndex == 0 ? 0 : *static_cast<std::size_t*>(pIndex));
+      current_indeces_.push_back(
+        static_cast<int>(*static_cast<std::size_t*>(pIndex))
+      );
       infos_[current_context_] = current_indeces_;
 
       current_indeces_.pop_back();
@@ -27,7 +29,9 @@ namespace mfast
       std::size_t current_context_size = current_context_.size();
 
       if (pIndex) {
-        current_indeces_.push_back( *static_cast<std::size_t*>(pIndex) );
+        current_indeces_.push_back(
+          static_cast<int>(*static_cast<std::size_t*>(pIndex))
+        );
         if (current_context_size)
           current_context_ += ".";
         current_context_ += inst->name();
@@ -54,7 +58,9 @@ namespace mfast
         current_context_ += ".";
 
       current_context_ += inst->name();
-      current_indeces_.push_back( pIndex == 0 ? 0 : *static_cast<std::size_t*>(pIndex) );
+      current_indeces_.push_back(
+        pIndex  ? static_cast<int>(*static_cast<std::size_t*>(pIndex)) : 0
+      );
       infos_[current_context_] = current_indeces_;
 
       // std::cout << "inserting " << current_context_ << "\n";
