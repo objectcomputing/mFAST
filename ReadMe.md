@@ -1,10 +1,16 @@
 
 ### Introduction
 
-mFAST is an encoding/decoding library for FAST (FIX Adapted for STreaming) protocol written in C++.
+mFAST is a high performance C++ encoding/decoding library for FAST (FIX Adapted for STreaming) protocol.
+
 For more information, please read the [article](http://objectcomputing.github.io/mFAST/).
 
-### Release Notes
+For build instructions, please read the [wiki page](https://github.com/objectcomputing/mFAST/wiki/Installation).
 
-* \[01/18/2014\] Added preliminary FAST 1.2 enum and boolean type support. Set, bit group and timestamp types are not implemented yet.
-* \[01/12/2014\] Generating `omit_fieldName()` for optional fields in generated group field, `field_mref::as_absent()` member function has been replaced by `field_mref::omit()`.
+### Important Notice
+
+mFAST has a preliminary support for FAST protocol version 1.2 now. That includes the new `define` and `type` tags in the FAST XML specification and the new enum/boolean types.
+In addition, the generated sequence types support iterators now. However, there is no support for *SET*, *BIT GROUP* and *TIMESTAMP* yet.
+
+
+If you have used mFAST 1.1 version, please notice there are some backward-incompatible changes. First, to make a existing field absent, please use `msg_mref.omit_fieldName()` instead of `msg_mref.set_fieldName().as_absent()`. Second, if you have developed your own visitor for mFAST cref/mref types, the visitor has to be able to visit the new enum cref/mref types.
