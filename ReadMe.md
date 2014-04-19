@@ -7,4 +7,4 @@ For more information, please read the [article](http://objectcomputing.github.io
 ### Release Notes
 
 * \[01/18/2014\] Added preliminary FAST 1.2 enum and boolean type support. Set, bit group and timestamp types are not implemented yet.
-* \[01/12/2014\] Generating `omit_fieldName()` for optional fields in generated group/template classes, `field_mref::as_absent()` member function are removed.
+* \[01/12/2014\] Generating `omit_fieldName()` for optional fields in generated group field, `field_mref::as_absent()` member function has been replaced by `field_mref::omit()`.

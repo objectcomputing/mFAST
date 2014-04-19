@@ -1,5 +1,0 @@
-project (fast_type_gen) : mfast_core, mfast_xml_parser, boost_system, boost_filesystem {
-  exename = fast_type_gen
-  macros += MFAST_DYN_LINK
-  exeout = $(MFAST_ROOT)/bin
-}

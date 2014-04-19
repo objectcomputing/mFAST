@@ -1,6 +1,0 @@
-project(mfast_json) : mfast_core {
-  sharedname = mfast_json
-  dynamicflags += mfast_json_EXPORTS
-
-  includes += "."
-}

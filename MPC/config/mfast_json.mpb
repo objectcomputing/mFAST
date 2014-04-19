@@ -1,4 +1,0 @@
-project : mfast_core {
-  libs += mfast_json
-  after += mfast_json
-}

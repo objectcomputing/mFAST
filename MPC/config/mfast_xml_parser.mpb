@@ -1,5 +1,0 @@
-project : mfast_core {
-  libs += mfast_xml_parser
-  after += mfast_xml_parser
-
-}

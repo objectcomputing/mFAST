@@ -235,6 +235,14 @@ BOOST_AUTO_TEST_CASE(test_template)
   Person person2(person1.cref(), &alloc2);
 
   BOOST_CHECK(person1.cref() == person2.cref());
+
+  Person person3(&alloc);
+
+  person3.mref().as(person1.cref());
+
+  BOOST_CHECK(person1.cref() == person3.cref());
+
+
 }
 
 
