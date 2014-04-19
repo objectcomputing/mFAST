@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<templates xmlns="http://www.ociweb.com/ns/mfast/td/1.2" templateNs="http://www.ociweb.com/ns/templates/mfast_json" ns="http://www.ociweb.com/ns/mfast">
+  <define name="Address">
+    <group>
+      <string name="streetAddress"/>
+      <string name="city"/>
+      <string name="state"/>
+      <uInt32 name="postalCode"/>
+    </group>
+  </define>
+  <define name="Addresses">
+    <sequence>
+      <field>
+        <type name="Address"/>
+      </field>
+    </sequence>
+  </define>
+  <define name="PhoneNumbers">
+    <sequence>
+      <string name="type"/>
+      <string name="number"/>
+    </sequence>
+  </define>
+
+  <define name="Emails">
+    <sequence>
+      <string />
+    </sequence>
+  </define>
+
+  <define name="Config">
+    <sequence>
+      <string name="name"/>
+      <group name="detail">
+        <string name="detail1" />
+        <string name="detail2" />
+      </group>
+    </sequence>
+  </define>
+
+  <define name="Gender">
+    <enum>
+      <element name="male"/>
+      <element name="female"/>
+      <copy/>
+    </enum>
+  </define>
+  <define name="DiscreteEnum">
+    <enum>
+      <element name="One" value="1"/>
+      <element name="Three" value="3"/>
+      <element name="Five" value="5"/>
+      <copy/>
+    </enum>
+  </define>
+  <define name="Salary">
+    <decimal>
+      <exponent>
+        <constant value="-2"/>
+      </exponent>
+    </decimal>
+  </define>
+  <define name="UUID">
+    <byteVector>
+      <default value="000102030405060708090A0B0C0D0E0F"/>
+    </byteVector>
+  </define>
+  <define name="Education">
+    <group>
+      <string name="college" presence="optional" />
+      <string name="high-school" presence="optional" />
+      <string name="elementary-school" presence="optional" />
+    </group>
+  </define>
+
+  <define name="Person">
+    <group>
+    <field name="firstName">
+      <string charset="unicode"/>
+    </field>
+    <string name="lastName" charset="unicode"/>
+    <field name="gender">
+      <type name="Gender">
+        <default value="female" />
+      </type>
+    </field>
+    <uInt32 name="age"/>
+    <field name="addresses" presence="optional">
+      <type name="Addresses"/>
+    </field>
+    <field name="phoneNumbers">
+      <type name="PhoneNumbers"/>
+    </field>
+    <field name="emails">
+      <type name="Emails"/>
+    </field>
+    <field name="bloodType">
+      <enum>
+        <element name="A"/>
+        <element name="B"/>
+        <element name="AB"/>
+        <element name="O"/>
+      </enum>
+    </field>
+    <boolean name="married"/>
+    <field name="discrete">
+      <type name="DiscreteEnum"/>
+    </field>
+    <field name="salary">
+      <type name="Salary"/>
+    </field>
+    <field name="id">
+      <type name="UUID"/>
+    </field>
+    <field name="education" presence="optional">
+      <type name="Education" />
+    </field>
+    <int32Vector name="test_vector" />
+
+    <sequence name="twoDimSequence">
+      <sequence>
+        <string />
+      </sequence>
+    </sequence>
+  </group>
+  </define>
+</templates>

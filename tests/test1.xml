@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.fixprotocol.org/ns/templates/test1" ns="http://www.fixprotocol.org/ns/fix">
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1" templateNs="http://www.fixprotocol.org/ns/templates/test1" ns="http://www.fixprotocol.org/ns/fix">
     <template name="SampleInfo" id="1">
         <string name="MessageType" id="35">
             <constant value="X"/>

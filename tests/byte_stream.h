@@ -1,3 +1,22 @@
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
+// All rights reserved.
+//
+// This file is part of mFAST.
+//
+//     mFAST is free software: you can redistribute it and/or modify
+//     it under the terms of the GNU Lesser General Public License as published by
+//     the Free Software Foundation, either version 3 of the License, or
+//     (at your option) any later version.
+//
+//     mFAST is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//     GNU General Public License for more details.
+//
+//     You should have received a copy of the GNU Lesser General Public License
+//     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
+//
+
 #ifndef BYTE_STREAM_H_4KE09BNK
 #define BYTE_STREAM_H_4KE09BNK
 
@@ -9,40 +28,39 @@
 
 class byte_stream
 {
-  public:
-    byte_stream(const char* s, std::size_t len)
-      : data_(s)
-      , size_(len)
-    {
-    }
+public:
+  byte_stream(const char* s, std::size_t len)
+    : data_(s)
+    , size_(len)
+  {
+  }
 
-    template <std::size_t SIZE>
-    byte_stream(const char (&array) [SIZE])
-      : data_(array)
-      , size_(SIZE-1)
-    {
-    }
-    
-    
-    byte_stream(const mfast::fast_ostreambuf& sb)
-      : data_(sb.pbase())
-      , size_(sb.length())
-    {
-    }
+  template <std::size_t SIZE>
+  byte_stream(const char (&array) [SIZE])
+    : data_(array)
+    , size_(SIZE-1)
+  {
+  }
 
-    std::size_t size() const
-    {
-      return size_;
-    }
+  byte_stream(const mfast::fast_ostreambuf& sb)
+    : data_(sb.pbase())
+    , size_(sb.length())
+  {
+  }
 
-    const char* data() const
-    {
-      return data_;
-    }
+  std::size_t size() const
+  {
+    return size_;
+  }
 
-  private:
-    const char* data_;
-    std::size_t size_;
+  const char* data() const
+  {
+    return data_;
+  }
+
+private:
+  const char* data_;
+  std::size_t size_;
 };
 
 

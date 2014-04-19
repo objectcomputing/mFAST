@@ -1,7 +1,8 @@
 # The name of our project is "mFAST". CMakeLists files in this project can
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
-if(WIN32)
+
+if(MSVC_IDE)
 	cmake_minimum_required (VERSION 2.8.8)
 else()
 	cmake_minimum_required (VERSION 2.6.4)
@@ -10,7 +11,7 @@ endif()
 project (mFAST)
 
 set(MFAST_MAJOR_VERSION 1)
-set(MFAST_MINOR_VERSION 0)
+set(MFAST_MINOR_VERSION 2)
 set(MFAST_PATCH_VERSION 0)
 set(MFAST_VERSION ${MFAST_MAJOR_VERSION}.${MFAST_MINOR_VERSION}.${MFAST_PATCH_VERSION})
 
@@ -63,9 +64,9 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 # Select flags.
 # Initialize CXXFLAGS.
 if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-	set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
 elseif (MSVC)
-	add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # variables to be used later
@@ -83,11 +84,11 @@ link_directories (${PROJECT_BINARY_DIR}/src)
 # Install fast_type_gen batch file to set up the PATH environment
 # variable for using BOOST libraries
 
-if(WIN32)
+if(MSVC_IDE)
 configure_file(invoke.bat.in
                "${PROJECT_BINARY_DIR}/bin/invoke.bat"
                @ONLY)
-endif(WIN32)
+endif(MSVC_IDE)
 
 #============================================================
 # FASTTYPEGEN_TARGET (public macro)
@@ -96,26 +97,26 @@ endif(WIN32)
 
 macro(FASTTYPEGEN_TARGET Name)
 set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]")
-
+set(INPUTS)
 foreach (input ${ARGN})
-	get_filename_component(noext_name ${input} NAME_WE)
-	set(FASTTYPEGEN_${Name}_INPUTS_NOEXT ${FASTTYPEGEN_${Name}_INPUTS_NOEXT} ${noext_name})
+    get_filename_component(noext_name ${input} NAME_WE)
+    set(FASTTYPEGEN_${Name}_INPUTS_NOEXT ${FASTTYPEGEN_${Name}_INPUTS_NOEXT} ${noext_name})
 endforeach(input)
 
 foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
-	set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
+    set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
 endforeach(var)
 
 foreach (input ${ARGN})
-	set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
+    set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
 endforeach(input)
-
 
 ## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated.
 ## Not at the time when "make" is called.
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-if (WIN32)
+
+if (MSVC_IDE)
 	add_custom_command(
 	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
 	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat
@@ -145,14 +146,15 @@ endmacro()
 # Recurse into the "src" and "unit-tests" subdirectories. This does not actually
 # cause another cmake executable to run. The same process will walk through
 # the project's entire directory structure.
+enable_testing()
 
 add_subdirectory (tests)
 
 if (BUILD_SHARED_LIBS)
-  set(MFAST_LIBRARIES mfast_coder mfast)
+  set(MFAST_LIBRARIES mfast_coder mfast_xml_parser mfast)
   add_definitions( -DMFAST_DYN_LINK )
 else()
-  set(MFAST_LIBRARIES mfast_coder_static mfast_static)
+  set(MFAST_LIBRARIES mfast_coder_static mfast_xml_parser_static mfast_static)
 endif()
 
 add_subdirectory (examples)
@@ -170,11 +172,14 @@ add_custom_target(dist
 # Provide mfast-config.cmake and mfast-config.version to be used by other applications
 # ===============================
 
-export(PACKAGE ${CMAKE_PROJECT_NAME})
+if (NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
+  export(PACKAGE ${CMAKE_PROJECT_NAME})
+endif(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
+
 export(TARGETS fast_type_gen ${MFAST_LIBRARIES} FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
 
 # Create the mFASTConfig.cmake for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src" "${PROJECT_BINARY_DIR}")
 configure_file(mFASTConfig.cmake.in
                "${PROJECT_BINARY_DIR}/mFASTConfig.cmake"
                @ONLY)
@@ -199,3 +204,9 @@ install(FILES
 
 # Install the export set for use with the install-tree
 install(EXPORT mFASTTargets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+FILE(GLOB schema_files "${CMAKE_CURRENT_SOURCE_DIR}/schema/*.*")
+
+install(FILES
+        ${schema_files}
+        DESTINATION ${INSTALL_DATA_DIR}/mfast)

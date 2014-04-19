@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -18,7 +18,7 @@
 //
 #include <mfast.h>
 #include <mfast/field_comparator.h>
-#include <mfast/coder/dynamic_templates_description.h>
+#include <mfast/xml_parser/dynamic_templates_description.h>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
@@ -59,18 +59,12 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   m1ref[2].as(2);
   m1ref[3].as("abcd");
 
-
-  for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
-  {
-    BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
-  }
-
   m2ref[0].as(0);
   m2ref[1].as(1);
   m2ref[2].as(2);
   m2ref[3].as("abcd");
 
-
+  BOOST_CHECK(m1ref[0] == m2ref[0]);
   BOOST_CHECK(m1ref == m2ref);
 
   m2ref[2].as(3);
@@ -112,11 +106,6 @@ BOOST_AUTO_TEST_CASE(group_compare_test)
   m1group[0].as(1);
   m1group[1].as(2);
 
-
-  for (std::size_t i = 0; i < m1group.num_fields(); ++i)
-  {
-    BOOST_CHECK_EQUAL(m1group[i].instruction()->field_index(), i);
-  }
 
   m2ref[0].as(0);
   group_mref m2group(m2ref[1]);
@@ -167,12 +156,6 @@ BOOST_AUTO_TEST_CASE(sequence_compare_test)
   m1seq[0][1].as(2);
   m1seq[1][0].as(3);
   m1seq[1][1].as(4);
-
-
-  for (std::size_t i = 0; i < m1seq[0].num_fields(); ++i)
-  {
-    BOOST_CHECK_EQUAL(m1seq[0][i].instruction()->field_index(), i);
-  }
 
   m2ref[0].as(0);
   sequence_mref m2seq(m2ref[1]);
@@ -225,11 +208,6 @@ BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
   m1ref[1].as(2);
   m1ref[2].as(3);
 
-  for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
-  {
-    BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
-  }
-
   m2ref[0].as(1);
   m2ref[1].as(2);
   m2ref[2].as(3);
@@ -277,10 +255,13 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
   target1[0].as(2);
   target1[1].as(3);
 
-  for (std::size_t i = 0; i < m1ref.num_fields(); ++i)
-  {
-    BOOST_CHECK_EQUAL(m1ref[i].instruction()->field_index(), i);
-  }
+  nested_message_cref nested1_cref(m1.cref()[1]);
+
+  BOOST_CHECK_EQUAL(nested1_cref.target_instruction(), description[0]);
+
+  message_cref the_nested1(nested1_cref.target());
+  BOOST_CHECK_EQUAL( static_cast<uint32_cref>(the_nested1[0]).value(), 2U);
+  BOOST_CHECK_EQUAL( static_cast<uint32_cref>(the_nested1[1]).value(), 3U);
 
 
   m2ref[0].as(1);

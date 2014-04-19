@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -17,6 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "cpp_gen.h"
+#include <boost/io/ios_state.hpp>
 
 
 std::string cpp_gen::prefix_string() const
@@ -24,6 +25,15 @@ std::string cpp_gen::prefix_string() const
   std::stringstream strm;
   for (std::size_t i = 0; i < prefixes_.size(); ++i) {
     strm << prefixes_[i] << "__";
+  }
+  return strm.str();
+}
+
+std::string cpp_gen::cref_scope() const
+{
+  std::stringstream strm;
+  for (std::size_t i = 0; i < prefixes_.size(); ++i) {
+    strm << prefixes_[i] << "_cref::";
   }
   return strm.str();
 }
@@ -62,29 +72,27 @@ cpp_gen::gen_op_context(const char*                name,
 {
   if (context == 0)
     return "0";
-  std::string prefix = prefix_string();
-  out_ << "const static " << "op_context_t " << prefix << name << "_opContext ={\n"
+
+  out_ << "const static " << "op_context_t " << prefix_string() << name << "_opContext ={\n"
        << "  \"" << context->key_ << "\", \n"
        << "  \"" << context->ns_ << "\", \n"
-       << "  \"" << context->dictionary_ << "\"};";
-  std::string result = "&";
-  result += prefix;
-  result += name;
-  result += "_opContext";
-  return result;
+       << "  \"" << context->dictionary_ << "\"};\n\n";
+
+  std::stringstream result;
+  result << "&" <<  prefix_string() << name << "_opContext";
+  return result.str();
 }
 
 void cpp_gen::gen_field(const mfast::field_instruction* inst,
                         const std::string&              context,
-                        const char*                     cpp_type)
+                        const char*                     cpp_type,
+                        void*                           /*pIndex*/)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
   // std::string context = gen_op_context(inst->name(), inst->op_context());
 
   out_ << "const static " << cpp_type << "_field_instruction\n"
        << prefix_string() << name << "_instruction(\n"
-       << "  " << index << ",\n"
        << "  " << get_operator_name(inst) << ",\n"
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
@@ -109,33 +117,35 @@ get_initial_value(const mfast::value_storage& storage, const char* suffix)
 
 void cpp_gen::gen_integer(const mfast::integer_field_instruction_base* inst,
                           const char*                                  cpp_type,
-                          const std::string&                           initial_value)
+                          const std::string&                           initial_value,
+                          void*                                        pIndex)
 {
-  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), cpp_type);
-  out_ << "  int_value_storage<"<< cpp_type << "_t>(" << initial_value  <<  ")); // initial_value\n\n";
+  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), cpp_type, pIndex);
+  out_ << "  int_value_storage<"<< cpp_type << "_t>(" << initial_value   << "), // initial_value\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 }
 
-void cpp_gen::visit(const mfast::int32_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::int32_field_instruction* inst, void* pIndex)
 {
-  gen_integer(inst, "int32", get_initial_value<int32_t>(inst->initial_value(), "") );
+  gen_integer(inst, "int32", get_initial_value<int32_t>(inst->initial_value(), ""), pIndex );
 }
 
-void cpp_gen::visit(const mfast::uint32_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::uint32_field_instruction* inst, void* pIndex)
 {
-  gen_integer(inst, "uint32", get_initial_value<uint32_t>(inst->initial_value(), "U") );
+  gen_integer(inst, "uint32", get_initial_value<uint32_t>(inst->initial_value(), "U"), pIndex  );
 }
 
-void cpp_gen::visit(const mfast::int64_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::int64_field_instruction* inst, void* pIndex)
 {
-  gen_integer(inst, "int64", get_initial_value<int64_t>(inst->initial_value(), "LL") );
+  gen_integer(inst, "int64", get_initial_value<int64_t>(inst->initial_value(), "LL"), pIndex  );
 }
 
-void cpp_gen::visit(const mfast::uint64_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::uint64_field_instruction* inst, void* pIndex)
 {
-  gen_integer(inst, "uint64", get_initial_value<uint64_t>(inst->initial_value(), "ULL") );
+  gen_integer(inst, "uint64", get_initial_value<uint64_t>(inst->initial_value(), "ULL"), pIndex  );
 }
 
-void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
   if (inst->mantissa_instruction() ) {
@@ -153,10 +163,13 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
          << "));// mantissa inital value\n\n";
   }
 
-  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "decimal");
+  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "decimal", pIndex);
 
-  if ( inst->mantissa_instruction() ) {
-    out_ << "  &" << prefix_string() << name << "_mantissa_instruction,\n";
+  if ( inst->field_type() == mfast::field_type_exponent)  {
+    if (inst->mantissa_instruction() )
+      out_ << "  &" << prefix_string() << name << "_mantissa_instruction,\n";
+    else
+      out_ << "  0, // mantissa_instruction\n";
   }
 
   const mfast::value_storage& init_value = inst->initial_value();
@@ -164,14 +177,16 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void*)
   out_ << "  decimal_value_storage(";
   if (!init_value.is_empty())
     out_ <<  init_value.of_decimal.mantissa_ << "LL, " << static_cast<int> (init_value.of_decimal.exponent_);
-  out_ << ")); // initial_value\n\n";
+  out_ << "), // initial_value\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 
 }
 
 void cpp_gen::gen_string(const mfast::ascii_field_instruction* inst,
-                         const char*                           charset)
+                         const char*                           charset,
+                         void*                                 pIndex)
 {
-  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), charset);
+  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), charset, pIndex);
 
   if (inst->initial_value().is_empty()) {
     out_ << "  "<< "string_value_storage()";
@@ -182,15 +197,16 @@ void cpp_gen::gen_string(const mfast::ascii_field_instruction* inst,
   }
 }
 
-void cpp_gen::visit(const mfast::ascii_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::ascii_field_instruction* inst, void* pIndex)
 {
-  gen_string(inst, "ascii");
-  out_ <<  "); // initial value\n\n";
+  gen_string(inst, "ascii", pIndex);
+  out_ <<  ", // initial_value\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 }
 
-void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void* pIndex)
 {
-  gen_string(inst, "unicode");
+  gen_string(inst, "unicode", pIndex);
   if (inst->length_name()) {
     out_ << ", // initial value\n"
          << "  " << inst->length_id() << ", // length id\n"
@@ -198,13 +214,14 @@ void cpp_gen::visit(const mfast::unicode_field_instruction* inst, void*)
          << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
   }
   else {
-    out_ << "); // initial value\n\n";
+    out_ << ", // initial_value\n"
+         << "  " << inst->tag() << "); // tag\n\n";
   }
 }
 
-void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void* pIndex)
 {
-  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "byte_vector");
+  gen_field(inst, gen_op_context(inst->name(), inst->op_context()), "byte_vector", pIndex);
 
   if (inst->initial_value().is_empty()) {
     out_ << "  "<< "byte_vector_value_storage()";
@@ -212,9 +229,14 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
   else {
     out_ << "  "<< "byte_vector_value_storage(\"";
     const char* val = static_cast<const char*>(inst->initial_value().of_array.content_);
-    for (std::size_t i = 0; i < inst->initial_value().array_length(); ++i)
     {
-      out_ << "\\x" << std::hex << std::setfill('0') << std::setw(2) << (int) val[i];
+      boost::io::ios_flags_saver ifs( out_ );
+      out_ << std::hex << std::setfill('0') << std::setw(2);
+
+      for (std::size_t i = 0; i < inst->initial_value().array_length(); ++i)
+      {
+        out_ << "\\x" << (0xFF & (int) val[i]);
+      }
     }
     out_<< "\"," <<  inst->initial_value().array_length() << ")";
   }
@@ -224,53 +246,56 @@ void cpp_gen::visit(const mfast::byte_vector_field_instruction* inst, void*)
     out_ << ", // initial value\n"
          << "  " << inst->length_id() << ", // length id\n"
          << "  \"" <<  inst->length_name() << "\", // length name\n"
-         << "  \"" << inst->length_ns() << "\"); // length ns\n\n";
+         << "  \"" << inst->length_ns() << "\", // length ns\n"
+         << "  " << inst->tag() << "); // tag\n\n";
   }
   else {
-    out_ << "); // initial value\n\n";
+    out_ << ", // initial_value\n"
+         << "  " << inst->tag() << "); // tag\n\n";
   }
 }
 
-void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst)
+void cpp_gen::gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst, void* /*pIndex*/)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
   // std::string context = gen_op_context(inst->name(), inst->op_context());
 
   out_ << "const static " << cpp_type << "_field_instruction\n"
        << prefix_string() << name << "_instruction(\n"
-       << "  " << index << ",\n"
        << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
        << "  \""<< inst->name() << "\", // name\n"
-       << "  \""<< inst->ns() << "\"); // ns\n";
+       << "  \""<< inst->ns() << "\", // ns\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 
   add_to_instruction_list(name);
 }
 
-void cpp_gen::visit(const mfast::int32_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::int32_vector_field_instruction* inst, void* pIndex)
 {
-  gen_int_vector("int32_vector", inst);
+  gen_int_vector("int32_vector", inst, pIndex);
 }
 
-void cpp_gen::visit(const mfast::uint32_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::uint32_vector_field_instruction* inst, void* pIndex)
 {
-  gen_int_vector("uint32_vector", inst);
+  gen_int_vector("uint32_vector", inst, pIndex);
 }
 
-void cpp_gen::visit(const mfast::int64_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::int64_vector_field_instruction* inst, void* pIndex)
 {
-  gen_int_vector("int64_vector", inst);
+  gen_int_vector("int64_vector", inst, pIndex);
 }
 
-void cpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::uint64_vector_field_instruction* inst, void* pIndex)
 {
-  gen_int_vector("uint64_vector", inst);
+  gen_int_vector("uint64_vector", inst, pIndex);
 }
 
 void cpp_gen::output_subinstructions()
 {
+  assert(subinstructions_list_.size());
   std::string content = subinstructions_list_.back();
+
   content.resize(content.size()-1);
 
   out_ << "const static field_instruction* " << prefix_string() << "subinstructions[] = {\n"
@@ -279,78 +304,124 @@ void cpp_gen::output_subinstructions()
   subinstructions_list_.pop_back();
 }
 
+bool cpp_gen::need_generate_subinstructions(const mfast::group_field_instruction* inst)
+{
+  return inst->ref_instruction()==0 && !this->contains_only_templateref(inst);
+}
+
 std::string
 cpp_gen::get_subinstructions(const mfast::group_field_instruction* inst)
 {
+  using namespace mfast;
   std::stringstream subinstruction_arg;
 
-  if ( !contains_only_templateRef(inst) ) {
+  if (need_generate_subinstructions(inst)) {
+
     output_subinstructions();
 
-    subinstruction_arg << "  "<< prefix_string() << "subinstructions,\n"
-                       << "  "<< inst->subinstructions_count() << ", // num_fields\n";
+    subinstruction_arg << "  "<< prefix_string() << "subinstructions,\n";
     prefixes_.pop_back();
+
   }
-  else {
+  else
+  {
     prefixes_.pop_back();
-    if (inst->ref_template()) {
-      std::stringstream strm;
-      strm << inst->ref_template()->cpp_ns() << "::" << inst->ref_template()->name();
-      std::string qulified_name = strm.str();
-      subinstruction_arg << "  "<< qulified_name << "::instruction()->subinstructions(),\n"
-                         << "  "<< qulified_name << "::instruction()->subinstructions_count(),\n";
-    }
+
+    if (this->contains_only_templateref(inst))
+      subinstruction_arg << "  "<< "mfast::templateref_instruction::default_instruction(),\n";
     else {
-      const char*  presence_str = "presence_mandatory";
-      if (inst->field_type() == mfast::field_type_group) {
-        presence_str = get_presence(inst);
-      }
-      // use templateref instruction singleton
-      subinstruction_arg << "  "<< "mfast::templateref_instruction::default_instructions( " << presence_str << "),\n"
-                         << "  1, // num_fields\n";
+      std::string qualified_name = cpp_type_of(inst);
+
+      subinstruction_arg << "  "<< qualified_name << "::instruction(),\n";
     }
   }
   return subinstruction_arg.str();
+
 }
 
-void cpp_gen::visit(const mfast::group_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
 
+  std::string qualified_name = name;
+  if (inst->ref_instruction())
+  {
+    qualified_name = cpp_type_of(inst);
+  }
 
-  add_to_instruction_list(name);
+  if (pIndex == 0) {
+    out_ << "const " << qualified_name << "::instruction_type*\n"
+         << name << "::instruction()\n"
+         << "{\n";
+  }
+  else
+    add_to_instruction_list(name);
+
   prefixes_.push_back(name);
 
-  if (  !contains_only_templateRef(inst) ) {
+  bool to_gen_subinstructions = need_generate_subinstructions(inst);
+
+  if (  to_gen_subinstructions )
+  {
+
     subinstructions_list_.resize(subinstructions_list_.size()+1);
     traverse(inst, "");
   }
 
   std::string subinstruction_arg = get_subinstructions(inst);
 
-  out_ << "const static mfast::group_field_instruction\n"
-       << prefix_string() << name << "_instruction(\n"
-       << "  "<<  index << ",\n"
-       << "  " << get_presence(inst) << ",\n"
+  if (pIndex == 0) {
+    out_ << "const static " << name << "::instruction_type\n"
+         << "  the_instruction(\n";
+  }
+  else if (  to_gen_subinstructions )
+  {
+    out_ << "const static " << cref_scope() << name << "_cref::instruction_type\n"
+         << prefix_string() << name << "_instruction(\n";
+  }
+  else {
+    out_ << "const static mfast::group_instruction_ex<" << cref_scope() << name << "_cref>\n"
+         << prefix_string() << name << "_instruction(\n";
+  }
+
+  out_ << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
        << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
        << "  \"" << inst->dictionary() << "\", // dictionary\n"
        << subinstruction_arg
        << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n";
+       << "  \"" << inst->typeref_ns() << "\", // typeRef ns \n"
+       << "  \"\", // cpp_ns\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 
-
+  if (pIndex == 0) {
+    out_ << "  return &the_instruction;\n"
+         << "}\n\n";
+  }
 }
 
-void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
+void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
-  std::size_t index = inst->field_index();
+  bool to_gen_subinstruction =  inst->ref_instruction() == 0 && inst->element_instruction()==0;
 
-  add_to_instruction_list(name);
-  prefixes_.push_back(name);
+  std::string qualified_name = name;
+  if (inst->ref_instruction())
+  {
+    qualified_name = cpp_type_of(inst);
+  }
+
+  if (pIndex == 0) {
+    out_ << "const " << qualified_name << "::instruction_type*\n"
+         << name << "::instruction()\n"
+         << "{\n";
+  }
+  else
+    add_to_instruction_list(name);
+
+  prefixes_.push_back(name+"_element");
+
 
   if (inst->length_instruction()) {
     std::string context = gen_op_context(inst->length_instruction()->name(),
@@ -359,7 +430,6 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
     // length
     out_ << "static uint32_field_instruction\n"
          << prefix_string() << name << "_length_instruction(\n"
-         << "  0,"
          << "  " << get_operator_name(inst->length_instruction()) << ",\n"
          << "  " << get_presence(inst->length_instruction()) << ",\n"
          << "  " << inst->length_instruction()->id() << ", // id\n"
@@ -373,7 +443,8 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
   }
 
 
-  if ( !contains_only_templateRef(inst) ) {
+  if (to_gen_subinstruction )
+  {
     subinstructions_list_.resize(subinstructions_list_.size()+1);
     traverse(inst, "_element");
   }
@@ -386,25 +457,66 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void*)
     lengthInstruction = strm.str();
   }
 
-  std::string subinstruction_arg = get_subinstructions(inst);
+  std::stringstream subinstruction_arg;
+  if (to_gen_subinstruction )
+  {
+    output_subinstructions();
 
-  out_ << "const static mfast::sequence_field_instruction\n"
-       << prefix_string() << name << "_instruction(\n"
-       << "  "<<  index << ",\n"
-       << "  " << get_presence(inst) << ",\n"
+    subinstruction_arg << "  "<< prefix_string() << "subinstructions,\n";
+  }
+  else {
+    subinstruction_arg << "  instructions_view_t(0,0),\n";
+  }
+
+  if (inst->element_instruction()) {
+    subinstruction_arg << "  " << cpp_type_of(inst->element_instruction()) << "::instruction(), // element_instruction\n";
+  }
+  else {
+    subinstruction_arg << "  0, // element_instruction\n";
+  }
+
+  if (inst->ref_instruction()) {
+    subinstruction_arg << "  " << cpp_type_of(inst->ref_instruction()) << "::instruction(), // ref_instruction\n ";
+  }
+  else {
+    subinstruction_arg << "  0, // ref_instruction\n";
+  }
+
+  prefixes_.pop_back();
+
+  if (pIndex == 0) {
+    out_ << "const static " << name << "::instruction_type\n"
+         << "  the_instruction(\n";
+  }
+  else {
+    if (name == "_")
+      out_ << "const static " << cref_scope() << "instruction_type\n";
+    else
+      out_ << "const static " << cref_scope() << name << "_cref::instruction_type\n";
+    out_ << prefix_string() << name << "_instruction(\n";
+  }
+
+  out_ << "  " << get_presence(inst) << ",\n"
        << "  " << inst->id() << ", // id\n"
        << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
        << "  \"" << inst->dictionary() << "\", // dictionary\n"
-       << subinstruction_arg
+       << subinstruction_arg.str()
        << "  "<< lengthInstruction << ", // length\n"
        << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n";
+       << "  \"" << inst->typeref_ns() << "\", // typeRef ns \n"
+       << "  \"\", // cpp_ns\n"
+       << "  " << inst->tag() << "); //tag \n\n";
+
+  if (pIndex == 0) {
+    out_ << "  return &the_instruction;\n"
+         << "}\n\n";
+  }
 }
 
 void cpp_gen::visit(const mfast::template_instruction* inst, void*)
 {
-  if (inst->subinstructions_count() == 0)
+  if (inst->subinstructions().size() == 0)
     return;
 
   std::string name( cpp_name( inst ) );
@@ -431,21 +543,22 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
        << "    \""<< inst->template_ns() << "\", // templateNs\n"
        << "    \""<< inst->dictionary() << "\", // dictionary\n"
        << "    "<< name << "__subinstructions,\n"
-       << "    "<< inst->subinstructions_count() << ", // num_fields\n"
        << "    " << inst->has_reset_attribute() << ", // reset\n"
        << "  \"" << inst->typeref_name() << "\", // typeRef name \n"
-       << "  \"" << inst->typeref_ns() << "\"); // typeRef ns \n\n"
+       << "  \"" << inst->typeref_ns() << "\", // typeRef ns \n"
+       << "  \"\", // cpp_ns\n"
+       << "  " << inst->tag() << "); // tag \n\n"
        << "  return &the_instruction;\n"
        << "}\n\n";
 }
 
-void cpp_gen::visit(const mfast::templateref_instruction* inst, void*)
+void cpp_gen::visit(const mfast::templateref_instruction* inst, void* pIndex)
 {
-  std::size_t index = inst->field_index();
+  std::size_t index = *static_cast<std::size_t*>(pIndex);
 
-  out_ << "templateref_instruction\n"
-       << "templateref" << index << "_instruction(\n"
-       << "  " << index << ");\n\n";
+  out_ << "static const templateref_instruction\n"
+       << prefix_string() << "templateref" << index << "_instruction(\n"
+       << "  " << inst->tag() << "); // tag\n\n";
 
   std::stringstream tmp;
   tmp << "templateref" << index;
@@ -461,21 +574,167 @@ void cpp_gen::generate(mfast::dynamic_templates_description& desc)
 
   this->traverse(desc);
 
+
+  BOOST_FOREACH(const mfast::aggregate_view_info& info, desc.view_infos())
+  {
+    this->generate(info);
+  }
+
   std::string instructions = template_instructions_.str();
-  if (instructions.size())
+  if (instructions.size()) {
     instructions.resize(instructions.size() - 2);
 
-  out_ << "const template_instruction* "<< filebase_ << "_templates_instructions[] ={\n"
-       << instructions
-       << "};\n\n"
-       << "mfast::templates_description* description()\n"
-       << "{\n"
-       << "  static mfast::templates_description desc(\n"
-       << "    \"" << desc.ns()  << "\", // ns\n"
-       << "    \"" << desc.template_ns()<< "\", // templateNs\n"
-       << "    \"" << desc.dictionary() << "\", // dictionary\n"
-       << "    " << filebase_ << "_templates_instructions);\n"
-       << "  return &desc;\n"
-       << "}\n\n"
-       << "\n}\n";
+    out_ << "const template_instruction* "<< filebase_ << "_templates_instructions[] ={\n"
+         << instructions
+         << "};\n\n"
+         << "mfast::templates_description* description()\n"
+         << "{\n"
+         << "  static mfast::templates_description desc(\n"
+         << "    \"" << desc.ns()  << "\", // ns\n"
+         << "    \"" << desc.template_ns()<< "\", // templateNs\n"
+         << "    \"" << desc.dictionary() << "\", // dictionary\n"
+         << "    " << filebase_ << "_templates_instructions);\n"
+         << "  return &desc;\n"
+         << "}\n\n";
+  }
+  out_ << "\n}\n";
+}
+
+void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* pIndex)
+{
+  std::string name( cpp_name( inst ) );
+  std::string qualified_name = name;
+  std::string instruction_variable_name;
+  std::stringstream elements_variable_name;
+  std::stringstream num_elements_name;
+  std::stringstream instruction_type;
+  std::string values_variable_name="0";
+
+  if (inst->ref_instruction())
+  {
+    qualified_name = cpp_type_of(inst);
+  }
+
+  if (pIndex == 0) {
+    out_ << "const " << qualified_name << "::instruction_type*\n"
+         << name << "::instruction()\n"
+         << "{\n";
+    instruction_variable_name = "  the_instruction";
+    instruction_type << qualified_name << "::instruction_type";
+  }
+  else {
+    add_to_instruction_list(name);
+    instruction_variable_name =  prefix_string() + name + "_instruction";
+    instruction_type << cref_scope() << name << "_cref::instruction_type";
+  }
+
+  if (inst->ref_instruction()) {
+    elements_variable_name << qualified_name << "::instruction()->elements()";
+    num_elements_name << qualified_name << "::instruction()->num_elements()";
+    values_variable_name = qualified_name + "::instruction()->element_values()";
+    instruction_type.str(qualified_name + "::instruction_type");
+  }
+  else {
+    elements_variable_name << "elements";
+    num_elements_name << inst->num_elements();
+
+    out_ << "static const char* elements[] = {\n";
+
+    for (uint64_t i = 0; i < inst->num_elements(); ++i) {
+      if (i != 0 ) {
+        out_ << ",\n";
+      }
+      out_ << "  \"" << inst->elements()[i] << "\"";
+    }
+    out_ << "};\n";
+
+    if (inst->element_values()) {
+      out_ << "static const uint64_t values[] = {\n";
+
+      for (uint64_t i = 0; i < inst->num_elements(); ++i) {
+        if (i != 0 ) {
+          out_ << ",\n";
+        }
+        out_ << "  " << inst->element_values()[i];
+      }
+      out_ << "};\n";
+      values_variable_name = "values";
+    }
+  }
+
+  std::string context = gen_op_context(inst->name(), inst->op_context());
+
+
+
+  out_ << "const static " << instruction_type.str() << "\n"
+       << instruction_variable_name << "(\n"
+       << "  " << get_operator_name(inst) << ",\n"
+       << "  " << get_presence(inst) << ",\n"
+       << "  " << inst->id() << ", // id\n"
+       << "  \""<< inst->name() << "\", // name\n"
+       << "  \""<< inst->ns() << "\", // ns\n"
+       << "  "<< context << ",  // opContext\n"
+       << "  int_value_storage<uint64_t>(" << inst->initial_value().get<uint64_t>() <<  "), // initial_value\n"
+       << "  " << elements_variable_name.str() << ", // element names\n"
+       << "  " << values_variable_name << ", // element values\n"
+       << "  " << num_elements_name.str() << ",// num elements\n"
+       << "  0, // ref_instruction\n"
+       << "  0, // cpp_ns\n"
+       << "  " << inst->tag() << "); //tag \n\n";
+
+  if (pIndex == 0) {
+    out_ << "  return &the_instruction;\n"
+         << "}\n\n";
+  }
+}
+
+void cpp_gen::generate(const mfast::aggregate_view_info& info)
+{
+  std::string my_name = cpp_name(info.name_);
+
+  std::vector<int> indeces_sizes;
+  indeces_sizes.reserve(info.data_.size());
+
+  out_ << "namespace {\n\n"
+       << "  const static int64_t __"<< my_name << "__indeces__[]={\n";
+
+  int k = 0;
+  for(std::size_t i = 0; i < info.data_.size()-1; ++i)
+  {
+    const mfast::field_view_info& finfo = info.data_[i];
+    out_ << "    ";
+    indeces_sizes.push_back(k);
+    for (std::size_t j=0; finfo.nest_indices[j] != -1; ++j, ++k) {
+      out_ << finfo.nest_indices[j] << ",";
+    };
+    out_ << "-1";
+    if (i != info.data_.size()-2)
+      out_ << ",";
+    out_ << "\n";
+    ++k;
+  }
+  out_ << "  };\n"
+       << "  const static mfast::field_view_info __" << my_name << "_data__[] = {\n";
+
+  for (std::size_t i = 0; i < info.data_.size()-1; ++i)
+  {
+    out_ << "    {" << info.data_[i].prop << "ULL, __"<< my_name << "__indeces__ + " <<  indeces_sizes[i] << "},\n";
+  }
+  out_ << "    {0, 0}\n"
+       << "  };\n\n"
+       << "}//namespace\n\n";
+
+  std::string ns_prefix;
+  if (this->cpp_ns_ != info.instruction_->cpp_ns())
+  {
+    ns_prefix = info.instruction_->cpp_ns();
+    ns_prefix += "::";
+  }
+
+  out_ << "const mfast::aggregate_view_info " <<  my_name << "::info_(\n"
+       << "  \"" << info.name_ <<"\",\n"
+       << "  " << ns_prefix << cpp_name(info.instruction_->name()) << "::instruction(),\n"
+       << "  mfast::array_view<const  mfast::field_view_info>(__" << my_name << "_data__," << info.data_.size() << "),\n"
+       << "  " << info.max_depth_  << "\n"
+       << ");\n\n";
 }

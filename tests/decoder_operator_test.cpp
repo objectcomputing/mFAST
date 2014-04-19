@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(operator_none_decode_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(0, operator_none,
+    uint64_field_instruction inst(operator_none,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -137,11 +137,11 @@ BOOST_AUTO_TEST_CASE(operator_none_decode_test)
 
     uint64_mref result(&allocator, &storage, &inst);
 
-    result.as_absent();
+    result.omit();
     BOOST_CHECK( decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
   {
-    uint64_field_instruction inst(0, operator_none,
+    uint64_field_instruction inst(operator_none,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_decode_test)
     // An optional field with the constant operator will occupy a single bit. If the bit is set, the value
     // is the initial value in the instruction context. If the bit is not set, the value is considered absent.
 
-    uint64_field_instruction inst(0, operator_constant,
+    uint64_field_instruction inst(operator_constant,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -186,13 +186,13 @@ BOOST_AUTO_TEST_CASE(operator_constant_decode_test)
 
     // testing when the presence bit is not set
 
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
   {
     // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
 
-    uint64_field_instruction inst(0, operator_constant,
+    uint64_field_instruction inst(operator_constant,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(0, operator_default,
+    uint64_field_instruction inst(operator_default,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_default,
+    uint64_field_instruction inst(operator_default,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_default,
+    uint64_field_instruction inst(operator_default,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
 
     uint64_mref result(&allocator, &storage, &inst);
 
-    result.as_absent();
+    result.omit();
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_default,
+    uint64_field_instruction inst(operator_default,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -286,11 +286,11 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_default,
+    uint64_field_instruction inst(operator_default,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0);
+                                  0, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
 
     // If the field has optional presence and no initial value, the field is considered absent when there is no value in the stream.
 
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
   }
@@ -310,7 +310,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(0, operator_copy,
+    uint64_field_instruction inst(operator_copy,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_copy,
+    uint64_field_instruction inst(operator_copy,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_copy,
+    uint64_field_instruction inst(operator_copy,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
 
 
     uint64_mref result(&allocator, &storage, &inst);
-    result.as_absent();
+    result.omit();
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
@@ -379,7 +379,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_copy,
+    uint64_field_instruction inst(operator_copy,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -412,20 +412,20 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
     inst.prev_value().present(false);
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent.
-    result.as_absent();
+    result.omit();
   }
 
   { // testing no initial value
-    uint64_field_instruction inst(0, operator_copy,
+    uint64_field_instruction inst(operator_copy,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0);
+                                  0, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
     uint64_mref result(&allocator, &storage, &inst);
-    result.as_absent();
+    result.omit();
 
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * undefined – If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
@@ -439,7 +439,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(0, operator_increment,
+    uint64_field_instruction inst(operator_increment,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -457,7 +457,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_increment,
+    uint64_field_instruction inst(operator_increment,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_increment,
+    uint64_field_instruction inst(operator_increment,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -502,7 +502,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
 
 
     uint64_mref result(&allocator, &storage, &inst);
-    result.as_absent();
+    result.omit();
     // Optional integer, decimal, string and byte vector fields – one bit.
     // If set, the value appears in the stream in a nullable representation.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
@@ -511,7 +511,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_increment,
+    uint64_field_instruction inst(operator_increment,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -540,24 +540,24 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     /// set previous value to empty
-    prev.as_absent();
+    prev.omit();
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent.
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
   { // testing no initial value
-    uint64_field_instruction inst(0, operator_increment,
+    uint64_field_instruction inst(operator_increment,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0);
+                                  0, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
     uint64_mref result(&allocator, &storage, &inst);
-    result.as_absent();
+    result.omit();
     // Optional integer, decimal, string and byte vector fields – one bit.
     // A NULL indicates that the value is absent and the state of the previous value is set to empty
 
@@ -574,7 +574,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
   value_storage storage;
 
   {
-    uint64_field_instruction inst(0, operator_delta,
+    uint64_field_instruction inst(operator_delta,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -595,11 +595,11 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_delta,
+    uint64_field_instruction inst(operator_delta,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0); // no initial value
+                                  0, int_value_storage<uint64_t>()); // no initial value
     inst.construct_value(storage, &allocator);
 
 
@@ -616,7 +616,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_delta,
+    uint64_field_instruction inst(operator_delta,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -640,7 +640,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_delta,
+    uint64_field_instruction inst(operator_delta,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -656,7 +656,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
 
     //  If the field has optional presence, the delta value can be NULL. In that case the value of the field is considered absent.
 
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
 
@@ -668,7 +668,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
   value_storage storage;
 
   {
-    decimal_field_instruction inst(0, operator_delta,
+    decimal_field_instruction inst(operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_decimal","",
@@ -687,11 +687,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
     BOOST_CHECK(decode_mref("\xC0\x82\x83", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
   }
   {
-    decimal_field_instruction inst(0, operator_delta,
+    decimal_field_instruction inst(operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_decimal","",
-                                   0); // no initial value
+                                   0,
+                                   decimal_value_storage()); // no initial value
 
     inst.construct_value(storage, &allocator);
     decimal_mref result(&allocator, &storage, &inst);
@@ -705,11 +706,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
   }
 
   {
-    decimal_field_instruction inst(0, operator_delta,
+    decimal_field_instruction inst(operator_delta,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0); // no initial value
+                                   0,
+                                   decimal_value_storage()); // no initial value
 
     inst.construct_value(storage, &allocator);
     decimal_mref result(&allocator, &storage, &inst);
@@ -718,7 +720,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\xC0\x80\x83", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
   }
 }
@@ -730,7 +732,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_delta,
+    ascii_field_instruction inst(operator_delta,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
@@ -753,11 +755,11 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
 
   { // testing mandatory field without initial value
 
-    ascii_field_instruction inst(0, operator_delta,
+    ascii_field_instruction inst(operator_delta,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -776,11 +778,11 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
   { // testing mandatory field without initial value
     // const char* default_value = "initial_string";
 
-    ascii_field_instruction inst(0, operator_delta,
+    ascii_field_instruction inst(operator_delta,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -797,7 +799,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
 
   { // testing optional field with NULL substraction in the stream
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_delta,
+    ascii_field_instruction inst(operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -812,14 +814,14 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
     // If the field has optional presence, the delta value can be NULL.
     // In that case the value of the field is considered absent.
     // Note that the previous value is not set to empty but is left untouched if the value is absent.
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
   }
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_delta,
+    ascii_field_instruction inst(operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -843,7 +845,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
 
   { // testing optional field with negative substraction in the stream
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_delta,
+    ascii_field_instruction inst(operator_delta,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -873,12 +875,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
-    unicode_field_instruction inst(0, operator_delta,
+    unicode_field_instruction inst(operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_ascii","",
                                    0,
-                                   string_value_storage(default_value));
+                                   string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
 
@@ -898,11 +900,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
   { // testing mandatory field without initial value
     //const char* default_value = "initial_string";
 
-    unicode_field_instruction inst(0, operator_delta,
+    unicode_field_instruction inst(operator_delta,
                                    presence_mandatory,
                                    1,
                                    "test_unicode","",
-                                   0);
+                                   0,
+                                   string_value_storage(), 0, "", "");
 
     inst.construct_value(storage, &alloc);
 
@@ -922,12 +925,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
 
   { // testing optional field with NULL substraction in the stream
     const char* default_value = "initial_string";
-    unicode_field_instruction inst(0, operator_delta,
+    unicode_field_instruction inst(operator_delta,
                                    presence_optional,
                                    1,
                                    "test_unicode","",
                                    0,
-                                   string_value_storage(default_value));
+                                   string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
 
@@ -940,7 +943,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
     // Note that the previous value is not set to empty but is left untouched if the value is absent.
 
 
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\xC0\x80", NO_PMAP_BIT, result, PRESERVE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
@@ -948,12 +951,12 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
 
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
-    unicode_field_instruction inst(0, operator_delta,
+    unicode_field_instruction inst(operator_delta,
                                    presence_optional,
                                    1,
                                    "test_unicode","",
                                    0,
-                                   string_value_storage(default_value));
+                                   string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
 
@@ -978,7 +981,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 
   { // testing mandatory field with initial value
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_tail,
+    ascii_field_instruction inst(operator_tail,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
@@ -999,7 +1002,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
   }
   { // testing mandatory field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_tail,
+    ascii_field_instruction inst(operator_tail,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
@@ -1032,11 +1035,11 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
   }
   { // testing mandatory field without initial value while tail value not in the stream
 
-    ascii_field_instruction inst(0, operator_tail,
+    ascii_field_instruction inst(operator_tail,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -1054,11 +1057,11 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 
   { // testing mandatory field without initial value while tail value is in the stream
 
-    ascii_field_instruction inst(0, operator_tail,
+    ascii_field_instruction inst(operator_tail,
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref result(&alloc, &storage, &inst);
@@ -1079,7 +1082,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 
   { // testing optional field with initial value
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_tail,
+    ascii_field_instruction inst(operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -1104,7 +1107,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 
   { // testing optional field with NULL tail value
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_tail,
+    ascii_field_instruction inst(operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -1121,7 +1124,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
     // the field is obtained by combining the delta value with a base value.
     // The base value depends on the state of the previous value in the following way:
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\xC0\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
@@ -1129,7 +1132,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 
   { // testing optional field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_tail,
+    ascii_field_instruction inst(operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -1151,16 +1154,16 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
 
     ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
     // change the previous value to "ABCDE" so we can verified the case with defined previous value
-    prev.shallow_assign( "ABCDE" );
+    prev.refers_to( "ABCDE" );
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  assigned – the value of the field is the previous value.
     result.as("ABCDE");
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
-    prev.as_absent();
+    prev.omit();
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way:
     // empty – the value of the field is empty. If the field is optional the value is considered absent.
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
 
     inst.destruct_value(storage, &alloc);
@@ -1169,11 +1172,11 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
   { // testing optional field without initial value while tail value not in the stream
     // const char* default_value = "initial_string";
 
-    ascii_field_instruction inst(0, operator_tail,
+    ascii_field_instruction inst(operator_tail,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0);
+                                 0, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -1186,7 +1189,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
     //  undefined – the value of the field is the initial value that also becomes the new previous value.
     // If the field has optional presence and no initial value, the field is considered absent and the state of the previous value is changed to empty.
 
-    result.as_absent();
+    result.omit();
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
     inst.destruct_value(storage, &alloc);
   }

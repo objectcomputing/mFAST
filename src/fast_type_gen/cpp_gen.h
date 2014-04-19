@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -49,24 +49,35 @@ public:
   virtual void visit(const mfast::uint32_vector_field_instruction*, void*);
   virtual void visit(const mfast::int64_vector_field_instruction*, void*);
   virtual void visit(const mfast::uint64_vector_field_instruction*, void*);
+  virtual void visit(const mfast::enum_field_instruction*, void*);
 
 private:
+  virtual void generate(const mfast::aggregate_view_info& info);
+
   std::string prefix_string() const;
+  std::string cref_scope() const;
   void add_to_instruction_list(const std::string& name);
   std::string gen_op_context(const char*                name,
                              const mfast::op_context_t* context);
   void gen_field(const mfast::field_instruction* inst,
                  const std::string&              context,
-                 const char*                     cpp_type);
+                 const char*                     cpp_type,
+                 void*                           pIndex);
   void gen_integer(const mfast::integer_field_instruction_base* inst,
                    const char*                                  cpp_type,
-                   const std::string&                           initial_value);
+                   const std::string&                           initial_value,
+                   void*                                        pIndex);
   void gen_string(const mfast::ascii_field_instruction* inst,
-                  const char*                           charset);
+                  const char*                           charset,
+                  void*                                 pIndex);
 
-  void gen_int_vector(const char* cpp_type, const mfast::vector_field_instruction_base* inst);
+  void gen_int_vector(const char*                                 cpp_type,
+                      const mfast::vector_field_instruction_base* inst,
+                      void*                                       pIndex);
+
   void output_subinstructions();
   std::string get_subinstructions(const mfast::group_field_instruction* inst);
+  bool need_generate_subinstructions(const mfast::group_field_instruction* inst);
 
   std::vector<std::string> subinstructions_list_;
   std::stringstream template_instructions_;

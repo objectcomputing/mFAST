@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -48,11 +48,21 @@ public:
   virtual void visit(const mfast::sequence_field_instruction*, void*);
   virtual void visit(const mfast::template_instruction*, void*);
   virtual void visit(const mfast::templateref_instruction*, void*);
+  virtual void visit(const mfast::enum_field_instruction*, void*);
 
 private:
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix);
+  virtual void generate(const mfast::aggregate_view_info& info);
 
-  void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);
+  void gen_primitive (const char*                     cpp_type,
+                      const mfast::field_instruction* inst,
+                      void*                           pIndex);
+
+  void gen_accessors (const mfast::field_instruction* inst,
+                      const std::string&              name,
+                      const std::string&              cref_type_name,
+                      const std::string&              mref_type_name,
+                      void*                           pIndex);
 
   std::stringstream mref_scope_;
 };

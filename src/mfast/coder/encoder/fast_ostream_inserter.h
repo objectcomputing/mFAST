@@ -10,11 +10,10 @@ namespace mfast
 {
   template <typename U>
   inline fast_ostream& operator << (fast_ostream& strm, const int_cref<U>& cref)
-  {    
+  {
     strm.encode(cref.value(), cref.instruction()->is_nullable(), cref.absent());
     return strm;
   }
-
 
   inline fast_ostream& operator << (fast_ostream& strm, const exponent_cref& cref)
   {
@@ -24,19 +23,19 @@ namespace mfast
 
   inline fast_ostream& operator << (fast_ostream& strm, const ascii_string_cref& cref)
   {
-    strm.encode(cref.c_str(), cref.size(), cref.instruction()->is_nullable(), cref.instruction());
+    strm.encode(cref.c_str(),static_cast<uint32_t>( cref.size()), cref.instruction()->is_nullable(), cref.instruction());
     return strm;
   }
 
   inline fast_ostream& operator << (fast_ostream& strm, const unicode_string_cref& cref)
   {
-    strm.encode(cref.c_str(), cref.size(), cref.instruction()->is_nullable(), cref.instruction());
+    strm.encode(cref.c_str(), static_cast<uint32_t>(cref.size()), cref.instruction()->is_nullable(), cref.instruction());
     return strm;
   }
 
   inline fast_ostream& operator << (fast_ostream& strm, const byte_vector_cref& cref)
   {
-    strm.encode(cref.begin(), cref.size(), cref.instruction()->is_nullable(), cref.instruction());
+    strm.encode(cref.begin(), static_cast<uint32_t>(cref.size()), cref.instruction()->is_nullable(), cref.instruction());
     return strm;
   }
 
@@ -48,7 +47,7 @@ namespace mfast
     }
     return strm;
   }
-    
+
 }
 
 #endif /* end of include guard: FAST_OSTREAM_INSERTER_H_WQ683ZCZ */

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
   BOOST_CHECK(!null_ref.present() );
 
   {
-    uint64_field_instruction inst(0, operator_delta,
+    uint64_field_instruction inst(operator_delta,
                                   presence_optional,
                                   1,
                                   "test_uint64","",
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.value(), 5U);
 
-    ref.as_initial_value();
+    ref.to_initial_value();
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);
 
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     BOOST_CHECK_EQUAL(another_cref.value(), UINT64_MAX);
 
 
-    ref.as_absent();
+    ref.omit();
     BOOST_CHECK(!ref.present() );
 
     detail::codec_helper helper;
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
   }
 
   {
-    uint64_field_instruction inst(0, operator_copy,
+    uint64_field_instruction inst(operator_copy,
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
 
     uint64_mref ref(&allocator, &storage, &inst);
     BOOST_CHECK(ref.present() );
-    ref.as_absent(); // mandatory field shoudn't be able to be absent
+    ref.omit(); // mandatory field shoudn't be able to be absent
     BOOST_CHECK(ref.present() );
 
 
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
   }
 
   {
-    int32_field_instruction inst(0, operator_copy,
+    int32_field_instruction inst(operator_copy,
                                  presence_mandatory,
                                  1,
                                  "test_int32","",
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
   }
 
 
-  uint32_field_instruction inst(0, operator_copy,
+  uint32_field_instruction inst(operator_copy,
                                 presence_mandatory,
                                 1,
                                 "test_uint32","",
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
 BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
 {
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
   }
 
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -196,12 +196,13 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                              0,
                                              int_value_storage<int64_t>());
 
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
                                    0,
-                                   &mantissa_inst);
+                                   &mantissa_inst,
+                                   decimal_value_storage());
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
   }
   {
@@ -209,7 +210,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                              0,
                                              int_value_storage<int64_t>());
 
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -226,7 +227,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
   value_storage storage;
 
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -253,12 +254,12 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     BOOST_CHECK_EQUAL(ref.mantissa(), 5);
     BOOST_CHECK_EQUAL(ref.exponent(), 20);
 
-    ref.as_initial_value();
+    ref.to_initial_value();
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.mantissa(), INT64_MAX);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
 
-    ref.as_absent();
+    ref.omit();
     BOOST_CHECK(!ref.present() );
 
     ref.set_mantissa(4);
@@ -266,7 +267,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     BOOST_CHECK_EQUAL(ref.mantissa(), 4);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
 
-    ref.as_absent();
+    ref.omit();
     ref.set_exponent(5);
     BOOST_CHECK(ref.present() );
     BOOST_CHECK_EQUAL(ref.exponent(), 5);
@@ -297,7 +298,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
 
     }
     {
-      ref.as_absent();
+      ref.omit();
       helper.save_previous_value(ref);
       BOOST_CHECK_THROW(helper.delta_base_value_of(ref), mfast::fast_error);
     }
@@ -322,6 +323,9 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
     ref.as(decimal("0.05"));
     BOOST_CHECK_EQUAL(ref.mantissa(), 5);
     BOOST_CHECK_EQUAL(ref.exponent(), -2);
+
+    ref.as(-110);
+    BOOST_CHECK_EQUAL(ref.value(), decimal(-110));
   }
 }
 
@@ -332,7 +336,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
 
   {
     mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal2","",
@@ -359,12 +363,12 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     BOOST_CHECK_EQUAL(ref.mantissa(), 5);
     BOOST_CHECK_EQUAL(ref.exponent(), 20);
 
-    ref.as_initial_value();
+    ref.to_initial_value();
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.mantissa(), 6);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
 
-    ref.as_absent();
+    ref.omit();
     BOOST_CHECK(!ref.present() );
 
     ref.set_mantissa(4);
@@ -372,13 +376,13 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     BOOST_CHECK_EQUAL(ref.mantissa(), 4);
     BOOST_CHECK_EQUAL(ref.exponent(), 64);
 
-    ref.as_absent();
+    ref.omit();
     ref.set_exponent(5);
     BOOST_CHECK(ref.present() );
     BOOST_CHECK_EQUAL(ref.exponent(), 5);
 
-    exponent_mref exp_mref = ref.for_exponent();
-    exp_mref.as_initial_value();
+    exponent_mref exp_mref = ref.set_exponent();
+    exp_mref.to_initial_value();
     BOOST_CHECK_EQUAL(exp_mref.value(), 64);
     BOOST_CHECK_EQUAL(ref.exponent(),   64);
 
@@ -386,7 +390,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
 
   {
     mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
-    decimal_field_instruction inst(0, operator_default,
+    decimal_field_instruction inst(operator_default,
                                    presence_optional,
                                    1,
                                    "test_decimal2","",
@@ -400,7 +404,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     ref.as(1,1); // set the value so it's present
 
     // The exponent initial value is absent, therefore, the entire value should be absent().
-    ref.for_exponent().as_initial_value();
+    ref.set_exponent().to_initial_value();
     BOOST_CHECK(ref.absent());
   }
 
@@ -412,7 +416,7 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
   value_storage storage;
   const char* default_value = "initial_string";
   {
-    ascii_field_instruction inst(0, operator_copy,
+    ascii_field_instruction inst(operator_copy,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -422,7 +426,7 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
   }
   {
-    ascii_field_instruction inst(0, operator_copy,
+    ascii_field_instruction inst(operator_copy,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -438,7 +442,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
   debug_allocator alloc;
   value_storage storage;
   const char* default_value = "initial_string";
-  ascii_field_instruction inst(0, operator_copy,
+  ascii_field_instruction inst(operator_copy,
                                presence_optional,
                                1,
                                "test_ascii","",
@@ -461,10 +465,18 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     ascii_string_mref ref(&alloc, &storage, &inst);
     BOOST_CHECK(!ref.present());
 
-    ref.as_initial_value();
+    ref.push_back('c');
+    BOOST_CHECK_EQUAL(ref.size(), 1U);
+
+    ref.to_initial_value();
     BOOST_CHECK(ref.present());
     BOOST_CHECK_EQUAL(ref.size(), strlen(default_value));
     BOOST_CHECK(ref == "initial_string" );
+
+    // testing value
+    std::stringstream strm;
+    strm << ref.value();
+    BOOST_CHECK_EQUAL(strm.str(), std::string("initial_string"));
 
     ref.as("string1");
     BOOST_CHECK(ref == "string1" );
@@ -490,17 +502,27 @@ BOOST_AUTO_TEST_CASE(string_field_test)
     ref.replace(4, 2, "aaaa", 4);
     BOOST_CHECK(ref == "xxxxaaaa");
 
-    ref.shallow_assign("abcde");
+    ref.refers_to("abcde");
     BOOST_CHECK(ref == "abcde");
     BOOST_CHECK_EQUAL(storage.of_array.capacity_in_bytes_, 0U);
 
-    ref.as_absent();
+    ref.pop_back();
+    BOOST_CHECK(ref == "abcd");
+
+    ref.clear();
     BOOST_CHECK(ref.absent());
+    ref.as("cde");
+    BOOST_CHECK(ref == "cde");
+
+    ref.omit();
+    BOOST_CHECK(ref.absent());
+
 
 
     detail::codec_helper helper;
 
     BOOST_CHECK(!helper.previous_value_of(ref).is_defined() );
+
 
     // testing delta base value
 
@@ -541,7 +563,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
       BOOST_CHECK( base_cref.present() );
       BOOST_CHECK( base_cref == "4");
     }
-    ref.as_absent();
+    ref.omit();
     helper.save_previous_value(ref);
     {
       value_storage base_value = helper.tail_base_value_of(ref);
@@ -561,6 +583,26 @@ BOOST_AUTO_TEST_CASE(string_field_test)
 
   }
 
+
+  {
+    // testing swap operation
+
+    ascii_string_type string_holder1(&alloc);
+    ascii_string_type string_holder2(&alloc);
+
+    string_holder1.mref().as("abc");
+
+    BOOST_CHECK_EQUAL(string_holder1.cref().size(), 3U);
+    BOOST_CHECK_EQUAL(boost::string_ref("abc"), string_holder1.cref().value());
+
+
+    string_holder2.mref().as("def");
+    string_holder1.mref().swap(string_holder2.mref());
+
+    BOOST_CHECK_EQUAL(boost::string_ref("def"), string_holder1.cref().value());
+    BOOST_CHECK_EQUAL(boost::string_ref("abc"), string_holder2.cref().value());
+  }
+
   inst.destruct_value(storage, &alloc);
 
 }
@@ -572,7 +614,7 @@ BOOST_AUTO_TEST_CASE(string_delta_test)
   debug_allocator alloc;
   value_storage storage;
   const char* default_value = "initial_string";
-  ascii_field_instruction inst(0, operator_copy,
+  ascii_field_instruction inst(operator_copy,
                                presence_optional,
                                1,
                                "test_ascii","",
@@ -587,11 +629,11 @@ BOOST_AUTO_TEST_CASE(string_delta_test)
     const char* base_str = "base_value";
     value_storage base_value;
     base_value.of_array.content_ = const_cast<char*>(base_str);
-    base_value.array_length( strlen(base_str) );
+    base_value.array_length( static_cast<uint32_t>(strlen(base_str)) );
 
 
     const char* delta_str = "\x41\x42\x43\x44\xC5"; // "ABCDE"
-    uint32_t delta_len = strlen(delta_str);
+    uint32_t delta_len = static_cast<uint32_t>(strlen(delta_str));
 
     helper.apply_string_delta(mref, base_value, 5, delta_str, delta_len);
 
@@ -617,7 +659,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
   unsigned char f0_initial[] = "\x01\x02\x03\x04\x05";
   const char* f1_initial = "abcdefg";
 
-  byte_vector_field_instruction inst0(0, operator_copy,
+  byte_vector_field_instruction inst0(operator_copy,
                                       presence_optional,
                                       1,
                                       "test_byte_vector","",
@@ -625,22 +667,22 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                       byte_vector_value_storage(f0_initial,sizeof(f0_initial)),
                                       0, 0, 0);
 
-  unicode_field_instruction inst1(1, operator_copy,
+  unicode_field_instruction inst1(operator_copy,
                                   presence_optional,
                                   2,
                                   "test_unicode","",
                                   0,
-                                  string_value_storage(f1_initial));
+                                  string_value_storage(f1_initial), 0, "", "");
 
   const field_instruction* instructions[] = {
     &inst0,&inst1
   };
 
-  group_field_instruction group_inst(0, presence_optional,
+  group_field_instruction group_inst(presence_optional,
                                      3,
                                      "test_group","","",
                                      instructions,
-                                     2);
+                                     "", "", "");
 
   BOOST_CHECK_EQUAL(group_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
@@ -671,10 +713,9 @@ BOOST_AUTO_TEST_CASE(group_field_test)
 
   {
     group_mref ref(&alloc, &storage, &group_inst);
-    BOOST_CHECK_EQUAL(ref.present(),    false);
+    BOOST_CHECK_EQUAL(ref.present(),    true);
     BOOST_CHECK_EQUAL(ref.num_fields(), 2U);
 
-    ref.as_present();
     field_mref f0(ref[0] );
     BOOST_CHECK(f0.absent());
 
@@ -690,7 +731,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
     unicode_string_mref mf1(f1);
     BOOST_CHECK_EQUAL(mf1.field_type(), field_type_unicode_string);
 
-    mf0.as_initial_value();
+    mf0.to_initial_value();
 
     BOOST_CHECK_EQUAL(mf0.size(),                                 sizeof(f0_initial));
     BOOST_CHECK_EQUAL(memcmp(mf0.data(), f0_initial, mf0.size()), 0);
@@ -700,6 +741,10 @@ BOOST_AUTO_TEST_CASE(group_field_test)
 
     BOOST_CHECK_EQUAL(mf0.size(),                            4U);
     BOOST_CHECK_EQUAL(memcmp(mf0.data(), bytes, mf0.size()), 0);
+
+    mf0.refers_to(bytes, 4);
+    BOOST_CHECK_EQUAL(mf0.data(), bytes);
+    BOOST_CHECK_EQUAL(mf0.size(), 4U);
   }
 
   group_inst.destruct_value(storage, &alloc);
@@ -714,7 +759,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
   unsigned char f0_initial[] = "\x01\x02\x03\x04\x05";
   const char* f1_initial = "abcdefg";
 
-  byte_vector_field_instruction inst0(0, operator_copy,
+  byte_vector_field_instruction inst0(operator_copy,
                                       presence_optional,
                                       1,
                                       "test_byte_vector","",
@@ -722,14 +767,14 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                       byte_vector_value_storage(f0_initial,sizeof(f0_initial)),
                                       0, 0, 0);
 
-  unicode_field_instruction inst1(1, operator_copy,
+  unicode_field_instruction inst1(operator_copy,
                                   presence_optional,
                                   2,
                                   "test_unicode","",
                                   0,
-                                  string_value_storage(f1_initial));
+                                  string_value_storage(f1_initial), 0, "", "");
 
-  uint32_field_instruction length_inst(0, operator_none,
+  uint32_field_instruction length_inst(operator_none,
                                        presence_mandatory,
                                        4,
                                        "","",
@@ -741,14 +786,13 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
     &inst0,&inst1
   };
 
-  sequence_field_instruction sequence_inst(0, presence_optional,
+  sequence_field_instruction sequence_inst(presence_optional,
                                            3, // id
                                            "test_group","","",
-                                           instructions,
-                                           2, // subinstructions_count
-                                           &length_inst);
+                                           instructions,0,0,
+                                           &length_inst, "", "", "");
 
-  BOOST_CHECK_EQUAL(sequence_inst.subinstructions_count(),    2U);
+  BOOST_CHECK_EQUAL(sequence_inst.subinstructions().size(),    2U);
   BOOST_CHECK_EQUAL(sequence_inst.group_content_byte_count(), 2 * sizeof(value_storage) );
 
   sequence_inst.construct_value(storage, &alloc);
@@ -761,7 +805,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
     ref.resize(2);
     BOOST_CHECK_EQUAL(ref.present(),    true);
 
-    ref.as_absent();
+    ref.omit();
     BOOST_CHECK_EQUAL(ref.present(),    false);
 
     ref.resize(2);
@@ -784,7 +828,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
       unicode_string_mref mf1(e0f1);
       BOOST_CHECK_EQUAL(mf1.field_type(), field_type_unicode_string);
 
-      mf0.as_initial_value();
+      mf0.to_initial_value();
 
       BOOST_CHECK_EQUAL(mf0.size(),                                 sizeof(f0_initial));
       BOOST_CHECK_EQUAL(memcmp(mf0.data(), f0_initial, mf0.size()), 0);
@@ -828,7 +872,7 @@ public:
 
 
   mock_field_instruction()
-    : field_instruction (0, operator_none,field_type_int32,presence_mandatory,0,"","")
+    : field_instruction (operator_none,field_type_int32,presence_mandatory,0,"","", instruction_tag())
     , construct_value_called_(0)
     , destruct_value_called_(0)
     , copy_value_deep_called_(0)
@@ -864,6 +908,10 @@ public:
   {
   }
 
+  virtual mock_field_instruction* clone(arena_allocator& alloc) const
+  {
+    return new (alloc) mock_field_instruction(*this);
+  }
 };
 
 
@@ -908,19 +956,18 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
     &mock0
   };
 
-  uint32_field_instruction length_inst(0, operator_none,
+  uint32_field_instruction length_inst(operator_none,
                                        presence_mandatory,
                                        4,
                                        "","",
                                        0,
                                        int_value_storage<uint32_t>(0));
 
-  sequence_field_instruction sequence_inst(0, presence_optional,
+  sequence_field_instruction sequence_inst(presence_optional,
                                            3, // id
                                            "test_group","","",
-                                           instructions,
-                                           1, // subinstructions_count
-                                           &length_inst);
+                                           instructions,0,0,
+                                           &length_inst, "", "", "");
 
   sequence_inst.construct_value(storage, &alloc);
 

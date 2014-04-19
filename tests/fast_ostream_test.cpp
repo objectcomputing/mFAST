@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -94,7 +94,7 @@ encode_string(const char* str,std::size_t len, bool nullable, const byte_stream&
   strm.rdbuf(&sb);
 
 
-  strm.encode(str, len, nullable, instruction);
+  strm.encode(str, static_cast<uint32_t>(len), nullable, instruction);
 
   if (byte_stream(sb) == result)
     return true;
@@ -129,7 +129,7 @@ encode_byte_vector(const char* bv,std::size_t len, bool nullable, const byte_str
   strm.rdbuf(&sb);
 
 
-  strm.encode(reinterpret_cast<const unsigned char*>(bv), len, nullable, 0);
+  strm.encode(reinterpret_cast<const unsigned char*>(bv), static_cast<uint32_t>(len), nullable, 0);
 
   if (byte_stream(sb) == result)
     return true;
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(inserter_test)
   value_storage storage;
   {
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_copy,
+    ascii_field_instruction inst(operator_copy,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -185,13 +185,13 @@ BOOST_AUTO_TEST_CASE(inserter_test)
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref mref(&alloc, &storage, &inst);
-    mref.shallow_assign("AAA");
+    mref.refers_to("AAA");
 
     BOOST_CHECK(insert_to_stream(mref, "\x41\x41\xC1"));
   }
 
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -202,7 +202,7 @@ BOOST_AUTO_TEST_CASE(inserter_test)
     decimal_mref mref(&alloc, &storage, &inst);
 
 
-    mref.as_absent();
+    mref.omit();
     BOOST_CHECK(insert_to_stream(mref, "\x80"));
 
     mref.as(1, 4);
@@ -226,7 +226,7 @@ encode_pmap(const char* bits, std::size_t maxbits, const byte_stream& result)
   encoder_presence_map pmap;
   pmap.init(&strm, maxbits);
 
-  unsigned byte;
+  unsigned byte=0;
 
   for (std::size_t i = 0; i < maxbits; ++i ) {
 

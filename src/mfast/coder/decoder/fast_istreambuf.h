@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -20,17 +20,17 @@
 #define FAST_ISTREAMBUF_H_7X1JL4X6
 #include <stdexcept>
 
-#include "../common/exceptions.h"
+#include "mfast/exceptions.h"
 #include <iostream>
 
 namespace mfast
 {
 
-class fast_istream;
-class decoder_presence_map;
+  class fast_istream;
+  class decoder_presence_map;
 
-class fast_istreambuf
-{
+  class fast_istreambuf
+  {
   public:
     fast_istreambuf(const char* buf, std::size_t sz)
       : gptr_(buf)
@@ -42,8 +42,6 @@ class fast_istreambuf
     {
       return egptr_-gptr_;
     }
-
-
 
     // get the length of the stop bit encoded entity
     std::size_t
@@ -62,8 +60,8 @@ class fast_istreambuf
     friend class fast_istream;
     friend class decoder_presence_map;
     friend class fast_decoder;
-    
-    void gbump (int n)
+
+    void gbump (std::ptrdiff_t n)
     {
       gptr_ += n;
     }
@@ -74,17 +72,24 @@ class fast_istreambuf
         BOOST_THROW_EXCEPTION(fast_dynamic_error("Buffer underflow"));
       return *(gptr_++);
     }
-    
-    char sgetc() const {
+
+    char sgetc() const
+    {
       return *gptr_;
     }
-    
-    const char* gptr() { return gptr_; }
-    const char* egptr() { return egptr_; }
-    
-    
-    const char *gptr_, *egptr_;
-};
+
+    const char* gptr()
+    {
+      return gptr_;
+    }
+
+    const char* egptr()
+    {
+      return egptr_;
+    }
+
+    const char*gptr_, *egptr_;
+  };
 
 
 

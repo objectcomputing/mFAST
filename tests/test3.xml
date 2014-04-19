@@ -1,5 +1,14 @@
 <?xml version="1.0"?>
-<templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="http://www.ociweb.com/ns/templates/mfast_json" ns="http://www.ociweb.com/ns/mfast">
+<templates xmlns="http://www.ociweb.com/ns/mfast/td/1.2"
+  xmlns:mfast="http://www.ociweb.com/ns/mfast/td/1.2"
+  templateNs="http://www.ociweb.com/ns/templates/mfast_json"
+  ns="http://www.ociweb.com/ns/mfast">
+
+  <define name="mfast:tag">
+    <enum>
+      <element name="JSON_UNKNOWN" value="1" />
+    </enum>
+  </define>
 
     <template name="Stock">
         <uInt32 name="warehouse" />
@@ -7,22 +16,27 @@
     </template>
 
     <template name="Product" >
-        <uInt32 name="id" />
+        <uInt32 name="id" presence="optional"/>
         <string name="name" />
         <decimal name="price">
           <delta value="0" />
         </decimal>
         <sequence name="tags" presence="optional">
-            <string name="tag_item" />
+            <string  />
         </sequence>
         <group name="stock" presence="optional">
             <templateRef name="Stock" />
         </group>
+        <sequence name="resalers" presence="optional">
+            <string  name="name"/>
+        </sequence>
+
+        <byteVector name="ext" mfast:tag="JSON_UNKNOWN"/>
     </template>
 
     <template name="LoginAccount">
         <string name="userName" />
-        <string name="password" />
+        <string name="password" presence="optional" />
     </template>
 
     <template name="BankAccount">
@@ -47,7 +61,7 @@
             <string name="number" />
         </sequence>
         <sequence name="emails">
-            <string name="entry"/>
+            <string />
         </sequence>
         <group name="login" presence="optional">
             <templateRef />
@@ -57,5 +71,23 @@
         </sequence>
     </template>
 
+    <template name="SeqTemplate1">
+      <sequence name="seq1">
+        <int32 name="field1" />
+        <int32 name="field2" />
+      </sequence>
+    </template>
+
+    <template name="SeqTemplate2">
+      <sequence name="seq2">
+        <templateRef name="BankAccount" />
+      </sequence>
+    </template>
+
+    <template name="UsingSeqTemplates">
+      <string name="string_field"/>
+      <templateRef name="SeqTemplate1"/>
+      <templateRef name="SeqTemplate2"/>
+    </template>
 </templates>
 

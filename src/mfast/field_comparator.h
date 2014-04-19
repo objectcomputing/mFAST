@@ -5,136 +5,102 @@
 namespace mfast
 {
 
-namespace detail {
-struct field_uneqaul_exception {};
+  namespace detail {
+    struct field_uneqaul_exception {};
 
-template <typename T>
-class field_comparator
-{
-  private:
-    T parent_;
-  public:
+    class field_comparator
+    {
+    private:
+      field_cref rhs_;
 
-    enum {
-      visit_absent = 1
+    public:
+      enum {
+        visit_absent = 1
+      };
+      field_comparator(const field_cref& rhs)
+        : rhs_(rhs)
+      {
+      }
+
+      template <typename SimpleType>
+      void visit(const SimpleType& lhs) const
+      {
+        SimpleType rhs =  dynamic_cast_as<SimpleType>(rhs_);
+        if (lhs != rhs)
+          throw field_uneqaul_exception();
+      }
+
+      static void compare(const aggregate_cref lhs, const aggregate_cref rhs)
+      {
+        if (lhs.num_fields() == rhs.num_fields()) {
+
+          for (std::size_t i = 0; i < lhs.num_fields(); ++i) {
+            field_comparator comparator(rhs[i]);
+            lhs[i].accept_accessor(comparator);
+          }
+        }
+        else {
+          throw field_uneqaul_exception();
+        }
+      }
+
+      void visit(const group_cref& lhs, int) const
+      {
+        if (lhs.present() != rhs_.present())
+          throw field_uneqaul_exception();
+        if (lhs.present() )
+          compare(lhs, dynamic_cast_as<group_cref>(rhs_));
+      }
+
+      void visit(const nested_message_cref& lhs, int) const
+      {
+        if (lhs.present() != rhs_.present())
+          throw field_uneqaul_exception();
+        if (lhs.present() )
+          compare(lhs, dynamic_cast_as<nested_message_cref>(rhs_));
+      }
+
+
+      void visit(const sequence_cref& lhs, int) const
+      {
+        sequence_cref rhs = dynamic_cast_as<sequence_cref>(rhs_);
+        if (lhs.num_fields() == rhs.num_fields() && lhs.size() == rhs.size()) {
+          for (std::size_t i = 0; i < lhs.size(); ++i) {
+            compare(lhs[i], rhs[i]);
+          }
+        }
+        else
+          throw field_uneqaul_exception();
+      }
+
     };
 
-    field_comparator(const T& rhs)
-      : parent_(rhs)
-    {
-    }
+  }
 
-    void visit(const group_cref& lhs, int) const
-    {
-      group_cref rhs =  dynamic_cast_as<group_cref>(parent_[lhs.instruction()->field_index()]);
-
-      if (lhs.num_fields() != rhs.num_fields())
-        throw field_uneqaul_exception ();
-
-      field_comparator<group_cref> new_comp(rhs);
-      lhs.accept_accessor( new_comp );
-    }
-
-    void visit(const sequence_cref& lhs, int) const;
-
-    void visit(const sequence_element_cref&, int) const
-    {
-    }
-
-    void visit(const nested_message_cref& lhs, int) const
-    {
-      nested_message_cref rhs =  dynamic_cast_as<nested_message_cref>(parent_[lhs.instruction()->field_index()]);
-      field_comparator<message_cref> new_comp(rhs.target());
-      lhs.target().accept_accessor( new_comp );
-    }
-
-    template <typename SimpleType>
-    void visit(const SimpleType& lhs) const
-    {
-      SimpleType rhs =  dynamic_cast_as<SimpleType>(parent_[lhs.instruction()->field_index()]);
-
-      if (lhs != rhs)
-        throw field_uneqaul_exception();
-    }
-};
-
-template <>
-class field_comparator<sequence_cref>
-{
-public:
-private:
-  sequence_cref parent_;
-public:
-  enum {
-    visit_absent = 1
-  };
-
-  field_comparator(const sequence_cref& rhs)
-    : parent_(rhs)
+  inline bool operator == (const aggregate_cref& lhs, const aggregate_cref& rhs)
   {
+    try {
+      detail::field_comparator::compare(lhs, rhs);
+      return true;
+    }
+    catch (...) {
+      return false;
+    }
   }
 
-  void visit(const sequence_element_cref& lhs, int index) const
+  inline bool operator == (const field_cref& lhs, const field_cref& rhs)
   {
-    sequence_element_cref rhs =  parent_[index];
-    field_comparator<sequence_element_cref> new_comp(rhs);
-    lhs.accept_accessor( new_comp );
+    try {
+      detail::field_comparator comparator(rhs);
+      lhs.accept_accessor(comparator);
+      return true;
+    }
+    catch (...) {
+      return false;
+    }
   }
 
-  template <typename CompositeType>
-  void visit(const CompositeType&, int) const
-  {
-  }
-
-  template <typename SimpleType>
-  void visit(const SimpleType&) const
-  {
-  }
-};
-
-template <typename T>
-void field_comparator<T>::visit(const sequence_cref& lhs, int) const
-{
-  sequence_cref rhs =  dynamic_cast_as<sequence_cref>(parent_[lhs.instruction()->field_index()]);
-
-  if (lhs.num_fields() != rhs.num_fields() || lhs.size() != rhs.size())
-    throw field_uneqaul_exception ();
-
-  field_comparator<sequence_cref> new_comp(rhs);
-  lhs.accept_accessor( new_comp );
-}
-
-template <typename Ref>
-inline bool equal(const Ref& lhs, const Ref& rhs)
-{
-  try {
-    field_comparator<Ref> comparator(rhs);
-    lhs.accept_accessor(comparator);
-    return true;
-  }
-  catch (...) {
-    return false;
-  }
-}
-}
-
-
-inline bool operator == (const group_cref& lhs, const group_cref& rhs)
-{
-  return detail::equal(lhs, rhs);
-}
-
-inline bool operator == (const sequence_cref& lhs, const sequence_cref& rhs)
-{
-  return detail::equal(lhs, rhs);
-}
-
-inline bool operator == (const aggregate_cref& lhs, const aggregate_cref& rhs)
-{
- return detail::equal(lhs, rhs);
-}
-
-using namespace std::rel_ops;
+  using namespace std::rel_ops;
 
 }
 

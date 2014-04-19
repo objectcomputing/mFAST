@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -24,10 +24,10 @@
 #include "mfast/mfast_export.h"
 namespace mfast {
 
-/// An abstract interface for allocators.
-///
-class MFAST_EXPORT allocator
-{
+  /// An abstract interface for allocators.
+  ///
+  class MFAST_EXPORT allocator
+  {
   public:
     /// Allocate exactly n bytes for the memory that is not subjected to regrow
     ///
@@ -47,9 +47,9 @@ class MFAST_EXPORT allocator
     /// @throws std::bad_alloc on failure.
     virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)=0;
 
-    /// Deallocate a memory of size \a n 
+    /// Deallocate a memory of size \a n
     ///
-    /// Notice that \a pointer must be the one returned by  allocate() or rellocate() and \a n 
+    /// Notice that \a pointer must be the one returned by  allocate() or rellocate() and \a n
     /// must be the one specified in allocate() or the returned value of reallocate().
     virtual void deallocate(void* pointer, std::size_t n)=0;
 
@@ -60,8 +60,8 @@ class MFAST_EXPORT allocator
     /// operation.
     ///
     /// @return true if successful.
-    virtual bool reset();
-};
+    // virtual bool reset();
+  };
 
 }
 

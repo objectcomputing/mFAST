@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -27,13 +27,20 @@
 #include <iterator>
 using namespace boost::filesystem;
 
-
 int main(int argc, const char** argv)
 {
   mfast::template_registry registry;
 
   try {
-    for (int i = 1; i < argc; ++i) {
+    int i = 1;
+    const char* export_symbol = 0;
+
+    if (std::strcmp(argv[1], "-E") == 0) {
+      export_symbol = argv[2];
+      i = 3;
+    }
+
+    for (; i < argc; ++i) {
 
       std::ifstream ifs(argv[i]);
 
@@ -54,6 +61,8 @@ int main(int argc, const char** argv)
                                                 &registry);
 
       hpp_gen header_gen(filebase.c_str());
+      if (export_symbol)
+        header_gen.set_export_symbol(export_symbol);
       header_gen.generate(desc);
 
       inl_gen inline_gen(filebase.c_str());

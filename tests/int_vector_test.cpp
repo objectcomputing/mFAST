@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -22,7 +22,7 @@
 #include <mfast/coder/fast_encoder.h>
 #include <mfast/vector_ref.h>
 #include <mfast/coder/common/codec_helper.h>
-#include <mfast/coder/dynamic_templates_description.h>
+#include <mfast/xml_parser/dynamic_templates_description.h>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
@@ -52,8 +52,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_int_vector, T, test_types )
 {
   debug_allocator alloc;
   value_storage storage;
-  vector_field_instruction<T> inst(0, //field_index
-                                   presence_optional,
+  vector_field_instruction<T> inst(presence_optional,
                                    1, // id
                                    "int_vector","");
 
@@ -169,7 +168,7 @@ BOOST_AUTO_TEST_CASE (test_fast_encoding)
 
       sequence_mref f1 = static_cast<sequence_mref>(mref[1]);
       f1.resize(SIZE);
-      for (int i = 0; i < SIZE; ++i) {
+      for (int64_t i = 0; i < SIZE; ++i) {
         f1[i][0].as<int64_t>(i);
       }
 

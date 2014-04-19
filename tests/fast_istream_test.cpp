@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -135,7 +135,7 @@ decode_byte_vector(const byte_stream& bs, bool nullable, const char* result, std
   fast_istreambuf sb(bs.data(), bs.size());
   fast_istream strm(&sb);
 
-  const unsigned char* str;
+  const unsigned char* str=0;
   uint32_t len;
 
   bool not_null = strm.decode(str, len, nullable, 0);
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
   value_storage storage;
   {
     const char* default_value = "initial_string";
-    ascii_field_instruction inst(0, operator_copy,
+    ascii_field_instruction inst(operator_copy,
                                  presence_optional,
                                  1,
                                  "test_ascii","",
@@ -206,13 +206,13 @@ BOOST_AUTO_TEST_CASE(extractor_test)
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref mref(&alloc, &storage, &inst);
-    mref.shallow_assign("AAA");
+    mref.refers_to("AAA");
 
     BOOST_CHECK(extract_from_stream("\x41\x41\xC1", mref));
   }
 
   {
-    decimal_field_instruction inst(0, operator_copy,
+    decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
     decimal_mref mref(&alloc, &storage, &inst);
 
 
-    mref.as_absent();
+    mref.omit();
     BOOST_CHECK(extract_from_stream("\x80", mref));
 
     mref.as(1, 4);
@@ -244,8 +244,7 @@ decode_pmap(const byte_stream& bs, const char* result_bits, std::size_t maxbits)
   decoder_presence_map pmap;
   strm.decode(pmap);
 
-  char bits[16];
-  memset(bits, 16, 0);
+  char bits[16]="";
 
   char* pos = bits;
 
@@ -260,7 +259,7 @@ decode_pmap(const byte_stream& bs, const char* result_bits, std::size_t maxbits)
 
   pos[0] <<= ( 8 - (maxbits%8) );
 
-  int nbytes = (maxbits + 7)/8; // i.e. ceiling(maxbits/8)
+  std::size_t nbytes = (maxbits + 7)/8; // i.e. ceiling(maxbits/8)
   if (memcmp(bits, result_bits, nbytes) == 0)
     return true;
 

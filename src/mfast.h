@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -18,7 +18,7 @@
 //
 #ifndef MFAST_H_4EMINVTV
 #define MFAST_H_4EMINVTV
-#include <mfast/field_instruction.h>
+#include <mfast/field_instructions.h>
 #include <mfast/decimal_ref.h>
 #include <mfast/int_ref.h>
 #include <mfast/string_ref.h>
@@ -29,5 +29,9 @@
 #include <mfast/field_visitor.h>
 #include <mfast/arena_allocator.h>
 #include <mfast/field_comparator.h>
-#include <mfast/composite_field.h>
+#include <mfast/composite_type.h>
+#include <mfast/sequence_type.h>
+#include <mfast/enum_ref.h>
+#include <mfast/boolean_ref.h>
+#include <mfast/view_iterator.h>
 #endif /* end of include guard: MFAST_H_4EMINVTV */

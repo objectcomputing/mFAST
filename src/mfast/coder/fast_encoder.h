@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -82,10 +82,10 @@ class MFAST_CODER_EXPORT fast_encoder
     void encode(const message_cref& message,
                 std::vector<char>&  buffer,
                 bool                force_reset = false);
-              
+
     /// Instruct the encoder whether the overlong presence map is allowed.
     ///
-    /// Overlong presence map is allowed by default for better performance. 
+    /// Overlong presence map is allowed by default for better performance.
     /// It can be disabled for better standard conformance reason.
     void allow_overlong_pmap(bool v);
 

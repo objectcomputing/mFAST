@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -17,7 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ENCODER_FIELD_OPERATOR_H_MNM3YM8Xo
+#ifndef ENCODER_FIELD_OPERATOR_H_MNM3YM8X
 #define ENCODER_FIELD_OPERATOR_H_MNM3YM8X
 
 #include "mfast/int_ref.h"
@@ -28,8 +28,8 @@
 
 namespace mfast {
 
-class encoder_field_operator
-{
+  class encoder_field_operator
+  {
   public:
     virtual void encode(const int32_cref&     cref,
                         fast_ostream&         stream,
@@ -55,9 +55,9 @@ class encoder_field_operator
     virtual void encode(const decimal_cref&   cref,
                         fast_ostream&         stream,
                         encoder_presence_map& pmap) const;
-};
+  };
 
-extern const encoder_field_operator* const encoder_operators[operators_count];
+  extern const encoder_field_operator* const encoder_operators[operators_count];
 
 }
 

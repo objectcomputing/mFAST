@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -19,7 +19,7 @@
 #include <mfast.h>
 #include <mfast/coder/fast_decoder.h>
 #include <mfast/coder/fast_encoder.h>
-#include <mfast/coder/dynamic_templates_description.h>
+#include <mfast/xml_parser/dynamic_templates_description.h>
 #include <cstdio>
 #include <iostream>
 #include <cstring>
@@ -136,7 +136,11 @@ int main(int argc, const char** argv)
         const char *last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
-          mfast::message_cref  msg = coder.decode(first, last, force_reset || first_message );
+#ifdef WITH_ENCODE
+          mfast::message_cref  msg =
+#endif
+            coder.decode(first, last, force_reset || first_message );
+
 #ifdef WITH_ENCODE
           encoder.encode(msg, buffer, force_reset || first_message);
 #endif

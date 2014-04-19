@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -23,8 +23,8 @@
 
 namespace mfast {
 
-class decoder_presence_map
-{
+  class decoder_presence_map
+  {
   public:
     decoder_presence_map()
       : cur_bitmap_ (0)
@@ -42,7 +42,6 @@ class decoder_presence_map
       bool result = (cur_bitmap_ & mask_) != 0;
       return result;
     }
-    
 
     bool load(fast_istreambuf& buf)
     {
@@ -59,9 +58,9 @@ class decoder_presence_map
     }
 
   private:
-    
+
     bool load(const char*& addr)
-    {      
+    {
       bool load_complete = false;
       const int max_load_byes = sizeof(uint64_t)*8/7;
       mask_ = 1;
@@ -78,12 +77,12 @@ class decoder_presence_map
       }
       return load_complete;
     }
-    
+
     uint64_t cur_bitmap_;
     uint64_t mask_;
     const char* continue_;
     friend std::ostream& operator << (std::ostream&, const mfast::decoder_presence_map&);
-};
+  };
 
 }
 

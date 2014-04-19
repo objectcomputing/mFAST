@@ -6,7 +6,7 @@ file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current 
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-set(mfast_coder_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../../../tinyxml2/tinyxml2.cpp ${sources} ${headers})
+set(mfast_coder_SRCS ${sources} ${headers})
 
 add_library(mfast_coder_static STATIC ${mfast_coder_SRCS})
 
@@ -23,10 +23,18 @@ install(TARGETS mfast_coder_static
 
 if (BUILD_SHARED_LIBS)
   add_library(mfast_coder SHARED ${mfast_coder_SRCS})
+  # the add_dependencies is necessary for CMake 2.6.4. Otherwise, the shared
+  # library would be built before the static library, and the shared library
+  # would be deleted when the static library is built. For CMake 2.8.x, there
+  # is no such problem.
+  add_dependencies(mfast_coder mfast_coder_static)
+
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
 	set_target_properties(mfast_coder PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   target_link_libraries(mfast_coder mfast)
+  set_target_properties(mfast_coder PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+
 
   install(TARGETS mfast_coder
           EXPORT  mFASTTargets

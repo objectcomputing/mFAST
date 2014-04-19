@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<templates xmlns="http://www.ociweb.com/ns/mfast/td/1.2" templateNs="view_test" ns="http://www.ociweb.com/ns/mfast">
+    <template name="LoginAccount">
+        <string name="userName" />
+        <string name="password" />
+    </template>
+
+    <template name="BankAccount">
+        <uInt64 name="number" />
+        <uInt64 name="routingNumber" />
+        <string name="bank" presence="optional"/>
+        <string name="alias" presence="optional"/>
+    </template>
+
+    <template name="Person" >
+        <string name="firstName" />
+        <string name="lastName" />
+        <uInt32 name="age" />
+        <group name="address" presence="optional">
+            <string name="streetAddress" />
+            <string name="city" />
+            <string name="state" />
+            <uInt32 name="postalCode" />
+        </group>
+        <sequence name="phoneNumbers">
+            <string name="type" />
+            <string name="number" />
+        </sequence>
+        <sequence name="emails">
+            <string />
+        </sequence>
+        <group name="login" presence="optional">
+            <templateRef name="LoginAccount"/>
+        </group>
+        <sequence name="bankAccounts" presence="optional">
+            <templateRef name="BankAccount"/>
+        </sequence>
+    </template>
+    <view name="PersonView" reference="Person">
+      <field name="lastName"> <reference name="lastName" /> </field>
+      <field name="firstName"> <reference name="firstName" /> </field>
+      <field name="postalCode"> <reference name="address.postalCode" /> </field>
+      <field name="city"> <reference name="address.city" /> </field>
+      <field name="phoneNumber"> <reference name="phoneNumbers[0].number" /> </field>
+      <field name="userName">
+        <reference name="login.userName" />
+        <reference name="firstName" />
+      </field>
+    </view>
+</templates>

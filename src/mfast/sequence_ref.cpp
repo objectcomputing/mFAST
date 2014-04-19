@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -20,40 +20,42 @@
 #include "mfast/allocator.h"
 
 namespace mfast {
-namespace detail {
+  namespace detail {
 
-void sequence_mref_helper::reserve(const sequence_field_instruction* instruction,
-                                   value_storage*                    storage,
-                                   allocator*                        alloc,
-                                   std::size_t                       n)
-{
-  std::size_t element_size = instruction->group_content_byte_count ();
+    const value_storage default_sequence_storage;
 
-  std::size_t reserve_size = n*element_size;
+    void sequence_mref_helper::reserve(const sequence_field_instruction* instruction,
+                                       value_storage*                    storage,
+                                       allocator*                        alloc,
+                                       std::size_t                       n)
+    {
+      std::size_t element_size = instruction->group_content_byte_count ();
 
-  if ( reserve_size > storage->of_array.capacity_in_bytes_)
-  {
+      std::size_t reserve_size = n*element_size;
 
-    std::size_t new_capacity =
-      alloc->reallocate (storage->of_array.content_,
-                         storage->of_array.capacity_in_bytes_,
-                         reserve_size);
+      if ( reserve_size > storage->of_array.capacity_in_bytes_)
+      {
 
-    std::size_t old_num_elements = storage->of_array.capacity_in_bytes_/element_size;
-    std::size_t new_num_elements = new_capacity/element_size;
+        std::size_t new_capacity =
+          alloc->reallocate (storage->of_array.content_,
+                             storage->of_array.capacity_in_bytes_,
+                             reserve_size);
 
-    instruction->construct_sequence_elements (*storage,
-                                              old_num_elements,
-                                              new_num_elements - old_num_elements,
-                                              alloc);
-   // In the above 3rd parameter, it is incorrect to use
-   // (new_capacity-storage->of_array.capacity_in_bytes_)/element_size.
-   // It would cause differet value when either storage->of_array.capacity_in_bytes_
-   // or new_capacity is not the multiple of element_size.
+        std::size_t old_num_elements = storage->of_array.capacity_in_bytes_/element_size;
+        std::size_t new_num_elements = new_capacity/element_size;
 
-    storage->of_array.capacity_in_bytes_ = new_capacity;
+        instruction->construct_sequence_elements (*storage,
+                                                  old_num_elements,
+                                                  new_num_elements - old_num_elements,
+                                                  alloc);
+        // In the above 3rd parameter, it is incorrect to use
+        // (new_capacity-storage->of_array.capacity_in_bytes_)/element_size.
+        // It would cause differet value when either storage->of_array.capacity_in_bytes_
+        // or new_capacity is not the multiple of element_size.
+
+        storage->of_array.capacity_in_bytes_ = new_capacity;
+      }
+    }
+
   }
-}
-
-}
 }

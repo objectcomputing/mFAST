@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
@@ -54,27 +54,23 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   test1::SampleInfo info(&alloc);
   BOOST_CHECK_EQUAL((int)test1::SampleInfo::the_id,                             1);
   BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->id(),                    1U);
-  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->subinstructions_count(), 4U);
+  BOOST_CHECK_EQUAL(test1::SampleInfo::instruction()->subinstructions().size(), 4U);
   test1::SampleInfo_cref info_cref = info.cref();
 
   BOOST_CHECK(equal_string(info_cref.get_BeginString(), "FIX4.4"));
-  BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->field_index(),        0);
   BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->field_type(),     mfast::field_type_ascii_string);
   BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->id(),                 8U);
   BOOST_CHECK_EQUAL(info_cref.get_BeginString().instruction()->field_operator(), mfast::operator_constant);
 
   BOOST_CHECK(equal_string(info_cref.get_MessageType(), "X"));
-  BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->field_index(),             1);
   BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->field_type(),          mfast::field_type_ascii_string);
   BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->id(),                     35U);
   BOOST_CHECK_EQUAL(info_cref.get_MessageType().instruction()->field_operator(),      mfast::operator_constant);
 
-  BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->field_index(),            2);
   BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->field_type(),         mfast::field_type_ascii_string);
   BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->id(),                    49U);
   BOOST_CHECK_EQUAL(info_cref.get_SenderCompID().instruction()->field_operator(),     mfast::operator_copy);
 
-  BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->field_index(),               3);
   BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->field_type(),            mfast::field_type_uint32);
   BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->id(),                       34U);
   BOOST_CHECK_EQUAL(info_cref.get_MsgSeqNum().instruction()->field_operator(),        mfast::operator_increment);
@@ -82,16 +78,15 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   test2::MDRefreshSample sample(&alloc);
   BOOST_CHECK_EQUAL((int)test2::MDRefreshSample::the_id,                                  2);
   BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->id(),                    2U);
-  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->subinstructions_count(), 3U);
+  BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->subinstructions().size(), 3U);
 
   test2::MDRefreshSample_cref sample_cref = sample.cref();
   test1::SampleInfo_cref si = sample_cref.get_info();
   // BOOST_CHECK_EQUAL(si.present(), true);
   BOOST_CHECK_EQUAL(si.instruction()->segment_pmap_size(), 2U);
 
-  BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->field_index(),           1);
   BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->field_type(),        mfast::field_type_sequence);
-  // BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->subinstructions_count(), 11U);
+  // BOOST_CHECK_EQUAL(sample.cref().get_MDEntries().instruction()->subinstructions().size(), 11U);
 
   const mfast::uint32_field_instruction* len_inst = sample.cref().get_MDEntries().instruction()->length_instruction();
 
@@ -105,12 +100,10 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   typedef test2::MDRefreshSample_cref::MDEntries_element_cref MDEntries_element_cref;
   MDEntries_element_cref elem0 = sample.cref().get_MDEntries()[0];
 
-  BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->field_index(),        0);
   BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->id(),               279U);
   BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->field_type(),     mfast::field_type_uint32);
   BOOST_CHECK_EQUAL(elem0.get_MDUpdateAction().instruction()->field_operator(), mfast::operator_copy);
 
-  BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_index(),           5);
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->id(),                  271U);
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_type(),        mfast::field_type_exponent);
   BOOST_CHECK_EQUAL(elem0.get_MDEntrySize().instruction()->field_operator(),    mfast::operator_copy);
@@ -119,16 +112,27 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   BOOST_CHECK_EQUAL(mantissa_inst->field_type(),                                mfast::field_type_int64);
   BOOST_CHECK_EQUAL(mantissa_inst->field_operator(),                            mfast::operator_delta);
 
-
   sample.mref().set_MDEntries().resize(2);
   sample.mref().set_MDEntries().resize(4);
 
   MDEntries_element_cref elem3 = sample.cref().get_MDEntries()[3];
   BOOST_CHECK_EQUAL(elem3.get_MDEntryType().size(),           0U);
 
+  BOOST_CHECK_EQUAL(sample_cref.instruction()->subinstructions().size(), 3U);
+  BOOST_CHECK_EQUAL(sample_cref.instruction()->subinstruction(2)->field_type(), mfast::field_type_sequence);
+
+
   test2::MDRefreshSample_mref::extra_mref extra_mref =  sample.mref().set_extra();
+
+  BOOST_CHECK_EQUAL(extra_mref.instruction(), sample_cref.instruction()->subinstruction(2));
+
   extra_mref.resize(1);
-  BOOST_CHECK(equal_string(extra_mref[0].get_BeginString(), "FIX4.4"));
+  BOOST_CHECK_EQUAL(extra_mref.instruction(), sample_cref.instruction()->subinstruction(2));
+  BOOST_CHECK_EQUAL(extra_mref.instruction()->element_instruction()->field_type(), mfast::field_type_template);
+
+  test1::SampleInfo_mref extra0 (extra_mref[0]);
+
+  BOOST_CHECK(equal_string(extra0.get_BeginString(), "FIX4.4"));
 
   mfast::message_cref generic_cref(sample_cref.field_storage(0), test2::MDRefreshSample::instruction());
   test2::MDRefreshSample_cref specific_cref(generic_cref);
