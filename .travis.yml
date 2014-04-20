@@ -16,5 +16,5 @@ script:
     - mkdir _builds
     - cd _builds
     - cmake ..
-	- make
+    - make
     - make test
