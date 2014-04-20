@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   Emails emails;
 
-  const char* values[] = {
+  boost::string_ref values[] = {
     "test1@.email.com",
     "test2@.email.com",
     "test3@.email.com",
