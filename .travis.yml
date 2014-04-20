@@ -6,7 +6,11 @@ compiler:
     - clang
 
 before_install:
-    - sudo apt-get install libboost-dev
+    - sudo add-apt-repository ppa:apokluda/boost1.53 -y
+    - sudo apt-get update
+
+install:
+    - sudo apt-get install libboost1.53-dev
 
 script:
     - mkdir _builds
