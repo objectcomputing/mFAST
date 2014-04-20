@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(json_decode_null_test)
     std::stringstream strm(result);
 
     mfast::json::decode(strm, account_holder.mref());
-    BOOST_CHECK_EQUAL(account_holder.cref().get_userName().value(), "test");
+    BOOST_CHECK_EQUAL(account_holder.cref().get_userName().value(), boost::string_ref("test"));
     BOOST_CHECK( account_holder.cref().get_password().absent() );
   }
   catch (boost::exception& ex)
