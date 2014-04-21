@@ -10,6 +10,12 @@ endif()
 
 project (mFAST)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+	include(CodeCoverage)
+	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_COVERAGE})
+endif()
+
 set(MFAST_MAJOR_VERSION 1)
 set(MFAST_MINOR_VERSION 2)
 set(MFAST_PATCH_VERSION 0)
@@ -50,15 +56,15 @@ if(NOT IS_ABSOLUTE "${INSTALL_INCLUDE_DIR}")
  set(INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 endif()
 
-##########################################################################################################
+################################################################################
 ## Setting up Boost Library
 ################################
 
 find_package( Boost 1.53.0 REQUIRED unit_test_framework system filesystem)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIRS})
 
-###########################################################################################################
+################################################################################
 
 
 # Select flags.
@@ -85,9 +91,9 @@ link_directories (${PROJECT_BINARY_DIR}/src)
 # variable for using BOOST libraries
 
 if(MSVC_IDE)
-configure_file(invoke.bat.in
-               "${PROJECT_BINARY_DIR}/bin/invoke.bat"
-               @ONLY)
+    configure_file(invoke.bat.in
+                   "${PROJECT_BINARY_DIR}/bin/invoke.bat"
+                   @ONLY)
 endif(MSVC_IDE)
 
 #============================================================
@@ -104,7 +110,11 @@ foreach (input ${ARGN})
 endforeach(input)
 
 foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
-    set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
+    set(FASTTYPEGEN_${Name}_OUTPUTS
+        ${FASTTYPEGEN_${Name}_OUTPUTS}
+        ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/${var}.h
+        ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
 endforeach(var)
 
 foreach (input ${ARGN})
@@ -142,7 +152,6 @@ endmacro()
 
 
 #============================================================
-
 # Recurse into the "src" and "unit-tests" subdirectories. This does not actually
 # cause another cmake executable to run. The same process will walk through
 # the project's entire directory structure.
@@ -205,8 +214,19 @@ install(FILES
 # Install the export set for use with the install-tree
 install(EXPORT mFASTTargets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-FILE(GLOB schema_files "${CMAKE_CURRENT_SOURCE_DIR}/schema/*.*")
+file(GLOB schema_files "${CMAKE_CURRENT_SOURCE_DIR}/schema/*.*")
 
 install(FILES
         ${schema_files}
         DESTINATION ${INSTALL_DATA_DIR}/mfast)
+
+
+if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    SETUP_TARGET_FOR_COVERAGE(
+                    coverage            # Name for custom target.
+                    mfast_test          # Name of the test driver executable that runs the tests.
+                                        # NOTE! This should always have a ZERO as exit code
+                                        # otherwise the coverage generation will not complete.
+                    coverage            # Name of output directory.
+                    )
+endif()
