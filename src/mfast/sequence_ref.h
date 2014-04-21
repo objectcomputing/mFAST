@@ -142,7 +142,7 @@ namespace mfast {
     , public boost::iterator_facade<sequence_iterator<ElementRef, IsElementAggregate>,
                                     ElementRef,
                                     boost::random_access_traversal_tag,
-                                    const ElementRef&>
+                                    ElementRef>
   {
   public:
     sequence_iterator()
@@ -283,6 +283,8 @@ namespace mfast {
     typedef ElementType reference;
     typedef sequence_iterator<ElementType, is_element_aggregate> iterator;
     typedef iterator const_iterator;
+    typedef boost::reverse_iterator<iterator> reverse_iterator;
+    typedef reverse_iterator const_reverse_iterator;
 
     make_sequence_cref()
       : field_cref(&detail::default_sequence_storage, 0)
@@ -370,6 +372,27 @@ namespace mfast {
       return end();
     }
 
+    reverse_iterator rbegin() const
+    {
+      return boost::make_reverse_iterator(this->end());
+    }
+
+    reverse_iterator rend() const
+    {
+      return boost::make_reverse_iterator(this->begin());
+    }
+
+    const_reverse_iterator crbegin() const
+    {
+      return this->rbegin();
+    }
+
+    const_reverse_iterator crend() const
+    {
+      return this->rbegin();
+    }
+
+
     template <typename FieldAccesor>
     void accept_accessor(FieldAccesor&) const;
 
@@ -444,7 +467,9 @@ namespace mfast {
     typedef const SequenceInstructionType* instruction_cptr;
     typedef ElementType reference;
     typedef sequence_iterator<ElementType, is_element_aggregate> iterator;
-    typedef iterator const_iterator;
+    typedef iterator const_iterator; //This is required to make BOOST_FOREACH
+    typedef boost::reverse_iterator<iterator> reverse_iterator;
+    typedef reverse_iterator const_reverse_iterator;
 
     // make_sequence_mref()
     // {
@@ -543,6 +568,17 @@ namespace mfast {
                                 this->element_instruction()));
 
     }
+
+    reverse_iterator rbegin() const
+    {
+      return boost::make_reverse_iterator(this->end());
+    }
+
+    reverse_iterator rend() const
+    {
+      return boost::make_reverse_iterator(this->begin());
+    }
+
 
     /**
      * Grows this sequence  by delta elements.

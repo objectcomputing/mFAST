@@ -99,16 +99,31 @@ BOOST_AUTO_TEST_CASE(test_sequence)
     BOOST_CHECK( it->value() == values[index++] );
   }
 
+  BOOST_REVERSE_FOREACH(mfast::ascii_string_cref ref, emails.cref())
+  {
+    BOOST_CHECK_EQUAL(ref.value(), values[--index] );
+  }
+
   emails.mref().as( list_of("test1")("test2") );
   BOOST_REQUIRE_EQUAL(emails.cref().size(), 2U);
   BOOST_CHECK(emails.cref()[0] == "test1");
   BOOST_CHECK(emails.cref()[1] == "test2");
 
+  BOOST_REVERSE_FOREACH(mfast::ascii_string_mref ref, emails.mref())
+  {
+    ref.as(values[index++]);
+  }
+
+  BOOST_FOREACH(mfast::ascii_string_cref ref, emails.cref())
+  {
+    BOOST_CHECK_EQUAL(ref.value(), values[--index] );
+  }
+
   // Testing sequence of aggregate types
 
   Addresses addresses;
 
-  BOOST_FOREACH (const Address_mref &addr, addresses.mref())
+  BOOST_FOREACH (Address_mref addr, addresses.mref())
   {
   }
 
@@ -126,7 +141,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   index = 0;
 
 
-  BOOST_FOREACH (const Address_mref &addr, addresses.mref())
+  BOOST_FOREACH (Address_mref addr, addresses.mref())
   {
     addr.set_postalCode().as(static_cast<uint32_t>(index+10000));
     ++index;
@@ -134,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   index = 0;
 
-  BOOST_FOREACH(const Address_cref &addr, addresses.cref())
+  BOOST_FOREACH(Address_cref addr, addresses.cref())
   {
     BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
     ++index;
@@ -215,7 +230,7 @@ BOOST_AUTO_TEST_CASE(test_template)
 
 
   unsigned index = 0;
-  BOOST_FOREACH (const Address_mref &addr, person1.mref().set_addresses())
+  BOOST_FOREACH (Address_mref addr, person1.mref().set_addresses())
   {
     addr.set_postalCode().as(index+10000);
     ++index;
@@ -223,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_template)
 
   index = 0;
 
-  BOOST_FOREACH(const Address_cref &addr, person1.cref().get_addresses())
+  BOOST_FOREACH(Address_cref addr, person1.cref().get_addresses())
   {
     BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
     ++index;
