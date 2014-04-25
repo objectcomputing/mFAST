@@ -260,8 +260,8 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
   BOOST_CHECK_EQUAL(nested1_cref.target_instruction(), description[0]);
   const field_instruction* inst = nested1_cref.target().instruction();
   BOOST_CHECK( dynamic_cast<const template_instruction*>(inst));
+
   message_cref the_nested1(nested1_cref.target());
-  std::cout << "checkpoint\n";
   BOOST_CHECK_EQUAL( static_cast<uint32_cref>(the_nested1[0]).value(), 2U);
   BOOST_CHECK_EQUAL( static_cast<uint32_cref>(the_nested1[1]).value(), 3U);
 
