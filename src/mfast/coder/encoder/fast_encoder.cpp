@@ -35,7 +35,6 @@ namespace mfast
 
 
   struct fast_encoder_impl
-    : detail::field_storage_helper
   {
 
     enum {
@@ -217,7 +216,7 @@ namespace mfast
 
     // we have to replace the target instruction in cref so that the previous values of
     // the inner fields can be accessed.
-    const template_instruction*& target_inst = detail::field_storage_helper::storage_of(cref).of_templateref.of_instruction.instruction_;
+    const template_instruction*& target_inst = const_cast<value_storage*>(field_cref_core_access::storage_of(cref))->of_templateref.of_instruction.instruction_;
     target_inst = encode_segment_preemble(target_inst->id(), false);
 
     cref.accept_accessor(*this);

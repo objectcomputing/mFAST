@@ -29,7 +29,6 @@ namespace mfast
   namespace detail
   {
     class codec_helper
-      : public field_storage_helper
     {
     public:
       template <typename T>

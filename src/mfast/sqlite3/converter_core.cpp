@@ -298,7 +298,7 @@ namespace mfast
     void converter_core::bind(const template_info& info, unsigned column, const field_cref& ref) const
     {
       field_cref_binder binder(*this, info, column);
-      ref.instruction()->accept(binder, detail::field_storage_helper::storage_ptr_of(ref));
+      ref.instruction()->accept(binder, const_cast<value_storage*>(field_cref_core_access::storage_of(ref)));
     }
 
   } /* SQLite3 */

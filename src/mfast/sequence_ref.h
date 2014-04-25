@@ -118,7 +118,8 @@ namespace mfast {
 
     const char* content_storage() const
     {
-      return reinterpret_cast<const char*>(element_.storage_);
+      return reinterpret_cast<const char*>(
+        field_mref_core_access::storage_of(element_));
     }
 
     void content_storage(const void* ptr)

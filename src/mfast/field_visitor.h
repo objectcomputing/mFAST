@@ -37,7 +37,6 @@ namespace mfast {
     template <class FieldAccessor>
     class field_accessor_adaptor
       : public field_instruction_visitor
-      , private detail::field_storage_helper
     {
       FieldAccessor& accssor_;
 
@@ -53,7 +52,7 @@ namespace mfast {
         BOOST_FOREACH(field_cref r, ref)
         {
           if (r.present() || FieldAccessor::visit_absent ) {
-            r.instruction()->accept(*this, storage_ptr_of(r));
+            r.instruction()->accept(*this, const_cast<value_storage*>(field_cref_core_access::storage_of(r)));
           }
         }
       }
@@ -172,7 +171,6 @@ namespace mfast {
     template <class FieldMutator>
     class field_mutator_adaptor
       : public field_instruction_visitor
-      , private detail::field_storage_helper
     {
       allocator* alloc_;
       FieldMutator& mutator_;
@@ -190,7 +188,7 @@ namespace mfast {
         BOOST_FOREACH(field_mref r, ref)
         {
           if (r.present() || FieldMutator::visit_absent ) {
-            r.instruction()->accept(*this, storage_ptr_of(r));
+            r.instruction()->accept(*this, field_mref_core_access::storage_of(r));
           }
         }
       }

@@ -56,7 +56,7 @@ namespace mfast
 
     message_cref target() const
     {
-      return message_cref(*this);
+      return message_cref(this->storage()->of_templateref.content_, this->target_instruction());
     }
 
     const template_instruction* target_instruction() const
@@ -66,7 +66,7 @@ namespace mfast
 
     operator aggregate_cref() const
     {
-      return aggregate_cref(storage()->of_group.content_, target_instruction());
+      return aggregate_cref(this->storage()->of_templateref.content_, this->target_instruction());
     }
 
     template <typename FieldAccessor>

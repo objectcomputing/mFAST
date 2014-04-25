@@ -129,7 +129,7 @@ namespace mfast
     : alloc_(alloc)
     , instruction_(other.instruction())
   {
-    this->instruction()->copy_construct_value(detail::field_storage_helper::storage_of(other),
+    this->instruction()->copy_construct_value(*field_cref_core_access::storage_of(other),
                                               my_storage_,
                                               alloc,
                                               0);

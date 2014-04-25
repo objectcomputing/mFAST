@@ -41,7 +41,7 @@ namespace mfast
   template <typename T>
   class make_aggregate_mref;
 
-
+  struct aggregate_cref_core_access;
   class aggregate_cref
   {
   public:
@@ -128,17 +128,32 @@ namespace mfast
     const group_field_instruction* instruction_;
     const value_storage* storage_array_;
 
-    template <typename T>
-    friend class make_aggregate_mref;
+  private:
+
+    aggregate_cref& operator= (const aggregate_cref&);
+
+    friend struct aggregate_cref_core_access;
 
     template <typename ElementRef, bool IsElementAggregate>
     friend struct sequence_iterator_base;
-  private:
-    aggregate_cref& operator= (const aggregate_cref&);
+  };
+
+  struct aggregate_cref_core_access
+  {
+    static const value_storage*
+    storage_of(const aggregate_cref& r)
+    {
+      return r.storage_array_;
+    }
 
   };
 
+  struct aggregate_mref_core_access;
+
+  template <typename T, typename U>
+  class make_message_mref;
   class message_mref;
+
 
   template <typename ConstRef>
   class make_aggregate_mref
@@ -217,15 +232,26 @@ namespace mfast
     void unlink_group_at(size_t index) const;
 
   private:
+    friend struct aggregate_mref_core_access;
     template <typename U> friend class make_aggregate_mref;
 
+
     make_aggregate_mref& operator= (const make_aggregate_mref&);
-    friend struct fast_decoder_impl;
-    friend class message_mref;
     mfast::allocator* alloc_;
   };
 
   typedef make_aggregate_mref<aggregate_cref> aggregate_mref;
+
+  struct aggregate_mref_core_access
+  {
+    template <typename T>
+    static value_storage*
+    storage_of(const make_aggregate_mref<T>& r)
+    {
+      return r.field_storage(0);
+    }
+
+  };
 
 
 /////////////////////////////////////////////////////////////////
@@ -248,12 +274,13 @@ namespace mfast
 
   inline
   aggregate_cref::aggregate_cref(const field_cref& other)
-    : storage_array_(detail::field_storage_helper::storage_ptr_of(other)->of_group.content_)
+    : storage_array_(field_cref_core_access::storage_of(other)->of_group.content_)
   {
     if (other.instruction()->field_type() == field_type_templateref)
     {
 
-      this->instruction_ = static_cast<const group_field_instruction*> (detail::field_storage_helper::storage_of(other).of_templateref.of_instruction.instruction_);
+      this->instruction_ = static_cast<const group_field_instruction*> (
+        field_cref_core_access::storage_of(other)->of_templateref.of_instruction.instruction_);
       if (this->instruction_ == 0)
         BOOST_THROW_EXCEPTION(unbouned_templateref_error());
       // if you hit the exeception, you have to use dynamic_nested_message_mref::rebind() to bind a valid
@@ -323,7 +350,6 @@ namespace mfast
     return aggregate_cref::iterator(this->storage_array_ + this->num_fields(),
                                     this->instruction()->subinstructions().end());
   }
-
 
 ////////////////////////////////////////////////
 
@@ -459,7 +485,8 @@ namespace mfast
 
     value_storage other_storage;
     other_storage.of_group.own_content_ = false;
-    other_storage.of_group.content_ = const_cast<value_storage*>(other.storage_array_);
+    other_storage.of_group.content_ =
+      const_cast<value_storage*>(aggregate_cref_core_access::storage_of(other));
 
     this->instruction()->copy_construct_value(other_storage,
                                               tmp_storage,
@@ -490,7 +517,6 @@ namespace mfast
                     this->field_storage(this->num_fields()),
                     this->instruction()->subinstructions().end());
   }
-
 
   template <typename ConstRef>
   void
@@ -572,7 +598,7 @@ namespace mfast
   make_aggregate_mref<ConstRef>::iterator::distance_to(
     typename make_aggregate_mref<ConstRef>::iterator const& other) const
   {
-    return (other.storage_array_ - this->storage_array_);
+    return ( other.storage_array_ - this->storage_array_);
   }
 }
 

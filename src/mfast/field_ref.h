@@ -33,29 +33,13 @@ namespace mfast {
 
   namespace detail {
     extern MFAST_EXPORT const value_storage null_storage;
-
-    class field_storage_helper
-    {
-    public:
-      template <typename Ref>
-      static value_storage& storage_of(const Ref& ref)
-      {
-        return *const_cast<value_storage*>(ref.storage());
-      }
-
-      template <typename Ref>
-      static value_storage* storage_ptr_of(const Ref& ref)
-      {
-        return const_cast<value_storage*>(ref.storage());
-      }
-
-    };
-
   }
 
 
   template <typename ElementRef, bool IsElementAggregate>
   struct sequence_iterator_base;
+
+  struct field_cref_core_access;
 
   class MFAST_EXPORT field_cref
   {
@@ -85,12 +69,7 @@ namespace mfast {
     }
 
     template <typename T>
-    explicit field_cref(const T& ref)
-      : instruction_(ref.instruction())
-      , storage_(detail::field_storage_helper::storage_ptr_of(ref))
-    {
-    }
-
+    explicit field_cref(const T& ref);
     bool absent () const
     {
       return instruction_== 0 ||  (optional() && storage_->is_empty());
@@ -100,19 +79,6 @@ namespace mfast {
     {
       return !absent ();
     }
-
-//     bool operator ! () const
-//     {
-//       return this->absent();
-//     }
-//
-// #ifndef BOOST_NO_CXX11_EXPLICIT_CONVERSION_OPERATORS
-//     explicit operator bool() const
-//     {
-//       return this->present();
-//     }
-//
-// #endif
 
     bool optional() const
     {
@@ -163,7 +129,8 @@ namespace mfast {
     const field_instruction* instruction_;
     const value_storage* storage_;
 
-    friend class mfast::detail::field_storage_helper;
+    friend struct field_cref_core_access;
+
     template <typename ElementRef, bool IsElementAggregate>
     friend struct sequence_iterator_base;
 
@@ -171,6 +138,21 @@ namespace mfast {
     field_cref& operator = (const field_cref&);
 
   };
+
+  struct field_cref_core_access
+  {
+    static const value_storage* storage_of(const field_cref& ref)
+    {
+      return ref.storage();
+    }
+  };
+
+  template <typename T>
+  field_cref::field_cref(const T& ref)
+    : instruction_(ref.instruction())
+    , storage_(field_cref_core_access::storage_of(ref))
+  {
+  }
 
 //////////////////////////////////////////////////////////////////
 
@@ -225,6 +207,7 @@ namespace mfast {
 
   }
 
+  struct field_mref_core_access;
 
   template <typename ConstFieldRef>
   class make_field_mref
@@ -268,6 +251,7 @@ namespace mfast {
     }
 
   protected:
+    friend struct field_mref_core_access;
 
     value_storage* storage () const
     {
@@ -278,11 +262,23 @@ namespace mfast {
 
     friend class detail::make_field_mref_base< make_field_mref<ConstFieldRef>,
                                                typename ConstFieldRef::canbe_optional >;
-    friend class detail::field_storage_helper;
 
     template <typename T>
     friend class make_field_mref;
   };
+
+  struct field_mref_core_access
+    : field_cref_core_access
+  {
+    using field_cref_core_access::storage_of;
+
+    template <typename T>
+    static value_storage* storage_of(const make_field_mref<T>& ref)
+    {
+      return ref.storage();
+    }
+  };
+
 
   typedef make_field_mref<field_cref> field_mref_base;
 
@@ -305,7 +301,7 @@ namespace mfast {
     typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
     if (instruction == 0)
       throw std::bad_cast();
-    return T1(detail::field_storage_helper::storage_ptr_of(ref), instruction);
+    return T1(field_mref_core_access::storage_of(ref), instruction);
   }
 
   template <typename T1, typename T2>
@@ -315,7 +311,7 @@ namespace mfast {
     typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
     if (instruction == 0)
       throw std::bad_cast();
-    return T1(ref.allocator(), detail::field_storage_helper::storage_ptr_of(ref), instruction);
+    return T1(ref.allocator(), field_mref_core_access::storage_of(ref), instruction);
   }
 
   namespace detail {

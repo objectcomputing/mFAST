@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
   BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->id(),                    2U);
   BOOST_CHECK_EQUAL(test2::MDRefreshSample::instruction()->subinstructions().size(), 3U);
 
-  test2::MDRefreshSample_cref sample_cref = sample.cref();
+  test2::MDRefreshSample::cref_type sample_cref = sample.cref();
   test1::SampleInfo_cref si = sample_cref.get_info();
   // BOOST_CHECK_EQUAL(si.present(), true);
   BOOST_CHECK_EQUAL(si.instruction()->segment_pmap_size(), 2U);
@@ -134,13 +134,11 @@ BOOST_AUTO_TEST_CASE(MDRefreshSample_test)
 
   BOOST_CHECK(equal_string(extra0.get_BeginString(), "FIX4.4"));
 
-  mfast::message_cref generic_cref(sample_cref.field_storage(0), test2::MDRefreshSample::instruction());
-  test2::MDRefreshSample_cref specific_cref(generic_cref);
+  mfast::message_cref generic_cref(sample.cref());
+  test2::MDRefreshSample::cref_type specific_cref(generic_cref);
 
-  mfast::message_mref generic_mref(&alloc,
-                                   const_cast<mfast::value_storage*>(sample_cref.field_storage(0)),
-                                   test2::MDRefreshSample::instruction());
-  test2::MDRefreshSample_mref specific_mref(generic_mref);
+  mfast::message_mref generic_mref(sample.mref());
+  test2::MDRefreshSample::mref_type specific_mref(generic_mref);
 
 
 }

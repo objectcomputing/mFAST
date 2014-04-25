@@ -125,6 +125,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   BOOST_FOREACH (Address_mref addr, addresses.mref())
   {
+    addr.instruction();
   }
 
   Addresses_mref::iterator it = addresses.mref().grow_by(2);
@@ -195,6 +196,7 @@ BOOST_AUTO_TEST_CASE(test_template)
   BOOST_FOREACH(Address_cref addr, person_mref.get_addresses())
   {
     num_addresses += 1;
+    addr.instruction(); // avoid unused variable warning
   }
 
   BOOST_CHECK_EQUAL(num_addresses, 0);
