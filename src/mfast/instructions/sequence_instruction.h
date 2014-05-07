@@ -91,6 +91,13 @@ namespace mfast
       element_instruction_ = i;
     }
 
+    int properties() const
+    {
+      // This member function is used to query the properties of sequence element.
+      // Becuase the sequence element can never be optional, the presence bit should never be encoded.
+      return  /* (optional() ? 1 : 0) | */ (segment_pmap_size() > 0) ? field_has_initial_value : 0;
+    }
+
   private:
 
     friend class dictionary_builder;

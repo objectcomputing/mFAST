@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<templates xmlns="http://www.fixprotocol.org/ns/template-definition"
+    templateNs="http://www.fixprotocol.org/ns/templates/sample"
+    ns="http://www.fixprotocol.org/ns/fix">
+
+  <template name="Test" id="1">
+    <uInt32 name="field1" id="1"><copy value="11"/></uInt32>
+    <uInt32 name="field2" id="2"><copy value="12"/></uInt32>
+    <uInt32 name="field3" id="3"><copy value="13"/></uInt32>
+  </template>
+</templates>

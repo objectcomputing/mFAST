@@ -225,7 +225,6 @@ bool FastXMLVisitor::VisitExit (const XMLElement & element)
 
   if (strcmp(element_name, "templateRef") == 0) {
     num_fields_.back() += 1;
-    result = true;
   }
 
   if (name_attr.empty())

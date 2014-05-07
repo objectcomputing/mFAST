@@ -52,14 +52,15 @@ protected:
 
 public:
   codegen_base(const char* filebase, const char* fileext);
-
+  static std::string cpp_name(const mfast::field_instruction* inst);
+  static std::string cpp_name(const char* n);
+  static const  mfast::field_instruction* get_element_instruction(const mfast::sequence_field_instruction* inst);
 protected:
   void traverse(mfast::dynamic_templates_description& desc);
   virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix="");
 
   void reset_scope(std::stringstream& strm, const std::string& str);
-  std::string cpp_name(const mfast::field_instruction* inst) const;
-  std::string cpp_name(const char* n) const;
+
 
   std::string cpp_type_of(const mfast::field_instruction* inst,
                           std::set<std::string>*          dependency=0) const;
@@ -68,7 +69,6 @@ protected:
 
   bool contains_only_templateref(const mfast::group_field_instruction* inst) const;
 
-  const  mfast::field_instruction* get_element_instruction(const mfast::sequence_field_instruction* inst) const;
 
   bool dont_generate(const mfast::field_instruction* inst) const;
 };

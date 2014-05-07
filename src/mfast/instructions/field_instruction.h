@@ -69,6 +69,11 @@ namespace mfast {
     field_type_enum
   };
 
+  enum property_enum_t
+  {
+    field_has_initial_value = 2,
+  };
+
 
   struct op_context_t {
     const char* key_;
@@ -189,13 +194,20 @@ namespace mfast {
 
     bool mandatory_without_initial_value() const
     {
-      return mandatory_no_initial_value_;
+      return !optional_flag_ && !has_initial_value_;
     }
 
     /// @returns true if the field type is string, byteVector or sequence.
     bool is_array() const
     {
       return is_array_;
+    }
+
+    int properties() const
+    {
+      // used for static visitor, the first bit describe whether the field is optional,
+      // the second bit describe whether the filed has initial value.
+      return  (optional() ? 1 : 0) |  (has_initial_value_ ? field_has_initial_value : 0);
     }
 
     const char* field_type_name() const;
@@ -242,6 +254,8 @@ namespace mfast {
       return tag_;
     }
 
+
+
   protected:
 
     virtual void update_invariant()
@@ -256,7 +270,7 @@ namespace mfast {
     uint16_t optional_flag_ : 1;
     uint16_t nullable_flag_ : 1;
     uint16_t has_pmap_bit_ : 1;
-    uint16_t mandatory_no_initial_value_ : 1;
+    uint16_t has_initial_value_ : 1;
     uint16_t field_type_ : 8;
     uint32_t id_;
     const char* name_;

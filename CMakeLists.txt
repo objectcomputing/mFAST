@@ -140,6 +140,10 @@ foreach (input ${ARGN})
     set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
 endforeach(input)
 
+
+if ( NOT ((${CMAKE_MAJOR_VERSION} LESS 2) OR (${CMAKE_MINOR_VERSION} LESS 8) OR (${CMAKE_PATCH_VERSION} LESS 4)))
+   set(CMAKE_SUPPORT_GENERATOR_EXPRESSION 1)
+endif()
 ## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated.
 ## Not at the time when "make" is called.
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -150,6 +154,14 @@ if (MSVC_IDE)
 	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
 	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat
 	  ARGS $<TARGET_FILE:fast_type_gen>  ${INPUTS}
+	  DEPENDS ${ARGN} fast_type_gen
+	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+elseif (CMAKE_SUPPORT_GENERATOR_EXPRESSION)
+	add_custom_command(
+	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+	  COMMAND $<TARGET_FILE:fast_type_gen>
+	  ARGS ${INPUTS}
 	  DEPENDS ${ARGN} fast_type_gen
 	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
 	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

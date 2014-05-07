@@ -36,7 +36,7 @@ namespace mfast
     , prev_value_(&prev_storage_)
     , initial_or_default_value_(initial_storage.is_empty() ? &default_value_ : &initial_value_)
   {
-    mandatory_no_initial_value_ = !optional && initial_storage.is_empty();
+    has_initial_value_= ! initial_storage.is_empty();
   }
 
   integer_field_instruction_base::integer_field_instruction_base(const integer_field_instruction_base& other)

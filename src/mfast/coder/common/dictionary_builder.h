@@ -105,6 +105,12 @@ namespace mfast {
 
     void build(const templates_description* def);
 
+    template <typename Desc>
+    void operator() (Desc*)
+    {
+      this->build(Desc::instance());
+    }
+
   private:
 
     virtual void visit(const int32_field_instruction*, void*);

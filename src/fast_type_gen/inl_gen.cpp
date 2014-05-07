@@ -18,6 +18,282 @@
 //
 #include "inl_gen.h"
 
+const char* get_operator_type(const mfast::field_instruction* inst)
+{
+  const char* names[] = {
+    "none_operator_type",
+    "constant_operator_type",
+    "delta_operator_type",
+    "default_operator_type",
+    "copy_operator_type",
+    "increment_operator_type",
+    "tail_operator_type",
+  };
+  return names[inst->field_operator()];
+}
+
+// properties() is not virtual function, we need to overload it
+template <typename Instruction>
+std::string get_properties_type(const Instruction* inst)
+{
+  std::stringstream strm;
+  strm << "properties_type< "
+       << inst->properties() << "> ";
+  return strm.str();
+}
+
+using namespace mfast;
+struct ext_cref_type_getter
+  : mfast::field_instruction_visitor
+{
+  std::stringstream out_;
+
+public:
+  ext_cref_type_getter()
+  {
+  }
+
+  std::string get()
+  {
+    return out_.str();
+  }
+
+  virtual void visit(const int32_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<int32_cref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const uint32_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<uint32_cref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const int64_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<int64_cref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const uint64_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<uint64_cref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const decimal_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<decimal_cref, ";
+    if (inst->field_type() == field_type_exponent) {
+      out_ << "boost::mpl::pair<" << get_operator_type(inst) << ", " <<  get_operator_type(inst->mantissa_instruction()) << ">, "
+           << "boost::mpl::pair<" << get_properties_type(inst) << ", " <<  get_properties_type(inst->mantissa_instruction()) << "> >";
+    }
+    else {
+      out_ << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+    }
+  }
+
+  virtual void visit(const ascii_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<ascii_string_cref, "<< get_operator_type(inst) << ", " << get_properties_type(inst) <<">";
+  }
+
+  virtual void visit(const unicode_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<unicode_string_cref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const byte_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<byte_vector_cref, "  << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const group_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref< " << codegen_base::cpp_name(inst) << "_cref,  group_type_tag, " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const sequence_field_instruction* inst, void*);
+
+  virtual void visit(const template_instruction* inst, void*)
+  {
+    out_ << "ext_cref< " << codegen_base::cpp_name(inst) << "_cref, group_type_tag, " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const templateref_instruction*, void*)
+  {
+    out_ << "nested_message_cref";
+  }
+
+  virtual void visit(const int32_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref< int32_vector_cref, "  << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const uint32_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref< uint32_vector_cref, "  << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const int64_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref< int64_vector_cref, "  << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const uint64_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref< uint64_vector_cref, "  << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const enum_field_instruction* inst, void*)
+  {
+    out_ << "ext_cref<enum_cref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+};
+
+
+std::string get_ext_cref_type(const field_instruction* inst)
+{
+  ext_cref_type_getter getter;
+  inst->accept(getter, 0);
+  return getter.get();
+}
+
+void ext_cref_type_getter::visit(const sequence_field_instruction* inst, void*)
+{
+  const uint32_field_instruction* length_inst  = inst->length_instruction();
+  const field_instruction* element_inst = codegen_base::get_element_instruction(inst);
+
+  out_ << "ext_cref< sequence_cref, ext_cref<uint32_cref, " << get_operator_type(length_inst) << ", " << get_properties_type(length_inst) << ">, ";
+  if (element_inst)
+    out_ << "ext_cref< typename " << codegen_base::cpp_name(inst) << "_cref::reference, "
+         << get_operator_type(element_inst) << ", " << get_properties_type(element_inst) << " > >";
+  else
+    out_ << "ext_cref< typename " << codegen_base::cpp_name(inst) << "_cref::reference, group_type_tag," << get_properties_type(inst) << "> >";
+}
+
+struct ext_mref_type_getter
+  : mfast::field_instruction_visitor
+{
+  std::stringstream out_;
+
+public:
+  ext_mref_type_getter()
+  {
+  }
+
+  std::string get()
+  {
+    return out_.str();
+  }
+
+  virtual void visit(const int32_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<int32_mref, "  << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const uint32_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<uint32_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const int64_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<int64_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const uint64_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<uint64_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const decimal_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<decimal_mref, ";
+    if (inst->field_type() == field_type_exponent) {
+      out_ << "boost::mpl::pair<" << get_operator_type(inst) << ", " <<  get_operator_type(inst->mantissa_instruction()) << ">, "
+           << "boost::mpl::pair<" << get_properties_type(inst) << ", " <<  get_properties_type(inst->mantissa_instruction()) << "> >";
+    }
+    else {
+      out_ << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+    }
+  }
+
+  virtual void visit(const ascii_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<ascii_string_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const unicode_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<unicode_string_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const byte_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<byte_vector_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const group_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref< " << codegen_base::cpp_name(inst) << "_mref, group_type_tag, " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const sequence_field_instruction* inst, void*);
+  virtual void visit(const template_instruction* inst, void*)
+  {
+    out_ << "ext_mref< " << codegen_base::cpp_name(inst) << "_mref, group_type_tag, " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const templateref_instruction*, void*)
+  {
+    out_ << "nested_message_mref";
+  }
+
+  virtual void visit(const int32_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<int32_vector_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const uint32_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<uint32_vector_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const int64_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<int64_vector_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const uint64_vector_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<uint64_vector_mref, " << get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const enum_field_instruction* inst, void*)
+  {
+    out_ << "ext_mref<enum_mref, "<< get_operator_type(inst) << ", " << get_properties_type(inst) << ">";
+  }
+
+};
+
+std::string get_ext_mref_type(const field_instruction* inst)
+{
+  ext_mref_type_getter getter;
+  inst->accept(getter,0);
+  return getter.get();
+}
+
+void ext_mref_type_getter::visit(const sequence_field_instruction* inst, void*)
+{
+  const uint32_field_instruction* length_inst  = inst->length_instruction();
+  const field_instruction* element_inst = codegen_base::get_element_instruction(inst);
+
+  out_ << "ext_mref< sequence_mref, ext_mref<uint32_mref, " << get_operator_type(length_inst) << ", " << get_properties_type(length_inst) << ">, ";
+  if (element_inst && element_inst != inst)
+    out_ << "ext_mref< typename " << codegen_base::cpp_name(inst) << "_mref::reference, " << get_operator_type(element_inst) << ", " << get_properties_type(element_inst) << " > >";
+  else
+    out_ << "ext_mref< typename " << codegen_base::cpp_name(inst) << "_mref::reference, group_type_tag," << get_properties_type(inst) << "> >";
+}
+
 void inl_gen::traverse(const mfast::group_field_instruction* inst, const char* name_suffix)
 {
   std::string saved_mref_scope = mref_scope_.str();
@@ -189,8 +465,23 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
          << "  const mfast::field_cref& other)\n"
          << "  : base_type(other)\n"
          << "{\n"
-         << "}\n\n"
-         << "inline\n"
+         << "}\n\n";
+
+    out_ << "template <typename Visitor>\n"
+         << "void " << cref_type_name << "::"<< name << "_cref::accept(Visitor& visitor)\n"
+         << "{\n"
+         << "  using namespace mfast;\n";
+
+
+    for (std::size_t i = 0; i < inst->subinstructions().size(); ++i)
+    {
+      const field_instruction* subinst = inst->subinstructions()[i];;
+      out_ << "  visitor.visit(" << get_ext_cref_type(subinst) << " ((*this)[" << i << "]) );\n";
+    }
+
+    out_ << "}\n\n";
+
+    out_ << "inline\n"
          << mref_type_name << "::"<< name << "_mref()\n"
          << "  : base_type(0, 0, 0)\n"
          << "{\n"
@@ -210,6 +501,19 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
          << "  : base_type(other)\n"
          << "{\n"
          << "}\n\n";
+
+    out_ << "template <typename Visitor>\n"
+         << "void " << mref_type_name << "::"<< name << "_mref::accept(Visitor& visitor)\n"
+         << "{\n"
+         << "  using namespace mfast;\n";
+
+    for (std::size_t i = 0; i < inst->subinstructions().size(); ++i)
+    {
+      const field_instruction* subinst = inst->subinstructions()[i];
+      out_ << "  visitor.visit(" << get_ext_mref_type(subinst) << " ((*this)[" << i << "]) );\n";
+    }
+
+    out_ << "}\n\n";
 
     if (!pIndex)
     {
@@ -279,6 +583,33 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
          << "  : base_type(alloc,storage, instruction)\n"
          << "{\n"
          << "}\n\n";
+
+    out_ << "template <typename Visitor>\n"
+         << "void " << cref_scope_.str() << name << "_element_cref::"<< name << "_element_cref::accept(Visitor& visitor)\n"
+         << "{\n"
+         << "  using namespace mfast;\n";
+
+    for (std::size_t i = 0; i < inst->subinstructions().size(); ++i)
+    {
+      const field_instruction* subinst = inst->subinstructions()[i];;
+      out_ << "  visitor.visit(" << get_ext_cref_type(subinst) << " ((*this)[" << i << "]) );\n";
+    }
+
+    out_ << "}\n\n";
+
+    out_ << "template <typename Visitor>\n"
+         << "void " << mref_scope_.str() << name << "_element_mref::"<< name << "_element_mref::accept(Visitor& visitor)\n"
+         << "{\n"
+         << "  using namespace mfast;\n";
+
+    for (std::size_t i = 0; i < inst->subinstructions().size(); ++i)
+    {
+      const field_instruction* subinst = inst->subinstructions()[i];;
+      out_ << "  visitor.visit(" << get_ext_mref_type(subinst) << " ((*this)[" << i << "]) );\n";
+    }
+
+
+    out_ << "}\n\n";
 
     traverse(inst, "_element");
   }
@@ -356,6 +687,27 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
        << "{\n"
        << "}\n\n"
        << "inline\n"
+       << name << "_cref::operator mfast::message_cref()\n"
+       << "{\n"
+       << "  return mfast::message_cref(this->storage(), static_cast<instruction_cptr>(this->instruction()));\n"
+       << "}\n\n";
+
+  out_ << "template <typename Visitor>\n"
+       << "void " << name << "_cref::accept(Visitor& visitor)\n"
+       << "{\n"
+       << "  using namespace mfast;\n";
+
+  for (std::size_t i = 0; i < inst->subinstructions().size(); ++i)
+  {
+    const field_instruction* subinst = inst->subinstructions()[i];;
+    out_ << "  visitor.visit(" << get_ext_cref_type(subinst) << " ((*this)[" << i << "]) );\n";
+  }
+
+
+  out_ << "}\n\n";
+
+
+  out_ << "inline\n"
        << name << "_mref::" << name << "_mref()\n"
        << "  : base_type(0, 0, 0)\n"
        << "{\n"
@@ -384,6 +736,26 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
        << "{\n"
        << "}\n\n"
        << "inline\n"
+       << name << "_mref::operator mfast::message_mref()\n"
+       << "{\n"
+       << "  return mfast::message_mref(this->allocator(), const_cast<mfast::value_storage*>(this->storage()), static_cast<instruction_cptr>(this->instruction()));\n"
+       << "}\n\n";
+
+  out_ << "template <typename Visitor>\n"
+       << "void " << name << "_mref::accept(Visitor& visitor)\n"
+       << "{\n"
+       << "  using namespace mfast;\n";
+
+  for (std::size_t i = 0; i < inst->subinstructions().size(); ++i)
+  {
+    const field_instruction* subinst = inst->subinstructions()[i];;
+    out_ << "  visitor.visit(" << get_ext_mref_type(subinst) << " ((*this)[" << i << "]) );\n";
+  }
+
+
+  out_ << "}\n\n";
+
+  out_ << "inline\n"
        << name << "::" << name << "(\n"
        << "  mfast::allocator* alloc)\n"
        << "  : base_type(alloc, instruction(), this->data())\n"
@@ -420,7 +792,7 @@ void inl_gen::visit(const mfast::template_instruction* inst, void*)
   this->traverse(inst, "");
 }
 
-void inl_gen::visit(const mfast::templateref_instruction* , void* pIndex)
+void inl_gen::visit(const mfast::templateref_instruction*, void* pIndex)
 {
   std::size_t index = *static_cast<std::size_t*>(pIndex);
 

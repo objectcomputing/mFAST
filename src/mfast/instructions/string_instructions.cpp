@@ -44,7 +44,7 @@ namespace mfast
     , prev_value_(&prev_storage_)
     , initial_or_default_value_(initial_value_.is_empty() ? &default_value_ : &initial_value_)
   {
-    mandatory_no_initial_value_ = !optional && initial_value.storage_.is_empty();
+    has_initial_value_= ! initial_value.storage_.is_empty();
   }
 
   ascii_field_instruction::ascii_field_instruction(const ascii_field_instruction& other)
@@ -100,7 +100,7 @@ namespace mfast
   {
     initial_value_ = v;
     initial_or_default_value_ = initial_value_.is_empty() ? &default_value_ : &initial_value_;
-    mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
+    has_initial_value_= ! initial_value_.is_empty();
   }
 
   unicode_field_instruction*

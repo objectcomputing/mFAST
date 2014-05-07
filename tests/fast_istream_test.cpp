@@ -98,7 +98,7 @@ decode_string(const byte_stream& bs, bool nullable, const char* result, std::siz
   const char* str;
   uint32_t len;
 
-  bool not_null = strm.decode(str, len, nullable, instruction);
+  bool not_null = strm.decode(str, len, instruction, nullable);
 
   if ((str == 0 && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
     return true;
@@ -138,7 +138,7 @@ decode_byte_vector(const byte_stream& bs, bool nullable, const char* result, std
   const unsigned char* str=0;
   uint32_t len;
 
-  bool not_null = strm.decode(str, len, nullable, 0);
+  bool not_null = strm.decode(str, len, 0, nullable);
 
   if ((result == 0 && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
     return true;

@@ -14,6 +14,8 @@ FASTTYPEGEN_TARGET(test_types4 test4.xml)
 FASTTYPEGEN_TARGET(test_types5 test5.xml)
 FASTTYPEGEN_TARGET(test_scp scp.xml)
 
+FASTTYPEGEN_TARGET(simples simple1.xml simple2.xml simple3.xml simple4.xml simple5.xml simple6.xml simple7.xml)
+
 
 add_executable (mfast_test
                 test_main.cpp
@@ -31,12 +33,15 @@ add_executable (mfast_test
                 ${FASTTYPEGEN_test_types4_OUTPUTS}
                 ${FASTTYPEGEN_test_types5_OUTPUTS}
                 ${FASTTYPEGEN_test_scp_OUTPUTS}
+                ${FASTTYPEGEN_simples_OUTPUTS}
                 fast_type_gen_test.cpp
                 dictionary_builder_test.cpp
                 json_test.cpp
                 int_vector_test.cpp
                 composite_type_test.cpp
-			    aggregate_view_test.cpp)
+			    aggregate_view_test.cpp
+                simple_coder_test.cpp
+            )
 
 target_link_libraries (mfast_test
                        mfast_static

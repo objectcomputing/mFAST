@@ -76,12 +76,12 @@ void codegen_base::reset_scope(std::stringstream& strm, const std::string& str)
 }
 
 std::string
-codegen_base::cpp_name(const mfast::field_instruction* inst) const
+codegen_base::cpp_name(const mfast::field_instruction* inst)
 {
   return cpp_name( inst->name() );
 }
 
-std::string codegen_base::cpp_name(const char* name) const
+std::string codegen_base::cpp_name(const char* name)
 {
   std::string result;
   if (!std::isalpha(name[0]))
@@ -253,7 +253,7 @@ bool codegen_base::contains_only_templateref(const mfast::group_field_instructio
 }
 
 const mfast::field_instruction*
-codegen_base::get_element_instruction(const mfast::sequence_field_instruction* inst) const
+codegen_base::get_element_instruction(const mfast::sequence_field_instruction* inst)
 {
   if (inst->element_instruction())
     return inst->element_instruction();

@@ -610,7 +610,7 @@ namespace mfast
 
           uint32_t delta_len;
           const typename T::value_type* delta_str=0;
-          stream.decode(delta_str, delta_len, false, mref.instruction());
+          stream.decode(delta_str, delta_len, mref.instruction(), false);
 
           this->apply_string_delta(mref,
                                    base_value,
@@ -727,7 +727,7 @@ namespace mfast
 
           uint32_t len;
           const typename T::value_type* str;
-          if (stream.decode(str, len, mref.instruction()->is_nullable(), mref.instruction()) ) {
+          if (stream.decode(str, len, mref.instruction(), mref.instruction()->is_nullable()) ) {
             const value_storage& base_value (tail_base_value_of(mref));
             this->apply_string_delta(mref,
                                      base_value,

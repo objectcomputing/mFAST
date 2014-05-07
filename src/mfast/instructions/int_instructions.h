@@ -79,7 +79,7 @@ namespace mfast
     {
       initial_value_ = v;
       initial_or_default_value_ = initial_value_.is_empty() ? &default_value_ : &initial_value_;
-      mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
+      has_initial_value_= ! initial_value_.is_empty();
     }
 
   protected:
@@ -94,7 +94,7 @@ namespace mfast
     virtual void update_invariant()
     {
       field_instruction::update_invariant();
-      mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
+      has_initial_value_= ! initial_value_.is_empty();
     }
 
   };

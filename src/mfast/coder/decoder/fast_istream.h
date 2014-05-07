@@ -37,9 +37,9 @@ namespace mfast
      *
      * @return false if the decoded value is null
      **/
-    template <typename T>
+    template <typename T, typename Nullable>
     typename boost::enable_if< boost::is_integral<T>,bool>::type
-    decode(T& result, bool nullable);
+    decode(T& result, Nullable nullable);
 
 
     void decode(decoder_presence_map& pmap)
@@ -62,10 +62,11 @@ namespace mfast
      * @param [in] instruction The field instruction
      * @return false if the decoded value is null
      **/
+    template <typename Nullable>
     bool decode(const char*& ascii,
                 uint32_t&    len,
-                bool         nullable,
-                const ascii_field_instruction* /* instruction */)
+                const ascii_field_instruction* /* instruction */,
+                Nullable     nullable)
     {
       char c = buf_->sgetc();
       ascii = buf_->gptr();
@@ -106,10 +107,11 @@ namespace mfast
      * @param [in] instruction
      * @return false if the decoded value is null
      **/
+    template <typename Nullable>
     bool decode(const char*& bv,
                 uint32_t&    len,
-                bool         nullable,
-                const unicode_field_instruction* /* instruction */)
+                const unicode_field_instruction* /* instruction */,
+                Nullable     nullable)
     {
       if (this->decode(len, nullable))
       {
@@ -128,10 +130,11 @@ namespace mfast
      * @param [in] instruction
      * @return false if the decoded value is null
      **/
+    template <typename Nullable>
     bool decode(const unsigned char*& bv,
                 uint32_t&             len,
-                bool                  nullable,
-                const byte_vector_field_instruction* /* instruction */)
+                const byte_vector_field_instruction* /* instruction */,
+                Nullable              nullable)
     {
       if (this->decode(len, nullable))
       {
@@ -285,9 +288,9 @@ namespace mfast
     buf_ = sb;
   }
 
-  template <typename T>
+  template <typename T, typename Nullable>
   typename boost::enable_if< boost::is_integral<T>,bool>::type
-  fast_istream::decode(T& result, bool nullable)
+  fast_istream::decode(T& result, Nullable nullable)
   {
     typename detail::int_trait<T>::temp_type tmp = 0;
 

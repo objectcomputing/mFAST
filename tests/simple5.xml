@@ -1,0 +1,14 @@
+<?xml version=" 1.0 "?>
+<templates xmlns="http://www.fixprotocol.org/ns/template-definition"
+  templateNs="http://www.fixprotocol.org/ns/templates/sample" ns="http://www.fixprotocol.org/ns/fix">
+<template name="Nested" id="01">
+  <uInt32 name="field2" id="12"><copy/></uInt32>
+  <uInt32 name="field3" id="13"><copy/></uInt32>
+</template>
+<template name="Test" id="02">
+  <uInt32 name="field1" id="11"><copy/></uInt32>
+  <group name="nested">
+    <templateRef/>
+  </group>
+</template>
+</templates>

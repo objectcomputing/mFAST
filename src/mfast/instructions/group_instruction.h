@@ -126,6 +126,11 @@ namespace mfast
       dictionary_ = v;
     }
 
+    int properties() const
+    {
+      return  (optional() ? 1 : 0) |  (segment_pmap_size() > 0 ? field_has_initial_value : 0);
+    }
+
     virtual void construct_value(value_storage& storage,
                                  allocator*     alloc) const;
     virtual void destruct_value(value_storage& storage,

@@ -50,7 +50,7 @@ namespace mfast {
                                                              boost::is_same<T, aggregate_cref>::value >::type* = 0)
       : AggregateCRef(other.field_storage(0), static_cast<const TemplateType*>(other.instruction()))
     {
-      assert( dynamic_cast<const TemplateType*>(other.instruction()) );
+      // assert( dynamic_cast<const TemplateType*>(other.instruction()) );
     }
 
     explicit make_message_cref(const field_cref& cref);
@@ -63,21 +63,7 @@ namespace mfast {
     instruction_cptr instruction() const;
   };
 
-  class message_cref
-    : public make_message_cref<aggregate_cref, template_instruction>
-  {
-    typedef make_message_cref<aggregate_cref, template_instruction> base_type;
 
-  public:
-    message_cref(const value_storage* storage_array,
-                 instruction_cptr     instruction);
-
-    template <typename AggregateCRef, typename TemplateType>
-    message_cref(const make_message_cref<AggregateCRef, TemplateType>& other);
-
-    explicit message_cref(const field_cref& cref);
-
-  };
 
   template <typename AggregateMRef, typename TemplateType>
   class make_message_mref
@@ -102,7 +88,7 @@ namespace mfast {
                       aggregate_mref_core_access::storage_of(other),
                       static_cast<const TemplateType*>(other.instruction()))
     {
-      assert( dynamic_cast<const TemplateType*>(other.instruction()) );
+      // assert( dynamic_cast<const TemplateType*>(other.instruction()) );
     }
 
     explicit make_message_mref(const field_mref_base& mref);
@@ -118,6 +104,23 @@ namespace mfast {
     const char* name() const;
 
     instruction_cptr instruction() const;
+  };
+
+
+  class message_cref
+    : public make_message_cref<aggregate_cref, template_instruction>
+  {
+    typedef make_message_cref<aggregate_cref, template_instruction> base_type;
+
+  public:
+    message_cref(const value_storage* storage_array,
+                 instruction_cptr     instruction);
+
+    template <typename AggregateCRef, typename TemplateType>
+    message_cref(const make_message_cref<AggregateCRef, TemplateType>& other);
+
+    explicit message_cref(const field_cref& cref);
+
   };
 
   class message_mref
@@ -180,7 +183,7 @@ namespace mfast {
   make_message_cref<AggregateCRef,TemplateType>::make_message_cref(const field_cref &cref)
     : AggregateCRef(cref)
   {
-    assert( dynamic_cast<const TemplateType*>(cref.instruction()) );
+    // assert( dynamic_cast<const TemplateType*>(cref.instruction()) );
   }
 
   template <typename AggregateCRef, typename TemplateType>
@@ -233,6 +236,7 @@ namespace mfast {
   {
   }
 
+
   inline
   message_cref::message_cref(const field_cref& cref)
     : base_type(cref)
@@ -272,7 +276,7 @@ namespace mfast {
   make_message_mref<AggregateMRef,TemplateType>::make_message_mref(const field_mref_base &mref)
     : AggregateMRef(mref)
   {
-    assert( dynamic_cast<const TemplateType*>(mref.instruction()) );
+    // assert( dynamic_cast<const TemplateType*>(mref.instruction()) );
   }
 
   template <typename AggregateMRef, typename TemplateType>

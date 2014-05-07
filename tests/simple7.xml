@@ -1,0 +1,10 @@
+<templates xmlns="http://www.fixprotocol.org/ns/template-definition"
+    templateNs="http://www.fixprotocol.org/ns/templates/sample"
+    ns="http://www.fixprotocol.org/ns/fix">
+
+  <template name="Test" id="1" scp:reset="yes">
+    <uInt32 name="field1" id="11"><copy value="11"/></uInt32>
+    <uInt32 name="field2" id="12"><copy value="12"/></uInt32>
+    <uInt32 name="field3" id="13"><copy value="13"/></uInt32>
+  </template>
+</templates>

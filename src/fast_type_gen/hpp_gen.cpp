@@ -161,7 +161,9 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
                  << indent << "    " << name << "_cref(\n"
                  << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, const mfast::value_storage*>::type storage,\n"
                  << indent << "      const T* instruction);\n\n"
-                 << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
+                 << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n"
+                 << indent << "    template <typename Visitor>\n"
+                 << indent << "    void accept(Visitor& v);\n\n";
 
     std::stringstream mref_base_type;
     mref_base_type << "mfast::make_aggregate_mref<" << cref_scope_.str() << name << "_cref>";
@@ -178,7 +180,9 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
                  << indent << "      mfast::allocator*       alloc,\n"
                  << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, mfast::value_storage*>::type   storage,\n"
                  << indent << "      const T* instruction);\n\n"
-                 << indent << "    explicit " << name << "_mref(const mfast::field_mref_base& other);\n\n";
+                 << indent << "    explicit " << name << "_mref(const mfast::field_mref_base& other);\n\n"
+                 << indent << "    template <typename Visitor>\n"
+                 << indent << "    void accept(Visitor& v);\n\n";
 
     this->traverse(inst, "");
 
@@ -290,7 +294,10 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
                  << indent << "    typedef const instruction_type* instruction_cptr;\n"
                  << indent << "    " << element_type << "_cref(\n"
                  << indent << "      const mfast::value_storage* storage,\n"
-                 << indent << "      instruction_cptr            instruction);\n\n";
+                 << indent << "      instruction_cptr            instruction);\n\n"
+                 << indent << "    template <typename Visitor>\n"
+                 << indent << "    void accept(Visitor& v);\n\n";
+
 
     header_mref_ << "\n"
                  << indent << "class " << element_type << "_mref\n"
@@ -301,7 +308,9 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
                  << indent << "    " << element_type << "_mref(\n"
                  << indent << "      mfast::allocator*     alloc,\n"
                  << indent << "      mfast::value_storage* storage,\n"
-                 << indent << "      instruction_cptr      instruction);\n\n";
+                 << indent << "      instruction_cptr      instruction);\n\n"
+                 << indent << "    template <typename Visitor>\n"
+                 << indent << "    void accept(Visitor& v);\n\n";
 
     this->traverse(inst, "_element");
 
@@ -379,7 +388,11 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, const mfast::value_storage*>::type storage,\n"
                << indent << "      const T* instruction);\n\n"
                << indent << "    " << name << "_cref(const mfast::message_cref& other);\n\n"
-               << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n";
+               << indent << "    explicit " << name << "_cref(const mfast::field_cref& other);\n\n"
+               << indent << "    operator mfast::message_cref();\n"
+               << indent << "    template <typename Visitor>\n"
+               << indent << "    void accept(Visitor& v);\n\n";
+
 
   header_mref_ << "\n"
                << indent << "typedef mfast::make_aggregate_mref<" << name << "_cref> " << name << "_mref_base;\n"
@@ -396,8 +409,11 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
                << indent << "      mfast::allocator*       alloc,\n"
                << indent << "      typename boost::enable_if<boost::is_same<typename T::cref_type, " << name << "_cref>, mfast::value_storage*>::type   storage,\n"
                << indent << "      const T* instruction);\n\n"
-               << indent << "   " << name << "_mref(const mfast::message_mref& other);\n\n"
-               << indent << "    explicit " << name << "_mref(const mfast::field_mref_base& other);\n\n";
+               << indent << "    " << name << "_mref(const mfast::message_mref& other);\n\n"
+               << indent << "    operator mfast::message_mref();\n"
+               << indent << "    explicit " << name << "_mref(const mfast::field_mref_base& other);\n\n"
+               << indent << "    template <typename Visitor>\n"
+               << indent << "    void accept(Visitor& v);\n\n";
 
 
   this->traverse(inst, "");
@@ -444,7 +460,7 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
 
 }
 
-void hpp_gen::visit(const mfast::templateref_instruction* , void* pIndex)
+void hpp_gen::visit(const mfast::templateref_instruction*, void* pIndex)
 {
   std::size_t index = *static_cast<std::size_t*>(pIndex);
   header_cref_ << indent << "mfast::nested_message_cref get_nested_message" << index << "() const;\n";
@@ -462,7 +478,8 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
       << "#define __" << filebase_upper << "_H__\n"
       << "\n"
       << "#include <mfast.h>\n"
-      << "#include <boost/array.hpp>\n";
+      << "#include <boost/array.hpp>\n"
+      << "#include <boost/mpl/pair.hpp>\n" ;
 
   BOOST_FOREACH(const std::string& dep, dependency_)
   {
@@ -483,8 +500,32 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
     this->generate(info);
   }
 
-  if (desc.size())
+  if (desc.size()) {
     out_ << export_symbol_uppercase_ << "mfast::templates_description* description();\n\n";
+
+    out_ << "struct templates_description\n"
+         << "  : mfast::templates_description"
+         << "{\n"
+         << "  typedef boost::mpl::vector<";
+
+    bool first = true;
+    for (std::size_t i=0; i < desc.size(); ++i)
+    {
+      if (desc[i]->id() > 0) {
+        if (!first != 0) {
+          out_ << ",\n";
+        }
+        else
+          first = false;
+        out_ << "                             " << cpp_name(desc[i]->name()) << "*";
+      }
+    }
+
+    out_ << "> types;\n"
+         << "  static mfast::templates_description* instance()\n"
+         << "  { return description(); }\n"
+         << "};\n\n";
+  }
 
   out_ << "#include \"" << filebase_ << ".inl\"\n"
        << "}\n\n"

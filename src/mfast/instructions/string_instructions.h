@@ -89,7 +89,7 @@ namespace mfast
     virtual void update_invariant()
     {
       field_instruction::update_invariant();
-      mandatory_no_initial_value_ = !optional() && initial_value_.is_empty();
+      has_initial_value_= ! initial_value_.is_empty();
     }
 
     friend class dictionary_builder;

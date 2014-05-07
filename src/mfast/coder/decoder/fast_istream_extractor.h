@@ -52,7 +52,7 @@ namespace mfast
   {
     const char* buf;
     uint32_t len;
-    if (strm.decode(buf, len, mref.instruction()->is_nullable(), mref.instruction())) {
+    if (strm.decode(buf, len, mref.instruction(), mref.instruction()->is_nullable())) {
       mref.assign(buf, buf+len);
       if (len > 0)
         mref[len-1] &= '\x7F';
@@ -67,7 +67,7 @@ namespace mfast
   {
     const char* buf;
     uint32_t len;
-    if (strm.decode(buf, len, mref.instruction()->is_nullable(), mref.instruction()))
+    if (strm.decode(buf, len, mref.instruction(), mref.instruction()->is_nullable()))
     {
       mref.assign(buf, buf+len);
     }
@@ -81,7 +81,7 @@ namespace mfast
   {
     const unsigned char* buf;
     uint32_t len;
-    if (strm.decode(buf, len, mref.instruction()->is_nullable(), 0))
+    if (strm.decode(buf, len, mref.instruction(), mref.instruction()->is_nullable()))
     {
       mref.assign(buf, buf+len);
     }
