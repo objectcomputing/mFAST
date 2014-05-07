@@ -527,7 +527,9 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
 
   out_ << "const " << name << "::instruction_type*\n"
        << name << "::instruction()\n"
-       << "{\n";
+       << "{\n"
+       << "  const static " << name << "::instruction_type* ptr_instruction;\n"
+       << "  if (ptr_instruction) return ptr_instruction;\n";
 
   traverse(inst);
 
@@ -548,7 +550,8 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
        << "  \"" << inst->typeref_ns() << "\", // typeRef ns \n"
        << "  \"\", // cpp_ns\n"
        << "  " << inst->tag() << "); // tag \n\n"
-       << "  return &the_instruction;\n"
+       << "  ptr_instruction = &the_instruction;\n"
+       << "  return ptr_instruction;\n"
        << "}\n\n";
 }
 
