@@ -70,7 +70,7 @@ namespace mfast
         }
         else {
           // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
-          mref.to_initial_value();
+          // mref.to_initial_value();
         }
 
         // save_previous_value(mref);
