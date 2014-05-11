@@ -31,13 +31,12 @@
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 const char usage[] =
-  "  -t file     : Template file (required)\n"
-  "  -f file     : FAST Message file (required)\n"
+  "  -t file     : Template file, default file=" TEMPLATE_FILE "\n"
+  "  -f file     : FAST Message file, default file=" DATA_FILE "\n"
   "  -head n     : process only the first 'n' messages\n"
   "  -c count    : repeat the test 'count' times\n"
   "  -r          : Toggle 'reset encoder on every message' (default false).\n"
-  "  -hfix n     : Skip n byte header before each message\n"
-  "  -arena      : Use arena_allocator\n\n";
+  "  -hfix n     : Skip n byte header before each message, (default n=4)\n\n";
 
 
 int read_file(const char* filename, std::vector<char>& contents)
@@ -63,19 +62,20 @@ int main(int argc, const char** argv)
   std::size_t head_n = (std::numeric_limits<std::size_t>::max)();
   std::size_t repeat_count = 1;
   bool force_reset = false;
-  std::size_t skip_header_bytes = 0;
-  bool use_arena = false;
+  std::size_t skip_header_bytes = 4;;
+  const char* filename = DATA_FILE;
+  const char* template_filename= TEMPLATE_FILE;
 
   int i = 1;
   int parse_status = 0;
   while (i < argc && parse_status == 0) {
     const char* arg = argv[i++];
 
-    if (std::strcmp(arg, "-t") == 0) {
-      parse_status = read_file(argv[i++], template_contents);
+    if (std::strcmp(arg, "-f") == 0) {
+      filename = argv[i++];
     }
-    else if (std::strcmp(arg, "-f") == 0) {
-      parse_status = read_file(argv[i++], message_contents);
+    if (std::strcmp(arg, "-t") == 0) {
+      template_filename = argv[i++];
     }
     else if (std::strcmp(arg, "-head") == 0) {
       head_n = atoi(argv[i++]);
@@ -97,10 +97,9 @@ int main(int argc, const char** argv)
     else if (std::strcmp(arg, "-hfix") == 0) {
       skip_header_bytes = atoi(argv[i++]);
     }
-    else if (std::strcmp(arg, "-arena") == 0) {
-      use_arena = true;
-    }
   }
+
+  parse_status = read_file(filename, message_contents) || read_file(template_filename, template_contents);
 
   if (parse_status != 0 || template_contents.size() == 0 || message_contents.size() == 0) {
     std::cout << '\n' << usage;
@@ -110,11 +109,9 @@ int main(int argc, const char** argv)
   try {
     mfast::dynamic_templates_description description(&template_contents[0]);
 
-    mfast::arena_allocator arena_alloc;
     mfast::malloc_allocator malloc_allc;
     mfast::allocator* alloc = &malloc_allc;
-    if (use_arena)
-      alloc = &arena_alloc;
+
     mfast::fast_decoder coder(alloc);
 
     const mfast::templates_description* descriptions[] = { &description };
@@ -132,14 +129,14 @@ int main(int argc, const char** argv)
 
       for (std::size_t j = 0; j < repeat_count; ++j) {
 
-        const char *first = &message_contents[0] + skip_header_bytes;
-        const char *last = &message_contents[0] + message_contents.size();
+        const char*first = &message_contents[0] + skip_header_bytes;
+        const char*last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
 #ifdef WITH_ENCODE
-          mfast::message_cref  msg =
+          mfast::message_cref msg =
 #endif
-            coder.decode(first, last, force_reset || first_message );
+          coder.decode(first, last, force_reset || first_message );
 
 #ifdef WITH_ENCODE
           encoder.encode(msg, buffer, force_reset || first_message);

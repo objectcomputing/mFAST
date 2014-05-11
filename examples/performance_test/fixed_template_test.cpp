@@ -37,12 +37,11 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 const char usage[] =
-  "  -f file     : FAST Message file (required)\n"
+  "  -f file     : FAST Message file, default file=" DATA_FILE "\n"
   "  -head n     : process only the first 'n' messages\n"
   "  -c count    : repeat the test 'count' times\n"
   "  -r          : Toggle 'reset encoder on every message' (default false).\n"
-  "  -hfix n     : Skip n byte header before each message\n"
-  "  -arena      : Use arena_allocator\n\n";
+  "  -hfix n     : Skip n byte header before each message, (default n=4)\n\n";
 
 int read_file(const char* filename, std::vector<char>& contents)
 {
@@ -66,8 +65,8 @@ int main(int argc, const char** argv)
   std::size_t head_n = (std::numeric_limits<std::size_t>::max)();
   std::size_t repeat_count = 1;
   bool force_reset = false;
-  std::size_t skip_header_bytes = 0;
-  bool use_arena = false;
+  std::size_t skip_header_bytes = 4;;
+  const char* filename = DATA_FILE;
 
   int i = 1;
   int parse_status = 0;
@@ -75,7 +74,7 @@ int main(int argc, const char** argv)
     const char* arg = argv[i++];
 
     if (std::strcmp(arg, "-f") == 0) {
-      parse_status = read_file(argv[i++], message_contents);
+      filename = argv[i++];
     }
     else if (std::strcmp(arg, "-head") == 0) {
       head_n = atoi(argv[i++]);
@@ -97,10 +96,9 @@ int main(int argc, const char** argv)
     else if (std::strcmp(arg, "-hfix") == 0) {
       skip_header_bytes = atoi(argv[i++]);
     }
-    else if (std::strcmp(arg, "-arena") == 0) {
-      use_arena = true;
-    }
   }
+
+  parse_status = read_file(filename, message_contents);
 
   if (parse_status != 0 || message_contents.size() == 0) {
     std::cout << '\n' << usage;
@@ -109,11 +107,8 @@ int main(int argc, const char** argv)
 
   try {
 
-    mfast::arena_allocator arena_alloc;
     mfast::malloc_allocator malloc_allc;
     mfast::allocator* alloc = &malloc_allc;
-    if (use_arena)
-      alloc = &arena_alloc;
 
     const mfast::templates_description* descriptions[] = { example::description() };
 

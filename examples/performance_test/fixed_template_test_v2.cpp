@@ -36,12 +36,11 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 const char usage[] =
-  "  -f file     : FAST Message file (required)\n"
+  "  -f file     : FAST Message file, default file=" DATA_FILE "\n"
   "  -head n     : process only the first 'n' messages\n"
   "  -c count    : repeat the test 'count' times\n"
   "  -r          : Toggle 'reset encoder on every message' (default false).\n"
-  "  -hfix n     : Skip n byte header before each message\n"
-  "  -arena      : Use arena_allocator\n\n";
+  "  -hfix n     : Skip n byte header before each message, (default n=4)\n\n";
 
 int read_file(const char* filename, std::vector<char>& contents)
 {
@@ -66,7 +65,7 @@ int main(int argc, const char** argv)
   std::size_t repeat_count = 1;
   bool force_reset = false;
   std::size_t skip_header_bytes = 4;;
-  const char* filename = "/Users/huangming/mfast/examples/performance_test/complex30000.dat";
+  const char* filename = DATA_FILE;
 
   int i = 1;
   int parse_status = 0;
@@ -97,7 +96,7 @@ int main(int argc, const char** argv)
       skip_header_bytes = atoi(argv[i++]);
     }
   }
-  
+
   parse_status = read_file(filename, message_contents);
 
 

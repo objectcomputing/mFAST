@@ -3,6 +3,11 @@ set(TEST_LIBS ${MFAST_LIBRARIES}
               # ${Boost_SYSTEM_LIBRARY}
     )
 
+set_property(
+   DIRECTORY
+   PROPERTY COMPILE_DEFINITIONS DATA_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/complex30000.dat\" TEMPLATE_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/example.xml\";
+   )
+
 add_executable (mf_generic_decode generic_template_test.cpp)
 target_link_libraries (mf_generic_decode
     			       # ${Boost_SYSTEM_LIBRARY} # only necessary when boost::chrono is used for measuring time
