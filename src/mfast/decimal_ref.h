@@ -436,8 +436,8 @@ namespace mfast {
     void normalize() const
     {
       while (mantissa() != 0 && mantissa() % 10 == 0) {
-        this->set_mantissa().as(mantissa()/10);
-        this->set_exponent().as(exponent()+1);
+        this->storage()->of_decimal.mantissa_ /= 10;
+        this->storage()->of_decimal.exponent_ += 1;
       }
 
       if (mantissa() == 0)
