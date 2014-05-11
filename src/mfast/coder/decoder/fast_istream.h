@@ -239,15 +239,12 @@ namespace mfast
     };
 
     template <typename T>
-    inline bool to_nullable_value(T& result, typename int_trait<T>::temp_type tmp, bool is_positive)
+    inline bool to_nullable_value(T& result, typename int_trait<T>::temp_type tmp, int decrement_value)
     {
       if (tmp == 0) {
         return false;
       }
-      else if (is_positive)
-        result = static_cast<T>(tmp -1);
-      else
-        result = static_cast<T>(tmp);
+      result = static_cast<T>(tmp - decrement_value);
       return true;
     }
 
@@ -257,7 +254,7 @@ namespace mfast
       typedef temp_uint64_t temp_type;
     };
 
-    inline bool to_nullable_value(uint64_t& result, temp_uint64_t tmp, bool is_positive)
+    inline bool to_nullable_value(uint64_t& result, temp_uint64_t tmp, int decrement_value)
     {
       if (tmp.value == 0) {
         if (!tmp.carry)
@@ -266,10 +263,8 @@ namespace mfast
           result = std::numeric_limits<uint64_t>::max();
         }
       }
-      else if (is_positive)
-        result = tmp.value -1;
       else
-        result = tmp.value;
+        result = tmp - decrement_value;
       return true;
 
     }
@@ -295,15 +290,15 @@ namespace mfast
     typename detail::int_trait<T>::temp_type tmp = 0;
 
     char c = buf_->sbumpc();
-    bool is_positive = true;
-
+    // bool decrement_value = true;
+    int decrement_value = nullable;
     if (boost::is_unsigned<T>::value) {
       tmp = c & 0x7F;
     }
     else {
       if (c & 0x40) {
         // this is a negtive integer
-        is_positive = false;
+        decrement_value = 0;
         tmp = (static_cast<T>(-1) << 7) | (c & 0x7F);
       }
       else {
@@ -312,22 +307,14 @@ namespace mfast
       }
     }
 
-    int consumed_bytes = 0;
-
-    const int max_bytes = 8*sizeof(T)/7+1;
-
-    while ( (c & 0x80) == 0 && consumed_bytes < max_bytes) {
+    while ( (c & 0x80) == 0 ) {
       tmp <<= 7;
       c = buf_->sbumpc();
       tmp |= ( c & 0x7F );
-      ++consumed_bytes;
     };
 
-    if ((c & 0x80) ==0)
-      BOOST_THROW_EXCEPTION(fast_dynamic_error("D2"));
-
     if (nullable) {
-      return detail::to_nullable_value(result, tmp, is_positive);
+      return detail::to_nullable_value(result, tmp, decrement_value);
     }
     else {
       result = static_cast<T>(tmp);
