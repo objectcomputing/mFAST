@@ -428,10 +428,10 @@ namespace mfast {
       this->storage()->of_array.capacity_in_bytes_ = 0;
     }
 
-     void shallow_assign(const value_type* addr, size_t n) const
-     {
-       this->refers_to(addr, n);
-     }
+    void shallow_assign(const value_type* addr, size_t n) const
+    {
+      this->refers_to(addr, n);
+    }
 
     void replace(size_t pos, size_t count,
                  const value_type* addr, size_t count2 ) const;
@@ -447,11 +447,9 @@ namespace mfast {
     friend class mfast::detail::codec_helper;
     void copy_from(const value_storage& v) const
     {
-      if (this->capacity()==0 || this->storage()->of_array.content_ != v.of_array.content_) {
-        const char* ptr = static_cast<const char*>(v.of_array.content_);
-        this->assign(ptr,
-                     ptr+ v.array_length());
-      }
+      const char* ptr = static_cast<const char*>(v.of_array.content_);
+      this->assign(ptr,
+                   ptr+ v.array_length());
     }
 
   private:
@@ -496,7 +494,6 @@ namespace mfast {
       this->resize(0);
       this->insert(this->begin(), first, last, std::input_iterator_tag() );
     }
-
 
     // The reason I decide to hide capacity() is because it may return a value
     // which is less than size() when the data() is not allocated by @c alloc_.
@@ -737,7 +734,7 @@ namespace mfast {
       this->resize(pos+count2);
     }
     else {
-	  std::ptrdiff_t diff = count2-count;
+      std::ptrdiff_t diff = count2-count;
       if (diff > 0) {
         // some elements has to be shift back
         this->shift(data()+pos, diff);
