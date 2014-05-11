@@ -404,8 +404,8 @@ namespace mfast {
     template <class InputIterator>
     void assign (InputIterator first, InputIterator last) const
     {
-      resize(0);
-      insert(begin(), first, last);
+      typedef typename std::iterator_traits<InputIterator>::iterator_category category;
+      this->assign(first, last, category());
     }
 
     void assign (size_t n, value_type val) const
@@ -461,7 +461,7 @@ namespace mfast {
     void insert (iterator             position,
                  RandomAccessIterator first,
                  RandomAccessIterator last,
-                 std::                random_access_iterator_tag) const
+                 std::random_access_iterator_tag) const
     {
       size_t n = std::distance(first, last);
       std::copy(first, last, this->shift(position, n));
@@ -476,6 +476,27 @@ namespace mfast {
         ++position;
       }
     }
+
+    template <class RandomAccessIterator>
+    void assign (RandomAccessIterator first,
+                 RandomAccessIterator last,
+                 std::random_access_iterator_tag) const
+    {
+      size_t n = std::distance(first, last);
+      this->reserve(n);
+      std::copy(first, last, this->begin());
+      this->storage()->array_length(static_cast<uint32_t>(n));
+    }
+
+    template <class InputIterator>
+    void assign (InputIterator first,
+                 InputIterator last,
+                 std::input_iterator_tag) const
+    {
+      this->resize(0);
+      this->insert(this->begin(), first, last, std::input_iterator_tag() );
+    }
+
 
     // The reason I decide to hide capacity() is because it may return a value
     // which is less than size() when the data() is not allocated by @c alloc_.
