@@ -22,9 +22,14 @@
 #include "hpp_gen.h"
 #include "inl_gen.h"
 #include "cpp_gen.h"
+#include "mfast/arena_allocator.h"
+#include "mfast/coder/common/dictionary_builder.h"
+
 #include <boost/filesystem.hpp>
 #include <fstream>
 #include <iterator>
+#include <boost/container/vector.hpp>
+
 using namespace boost::filesystem;
 
 int main(int argc, const char** argv)
@@ -40,7 +45,16 @@ int main(int argc, const char** argv)
       i = 3;
     }
 
-    for (; i < argc; ++i) {
+    boost::container::vector<mfast::dynamic_templates_description> descriptions;
+    boost::container::vector<std::string> filebases;
+
+    mfast::dictionary_resetter resetter;
+    mfast::arena_allocator alloc;
+    mfast::template_id_map_t templates_map;
+    mfast::dictionary_builder builder(resetter,templates_map,&alloc);
+
+
+    for (int j = 0; i < argc; ++i, ++j) {
 
       std::ifstream ifs(argv[i]);
 
@@ -53,12 +67,19 @@ int main(int argc, const char** argv)
                       std::istreambuf_iterator<char>());
 
       path f(path(argv[i]).stem());
-      std::string filebase = f.string();
-      std::cout << filebase.c_str() << "\n";
+      filebases.push_back(f.string());
 
-      mfast::dynamic_templates_description desc(xml.c_str(),
-                                                filebase.c_str(),
-                                                &registry);
+      descriptions.emplace_back(xml.c_str(),
+                                filebases[j].c_str(),
+                                &registry);
+
+      builder.build(&descriptions[j]);
+    }
+
+    for (std::size_t j = 0; j < filebases.size(); ++j)
+    {
+      mfast::dynamic_templates_description& desc = descriptions[j];
+      const std::string& filebase = filebases[j];
 
       hpp_gen header_gen(filebase.c_str());
       if (export_symbol)

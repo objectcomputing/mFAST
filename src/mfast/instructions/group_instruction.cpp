@@ -149,10 +149,4 @@ namespace mfast
     }
   }
 
-  const field_instruction* group_field_instruction::subinstruction(std::size_t index) const
-  {
-    assert(index < subinstructions_.size());
-    return subinstructions_[index];
-  }
-
 } /* mfast */

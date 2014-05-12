@@ -63,6 +63,7 @@ namespace mfast
     typedef boost::integral_constant<bool, (OperatorType::value != operator_constant && IsOptional )> is_nullable_type;
     typedef boost::integral_constant<bool, ((OperatorType::value & field_has_initial_value) > 0 && !IsOptional )> mandatory_without_initial_value_type;
     typedef boost::integral_constant<bool, (OperatorType::value > operator_delta || ((OperatorType::value == operator_constant) && IsOptional )) > has_pmap_type;
+    typedef boost::integral_constant<bool, (Properties::value == field_previous_value_shared) > previous_value_shared_type;
 
     is_nullable_type nullable() const
     {
@@ -77,6 +78,11 @@ namespace mfast
     has_pmap_type has_pmap() const
     {
       return has_pmap_type();
+    }
+
+    previous_value_shared_type previous_value_shared() const
+    {
+      return previous_value_shared_type();
     }
 
   };

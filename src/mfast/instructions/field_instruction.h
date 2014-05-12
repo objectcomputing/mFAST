@@ -72,6 +72,7 @@ namespace mfast {
   enum property_enum_t
   {
     field_has_initial_value = 2,
+    field_previous_value_shared = 4
   };
 
 
@@ -207,7 +208,9 @@ namespace mfast {
     {
       // used for static visitor, the first bit describe whether the field is optional,
       // the second bit describe whether the filed has initial value.
-      return  (optional() ? 1 : 0) |  (has_initial_value_ ? field_has_initial_value : 0);
+      return  (optional() ? 1 : 0) |
+              (has_initial_value_ ? field_has_initial_value : 0) |
+              (previous_value_shared_ ? field_previous_value_shared : 0);
     }
 
     const char* field_type_name() const;
@@ -254,7 +257,15 @@ namespace mfast {
       return tag_;
     }
 
+    bool previous_value_shared() const
+    {
+      return previous_value_shared_;
+    }
 
+    void previous_value_shared(bool shared)
+    {
+      previous_value_shared_ = shared;
+    }
 
   protected:
 
@@ -271,7 +282,8 @@ namespace mfast {
     uint16_t nullable_flag_ : 1;
     uint16_t has_pmap_bit_ : 1;
     uint16_t has_initial_value_ : 1;
-    uint16_t field_type_ : 8;
+    uint16_t field_type_ : 7;
+    uint16_t previous_value_shared_ : 1;
     uint32_t id_;
     const char* name_;
     const char* ns_;

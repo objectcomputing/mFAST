@@ -84,7 +84,12 @@ namespace mfast
     int find_subinstruction_index_by_name(const char* name) const;
 
 
-    const field_instruction* subinstruction(std::size_t index) const;
+    const field_instruction* subinstruction(std::size_t index) const
+    {
+      assert(index < subinstructions_.size());
+      return subinstructions_[index];
+    }
+
     std::size_t segment_pmap_size() const
     {
       return segment_pmap_size_;

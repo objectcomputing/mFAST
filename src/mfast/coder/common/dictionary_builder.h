@@ -143,13 +143,15 @@ namespace mfast {
                            const char*         ns,
                            const op_context_t* op_context,
                            field_type_enum_t   field_type,
-                           value_storage*      candidate_storage);
+                           value_storage*      candidate_storage,
+                           field_instruction* instruction);
 
     template_instruction* find_template(uint32_t template_id);
 
     struct indexer_value_type
     {
       field_type_enum_t field_type_;
+      field_instruction* instruction_;
       value_storage*  storage_;
     };
 

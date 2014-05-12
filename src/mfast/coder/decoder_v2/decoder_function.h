@@ -47,7 +47,8 @@ namespace mfast
         // If a field is optional and has no field operator, it is encoded with a
         // nullable representation and the NULL is used to represent absence of a
         // value. It will not occupy any bits in the presence map.
-        save_previous_value(ext_ref.base());
+        if (ext_ref.previous_value_shared())
+          save_previous_value(ext_ref.base());
       }
 
       template <typename T, typename Properties>
@@ -72,8 +73,8 @@ namespace mfast
           // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
           // mref.to_initial_value();
         }
-
-        // save_previous_value(mref);
+        if (ext_ref.previous_value_shared())
+          save_previous_value(mref);
       }
 
       template <typename T, typename Properties>
@@ -203,7 +204,8 @@ namespace mfast
           mref.to_initial_value();
         }
 
-        save_previous_value(mref);
+        if (ext_ref.previous_value_shared())
+          save_previous_value(mref);
       }
 
       template <typename IntType, typename Properties>

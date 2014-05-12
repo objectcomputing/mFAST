@@ -230,8 +230,20 @@ namespace mfast {
                                              const char*         ns,
                                              const op_context_t* op_context,
                                              field_type_enum_t   field_type,
-                                             value_storage*      candidate_storage)
+                                             value_storage*      candidate_storage,
+                                             field_instruction*  instruction)
   {
+    operator_enum_t field_operator = instruction->field_operator();
+
+    // except for the specified operators, the field will never depened on previous values
+    if (field_operator != operator_delta &&
+        field_operator != operator_copy &&
+        field_operator != operator_increment  &&
+        field_operator != operator_tail)
+    {
+      return candidate_storage;
+    }
+
     const char* dict = "";
 
     if (op_context) {
@@ -283,8 +295,10 @@ namespace mfast {
     indexer_t::iterator itr = indexer_.find(qualified_key);
 
     if (itr != indexer_.end()) {
-      if (itr->second.field_type_ == field_type)
+      if (itr->second.field_type_ == field_type) {
+        itr->second.instruction_->previous_value_shared(true);
         return itr->second.storage_;
+      }
       else
         BOOST_THROW_EXCEPTION(key_type_mismatch_error(qualified_key, itr->second.field_type_, field_type));
     }
@@ -292,6 +306,7 @@ namespace mfast {
     // std::cout << "adding dictionary key=" << qualified_key << "\n";
     indexer_value_type& v = indexer_[qualified_key];
     v.field_type_ = field_type;
+    v.instruction_ = instruction;
     v.storage_ = candidate_storage;
     resetter_.push_back(candidate_storage);
 
@@ -306,7 +321,8 @@ namespace mfast {
                                                dest->ns(),
                                                dest->op_context_,
                                                field_type_int32,
-                                               &dest->prev_storage_);
+                                               &dest->prev_storage_,
+                                               dest);
   }
 
   void dictionary_builder::visit(const uint32_field_instruction* src_inst, void* dest_inst)
@@ -317,7 +333,8 @@ namespace mfast {
                                                dest->ns(),
                                                dest->op_context_,
                                                field_type_uint32,
-                                               &dest->prev_storage_);
+                                               &dest->prev_storage_,
+                                               dest);
   }
 
   void dictionary_builder::visit(const int64_field_instruction* src_inst, void* dest_inst)
@@ -328,7 +345,8 @@ namespace mfast {
                                                dest->ns(),
                                                dest->op_context_,
                                                field_type_int64,
-                                               &dest->prev_storage_);
+                                               &dest->prev_storage_,
+                                               dest);
   }
 
   void dictionary_builder::visit(const uint64_field_instruction* src_inst, void* dest_inst)
@@ -339,7 +357,8 @@ namespace mfast {
                                                dest->ns(),
                                                dest->op_context_,
                                                field_type_uint64,
-                                               &dest->prev_storage_);
+                                               &dest->prev_storage_,
+                                               dest);
   }
 
   void dictionary_builder::visit(const ascii_field_instruction* src_inst, void* dest_inst)
@@ -350,7 +369,8 @@ namespace mfast {
                                                dest->ns(),
                                                dest->op_context_,
                                                field_type_ascii_string,
-                                               &dest->prev_storage_);
+                                               &dest->prev_storage_,
+                                               dest);
     if (value_destroyer_) {
       value_destroyer_->push_back(dest->prev_value_);
     }
@@ -364,7 +384,8 @@ namespace mfast {
                                                dest->ns(),
                                                dest->op_context_,
                                                field_type_unicode_string,
-                                               &dest->prev_storage_);
+                                               &dest->prev_storage_,
+                                               dest);
     if (value_destroyer_) {
       value_destroyer_->push_back(dest->prev_value_);
     }
@@ -381,7 +402,8 @@ namespace mfast {
                                                  dest->ns(),
                                                  dest->op_context(),
                                                  field_type_decimal,
-                                                 &dest->prev_storage_);
+                                                 &dest->prev_storage_,
+                                                 dest);
     }
     else {
 
@@ -394,14 +416,16 @@ namespace mfast {
                                                                         dest->ns(),
                                                                         dest->mantissa_instruction_->op_context(),
                                                                         field_type_int64,
-                                                                        &dest->mantissa_instruction_->prev_storage_);
+                                                                        &dest->mantissa_instruction_->prev_storage_,
+                                                                        dest->mantissa_instruction_);
       std::string exponent_name = dest->name();
       exponent_name += "....exponent";
       dest->prev_value_ = get_dictionary_storage(exponent_name.c_str(),
                                                  dest->ns(),
                                                  dest->op_context(),
                                                  field_type_exponent,
-                                                 &dest->prev_storage_);
+                                                 &dest->prev_storage_,
+                                                 dest);
     }
   }
 
@@ -413,7 +437,8 @@ namespace mfast {
                                                dest->ns(),
                                                dest->op_context(),
                                                field_type_byte_vector,
-                                               &dest->prev_storage_);
+                                               &dest->prev_storage_,
+                                               dest);
     if (value_destroyer_) {
       value_destroyer_->push_back(dest->prev_value_);
     }
@@ -451,7 +476,8 @@ namespace mfast {
                                                dest->ns(),
                                                dest->op_context_,
                                                field_type_uint64,
-                                               &dest->prev_storage_);
+                                               &dest->prev_storage_,
+                                               dest);
   }
 
 }
