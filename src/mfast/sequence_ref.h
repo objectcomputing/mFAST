@@ -23,6 +23,7 @@
 #include "mfast/field_ref.h"
 #include "mfast/group_ref.h"
 #include "mfast/aggregate_ref.h"
+
 #include <cassert>
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/range.hpp>
@@ -280,6 +281,8 @@ namespace mfast {
     typedef typename ElementType::instruction_type element_instruction_type;
     typedef const SequenceInstructionType* instruction_cptr;
     typedef typename SequenceTrait::is_element_aggregate is_element_aggregate;
+    typedef sequence_type_tag type_category;
+
 
     typedef ElementType reference;
     typedef sequence_iterator<ElementType, is_element_aggregate> iterator;

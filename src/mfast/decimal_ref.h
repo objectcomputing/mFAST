@@ -28,6 +28,7 @@
 #include "mfast_export.h"
 #include "mfast/field_ref.h"
 #include "mfast/int_ref.h"
+#include "mfast/type_category.h"
 
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
@@ -67,6 +68,8 @@ namespace mfast {
     typedef decimal_field_instruction instruction_type;
     typedef const decimal_field_instruction* instruction_cptr;
     typedef int16_t value_type;
+    typedef integer_type_tag type_category;
+
 
     exponent_cref()
     {
@@ -128,6 +131,8 @@ namespace mfast {
     typedef decimal_field_instruction instruction_type;
     typedef const instruction_type* instruction_cptr;
     typedef decimal value_type;
+    typedef decimal_type_tag type_category;
+
 
     decimal_cref()
     {
@@ -247,6 +252,8 @@ namespace mfast {
     : public exponent_cref
   {
   public:
+    typedef exponent_cref cref_type;
+
     exponent_mref()
     {
     }
@@ -260,6 +267,11 @@ namespace mfast {
 
     exponent_mref(const exponent_mref& other)
       : exponent_cref(other)
+    {
+    }
+
+    explicit exponent_mref(const field_mref_base& other)
+      : exponent_cref(field_mref_core_access::storage_of(other), other.instruction())
     {
     }
 
@@ -306,6 +318,7 @@ namespace mfast {
     }
 
     friend class mfast::detail::codec_helper;
+    friend class field_mref;
 
     void copy_from(value_storage v) const
     {

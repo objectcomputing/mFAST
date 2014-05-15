@@ -61,8 +61,18 @@ namespace mfast
     {
     }
 
-    field_mref(const make_field_mref<field_cref> &other)
-      : field_mref_base(other)
+    template <typename T>
+    field_mref(const make_field_mref<T> &other)
+      : field_mref_base(other.allocator(),
+                        field_mref_core_access::storage_of(other),
+                        other.instruction())
+    {
+    }
+
+    field_mref(const exponent_mref& other)
+      : field_mref_base(static_cast<allocator_type*>(0),
+                        other.storage(),
+                        other.instruction())
     {
     }
 

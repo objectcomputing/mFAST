@@ -32,6 +32,9 @@ namespace mfast {
     : public vector_cref_base<char, Instruction>
   {
   public:
+
+    typedef string_type_tag type_category;
+
     string_cref_base()
     {
     }

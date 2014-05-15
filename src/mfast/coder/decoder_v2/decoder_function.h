@@ -17,25 +17,20 @@ namespace mfast
     {
     public:
 
-      template <typename ExponentOp, typename MantissaOp, typename Properties>
-      void decode(const ext_mref<decimal_mref, boost::mpl::pair<ExponentOp, MantissaOp>,  Properties>& ext_ref,
-                  fast_istream&         stream,
-                  decoder_presence_map& pmap)
+      template <typename T>
+      void decode (const T&              ext_ref,
+                   fast_istream&         stream,
+                   decoder_presence_map& pmap) const
       {
-        typedef ext_mref<decimal_mref, boost::mpl::pair<ExponentOp, MantissaOp>,  Properties> ext_type;
-
-        typename ext_type::exponent_type exponent_ref = ext_ref.set_exponent();
-        decode(exponent_ref, stream, pmap);
-        if (exponent_ref.present())
-        {
-          decode(ext_ref.set_mantissa(), stream, pmap);
-        }
+        this->decode(ext_ref, stream, pmap, typename T::operator_category(), typename T::type_category());
       }
 
-      template <typename T, typename Properties>
-      void decode (const ext_mref<T, none_operator_type, Properties >&  ext_ref,
-                   fast_istream&         stream,
-                   decoder_presence_map& /*pmap*/) const
+      template <typename T, typename TypeCategory>
+      void decode (const T&      ext_ref,
+                   fast_istream& stream,
+                   decoder_presence_map& /*pmap*/,
+                   none_operator_tag,
+                   TypeCategory) const
       {
         stream >> ext_ref;
 
@@ -48,15 +43,17 @@ namespace mfast
         // nullable representation and the NULL is used to represent absence of a
         // value. It will not occupy any bits in the presence map.
         if (ext_ref.previous_value_shared())
-          save_previous_value(ext_ref.base());
+          save_previous_value(ext_ref.set());
       }
 
-      template <typename T, typename Properties>
-      void decode(const ext_mref<T, constant_operator_type, Properties >&  ext_ref,
+      template <typename T, typename TypeCategory>
+      void decode(const T&              ext_ref,
                   fast_istream& /* stream */,
-                  decoder_presence_map& pmap) const
+                  decoder_presence_map& pmap,
+                  constant_operator_tag,
+                  TypeCategory) const
       {
-        T mref = ext_ref.base();
+        typename T::mref_type mref = ext_ref.set();
 
         if (ext_ref.optional()) {
           // An optional field with the constant operator will occupy a single bit. If the bit is set, the value
@@ -77,12 +74,14 @@ namespace mfast
           save_previous_value(mref);
       }
 
-      template <typename T, typename Properties>
-      void decode(const ext_mref<T, copy_operator_type, Properties >&  ext_ref,
+      template <typename T, typename TypeCategory>
+      void decode(const T&              ext_ref,
                   fast_istream&         stream,
-                  decoder_presence_map& pmap) const
+                  decoder_presence_map& pmap,
+                  copy_operator_tag,
+                  TypeCategory) const
       {
-        T mref = ext_ref.base ();
+        typename T::mref_type mref = ext_ref.set ();
 
         if (pmap.is_next_bit_set()) {
           stream >> ext_ref;
@@ -127,12 +126,14 @@ namespace mfast
         }
       }
 
-      template <typename T, typename Properties>
-      void decode(const ext_mref<T, increment_operator_type, Properties >&  ext_ref,
+      template <typename T, typename TypeCategory>
+      void decode(const T&              ext_ref,
                   fast_istream&         stream,
-                  decoder_presence_map& pmap) const
+                  decoder_presence_map& pmap,
+                  increment_operator_tag,
+                  TypeCategory) const
       {
-        T mref = ext_ref.base ();
+        typename T::mref_type mref = ext_ref.set ();
 
         if (pmap.is_next_bit_set()) {
           stream >> ext_ref;
@@ -159,7 +160,7 @@ namespace mfast
             }
           }
           else if (previous.is_empty()) {
-              // if the previous value is empty – the value of the field is empty.
+            // if the previous value is empty – the value of the field is empty.
             if (ext_ref.optional()) {
               // If the field is optional the value is considered absent.
               mref.omit();
@@ -171,7 +172,7 @@ namespace mfast
 
           }
           else {
-            typedef typename T::value_type value_type;
+            typedef typename T::mref_type::value_type value_type;
             previous.set<value_type>(previous.get<value_type>() + 1 );
             // if the previous value is assigned – the value of the field is the previous value.
             load_previous_value(mref);
@@ -179,12 +180,14 @@ namespace mfast
         }
       }
 
-      template <typename T, typename Properties>
-      void decode(const ext_mref<T, default_operator_type, Properties>&  ext_ref,
+      template <typename T, typename TypeCategory>
+      void decode(const T&              ext_ref,
                   fast_istream&         stream,
-                  decoder_presence_map& pmap) const
+                  decoder_presence_map& pmap,
+                  default_operator_tag,
+                  TypeCategory) const
       {
-        T mref = ext_ref.base ();
+        typename T::mref_type mref = ext_ref.set ();
 
         // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
         // Optional integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream in a nullable representation.
@@ -208,21 +211,24 @@ namespace mfast
           save_previous_value(mref);
       }
 
-      template <typename IntType, typename Properties>
-      void decode(const ext_mref<int_mref<IntType>, delta_operator_type, Properties>&  ext_ref,
+      template <typename T>
+      void decode(const T&      ext_ref,
                   fast_istream& stream,
-                  decoder_presence_map& /* pmap */) const
+                  decoder_presence_map& /* pmap */,
+                  delta_operator_tag,
+                  integer_type_tag) const
       {
-        int_mref<IntType> mref = ext_ref.base ();
+        typename T::mref_type mref = ext_ref.set ();
+        typedef typename T::mref_type::value_type int_type;
 
         int64_t d;
         if (stream.decode(d, ext_ref.nullable() )) {
 
           value_storage bv = delta_base_value_of( mref );
-          int_mref<IntType> tmp(0, &bv, 0);
+          typename T::mref_type tmp(0, &bv, 0);
 
           // check_overflow(tmp.value(), d, mref.instruction(), stream);
-          mref.as( static_cast<IntType>(tmp.value()+d) );
+          mref.as( static_cast<int_type>(tmp.value()+d) );
 
           save_previous_value(mref);
         }
@@ -232,12 +238,14 @@ namespace mfast
         }
       }
 
-      template <typename ExtStringRef>
-      void decode_string(const ExtStringRef& ext_ref,
-                         fast_istream&       stream,
-                         decoder_presence_map& /* pmap */) const
+      template <typename T>
+      void decode(const T&      ext_ref,
+                  fast_istream& stream,
+                  decoder_presence_map& /* pmap */,
+                  delta_operator_tag,
+                  string_type_tag) const
       {
-        typename ExtStringRef::base_type mref = ext_ref.base();
+        typename T::mref_type mref = ext_ref.set();
         // The delta value is represented as a Signed Integer subtraction length followed by an ASCII String.
         // If the delta is nullable, the subtraction length is nullable. A NULL delta is represented as a
         // NULL subtraction length. The string part is present in the stream iff the subtraction length is not NULL.
@@ -252,7 +260,7 @@ namespace mfast
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
 
           uint32_t delta_len;
-          const typename ExtStringRef::base_type::value_type* delta_str=0;
+          const typename T::mref_type::value_type* delta_str=0;
           stream.decode(delta_str, delta_len, mref.instruction(), false_type());
 
           this->apply_string_delta(mref,
@@ -267,28 +275,15 @@ namespace mfast
         }
       }
 
-      template <typename Properties>
-      void decode(const ext_mref<byte_vector_mref, delta_operator_type, Properties>& ext_ref,
-                  fast_istream&       stream,
-                  decoder_presence_map& pmap) const
-      {
-        decode_string(ext_ref, stream, pmap);
-      }
 
-      template <typename CharType, typename Properties>
-      void decode(const ext_mref<string_mref<CharType>, delta_operator_type, Properties>& ext_ref,
-                  fast_istream&       stream,
-                  decoder_presence_map& pmap) const
-      {
-        decode_string(ext_ref, stream, pmap);
-      }
-
-      template <typename Properties>
-      void decode(const ext_mref<decimal_mref, delta_operator_type, Properties>&   ext_ref,
+      template <typename T>
+      void decode(const T&   ext_ref,
                   fast_istream&         stream,
-                  decoder_presence_map& /*pmap*/) const
+                  decoder_presence_map& /*pmap*/,
+                  delta_operator_tag,
+                  decimal_type_tag) const
       {
-        decimal_mref mref = ext_ref.base();
+        decimal_mref mref = ext_ref.set();
         stream >> ext_ref;
         if (!ext_ref.optional() || mref.present()) {
           value_storage bv = delta_base_value_of(mref);
@@ -304,17 +299,19 @@ namespace mfast
         }
       }
 
-      template <typename StringRef, typename Properties>
-      void decode(const ext_mref<StringRef,tail_operator_type,Properties>&  ext_ref,
+      template <typename T>
+      void decode(const T&  ext_ref,
                   fast_istream&         stream,
-                  decoder_presence_map& pmap) const
+                  decoder_presence_map& pmap,
+                  tail_operator_tag,
+                  string_type_tag) const
       {
-        StringRef mref = ext_ref.base();
+        typename T::mref_type mref = ext_ref.set();
 
         if (pmap.is_next_bit_set()) {
 
           uint32_t len;
-          const typename StringRef::value_type* str;
+          const typename T::mref_type::value_type* str;
           if (stream.decode(str, len, mref.instruction(), ext_ref.nullable()) ) {
             const value_storage& base_value (tail_base_value_of(mref));
             this->apply_string_delta(mref,

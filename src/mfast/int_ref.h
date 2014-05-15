@@ -21,6 +21,7 @@
 
 #include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
+#include "mfast/type_category.h"
 
 namespace mfast {
 
@@ -36,6 +37,7 @@ namespace mfast {
     typedef T value_type;
     typedef int_field_instruction<T> instruction_type;
     typedef const instruction_type* instruction_cptr;
+    typedef integer_type_tag type_category;
 
     int_cref()
       : field_cref()

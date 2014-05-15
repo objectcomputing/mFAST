@@ -22,6 +22,7 @@
 
 #include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
+#include "mfast/type_category.h"
 
 namespace mfast {
 
@@ -36,6 +37,7 @@ public:
   typedef uint64_t value_type;
   typedef enum_field_instruction instruction_type;
   typedef const instruction_type* instruction_cptr;
+  typedef integer_type_tag type_category;
 
   enum_cref()
     : field_cref()

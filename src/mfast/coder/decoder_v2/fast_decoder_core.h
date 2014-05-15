@@ -98,8 +98,8 @@ namespace mfast
       void init();
     };
 
-    template <>
-    class pmap_saver<true_type>
+    template <typename T>
+    class pmap_saver
     {
       decoder_presence_map pmap_;
       decoder_presence_map* prev_pmap_;
@@ -122,7 +122,7 @@ namespace mfast
     };
 
     template <>
-    class pmap_saver<false_type>
+    class pmap_saver<pmap_segment_size_zero>
     {
     public:
       pmap_saver(fast_decoder_core*)
@@ -146,20 +146,27 @@ namespace mfast
       {
       }
 
-      template <typename SimpleExtRef>
-      void visit(const SimpleExtRef& ext_ref);
+      template <typename T>
+      void visit(const T& ext_ref)
+      {
+        typedef typename T::type_category type_category;
+        this->visit(ext_ref, type_category());
+      }
 
-      template <typename IntType, typename Properties>
-      void visit(const ext_mref<int_vector_mref<IntType>, none_operator_type, Properties>& ext_ref);
+      template <typename T, typename TypeCategory>
+      void visit(const T& ext_ref, TypeCategory);
 
-      template <typename T, typename Properties>
-      void visit(const ext_mref<T, group_type_tag, Properties>& ext_ref);
+      template <typename T>
+      void visit(const T& ext_ref, split_decimal_type_tag);
 
-      template <typename Properties>
-      void visit(const ext_mref<mfast::nested_message_mref, group_type_tag, Properties>& ext_ref);
+      template <typename T>
+      void visit(const T& ext_ref, int_vector_type_tag);
 
-      template <typename LengthExtRef, typename ElementExtRef>
-      void visit(const ext_mref<sequence_mref, LengthExtRef, ElementExtRef>& ext_ref);
+      template <typename T>
+      void visit(const T& ext_ref, group_type_tag);
+
+      template <typename T>
+      void visit(const T& ext_ref, sequence_type_tag);
 
       void visit(const nested_message_mref& mref)
       {
@@ -170,20 +177,37 @@ namespace mfast
 
 
 
-    template <typename SimpleExtRef>
+    template <typename T, typename TypeCategory>
     inline void
-    fast_decoder_visitor::visit(const SimpleExtRef& ext_ref)
+    fast_decoder_visitor::visit(const T& ext_ref, TypeCategory)
     {
       this->decode(ext_ref,
                    core_->strm(),
-                   core_->current_pmap());
+                   core_->current_pmap(),
+                   typename T::operator_category(),
+                   TypeCategory());
 
     }
 
-    template <typename IntType, typename Properties>
-    inline void fast_decoder_visitor::visit(const ext_mref<int_vector_mref<IntType>, none_operator_type, Properties>& ext_ref)
+    template <typename T>
+    inline void
+    fast_decoder_visitor::visit(const T& ext_ref, split_decimal_type_tag)
     {
-      int_vector_mref<IntType> mref = ext_ref.base();
+
+      typename T::exponent_type exponent_ref = ext_ref.set_exponent();
+      this->decode(exponent_ref, core_->strm(), core_->current_pmap());
+      if (exponent_ref.present())
+      {
+        this->decode(ext_ref.set_mantissa(), core_->strm(), core_->current_pmap());
+      }
+    }
+
+
+
+    template <typename T>
+    inline void fast_decoder_visitor::visit(const T& ext_ref, int_vector_type_tag)
+    {
+      typename T::mref_type mref = ext_ref.set();
 
       uint32_t length=0;
       if (!core_->strm().decode(length, ext_ref.optional())) {
@@ -197,11 +221,10 @@ namespace mfast
       }
     }
 
-    template <typename T, typename Properties>
+    template <typename T>
     inline void
-    fast_decoder_visitor::visit(const ext_mref<T, group_type_tag, Properties>& ext_ref)
+    fast_decoder_visitor::visit(const T& ext_ref, group_type_tag)
     {
-      typedef ext_mref<T, group_type_tag, Properties> ext_ref_type;
       // If a group field is optional, it will occupy a single bit in the presence map.
       // The contents of the group may appear in the stream iff the bit is set.
       if (ext_ref.optional())
@@ -212,43 +235,23 @@ namespace mfast
         }
       }
 
-      pmap_saver<typename ext_ref_type::has_pmap_type> saver(core_);
-      ext_ref.base().accept(*this);
+      pmap_saver<typename T::pmap_segment_size_type> saver(core_);
+      ext_ref.set().accept(*this);
     }
 
-    template <typename Properties>
+
+    template <typename T>
     inline void
-    fast_decoder_visitor::visit(const ext_mref<mfast::nested_message_mref, group_type_tag, Properties>& ext_ref)
+    fast_decoder_visitor::visit(const T& ext_ref, sequence_type_tag)
     {
-      typedef ext_mref<mfast::nested_message_mref, group_type_tag, Properties> ext_ref_type;
-      // If a group field is optional, it will occupy a single bit in the presence map.
-      // The contents of the group may appear in the stream iff the bit is set.
-      if (ext_ref.optional())
-      {
-        if (!core_->current_pmap().is_next_bit_set()) {
-          ext_ref.omit();
-          return;
-        }
-      }
-
-      pmap_saver<typename ext_ref_type::has_pmap_type> saver(core_);
-      this->visit(ext_ref.base());
-    }
-
-    template <typename LengthExtRef, typename ElementExtRef>
-    inline void
-    fast_decoder_visitor::visit(const ext_mref<sequence_mref, LengthExtRef, ElementExtRef>& ext_ref)
-    {
-      typedef ext_mref<sequence_mref, LengthExtRef, ElementExtRef> ext_ref_type;
-
       value_storage storage;
 
-      typename ext_ref_type::length_type length = ext_ref.set_length(storage);
+      typename T::length_type length = ext_ref.set_length(storage);
       this->visit(length);
 
       if (length.present()) {
-        std::size_t len = length.base().value();
-        ext_ref.base().resize(len);
+        std::size_t len = length.get().value();
+        ext_ref.set().resize(len);
 
         for (std::size_t i = 0; i < len; ++i)
         {

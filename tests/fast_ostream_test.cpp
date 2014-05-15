@@ -40,7 +40,7 @@ encode_integer(T value, bool nullable, const byte_stream& result)
   fast_ostream strm(&alloc);
   strm.rdbuf(&sb);
 
-  strm.encode(value, nullable);
+  strm.encode(value, false, nullable);
 
   if (byte_stream(sb) == result)
     return true;
@@ -94,7 +94,7 @@ encode_string(const char* str,std::size_t len, bool nullable, const byte_stream&
   strm.rdbuf(&sb);
 
 
-  strm.encode(str, static_cast<uint32_t>(len), nullable, instruction);
+  strm.encode(str, static_cast<uint32_t>(len), instruction, nullable);
 
   if (byte_stream(sb) == result)
     return true;
@@ -129,7 +129,7 @@ encode_byte_vector(const char* bv,std::size_t len, bool nullable, const byte_str
   strm.rdbuf(&sb);
 
 
-  strm.encode(reinterpret_cast<const unsigned char*>(bv), static_cast<uint32_t>(len), nullable, 0);
+  strm.encode(reinterpret_cast<const unsigned char*>(bv), static_cast<uint32_t>(len), 0, nullable);
 
   if (byte_stream(sb) == result)
     return true;
@@ -272,8 +272,8 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     strm.encode("\x40\x41\x42\x43",
                 4,
-                false,
-                static_cast<const ascii_field_instruction*>(0));
+                static_cast<const ascii_field_instruction*>(0),
+                false);
 
     for (std::size_t i = 0; i < 70; ++i) {
       pmap.set_next_bit(false);
@@ -297,8 +297,8 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     strm.encode("\x40\x41\x42\x43",
                 4,
-                false,
-                static_cast<const ascii_field_instruction*>(0));
+                static_cast<const ascii_field_instruction*>(0),
+                false);
 
     for (std::size_t i = 0; i < 70; ++i) {
       pmap.set_next_bit(false);
@@ -322,8 +322,8 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     strm.encode("\x40\x41\x42\x43",
                 4,
-                false,
-                static_cast<const ascii_field_instruction*>(0));
+                static_cast<const ascii_field_instruction*>(0),
+                false);
 
     pmap.set_next_bit(true);
     for (std::size_t i = 0; i < 70; ++i) {

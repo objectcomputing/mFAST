@@ -21,6 +21,8 @@
 
 #include "mfast/field_instructions.h"
 #include "mfast/field_mref.h"
+#include "mfast/type_category.h"
+
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/range.hpp>
 
@@ -47,6 +49,7 @@ namespace mfast
   public:
     typedef const group_field_instruction* instruction_cptr;
     typedef boost::false_type is_mutable;
+    typedef group_type_tag type_category;
 
     aggregate_cref(const value_storage*           storage_array=0,
                    const group_field_instruction* instruction=0);

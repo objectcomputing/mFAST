@@ -101,8 +101,7 @@ namespace mfast
     void visit(sequence_element_cref& cref, int);
     void visit(nested_message_cref&, int);
 
-    template_instruction*  encode_segment_preemble(uint32_t template_id, bool force_reset);
-    void encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool force_reset);
+    void encode_segment(const message_cref cref, bool force_reset);
   };
 
   inline
@@ -208,26 +207,22 @@ namespace mfast
   inline void
   fast_encoder_impl::visit(nested_message_cref& cref, int)
   {
-    pmap_state state;
     int64_t saved_message_id = active_message_id_;
-
-    state.prev_pmap_ = this->current_;
-    this->current_ = &state.pmap_;
-
-    // we have to replace the target instruction in cref so that the previous values of
-    // the inner fields can be accessed.
-    const template_instruction*& target_inst = const_cast<value_storage*>(field_cref_core_access::storage_of(cref))->of_templateref.of_instruction.instruction_;
-    target_inst = encode_segment_preemble(target_inst->id(), false);
-
-    cref.accept_accessor(*this);
-
-    commit_pmap(state);
+    encoder_presence_map* prev_pmap = this->current_;
+    encode_segment(cref.target(), false);
+    this->current_ = prev_pmap;
     active_message_id_ = saved_message_id;
   }
 
-  template_instruction*
-  fast_encoder_impl::encode_segment_preemble(uint32_t template_id, bool force_reset)
+
+  void
+  fast_encoder_impl::encode_segment(const message_cref cref, bool force_reset)
   {
+    encoder_presence_map pmap;
+    this->current_ = &pmap;
+
+    uint32_t template_id = cref.id();
+
     template_instruction* instruction;
     template_id_map_t::iterator itr = templates_map_.find(template_id);
 
@@ -252,24 +247,14 @@ namespace mfast
       active_message_id_ = template_id;
       strm_.encode(active_message_id_, false, false);
     }
-    return instruction;
-  }
-
-  void
-  fast_encoder_impl::encode_segment(const message_cref& cref, fast_ostreambuf& sb, bool force_reset)
-  {
-    this->strm_.rdbuf(&sb);
-
-    encoder_presence_map pmap;
-    this->current_ = &pmap;
-
-    template_instruction* instruction = encode_segment_preemble(cref.id(), force_reset);
 
     aggregate_cref message(cref.field_storage(0), instruction);
     message.accept_accessor(*this);
 
     pmap.commit();
   }
+
+
 
   fast_encoder::fast_encoder(allocator* alloc)
     : impl_(new fast_encoder_impl(alloc))
@@ -306,7 +291,8 @@ namespace mfast
     assert(buffer_size > 0);
 
     fast_ostreambuf sb(buffer, buffer_size);
-    impl_->encode_segment(message, sb, force_reset);
+    impl_->strm_.rdbuf(&sb);
+    impl_->encode_segment(message, force_reset);
     return sb.length();
   }
 
@@ -316,7 +302,8 @@ namespace mfast
                        bool                force_reset)
   {
     resizable_fast_ostreambuf sb(buffer);
-    impl_->encode_segment(message, sb, force_reset);
+    impl_->strm_.rdbuf(&sb);
+    impl_->encode_segment(message, force_reset);
     buffer.resize(sb.length());
   }
 

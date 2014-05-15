@@ -10,7 +10,7 @@ namespace mfast
 {
 
   template <int V>
-  struct fast_operator_type
+  struct fast_operator_tag
     : boost::integral_constant<int, V>
   {
   };
@@ -22,19 +22,21 @@ namespace mfast
   };
 
 
-  typedef fast_operator_type<operator_none> none_operator_type;
-  typedef fast_operator_type<operator_constant> constant_operator_type;
-  typedef fast_operator_type<operator_delta> delta_operator_type;
-  typedef fast_operator_type<operator_default> default_operator_type;
-  typedef fast_operator_type<operator_copy> copy_operator_type;
-  typedef fast_operator_type<operator_increment> increment_operator_type;
-  typedef fast_operator_type<operator_tail> tail_operator_type;
+  typedef fast_operator_tag<operator_none> none_operator_tag;
+  typedef fast_operator_tag<operator_constant> constant_operator_tag;
+  typedef fast_operator_tag<operator_delta> delta_operator_tag;
+  typedef fast_operator_tag<operator_default> default_operator_tag;
+  typedef fast_operator_tag<operator_copy> copy_operator_tag;
+  typedef fast_operator_tag<operator_increment> increment_operator_tag;
+  typedef fast_operator_tag<operator_tail> tail_operator_tag;
+  typedef fast_operator_tag<operators_count> invalid_operator_tag;
+
+  struct sequence_element_tag {};
 
   // special tag for group to prevent
   // a group_mref decay to an aggregate_mref
   // which would lose the ability to reset
   // the presence flag
-  struct group_type_tag {};
 
   typedef boost::integral_constant<bool, true>  true_type;
   typedef boost::integral_constant<bool, false>  false_type;
@@ -87,16 +89,18 @@ namespace mfast
 
   };
 
+  typedef boost::integral_constant<unsigned int,0> pmap_segment_size_zero;
+
   template <typename Properties>
   struct ext_ref_properties<group_type_tag, Properties>
     : presence_checker<Properties>
   {
-    typedef boost::integral_constant<bool, ((Properties::value & field_has_initial_value) > 0) > has_pmap_type;
+    typedef boost::integral_constant<unsigned int, (Properties::value >> 1) > pmap_segment_size_type;
     typedef Properties properties_type;
 
-    has_pmap_type has_pmap() const
+    pmap_segment_size_type pmap_segment_size() const
     {
-      return has_pmap_type();
+      return pmap_segment_size_type();
     }
   };
 
@@ -106,7 +110,9 @@ namespace mfast
     : public ext_ref_properties<OpType, Properties>
   {
   public:
-    typedef BaseCRef base_type;
+    typedef BaseCRef cref_type;
+    typedef typename cref_type::type_category type_category;
+    typedef OpType operator_category;
 
     explicit ext_cref(const field_cref& base)
       : base_(base)
@@ -118,7 +124,7 @@ namespace mfast
     {
     }
 
-    base_type base() const
+    cref_type get() const
     {
       return base_;
     }
@@ -129,34 +135,7 @@ namespace mfast
     }
 
   private:
-    base_type base_;
-  };
-
-  template <typename Properties>
-  class ext_cref<nested_message_cref, group_type_tag, Properties>
-    : public ext_ref_properties<group_type_tag, Properties>
-  {
-  public:
-
-    typedef nested_message_cref base_type;
-
-    explicit ext_cref(const field_cref& other)
-      :  base_(other)
-    {
-    }
-
-    base_type base() const
-    {
-      return nested_message_cref(aggregate_cref(base_)[0]);
-    }
-
-    bool present() const
-    {
-      return !this->optional() || base_.present();
-    }
-
-  private:
-    field_cref base_;
+    cref_type base_;
   };
 
 
@@ -165,9 +144,11 @@ namespace mfast
   {
   public:
 
-    typedef decimal_cref base_type;
+    typedef decimal_cref cref_type;
     typedef typename Properties::first exponent_properties;
     typedef typename Properties::second mantissa_properties;
+    typedef split_decimal_type_tag type_category;
+    typedef invalid_operator_tag operator_category;
 
 
     typedef ext_cref<exponent_cref, ExponentOp, exponent_properties > exponent_type;
@@ -178,7 +159,7 @@ namespace mfast
     {
     }
 
-    base_type base() const
+    cref_type get() const
     {
       return base_;
     }
@@ -210,7 +191,9 @@ namespace mfast
   {
   public:
 
-    typedef sequence_cref base_type;
+    typedef sequence_cref cref_type;
+    typedef sequence_type_tag type_category;
+    typedef invalid_operator_tag operator_category;
 
 
     typedef LengthExtRef length_type;
@@ -221,7 +204,7 @@ namespace mfast
     {
     }
 
-    base_type base() const
+    cref_type get() const
     {
       return base_;
     }
@@ -250,6 +233,35 @@ namespace mfast
     sequence_cref base_;
   };
 
+
+
+  template <typename Properties>
+  class ext_cref<nested_message_cref, group_type_tag, Properties>
+    : public ext_ref_properties<group_type_tag, Properties>
+  {
+  public:
+    typedef group_type_tag type_category;
+    typedef invalid_operator_tag operator_category;
+    typedef nested_message_cref cref_type;
+
+    explicit ext_cref(const field_cref& other)
+      : base_(other)
+    {
+    }
+
+    cref_type get() const
+    {
+      return cref_type(aggregate_cref(base_)[0]);
+    }
+
+    bool present() const
+    {
+      return !this->optional() || base_.present();
+    }
+  private:
+    field_cref base_;
+  };
+
 ///////////////////////////////////////////////////////////////
 
   template <typename BaseMRef, typename OpType, typename Properties>
@@ -258,22 +270,32 @@ namespace mfast
   {
   public:
 
-    typedef BaseMRef base_type;
+    typedef BaseMRef mref_type;
+    typedef typename mref_type::cref_type cref_type;
+    typedef typename cref_type::type_category type_category;
+    typedef OpType operator_category;
 
-    explicit ext_mref(const field_mref_base& other)
+
+    ext_mref(const field_mref& other)
       : base_(other)
     {
     }
 
-    explicit ext_mref(const BaseMRef& other)
-      : base_(other)
+
+    mref_type set() const
     {
+      if (this->optional()){
+        value_storage* storage = field_mref_core_access::storage_of(this->base_);
+        storage->present(true);
+      }
+      return mref_type(base_);;
     }
 
-    base_type base() const
+    cref_type get() const
     {
-      return base_;
+      return cref_type(base_);;
     }
+
 
     bool present() const
     {
@@ -287,7 +309,7 @@ namespace mfast
     }
 
   private:
-    BaseMRef base_;
+    field_mref base_;
   };
 
 
@@ -296,13 +318,15 @@ namespace mfast
   {
   public:
 
-    typedef decimal_mref base_type;
-
+    typedef decimal_mref mref_type;
+    typedef decimal_cref cref_type;
     typedef typename Properties::first exponent_properties;
     typedef typename Properties::second mantissa_properties;
+    typedef invalid_operator_tag operator_category;
 
     typedef ext_mref<exponent_mref, ExponentOp, exponent_properties > exponent_type;
     typedef ext_mref<int64_mref, MantissaOp, mantissa_properties > mantissa_type;
+    typedef split_decimal_type_tag type_category;
 
 
     explicit ext_mref(const field_mref_base& other)
@@ -310,7 +334,12 @@ namespace mfast
     {
     }
 
-    base_type base() const
+    mref_type set() const
+    {
+      return base_;
+    }
+
+    cref_type get() const
     {
       return base_;
     }
@@ -332,55 +361,34 @@ namespace mfast
   };
 
 
-
-  template <typename IsOptional>
-  class group_ext_mref_base;
-
-  template <>
-  class group_ext_mref_base<true_type>
+  template <typename BaseMRef, typename Properties>
+  class ext_mref<BaseMRef, sequence_element_tag, Properties>
+    : public ext_ref_properties<group_type_tag, Properties>
   {
   public:
-    group_ext_mref_base(const field_mref_base& other)
-      : base_(other)
+
+    typedef BaseMRef mref_type;
+    typedef typename mref_type::cref_type cref_type;
+    typedef group_type_tag type_category;
+    typedef invalid_operator_tag operator_category;
+
+
+    explicit ext_mref(const aggregate_mref& other)
+      :  base_(other)
     {
     }
 
-    bool present() const
+    mref_type set() const
     {
-      return base_.present();
+      return mref_type(this->base_.allocator(),
+                       aggregate_mref_core_access::storage_of(base_),
+                       static_cast<typename mref_type::instruction_cptr>(this->base_.instruction()));
     }
 
-    void omit() const
+    cref_type get() const
     {
-      base_.omit();
-    }
-
-  protected:
-    value_storage* storage() const
-    {
-      return field_mref_core_access::storage_of(this->base_)->of_group.content_;
-    }
-
-    void as_present() const
-    {
-      field_mref_core_access::storage_of(this->base_)->present(true);
-    }
-
-    field_mref_base base_;
-  };
-
-  template <>
-  class group_ext_mref_base<false_type>
-  {
-  public:
-    group_ext_mref_base(const field_mref_base& other)
-      : base_(other)
-    {
-    }
-
-    group_ext_mref_base(const aggregate_mref& other)
-      : base_(other)
-    {
+      return cref_type(aggregate_mref_core_access::storage_of(base_),
+                       static_cast<typename mref_type::instruction_cptr>(this->base_.instruction()));
     }
 
     bool present() const
@@ -393,83 +401,8 @@ namespace mfast
     }
 
   protected:
-
-    value_storage* storage() const
-    {
-      return aggregate_mref_core_access::storage_of(this->base_);
-    }
-
-    void as_present() const
-    {
-    }
-
     aggregate_mref base_;
-  };
 
-
-  template <typename BaseMRef, typename Properties>
-  class ext_mref<BaseMRef, group_type_tag, Properties>
-    : public ext_ref_properties<group_type_tag, Properties>
-    , public group_ext_mref_base<typename presence_checker<Properties>::is_optional_type>
-  {
-    typedef group_ext_mref_base<typename presence_checker<Properties>::is_optional_type> ext_base;
-  public:
-
-    typedef BaseMRef base_type;
-
-    explicit ext_mref(const field_mref_base& other)
-      :  ext_base(other)
-    {
-    }
-
-    explicit ext_mref(const aggregate_mref& other)
-      :  ext_base(other)
-    {
-    }
-
-    base_type base() const
-    {
-      this->as_present();
-      return base_type(this->base_.allocator(),
-                       this->storage(),
-                       static_cast<typename base_type::instruction_cptr>(this->base_.instruction()));
-    }
-
-
-  };
-
-  template <typename Properties>
-  class ext_mref<nested_message_mref, group_type_tag, Properties>
-    : public ext_ref_properties<group_type_tag, Properties>
-  {
-  public:
-
-    typedef nested_message_mref base_type;
-
-    explicit ext_mref(const field_mref_base& other)
-      :  base_(other)
-    {
-    }
-
-
-    base_type base() const
-    {
-      return  nested_message_mref(aggregate_mref(base_)[0]);
-    }
-
-    bool present() const
-    {
-      return !this->optional() || base_.present();
-    }
-
-    void omit() const
-    {
-      if (this->optional())
-        base_.omit();
-    }
-
-  private:
-    field_mref base_;
   };
 
 
@@ -478,7 +411,10 @@ namespace mfast
   {
   public:
 
-    typedef sequence_mref base_type;
+    typedef sequence_mref mref_type;
+    typedef sequence_cref cref_type;
+    typedef sequence_type_tag type_category;
+    typedef invalid_operator_tag operator_category;
 
 
     typedef LengthExtRef length_type;
@@ -492,7 +428,12 @@ namespace mfast
     {
     }
 
-    base_type base() const
+    mref_type set() const
+    {
+      return base_;
+    }
+
+    cref_type get() const
     {
       return base_;
     }
@@ -535,6 +476,50 @@ namespace mfast
 
   private:
     sequence_mref base_;
+  };
+
+  template <typename Properties>
+  class ext_mref<nested_message_mref, group_type_tag, Properties>
+    : public ext_ref_properties<group_type_tag, Properties>
+  {
+  public:
+    typedef group_type_tag type_category;
+    typedef invalid_operator_tag operator_category;
+    typedef nested_message_cref cref_type;
+    typedef nested_message_mref mref_type;
+
+    explicit ext_mref(const field_mref& other)
+      : base_(other)
+    {
+    }
+
+    cref_type get() const
+    {
+      return cref_type(aggregate_cref(base_)[0]);
+    }
+
+    mref_type set() const
+    {
+      if (this->optional()){
+        value_storage* storage = field_mref_core_access::storage_of(this->base_);
+        storage->present(true);
+      }
+      return mref_type(aggregate_mref(base_)[0]);
+    }
+
+    bool present() const
+    {
+      return !this->optional() || base_.present();
+    }
+
+    void omit() const
+    {
+      if (this->optional())
+        base_.omit();
+    }
+
+  private:
+    field_mref base_;
   };
 
 

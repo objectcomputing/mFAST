@@ -25,6 +25,8 @@
 #include <limits>
 #include "mfast/field_ref.h"
 #include "mfast/allocator.h"
+#include "mfast/type_category.h"
+
 namespace mfast {
 
   namespace detail {
@@ -200,6 +202,7 @@ namespace mfast {
 
   public:
     typedef typename base_type::instruction_cptr instruction_cptr;
+    typedef string_type_tag type_category;
     vector_cref()
     {
     }
@@ -230,6 +233,8 @@ namespace mfast {
 
   public:
     typedef typename base_type::instruction_cptr instruction_cptr;
+    typedef int_vector_type_tag type_category;
+
     int_vector_cref()
     {
     }

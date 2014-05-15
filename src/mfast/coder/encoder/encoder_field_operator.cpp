@@ -600,7 +600,7 @@ namespace mfast
 
           int64_t delta = static_cast<int64_t>(cref.value() - base.value());
 
-          stream.encode(delta, cref.instruction()->is_nullable(), false);
+          stream.encode(delta, false, cref.instruction()->is_nullable());
           stream.save_previous_value(cref);
         }
 
@@ -651,8 +651,8 @@ namespace mfast
           delta_len = static_cast<uint32_t>(common_suffix_delta_len);
         }
 
-        stream.encode(substraction_len, cref.instruction()->is_nullable(), false);
-        stream.encode(delta_iterator, delta_len, false, cref.instruction());
+        stream.encode(substraction_len, false, cref.instruction()->is_nullable());
+        stream.encode(delta_iterator, delta_len, cref.instruction(), false);
 
         stream.save_previous_value(cref);
       }
@@ -807,8 +807,8 @@ namespace mfast
           }
           stream.encode(tail_itr,
                         tail_len,
-                        cref.instruction()->is_nullable(),
-                        cref.instruction());
+                        cref.instruction(),
+                        cref.instruction()->is_nullable());
         }
         stream.save_previous_value(cref);
 

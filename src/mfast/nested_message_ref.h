@@ -22,6 +22,7 @@
 #include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
 #include "mfast/message_ref.h"
+#include "mfast/type_category.h"
 
 namespace mfast
 {
@@ -33,6 +34,7 @@ namespace mfast
     typedef templateref_instruction instruction_type;
     typedef const templateref_instruction* instruction_cptr;
     typedef boost::false_type is_mutable;
+    typedef group_type_tag type_category;
 
     nested_message_cref()
     {
@@ -71,6 +73,12 @@ namespace mfast
 
     template <typename FieldAccessor>
     void accept_accessor(FieldAccessor&) const;
+
+    template <typename Visitor>
+    void accept(Visitor& v) const
+    {
+      v.visit(*this);
+    }
   };
 
 
@@ -109,6 +117,12 @@ namespace mfast
 
     template <typename FieldMutator>
     void accept_mutator(FieldMutator&) const;
+
+    template <typename Visitor>
+    void accept(Visitor& v) const
+    {
+      v.visit(*this);
+    }
 
     template <typename MESSAGE>
     typename MESSAGE::mref_type as() const

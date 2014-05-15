@@ -36,23 +36,26 @@ namespace mfast {
     fast_ostreambuf* rdbuf () const;
     fast_ostreambuf* rdbuf (fast_ostreambuf* sb);
 
-    template <typename IntType>
-    void encode(IntType t, bool nullable, bool is_null = false);
+    template <typename IntType, typename Nullable>
+    void encode(IntType t, bool is_null, Nullable nullable);
 
+    template <typename Nullable>
     void encode(const char* ascii,
-                uint32_t    len,
-                bool        nullable,
-                const ascii_field_instruction* /* instruction */);
+                uint32_t len,
+                const ascii_field_instruction* /* instruction */,
+                Nullable    nullable);
 
+    template <typename Nullable>
     void encode(const char* unicode,
                 uint32_t    len,
-                bool        nullable,
-                const unicode_field_instruction* /* instruction */);
+                const unicode_field_instruction* /* instruction */,
+                Nullable    nullable);
 
+    template <typename Nullable>
     void encode(const unsigned char* bv,
                 uint32_t             len,
-                bool                 nullable,
-                const byte_vector_field_instruction* /* instruction */);
+                const byte_vector_field_instruction* /* instruction */,
+                Nullable             nullable);
 
 
     void encode_null();
@@ -157,8 +160,8 @@ namespace mfast {
 
   }
 
-  template <typename IntType>
-  void fast_ostream::encode(IntType value, bool nullable, bool is_null)
+  template <typename IntType, typename Nullable>
+  void fast_ostream::encode(IntType value, bool is_null, Nullable nullable)
   {
     if (nullable) {
       if (is_null) {
@@ -212,11 +215,12 @@ namespace mfast {
     rdbuf()->sputn(buffer+i, max_encoded_length-i);
   }
 
+  template <typename Nullable>
   inline void
   fast_ostream::encode(const char* ascii,
                        uint32_t    len,
-                       bool        nullable,
-                       const ascii_field_instruction* /* instruction */)
+                       const ascii_field_instruction* /* instruction */,
+                       Nullable    nullable)
   {
     assert( ascii || nullable );
 
@@ -248,31 +252,33 @@ namespace mfast {
     rdbuf()->sputc(ascii[len-1] | 0x80);
   }
 
+  template <typename Nullable>
   inline void
   fast_ostream::encode(const char* unicode,
                        uint32_t    len,
-                       bool        nullable,
-                       const unicode_field_instruction* /* instruction */)
+                       const unicode_field_instruction* /* instruction */,
+                       Nullable    nullable)
   {
     // non-nullable string cannot have a null value
     assert( unicode || nullable );
 
-    encode(len, nullable, unicode == 0);
+    encode(len, unicode == 0, nullable);
     if (unicode && len > 0) {
       rdbuf()->sputn(unicode, len);
     }
   }
 
+  template <typename Nullable>
   inline void
   fast_ostream::encode(const unsigned char* bv,
                        uint32_t             len,
-                       bool                 nullable,
-                       const byte_vector_field_instruction* /* instruction */)
+                       const byte_vector_field_instruction* /* instruction */,
+                       Nullable    nullable)
   {
     // non-nullable byteVector cannot have a null value
     assert( bv || nullable );
 
-    encode(len, nullable, bv == 0);
+    encode(len, bv == 0, nullable);
     if (bv && len > 0) {
       rdbuf()->sputn(reinterpret_cast<const char*>(bv), len);
     }
