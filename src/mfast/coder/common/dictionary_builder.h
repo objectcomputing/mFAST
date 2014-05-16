@@ -18,7 +18,7 @@
 //
 #ifndef DICTIONARY_BUILDER_H_F26FXFII
 #define DICTIONARY_BUILDER_H_F26FXFII
-
+#include "../mfast_coder_export.h"
 #include "mfast/field_instructions.h"
 #include "mfast/arena_allocator.h"
 #include <vector>
@@ -93,7 +93,7 @@ namespace mfast {
   typedef std::map<uint32_t, template_instruction*> template_id_map_t;
 
 
-  class dictionary_builder
+  class MFAST_CODER_EXPORT dictionary_builder
     : private field_instruction_visitor
   {
   public:

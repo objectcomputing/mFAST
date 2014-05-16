@@ -7,7 +7,7 @@ namespace mfast
     void
     fast_decoder_core::decode_nested_message(const nested_message_mref& mref)
     {
-      pmap_saver<true_type> saver(this);
+      decoder_pmap_saver<true_type> saver(this);
       message_info* saved_active_info = this->active_message_info_;
 
 
@@ -22,7 +22,6 @@ namespace mfast
           active_message_info_ = &itr->second;
         }
         else {
-          using namespace coder;
           BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
                                                          << referenced_by_info(active_message_info_->message_.name()));
         }

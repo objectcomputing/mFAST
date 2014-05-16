@@ -86,6 +86,12 @@ namespace mfast {
     {
     }
 
+    explicit exponent_cref(const field_cref& other)
+      : field_cref(field_cref_core_access::storage_of(other), other.instruction())
+    {
+    }
+
+
     instruction_cptr instruction() const
     {
       return static_cast<instruction_cptr>(instruction_);

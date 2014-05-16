@@ -236,6 +236,11 @@ namespace mfast
       operator uint64_t () const {
         return value;
       }
+
+      uint64_t operator - (int x) const
+      {
+        return value - x;
+      }
     };
 
     template <typename T>

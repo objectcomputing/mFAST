@@ -64,7 +64,7 @@ namespace mfast
     friend class fast_istream;
     friend class decoder_presence_map;
     friend class fast_decoder;
-    friend struct mfast::coder::fast_decoder_core;
+    friend struct coder::fast_decoder_core;
 
     void gbump (std::ptrdiff_t n)
     {

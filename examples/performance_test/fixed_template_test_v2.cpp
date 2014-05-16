@@ -18,6 +18,7 @@
 //
 #include <mfast.h>
 #include <mfast/coder/fast_decoder_v2.h>
+#include <mfast/coder/fast_encoder_v2.h>
 #include <cstdio>
 #include <iostream>
 #include <cstring>
@@ -73,7 +74,7 @@ int main(int argc, const char** argv)
     const char* arg = argv[i++];
 
     if (std::strcmp(arg, "-f") == 0) {
-            filename = argv[i++];
+      filename = argv[i++];
     }
     else if (std::strcmp(arg, "-head") == 0) {
       head_n = atoi(argv[i++]);
@@ -110,10 +111,10 @@ int main(int argc, const char** argv)
     mfast::fast_decoder_v2< boost::mpl::vector<example::templates_description*> > decoder;
 
 #ifdef WITH_ENCODE
-    mfast::fast_encoder encoder;
-    encoder.include(descriptions);
+    mfast::fast_encoder_v2< boost::mpl::vector<example::templates_description*> > encoder;
     std::vector<char> buffer;
-    buffer.reserve(message_contents.size());
+    buffer.resize(message_contents.size());
+
 #endif
 
     mfast::message_type msg_value;
@@ -125,15 +126,21 @@ int main(int argc, const char** argv)
     {
 
       for (std::size_t j = 0; j < repeat_count; ++j) {
-
+#ifdef WITH_ENCODE
+        char* buf_beg = &buffer[0];
+        char* buf_end = &buffer[buffer.size()];
+#endif
         const char*first = &message_contents[0] + skip_header_bytes;
         const char*last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
-          mfast::message_cref msg = decoder.decode(first, last, force_reset || first_message );
+#ifdef WITH_ENCODE
+          mfast::message_cref msg =
+#endif
+            decoder.decode(first, last, force_reset || first_message );
 
 #ifdef WITH_ENCODE
-          encoder.encode(msg, buffer, force_reset || first_message);
+          buf_beg += encoder.encode(msg, buf_beg, buf_end-buf_beg, force_reset || first_message);
 #endif
 #ifdef WITH_MESSAGE_COPY
           msg_value = mfast::message_type(msg, &malloc_allc);

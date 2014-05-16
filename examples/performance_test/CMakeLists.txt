@@ -34,3 +34,8 @@ target_link_libraries (mf_fixed_decode_encode
 add_executable (mf_fixed_decode_v2 ${FASTTYPEGEN_example_OUTPUTS} fixed_template_test_v2.cpp)
 target_link_libraries (mf_fixed_decode_v2
                        ${TEST_LIBS} )
+
+add_executable (mf_fixed_decode_encode_v2 ${FASTTYPEGEN_example_OUTPUTS} fixed_template_test_v2.cpp)
+set_target_properties(mf_fixed_decode_encode_v2 PROPERTIES COMPILE_FLAGS -DWITH_ENCODE)
+target_link_libraries (mf_fixed_decode_encode_v2
+                      ${TEST_LIBS} )

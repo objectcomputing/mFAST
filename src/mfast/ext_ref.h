@@ -213,8 +213,9 @@ namespace mfast
     get_length(value_storage& storage) const
     {
 
-      uint32_cref length_cref(&storage, base_.instruction()->length_instruction());
-      return length_type(length_cref);
+      uint32_mref length_mref(0, &storage, base_.instruction()->length_instruction());
+      length_mref.as(base_.size());
+      return length_type(length_mref);
     }
 
     element_type
@@ -233,6 +234,37 @@ namespace mfast
     sequence_cref base_;
   };
 
+  template <typename BaseCRef, typename Properties>
+  class ext_cref<BaseCRef, sequence_element_tag, Properties>
+    : public ext_ref_properties<group_type_tag, Properties>
+  {
+  public:
+
+    typedef BaseCRef cref_type;
+    typedef group_type_tag type_category;
+    typedef invalid_operator_tag operator_category;
+
+
+    explicit ext_cref(const aggregate_cref& other)
+      :  base_(other)
+    {
+    }
+
+
+    cref_type get() const
+    {
+      return cref_type(aggregate_cref_core_access::storage_of(base_),
+                       static_cast<typename cref_type::instruction_cptr>(this->base_.instruction()));
+    }
+
+    bool present() const
+    {
+      return true;
+    }
+
+  protected:
+    aggregate_cref base_;
+  };
 
 
   template <typename Properties>

@@ -41,7 +41,7 @@ const char usage[] =
 
 int read_file(const char* filename, std::vector<char>& contents)
 {
-  std::FILE*fp = std::fopen(filename, "rb");
+  std::FILE* fp = std::fopen(filename, "rb");
   if (fp)
   {
     std::fseek(fp, 0, SEEK_END);
@@ -121,16 +121,19 @@ int main(int argc, const char** argv)
     mfast::fast_encoder encoder(alloc);
     encoder.include(descriptions);
     std::vector<char> buffer;
-    buffer.reserve(message_contents.size());
+    buffer.resize(message_contents.size());
 #endif
 
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
     {
 
       for (std::size_t j = 0; j < repeat_count; ++j) {
-
-        const char*first = &message_contents[0] + skip_header_bytes;
-        const char*last = &message_contents[0] + message_contents.size();
+#ifdef WITH_ENCODE
+        char* buf_beg = &buffer[0];
+        char* buf_end = &buffer[buffer.size()];
+#endif
+        const char* first = &message_contents[0] + skip_header_bytes;
+        const char* last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
 #ifdef WITH_ENCODE
@@ -139,7 +142,7 @@ int main(int argc, const char** argv)
           coder.decode(first, last, force_reset || first_message );
 
 #ifdef WITH_ENCODE
-          encoder.encode(msg, buffer, force_reset || first_message);
+          buf_beg += encoder.encode(msg, buf_beg, buf_end-buf_beg, force_reset || first_message);
 #endif
           first_message = false;
           first += skip_header_bytes;

@@ -138,7 +138,7 @@ namespace mfast
   template <typename IntType>
   void fast_encoder_impl::visit(int_vector_cref<IntType> &cref)
   {
-    strm_.encode(static_cast<uint32_t>(cref.size()), cref.optional(), !cref.present());
+    strm_.encode(static_cast<uint32_t>(cref.size()), !cref.present(), cref.optional());
     if (cref.present()) {
       for (std::size_t i = 0; i < cref.size(); ++i) {
         strm_.encode(cref[i], false, false);

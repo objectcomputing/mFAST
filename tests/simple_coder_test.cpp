@@ -18,7 +18,7 @@
 //
 #include <mfast.h>
 #include <mfast/field_comparator.h>
-// #include <mfast/coder/fast_encoder.h>
+#include <mfast/coder/fast_encoder_v2.h>
 #include <mfast/coder/fast_decoder_v2.h>
 
 #define BOOST_TEST_DYN_LINK
@@ -45,29 +45,29 @@ class fast_coding_test_case
 {
   public:
     fast_coding_test_case()
-      // , encoder_(&alloc_)
-      : decoder_(&alloc_)
+      : encoder_(&alloc_)
+      , decoder_(&alloc_)
     {
     }
 
-    // boost::test_tools::predicate_result
-    // encoding(const message_cref& msg_ref, const byte_stream& result, bool reset=false)
-    // {
-    //   const int buffer_size = 128;
-    //   char buffer[buffer_size];
-    //
-    //   std::size_t encoded_size = encoder_.encode(msg_ref,
-    //                                              buffer,
-    //                                              buffer_size,
-    //                                              reset);
-    //
-    //   if (result == byte_stream(buffer, encoded_size))
-    //     return true;
-    //
-    //   boost::test_tools::predicate_result res( false );
-    //   res.message() << "Got \"" << byte_stream(buffer, encoded_size) << "\" instead.";
-    //   return res;
-    // }
+    boost::test_tools::predicate_result
+    encoding(const message_cref& msg_ref, const byte_stream& result, bool reset=false)
+    {
+      const int buffer_size = 128;
+      char buffer[buffer_size];
+
+      std::size_t encoded_size = encoder_.encode(msg_ref,
+                                                 buffer,
+                                                 buffer_size,
+                                                 reset);
+
+      if (result == byte_stream(buffer, encoded_size))
+        return true;
+
+      boost::test_tools::predicate_result res( false );
+      res.message() << "Got \"" << byte_stream(buffer, encoded_size) << "\" instead.";
+      return res;
+    }
 
     boost::test_tools::predicate_result
     decoding(const byte_stream& bytes, const message_cref& result, bool reset=false)
@@ -82,14 +82,9 @@ class fast_coding_test_case
       return res;
     }
 
-    // const template_instruction* template_with_id(uint32_t id)
-   //  {
-   //    return encoder_.template_with_id(id);
-   //  }
-
   private:
     debug_allocator alloc_;
-    // fast_encoder encoder_;
+    mfast::fast_encoder_v2< boost::mpl::vector<DESC*> > encoder_;
     mfast::fast_decoder_v2< boost::mpl::vector<DESC*> > decoder_;
 };
 
@@ -110,7 +105,7 @@ BOOST_AUTO_TEST_CASE(simple_coder_test)
 
 
 
-  // BOOST_CHECK(test_case.encoding(msg_ref,"\xB8\x81\x82\x83"));
+  BOOST_CHECK(test_case.encoding(msg_ref,"\xB8\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
 }
 
@@ -126,7 +121,7 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
   msg_ref.set_group1().set_field2().as(2);
   msg_ref.set_group1().set_field3().as(3);
 
-  // BOOST_CHECK(test_case.encoding(msg_ref, "\xB0\x81\xE0\x82\x83"));
+  BOOST_CHECK(test_case.encoding(msg_ref, "\xB0\x81\xE0\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xB0\x81\xE0\x82\x83", msg_ref));
 
   // mfast::fast_decoder_v2< boost::mpl::vector<simple2::templates_description*> > decoder;
@@ -157,11 +152,11 @@ BOOST_AUTO_TEST_CASE(sequence_coder_test)
   seq[1].set_field2().as(0);
   seq[1].set_field3().as(1);
 
-  // BOOST_CHECK(test_case.encoding(msg_ref,
-  //                                // pmap | f1 | s1 len| elem1 pmap | f2 | f3 | elem2 pmap |  f2 | f3 |
-  //                                //  A0    81    83        E0        82   83     E0          80   81
-  //                                "\xA0\x81\x83\xE0\x82\x83\xE0\x80\x81"
-  //                                ));
+  BOOST_CHECK(test_case.encoding(msg_ref,
+                                 // pmap | f1 | s1 len| elem1 pmap | f2 | f3 | elem2 pmap |  f2 | f3 |
+                                 //  A0    81    83        E0        82   83     E0          80   81
+                                 "\xA0\x81\x83\xE0\x82\x83\xE0\x80\x81"
+                                 ));
   BOOST_CHECK(test_case.decoding("\xA0\x81\x83\xE0\x82\x83\xE0\x80\x81", msg_ref));
 
 }
@@ -179,7 +174,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
   msg_ref.set_field3().as(3);
                                  // pmap | template id | field1 | field2 | field 3 |
                                  //  F8         82        81        82       83
-  // BOOST_CHECK(test_case.encoding(msg_ref,"\xF8\x82\x81\x82\x83"));
+  BOOST_CHECK(test_case.encoding(msg_ref,"\xF8\x82\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xF8\x82\x81\x82\x83", msg_ref));
 }
 
@@ -202,7 +197,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
   target.set_field2().as(2);
   target.set_field3().as(3);
 
-  // BOOST_CHECK(test_case.encoding(msg_ref,"\xE0\x82\x81\xF0\x81\x82\x83"));
+  BOOST_CHECK(test_case.encoding(msg_ref,"\xE0\x82\x81\xF0\x81\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xE0\x82\x81\xF0\x81\x82\x83", msg_ref));
 }
 
@@ -218,12 +213,12 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
   msg_ref.set_field2().as(2);
   msg_ref.set_field3().as(3);
 
-  // BOOST_CHECK(test_case.encoding(msg_ref, "\xB8\x81\x82\x83", false));
+  BOOST_CHECK(test_case.encoding(msg_ref, "\xB8\x81\x82\x83", false));
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref, false));
 
 
   // message not changed
-  // BOOST_CHECK(test_case.encoding(msg_ref, "\x80", false));
+  BOOST_CHECK(test_case.encoding(msg_ref, "\x80", false));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref, false));
 
   msg_ref.set_field1().as(11);
@@ -237,7 +232,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
   BOOST_REQUIRE(msg_ref.get_field3().is_initial_value());
 
   // encoding with reset, all values are initial
-  // BOOST_CHECK(test_case.encoding(msg_ref, "\x80", true));
+  BOOST_CHECK(test_case.encoding(msg_ref, "\x80", true));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref, true));
 
 }
@@ -261,10 +256,10 @@ BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
   msg_ref.set_field2().as(12);
   msg_ref.set_field3().as(13);
   // encoding with reset, all values are initial
-  // BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
+  BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref));
 
-  // BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
+  BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref));
 }
 

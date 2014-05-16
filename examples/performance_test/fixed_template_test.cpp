@@ -119,7 +119,7 @@ int main(int argc, const char** argv)
     mfast::fast_encoder encoder(alloc);
     encoder.include(descriptions);
     std::vector<char> buffer;
-    buffer.reserve(message_contents.size());
+    buffer.resize(message_contents.size());
 #endif
 
     mfast::message_type msg_value;
@@ -131,15 +131,21 @@ int main(int argc, const char** argv)
     {
 
       for (std::size_t j = 0; j < repeat_count; ++j) {
-
+#ifdef WITH_ENCODE
+        char* buf_beg = &buffer[0];
+        char* buf_end = &buffer[buffer.size()];
+#endif
         const char *first = &message_contents[0] + skip_header_bytes;
         const char *last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
-          mfast::message_cref msg = decoder.decode(first, last, force_reset || first_message );
+#ifdef WITH_ENCODE
+          mfast::message_cref msg =
+#endif
+            decoder.decode(first, last, force_reset || first_message );
 
 #ifdef WITH_ENCODE
-          encoder.encode(msg, buffer, force_reset || first_message);
+         buf_beg += encoder.encode(msg, buf_beg, buf_end-buf_beg, force_reset || first_message);
 #endif
 #ifdef WITH_MESSAGE_COPY
           msg_value = mfast::message_type(msg, &malloc_allc);

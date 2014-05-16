@@ -1,6 +1,8 @@
 #ifndef FAST_DECODER_CORE_H_51998563
 #define FAST_DECODER_CORE_H_51998563
 
+#include "../mfast_coder_export.h"
+
 #include <boost/container/map.hpp>
 #include "mfast/sequence_ref.h"
 #include "mfast/nested_message_ref.h"
@@ -22,11 +24,11 @@ namespace mfast
     class fast_decoder_visitor;
 
     template <typename HasPMap>
-    class pmap_saver;
+    class decoder_pmap_saver;
 
 
 
-    struct fast_decoder_core
+    struct MFAST_CODER_EXPORT fast_decoder_core
     {
       typedef void (fast_decoder_core::*message_decode_function_t) (const message_mref&);
 
@@ -99,14 +101,14 @@ namespace mfast
     };
 
     template <typename T>
-    class pmap_saver
+    class decoder_pmap_saver
     {
       decoder_presence_map pmap_;
       decoder_presence_map* prev_pmap_;
       fast_decoder_core* core_;
 
     public:
-      pmap_saver(fast_decoder_core* core)
+      decoder_pmap_saver(fast_decoder_core* core)
         : prev_pmap_(core->current_)
         , core_(core)
       {
@@ -114,7 +116,7 @@ namespace mfast
         core_->strm().decode(pmap_);
       }
 
-      ~pmap_saver()
+      ~decoder_pmap_saver()
       {
         core_->current_ = this->prev_pmap_;
       }
@@ -122,14 +124,14 @@ namespace mfast
     };
 
     template <>
-    class pmap_saver<pmap_segment_size_zero>
+    class decoder_pmap_saver<pmap_segment_size_zero>
     {
     public:
-      pmap_saver(fast_decoder_core*)
+      decoder_pmap_saver(fast_decoder_core*)
       {
       }
 
-      ~pmap_saver()
+      ~decoder_pmap_saver()
       {
       }
 
@@ -235,7 +237,7 @@ namespace mfast
         }
       }
 
-      pmap_saver<typename T::pmap_segment_size_type> saver(core_);
+      decoder_pmap_saver<typename T::pmap_segment_size_type> saver(core_);
       ext_ref.set().accept(*this);
     }
 
@@ -271,12 +273,12 @@ namespace mfast
       ref.accept(visitor);
     }
 
-    struct construct_message_ex
+    struct construct_decoder_message_info
     {
       fast_decoder_core* core_;
       template_id_map_t& templates_map_;
 
-      construct_message_ex(fast_decoder_core* core,
+      construct_decoder_message_info(fast_decoder_core* core,
                            template_id_map_t& templates_map)
         : core_(core)
         , templates_map_(templates_map)
@@ -314,7 +316,7 @@ namespace mfast
         dictionary_builder(this->resetter_, templates_map, &this->template_alloc_)
         );
 
-      boost::mpl::for_each<Descriptions>( construct_message_ex(this, templates_map) );
+      boost::mpl::for_each<Descriptions>( construct_decoder_message_info(this, templates_map) );
 
       if (this->message_infos_.size() == 1)
       {
