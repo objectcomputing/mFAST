@@ -109,7 +109,7 @@ namespace mfast
               if (exp > 63 || exp < -63) {
                 BOOST_THROW_EXCEPTION(fast_dynamic_error("D11") << reason_info(std::string("Invalid exponent initial value: ") +  init_value_str ) );
               }
-              initial_value_ = decimal_value_storage(0, static_cast<uint8_t>(exp)).storage_;
+              initial_value_ = decimal_value_storage(0, static_cast<uint16_t>(exp)).storage_;
             }
           }
         }

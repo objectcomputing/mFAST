@@ -150,7 +150,7 @@ namespace mfast {
       return false;
     }
 
-    inline bool encode_max_value(int8_t&, fast_ostreambuf*)
+    inline bool encode_max_value(int16_t&, fast_ostreambuf*)
     {
       return false;
     }

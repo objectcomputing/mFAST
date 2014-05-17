@@ -40,8 +40,7 @@ namespace mfast
 
     struct {
       uint32_t present_;                ///< indicate if the value is present,
-      int8_t exponent_;
-      int8_t padding1_;
+      int16_t exponent_;
       uint16_t padding2_ : 15;
       uint16_t defined_bit_ : 1;
       int64_t mantissa_;
@@ -203,7 +202,7 @@ namespace mfast
     {
     }
 
-    decimal_value_storage(int64_t mantissa, uint8_t exponent)
+    decimal_value_storage(int64_t mantissa, int16_t exponent)
     {
       storage_.of_decimal.defined_bit_ = 1;
       storage_.of_decimal.present_ = 1;
@@ -211,6 +210,26 @@ namespace mfast
       storage_.of_decimal.exponent_ = exponent;
     }
 
+    int64_t manitissa() const
+    {
+      return storage_.of_decimal.mantissa_;
+    }
+
+    int16_t exponent() const
+    {
+      return storage_.of_decimal.exponent_;
+    }
+
+
+    void manitissa(int64_t m)
+    {
+      storage_.of_decimal.mantissa_ = m;
+    }
+
+    void exponent(int16_t e)
+    {
+      storage_.of_decimal.exponent_ = e;
+    }
   };
 
   struct string_value_storage

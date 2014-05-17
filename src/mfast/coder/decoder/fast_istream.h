@@ -177,9 +177,9 @@ namespace mfast
 
 
     template <>
-    struct int_trait<int8_t> // only used for decoding decimal exponent
+    struct int_trait<int16_t> // only used for decoding decimal exponent
     {
-      typedef int8_t temp_type;
+      typedef int16_t temp_type;
     };
 
 

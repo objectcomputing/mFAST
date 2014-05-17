@@ -63,7 +63,7 @@ namespace mfast {
   public:
     typedef decimal_field_instruction instruction_type;
     typedef const decimal_field_instruction* instruction_cptr;
-    typedef int8_t value_type;
+    typedef int16_t value_type;
 
     exponent_cref()
     {
@@ -91,7 +91,7 @@ namespace mfast {
              ( this->absent() || this->value() == instruction()->initial_value().of_decimal.exponent_);
     }
 
-    int8_t value() const
+    int16_t value() const
     {
       return this->storage()->of_decimal.exponent_;
     }
@@ -156,9 +156,9 @@ namespace mfast {
       return this->storage()->of_decimal.mantissa_;
     }
 
-    int8_t exponent() const
+    int16_t exponent() const
     {
-      return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
+      return static_cast<int16_t>(this->storage()->of_decimal.exponent_);
     }
 
     bool is_initial_value() const;
@@ -173,6 +173,12 @@ namespace mfast {
     instruction_cptr instruction() const
     {
       return static_cast<instruction_cptr>(instruction_);
+    }
+
+    operator double()
+    {
+      double x = mantissa();
+      return  x * std::pow(10, exponent());
     }
 
     value_storage default_base_value() const
@@ -258,7 +264,7 @@ namespace mfast {
       this->storage()->of_decimal.present_= this->instruction()->initial_value().of_decimal.present_;
     }
 
-    void as(int8_t v) const
+    void as(int16_t v) const
     {
       assert (!has_const_exponent() || v == instruction()->initial_value().of_decimal.exponent_);
 
@@ -278,7 +284,7 @@ namespace mfast {
 
   private:
     friend fast_istream& operator >> (fast_istream& strm, const exponent_mref& mref);
-    int8_t& value_ref() const
+    int16_t& value_ref() const
     {
       this->storage()->present(true);
       return this->storage()->of_decimal.exponent_;
@@ -358,7 +364,7 @@ namespace mfast {
 
     int16_t exponent() const
     {
-      return static_cast<int8_t>(this->storage()->of_decimal.exponent_);
+      return static_cast<int16_t>(this->storage()->of_decimal.exponent_);
     }
 
     void as (decimal d) const
@@ -383,7 +389,7 @@ namespace mfast {
         normalize();
       }
       else {
-        const int8_t const_exp = instruction()->initial_value().of_decimal.exponent_;
+        const int16_t const_exp = instruction()->initial_value().of_decimal.exponent_;
         d *= decimal(decimal_backend(1.0, -1*const_exp));
         this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
         this->storage()->of_decimal.exponent_ = const_exp;
@@ -391,7 +397,7 @@ namespace mfast {
       this->storage()->present(1);
     }
 
-    void as(int64_t mant, int8_t exp) const
+    void as(int64_t mant, int16_t exp) const
     {
       assert (exp <= 64 && exp >= -64);
       if (!has_const_exponent() || exp == instruction()->initial_value().of_decimal.exponent_) {

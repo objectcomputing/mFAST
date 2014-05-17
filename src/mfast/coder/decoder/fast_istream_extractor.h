@@ -40,7 +40,7 @@ namespace mfast
 
   inline fast_istream& operator >> (fast_istream& strm, const exponent_mref& mref)
   {
-    int8_t value;
+    int16_t value;
     if (!strm.decode(value, mref.instruction()->is_nullable()))
       mref.omit();
     else

@@ -57,9 +57,9 @@ namespace mfast
       report_overflow(instruction, stream);
   }
 
-  inline void check_overflow(int8_t base, int8_t delta, const field_instruction* instruction, fast_istream& stream)
+  inline void check_overflow(int16_t base, int16_t delta, const field_instruction* instruction, fast_istream& stream)
   {
-    int8_t r = base;
+    int16_t r = base;
     r += delta;
     if (r > 63 || r < 63)
       report_overflow(instruction, stream);
