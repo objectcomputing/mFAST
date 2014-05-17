@@ -28,6 +28,38 @@ namespace mfast {
         return os;
       }
 
+      std::ostream& operator << (std::ostream& os, const decimal_value_storage& storage)
+      {
+        int64_t mantissa =  storage.mantissa();
+        int exponent = storage.exponent();
+
+        if (exponent >= 0) {
+          os << mantissa;
+          std::fill_n(std::ostream_iterator<char>(os), exponent, '0');
+        }
+        else if (exponent < 0) {
+          char buf[128];
+          int n = std::snprintf(buf, 128, "%lld", mantissa);
+          char* p = buf;
+          if (mantissa < 0) {
+            os.put('-');
+            --n;
+            ++p;
+          }
+          if ((n+exponent) > 0) {
+            os.write(p, n+exponent);
+            os << '.' << p+n+exponent;
+          }
+          else {
+            os << "0.";
+            std::fill_n(std::ostream_iterator<char>(os), -exponent-n , '0');
+            os << p;
+          }
+        }
+
+        return os;
+      }
+
       class json_visitor
       {
       private:
@@ -54,6 +86,12 @@ namespace mfast {
         void visit(const NumericTypeRef& ref)
         {
           strm_ <<  separator_ << ref.value();
+        }
+
+        void visit(const decimal_cref& ref)
+        {
+          const decimal_value_storage& storage = *reinterpret_cast<const decimal_value_storage*>( field_cref_core_access::storage_of(ref) );
+          strm_ <<  separator_ << storage;
         }
 
         void visit(const enum_cref& ref)

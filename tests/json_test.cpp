@@ -35,6 +35,10 @@ namespace mfast {
                            bool                           first_quote_extracted=false);
     bool get_decimal_string(std::istream& strm, std::string& str);
     bool skip_value (std::istream& strm);
+
+    namespace encode_detail {
+      std::ostream& operator << (std::ostream& os, const decimal_value_storage& storage);
+    }
   }
 }
 
@@ -365,5 +369,62 @@ BOOST_AUTO_TEST_CASE(test_seq_codegen)
   BOOST_CHECK_EQUAL(seq2_inst->element_instruction(),    BankAccount::instruction());
 }
 
+
+BOOST_AUTO_TEST_CASE(test_decimal_output)
+{
+  using namespace mfast::json::encode_detail;
+  using mfast::decimal_value_storage;
+
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(12345, 0);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("12345"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(-12345, 0);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("-12345"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(12345, 2);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("1234500"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(-12345, 2);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("-1234500"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(12345, -2);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("123.45"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(-12345, -2);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("-123.45"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(12345, -5);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("0.12345"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(-12345, -5);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("-0.12345"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(12345, -7);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("0.0012345"));
+  }
+  {
+    std::stringstream strm;
+    strm << decimal_value_storage(-12345, -7);
+    BOOST_CHECK_EQUAL(strm.str(), std::string("-0.0012345"));
+  }
+}
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -210,7 +210,7 @@ namespace mfast
       storage_.of_decimal.exponent_ = exponent;
     }
 
-    int64_t manitissa() const
+    int64_t mantissa() const
     {
       return storage_.of_decimal.mantissa_;
     }
@@ -221,7 +221,7 @@ namespace mfast
     }
 
 
-    void manitissa(int64_t m)
+    void mantissa(int64_t m)
     {
       storage_.of_decimal.mantissa_ = m;
     }
