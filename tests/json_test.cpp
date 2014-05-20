@@ -33,7 +33,7 @@ namespace mfast {
                            std::string*                   pstr,
                            const mfast::byte_vector_mref* pref,
                            bool                           first_quote_extracted=false);
-    bool get_decimal_string(std::istream& strm, std::string& str);
+    std::istream& operator >> (std::istream& strm, mfast::decimal_value_storage& storage);
     bool skip_value (std::istream& strm);
 
     namespace encode_detail {
@@ -241,46 +241,6 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
 
 }
 
-BOOST_AUTO_TEST_CASE(test_get_decimal_string)
-{
-  using namespace mfast::json;
-  std::string str;
-  {
-    std::stringstream strm(" 123.45,");
-    BOOST_CHECK(get_decimal_string(strm, str));
-    BOOST_CHECK_EQUAL(str, std::string("123.45"));
-    strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
-  }
-  {
-    std::stringstream strm(" -123.45,");
-    BOOST_CHECK(get_decimal_string(strm, str));
-    BOOST_CHECK_EQUAL(str, std::string("-123.45"));
-    strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
-  }
-  {
-    std::stringstream strm(" 123.45E+12,");
-    BOOST_CHECK(get_decimal_string(strm, str));
-    BOOST_CHECK_EQUAL(str, std::string("123.45E+12"));
-    strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
-  }
-  {
-    std::stringstream strm(" 123.45E-12,");
-    BOOST_CHECK(get_decimal_string(strm, str));
-    BOOST_CHECK_EQUAL(str, std::string("123.45E-12"));
-    strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
-  }
-  {
-    std::stringstream strm(" 0.123,");
-    BOOST_CHECK(get_decimal_string(strm, str));
-    BOOST_CHECK_EQUAL(str, std::string("0.123"));
-    strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
-  }
-}
 
 BOOST_AUTO_TEST_CASE(test_skip_value)
 {
@@ -426,5 +386,53 @@ BOOST_AUTO_TEST_CASE(test_decimal_output)
     BOOST_CHECK_EQUAL(strm.str(), std::string("-0.0012345"));
   }
 }
+
+BOOST_AUTO_TEST_CASE(test_decimal_input)
+{
+  using namespace mfast::json;
+  std::string str;
+  mfast::decimal_value_storage storage;
+  {
+    std::stringstream strm(" 123.45,");
+    strm >> storage;
+    BOOST_CHECK_EQUAL(storage.mantissa(), 12345LL);
+    BOOST_CHECK_EQUAL(storage.exponent(), -2);
+    strm >> str;
+    BOOST_CHECK_EQUAL(str, std::string(","));
+  }
+  {
+    std::stringstream strm(" -123.45,");
+    strm >> storage;
+    BOOST_CHECK_EQUAL(storage.mantissa(), -12345LL);
+    BOOST_CHECK_EQUAL(storage.exponent(), -2);
+    strm >> str;
+    BOOST_CHECK_EQUAL(str, std::string(","));
+  }
+  {
+    std::stringstream strm(" 1.2345E+12,");
+    strm >> storage;
+    BOOST_CHECK_EQUAL(storage.mantissa(), 12345LL);
+    BOOST_CHECK_EQUAL(storage.exponent(), 8);
+    strm >> str;
+    BOOST_CHECK_EQUAL(str, std::string(","));
+  }
+  {
+    std::stringstream strm(" 1.2345E-12,");
+    strm >> storage;
+    BOOST_CHECK_EQUAL(storage.mantissa(), 12345LL);
+    BOOST_CHECK_EQUAL(storage.exponent(), -16);
+    strm >> str;
+    BOOST_CHECK_EQUAL(str, std::string(","));
+  }
+  {
+    std::stringstream strm(" 0.123,");
+    strm >> storage;
+    BOOST_CHECK_EQUAL(storage.mantissa(), 123LL);
+    BOOST_CHECK_EQUAL(storage.exponent(), -3);
+    strm >> str;
+    BOOST_CHECK_EQUAL(str, std::string(","));
+  }
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

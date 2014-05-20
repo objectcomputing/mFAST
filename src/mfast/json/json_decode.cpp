@@ -203,51 +203,58 @@ namespace mfast {
 
     }
 
-    bool get_decimal_string(std::istream& strm, std::string& str)
+    std::istream& operator >> (std::istream& strm, mfast::decimal_value_storage& storage)
     {
-      const int BUFFER_LEN=128;
-      char buf[BUFFER_LEN];
-      char* ptr = buf;
-      str.resize(0);
-      char c;
 
-      strm >> std::skipws >> c;
-      if (c != '-' && !isdigit(c)) {
-        strm.setstate(std::ios::failbit);
-        BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal", c));
+      int64_t mantissa;
+      int16_t exponent=0;
+      if (!(strm >> std::skipws >> mantissa))
+      {
+        BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal"));
       }
-      *ptr++ = c;
+         //BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal"));
+
       std::streambuf* sbuf = strm.rdbuf();
 
-      bool has_dot = false;
-      bool has_exp = false;
-      while ( (c = sbuf->sbumpc()) != EOF ) {
-        if (isdigit(c)) {}
-        else if (!has_dot && !has_exp && c == '.') {
-          has_dot = true;
-        }
-        else if (!has_exp && (c=='e' || c== 'E')) {
-          has_exp = true;
-          *ptr++ = c;
+      int c = sbuf->sbumpc();
+      if (c == '.')
+      {
+        bool negative = false;
 
-          c = sbuf->sbumpc();
-          if (c != '+' && c != '-' && !isdigit(c))
-            break;
+        if (mantissa < 0)
+        {
+          negative = true;
+          mantissa = -mantissa;
         }
-        else {
-          break;
+
+        while ( (c = sbuf->sbumpc()) != EOF  && isdigit(c))
+        {
+          mantissa *= 10;
+          mantissa += c - '0';
+          exponent -= 1;
         }
-        *ptr++ = c;
-        if (ptr >= buf+BUFFER_LEN-1) {
-          str.append(buf, ptr);
-          ptr = buf;
+
+        if (negative)
+        {
+          mantissa = -mantissa;
         }
       }
 
-      strm.putback(c);
-      if (buf != ptr)
-        str.append(buf, ptr);
-      return true;
+      if (c == 'e' || c == 'E')
+      {
+        int16_t exp;
+        if (!(strm >> exp))
+        {
+          BOOST_THROW_EXCEPTION(json_decode_error(strm, "Invalid expoenent"));
+        }
+        exponent += exp;
+      }
+      else {
+        strm.putback(c);
+      }
+      storage.mantissa(mantissa);
+      storage.exponent(exponent);
+      return strm;
     }
 
     bool parse_array_preamble(std::istream& strm)
@@ -337,26 +344,7 @@ namespace mfast {
 
       void visit(const mfast::decimal_mref& ref)
       {
-        try {
-          // We cannot directly use the following
-          //    decimal val; strm_ >> val;
-          // That is because boost::multiprecision::number
-          // cannot correctly extract value when the number
-          // is not terminate with a string separator (i.e. space, tab, etc).
-          // For example, the following code would fail
-          //    stringstream strm("1.111,");
-          //    decimal val; strm_ >> val;
-          // However, if you change the code from decimal to double
-          // the extraction would succeed.
-          std::string str;
-          if (get_decimal_string(strm_, str)) {
-            ref.as(mfast::decimal(str));
-          }
-        }
-        catch (...) {
-          strm_.setstate(std::ios::failbit);
-          BOOST_THROW_EXCEPTION(json_decode_error(strm_, "Expect decimal value"));
-        }
+        strm_ >> *reinterpret_cast<decimal_value_storage*>(field_mref_core_access::storage_of(ref));
       }
 
       template <typename Char>
