@@ -431,8 +431,6 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     ref.normalize();
     BOOST_CHECK_EQUAL(ref.mantissa(), 123);
     BOOST_CHECK_EQUAL(ref.exponent(), -1);
-
-
   }
 
 }
