@@ -178,7 +178,7 @@ namespace mfast {
     operator double()
     {
       double x = mantissa();
-      return  x * std::pow(10, exponent());
+      return x * std::pow(10, exponent());
     }
 
     value_storage default_base_value() const
@@ -400,17 +400,12 @@ namespace mfast {
     void as(int64_t mant, int16_t exp) const
     {
       assert (exp <= 64 && exp >= -64);
-      if (!has_const_exponent() || exp == instruction()->initial_value().of_decimal.exponent_) {
-        this->storage()->of_decimal.mantissa_ = mant;
-        this->storage()->of_decimal.exponent_ = exp;
-        this->storage()->present(1);
-      }
-      else {
-        as(make_decimal(mant, exp));
-      }
+
+      this->storage()->of_decimal.mantissa_ = mant;
+      this->storage()->of_decimal.exponent_ = exp;
+
+      this->storage()->present(1);
     }
-
-
 
     void set_mantissa(int64_t v) const
     {
@@ -441,17 +436,33 @@ namespace mfast {
 
     void normalize() const
     {
-      while (mantissa() != 0 && mantissa() % 10 == 0) {
-        this->storage()->of_decimal.mantissa_ /= 10;
-        this->storage()->of_decimal.exponent_ += 1;
-      }
+      if (!has_const_exponent()) {
+        while (mantissa() != 0 && mantissa() % 10 == 0) {
+          this->storage()->of_decimal.mantissa_ /= 10;
+          this->storage()->of_decimal.exponent_ += 1;
+        }
 
-      if (mantissa() == 0)
-        this->set_exponent(0);
+        if (mantissa() == 0)
+          this->set_exponent(0);
+      }
+      else {
+        // we need to adjust the mantissa and exponent if the exponent is required to be const
+
+        int16_t fixed_exponent = instruction()->initial_value().of_decimal.exponent_;
+        int16_t exponent_diff = exponent() - fixed_exponent;
+        for (; exponent_diff > 0; --exponent_diff)
+        {
+          this->storage()->of_decimal.mantissa_ *= 10;
+        }
+        for (; exponent_diff < 0; ++exponent_diff)
+        {
+          this->storage()->of_decimal.mantissa_ /= 10;
+        }
+        this->storage()->of_decimal.exponent_ = fixed_exponent;
+      }
     }
 
   private:
-
     bool has_const_exponent() const
     {
       return this->instruction()->field_type() == field_type_exponent && this->instruction()->field_operator() == operator_constant;

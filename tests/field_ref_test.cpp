@@ -408,6 +408,33 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     BOOST_CHECK(ref.absent());
   }
 
+  {
+    mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
+    decimal_field_instruction inst(operator_constant,
+                                   presence_mandatory,
+                                   1,
+                                   "test_decimal3","",
+                                   0,
+                                   &mantissa_inst,
+                                   decimal_value_storage(0, -1));
+
+    inst.construct_value(storage, &allocator);
+
+    decimal_mref ref(&allocator, &storage, &inst);
+    ref.as(1,1); // set the value so it's present
+
+    ref.normalize();
+    BOOST_CHECK_EQUAL(ref.mantissa(), 100);
+    BOOST_CHECK_EQUAL(ref.exponent(), -1);
+
+    ref.as(12345, -3);
+    ref.normalize();
+    BOOST_CHECK_EQUAL(ref.mantissa(), 123);
+    BOOST_CHECK_EQUAL(ref.exponent(), -1);
+
+
+  }
+
 }
 
 BOOST_AUTO_TEST_CASE(string_field_instruction_test)

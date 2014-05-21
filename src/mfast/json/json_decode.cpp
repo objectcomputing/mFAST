@@ -51,7 +51,6 @@ namespace mfast {
         *this << error_occurs_before_info(is);
       }
 
-
     };
 
 
@@ -212,7 +211,7 @@ namespace mfast {
       {
         BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal"));
       }
-         //BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal"));
+      //BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal"));
 
       std::streambuf* sbuf = strm.rdbuf();
 
@@ -339,12 +338,12 @@ namespace mfast {
           // treat it is an integer
           this->visit(reinterpret_cast<const uint64_mref&>(ref));
         }
-
       }
 
       void visit(const mfast::decimal_mref& ref)
       {
         strm_ >> *reinterpret_cast<decimal_value_storage*>(field_mref_core_access::storage_of(ref));
+        ref.normalize();
       }
 
       template <typename Char>
