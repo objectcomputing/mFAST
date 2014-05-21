@@ -244,7 +244,7 @@ namespace mfast {
         int16_t exp;
         if (!(strm >> exp))
         {
-          BOOST_THROW_EXCEPTION(json_decode_error(strm, "Invalid expoenent"));
+          BOOST_THROW_EXCEPTION(json_decode_error(strm, "Invalid exponent"));
         }
         exponent += exp;
       }
