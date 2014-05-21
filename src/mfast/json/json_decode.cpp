@@ -253,6 +253,7 @@ namespace mfast {
       }
       storage.mantissa(mantissa);
       storage.exponent(exponent);
+      storage.storage_.present(1);
       return strm;
     }
 
