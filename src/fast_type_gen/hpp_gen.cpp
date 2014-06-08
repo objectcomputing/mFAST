@@ -357,8 +357,8 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 
 void hpp_gen::visit(const mfast::template_instruction* inst, void*)
 {
-  if (inst->subinstructions().size() == 0)
-    return;
+  // if (inst->subinstructions().size() == 0)
+  //   return;
 
   std::string name ( cpp_name(inst) );
   header_cref_ << "\n"
@@ -412,7 +412,7 @@ void hpp_gen::visit(const mfast::template_instruction* inst, void*)
   content_<< "class ";
 
   content_<< export_symbol_uppercase_ << name << "\n"
-          << "  : private boost::array<mfast::value_storage, " << inst->subinstructions().size() << ">\n"
+          << "  : private mfast::value_storage_array<" << inst->subinstructions().size() << ">\n"
           << "  , public mfast::message_type\n"
           << "{\n"
           << "  typedef mfast::message_type base_type;\n"

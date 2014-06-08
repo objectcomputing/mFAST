@@ -316,8 +316,8 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 
 void inl_gen::visit(const mfast::template_instruction* inst, void*)
 {
-  if (inst->subinstructions().size() == 0)
-    return;
+  // if (inst->subinstructions().size() == 0)
+  //   return;
 
   std::string name (cpp_name(inst));
 

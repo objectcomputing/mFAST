@@ -25,6 +25,7 @@
 #include <cstring>
 #include <boost/type_traits/is_pointer.hpp>
 #include <boost/utility/enable_if.hpp>
+#include <boost/array.hpp>
 
 namespace mfast
 {
@@ -287,6 +288,21 @@ namespace mfast
     {
     }
 
+  };
+
+
+  template <unsigned SIZE>
+  struct value_storage_array
+    : boost::array<value_storage, SIZE>
+  {
+  };
+
+
+  template <>
+  struct value_storage_array<0>
+  {
+    value_storage* data() { return reinterpret_cast<value_storage*>(this); }
+    const value_storage* data() const { return reinterpret_cast<const value_storage*>(this); }
   };
 
 }
