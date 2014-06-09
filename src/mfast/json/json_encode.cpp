@@ -1,6 +1,6 @@
 #include "json.h"
 #include <boost/io/ios_state.hpp>
-
+#include <inttypes.h>
 namespace mfast {
   namespace json {
     namespace encode_detail {
@@ -39,7 +39,7 @@ namespace mfast {
         }
         else if (exponent < 0) {
           char buf[128];
-          int n = std::snprintf(buf, 128, "%lld", mantissa);
+          int n = std::snprintf(buf, 128, "%" PRId64, mantissa);
           char* p = buf;
           if (mantissa < 0) {
             os.put('-');
