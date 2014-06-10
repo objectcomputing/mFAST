@@ -177,7 +177,7 @@ namespace mfast {
 
     operator double()
     {
-      double x = mantissa();
+      double x = static_cast<double>(mantissa());
       return x * std::pow(10, exponent());
     }
 

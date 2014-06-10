@@ -1,5 +1,7 @@
 #include "json.h"
 #include <boost/io/ios_state.hpp>
+#include <boost/type_traits.hpp>
+#include <cstdio>
 
 namespace mfast {
   namespace json {
@@ -28,6 +30,29 @@ namespace mfast {
         return os;
       }
 
+      // Although C99 defined PRId64 macro in <inttypes.h> as the printf flag for int64_t,
+      // it's not available on MSVC. On the travis-ci platform, <inttypes.h> is available,
+      // but PRId64 is undefined. Using function overload is the only way I can make it
+      // portable without compiler warnining.
+      inline int snprint_int(char* buf, int buf_size, long x)
+      {
+#ifndef _MSC_VER
+        return std::snprintf(buf, buf_size, "%ld", x);
+#else
+        return sprintf_s(buf, buf_size, "%ld", x);
+#endif
+      }
+
+      inline int snprint_int(char* buf, int buf_size, long long x)
+      {
+#ifndef _MSC_VER
+        return std::snprintf(buf, buf_size, "%lld", x);
+#else
+        return sprintf_s(buf, buf_size, "%lld", x);
+#endif
+	  }
+
+
       std::ostream& operator << (std::ostream& os, const decimal_value_storage& storage)
       {
         int64_t mantissa =  storage.mantissa();
@@ -39,13 +64,8 @@ namespace mfast {
         }
         else if (exponent < 0) {
           char buf[128];
-// #ifdef PRId64
-//           int n = std::snprintf(buf, 128, "%" PRId64, mantissa);
-// #else
-          // Using %lld is most portable way to print int64_t I can find so far, although
-          // it triggers warning on some compilers.
-          int n = std::snprintf(buf, 128, "%lld", mantissa);
-// #endif
+
+          int n= snprint_int(buf, 128, mantissa);
 
           char* p = buf;
           if (mantissa < 0) {
