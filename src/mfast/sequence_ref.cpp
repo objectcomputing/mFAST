@@ -30,7 +30,7 @@ namespace mfast {
                                        allocator*                        alloc,
                                        std::size_t                       n)
     {
-      assert(n < UINT32_MAX);
+      assert(n < std::numeric_limits<uint32_t>::max());
       std::size_t element_size = instruction->group_content_byte_count ();
 
       std::size_t reserve_size = n*element_size;
