@@ -18,6 +18,7 @@
 //
 #include "mfast/sequence_ref.h"
 #include "mfast/allocator.h"
+#include <stdint.h>
 
 namespace mfast {
   namespace detail {
