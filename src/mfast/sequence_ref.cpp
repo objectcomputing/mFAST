@@ -29,6 +29,7 @@ namespace mfast {
                                        allocator*                        alloc,
                                        std::size_t                       n)
     {
+      assert(n < UINT32_MAX);
       std::size_t element_size = instruction->group_content_byte_count ();
 
       std::size_t reserve_size = n*element_size;
@@ -53,7 +54,7 @@ namespace mfast {
         // It would cause differet value when either storage->of_array.capacity_in_bytes_
         // or new_capacity is not the multiple of element_size.
 
-        storage->of_array.capacity_in_bytes_ = new_capacity;
+        storage->of_array.capacity_in_bytes_ = static_cast<uint32_t>(new_capacity);
       }
     }
 
