@@ -39,7 +39,12 @@ namespace mfast {
         }
         else if (exponent < 0) {
           char buf[128];
+#ifdef PRId64
           int n = std::snprintf(buf, 128, "%" PRId64, mantissa);
+#else
+          int n = std::snprintf(buf, 128, "%lld", mantissa);
+#endif
+
           char* p = buf;
           if (mantissa < 0) {
             os.put('-');
