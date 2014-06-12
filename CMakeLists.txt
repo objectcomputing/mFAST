@@ -80,6 +80,17 @@ set(MFAST_DYNAMIC_COMPONENTS CACHE INTERNAL "")
 set(MFAST_STATIC_COMPONENTS CACHE INTERNAL "")
 set(MFAST_LIBRARY CACHE INTERNAL "")
 
+############################################################################
+# Setting up RPATH
+#
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
+############################################################################
+
 include_directories ("${PROJECT_BINARY_DIR}"
                      "${PROJECT_SOURCE_DIR}/src")
 add_subdirectory (src)
