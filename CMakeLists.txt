@@ -21,6 +21,11 @@ set(MFAST_MINOR_VERSION 2)
 set(MFAST_PATCH_VERSION 0)
 set(MFAST_VERSION ${MFAST_MAJOR_VERSION}.${MFAST_MINOR_VERSION}.${MFAST_PATCH_VERSION})
 
+set(CPACK_PACKAGE_VERSION ${MFAST_VERSION})
+set(CPACK_PACKAGE_NAME "mfast")
+include(CPack)
+
+
 # flag to enable building shared/dynamic library
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "build shared/dynamic library")
 # Offer the user the choice of overriding the installation directories
