@@ -12,6 +12,7 @@ FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
 FASTTYPEGEN_TARGET(test_types3 test3.xml)
 FASTTYPEGEN_TARGET(test_types4 test4.xml)
 FASTTYPEGEN_TARGET(test_types5 test5.xml)
+FASTTYPEGEN_TARGET(test_scp scp.xml)
 
 
 add_executable (mfast_test
@@ -29,6 +30,7 @@ add_executable (mfast_test
                 ${FASTTYPEGEN_test_types3_OUTPUTS}
                 ${FASTTYPEGEN_test_types4_OUTPUTS}
                 ${FASTTYPEGEN_test_types5_OUTPUTS}
+                ${FASTTYPEGEN_test_scp_OUTPUTS}
                 fast_type_gen_test.cpp
                 dictionary_builder_test.cpp
                 json_test.cpp

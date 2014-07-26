@@ -296,11 +296,15 @@ void cpp_gen::output_subinstructions()
   assert(subinstructions_list_.size());
   std::string content = subinstructions_list_.back();
 
-  content.resize(content.size()-1);
-
-  out_ << "const static field_instruction* " << prefix_string() << "subinstructions[] = {\n"
-       << content << "\n"
-       << "};\n\n";
+  if (content.size()) {
+    content.resize(content.size()-1);
+    out_ << "const static field_instruction* " << prefix_string() << "subinstructions[] = {\n"
+         << content << "\n"
+         << "};\n\n";
+  }
+  else {
+     out_ << "const static mfast::instructions_view_t " << prefix_string() << "subinstructions;\n\n";
+  }
   subinstructions_list_.pop_back();
 }
 
@@ -516,8 +520,8 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 
 void cpp_gen::visit(const mfast::template_instruction* inst, void*)
 {
-  if (inst->subinstructions().size() == 0)
-    return;
+  // if (inst->subinstructions().size() == 0)
+  //   return;
 
   std::string name( cpp_name( inst ) );
 
@@ -532,7 +536,6 @@ void cpp_gen::visit(const mfast::template_instruction* inst, void*)
        << "  if (ptr_instruction) return ptr_instruction;\n";
 
   traverse(inst);
-
   output_subinstructions();
   prefixes_.pop_back();
 
