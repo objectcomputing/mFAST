@@ -33,12 +33,7 @@ namespace mfast {
                            std::string*                   pstr,
                            const mfast::byte_vector_mref* pref,
                            bool                           first_quote_extracted=false);
-    std::istream& operator >> (std::istream& strm, mfast::decimal_value_storage& storage);
     bool skip_value (std::istream& strm);
-
-    namespace encode_detail {
-      std::ostream& operator << (std::ostream& os, const decimal_value_storage& storage);
-    }
   }
 }
 
@@ -332,7 +327,6 @@ BOOST_AUTO_TEST_CASE(test_seq_codegen)
 
 BOOST_AUTO_TEST_CASE(test_decimal_output)
 {
-  using namespace mfast::json::encode_detail;
   using mfast::decimal_value_storage;
 
   {

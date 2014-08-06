@@ -202,60 +202,6 @@ namespace mfast {
 
     }
 
-    std::istream& operator >> (std::istream& strm, mfast::decimal_value_storage& storage)
-    {
-
-      int64_t mantissa;
-      int16_t exponent=0;
-      if (!(strm >> std::skipws >> mantissa))
-      {
-        BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal"));
-      }
-      //BOOST_THROW_EXCEPTION(json_decode_error(strm, "Expect decimal"));
-
-      std::streambuf* sbuf = strm.rdbuf();
-
-      int c = sbuf->sbumpc();
-      if (c == '.')
-      {
-        bool negative = false;
-
-        if (mantissa < 0)
-        {
-          negative = true;
-          mantissa = -mantissa;
-        }
-
-        while ( (c = sbuf->sbumpc()) != EOF  && isdigit(c))
-        {
-          mantissa *= 10;
-          mantissa += c - '0';
-          exponent -= 1;
-        }
-
-        if (negative)
-        {
-          mantissa = -mantissa;
-        }
-      }
-
-      if (c == 'e' || c == 'E')
-      {
-        int16_t exp;
-        if (!(strm >> exp))
-        {
-          BOOST_THROW_EXCEPTION(json_decode_error(strm, "Invalid exponent"));
-        }
-        exponent += exp;
-      }
-      else {
-        strm.putback(c);
-      }
-      storage.mantissa(mantissa);
-      storage.exponent(exponent);
-      storage.storage_.present(1);
-      return strm;
-    }
 
     bool parse_array_preamble(std::istream& strm)
     {
@@ -344,6 +290,11 @@ namespace mfast {
       void visit(const mfast::decimal_mref& ref)
       {
         strm_ >> *reinterpret_cast<decimal_value_storage*>(field_mref_core_access::storage_of(ref));
+
+        if (!strm_) {
+          BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect decimal value"));
+        }
+
         ref.normalize();
       }
 

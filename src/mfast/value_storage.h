@@ -305,6 +305,9 @@ namespace mfast
     const value_storage* data() const { return reinterpret_cast<const value_storage*>(this); }
   };
 
+  MFAST_EXPORT std::istream& operator >> (std::istream& strm, decimal_value_storage& storage);
+  MFAST_EXPORT std::ostream& operator << (std::ostream& os, const decimal_value_storage& storage);
+
 }
 
 #endif /* end of include guard: VALUE_STORAGE_H_OMNNMOZX */

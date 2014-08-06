@@ -21,6 +21,10 @@
 
 #include <cmath>
 #include <cfloat>
+#include <boost/utility/string_ref.hpp>
+#include <boost/array.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/array.hpp>
 #include "mfast_export.h"
 #include "mfast/field_ref.h"
 #include "mfast/int_ref.h"
@@ -55,7 +59,6 @@ namespace mfast {
   namespace detail {
     class codec_helper;
   }
-
 
   class exponent_cref
     : public field_cref
@@ -175,10 +178,17 @@ namespace mfast {
       return static_cast<instruction_cptr>(instruction_);
     }
 
-    operator double()
+    operator double() const
     {
       double x = static_cast<double>(mantissa());
       return x * std::pow(10, exponent());
+    }
+
+    std::string to_string() const
+    {
+      std::stringstream strm;
+      strm << *reinterpret_cast<const decimal_value_storage*>(this->storage());
+      return strm.str();
     }
 
     value_storage default_base_value() const
@@ -395,6 +405,21 @@ namespace mfast {
         this->storage()->of_decimal.exponent_ = const_exp;
       }
       this->storage()->present(1);
+    }
+
+    void as(boost::string_ref decimal_str)
+    {
+      typedef boost::iostreams::stream<boost::iostreams::array_source> array_stream;
+      array_stream is(decimal_str.data(), decimal_str.size());
+      is >> *reinterpret_cast<decimal_value_storage*>(this->storage());
+
+      if (!is) {
+        std::string msg(decimal_str.data(), decimal_str.size());
+        msg += " is not a decimal value";
+        BOOST_THROW_EXCEPTION(std::runtime_error(msg));
+      }
+
+      normalize();
     }
 
     void as(int64_t mant, int16_t exp) const
