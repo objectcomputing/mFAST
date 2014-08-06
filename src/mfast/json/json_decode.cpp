@@ -384,7 +384,7 @@ namespace mfast {
     };
 
 
-    // return false only when the parsed result is empty or error
+    // return false only parsed failure
     bool decode_visitor::visit_impl(const mfast::aggregate_mref& ref)
     {
 
@@ -400,13 +400,13 @@ namespace mfast {
 
         if (strm_.peek() == '}') {
           strm_ >> c;
-          return false;
+          return true;
         }
 
         do {
           std::string key;
           if (!get_quoted_string(strm_, &key, 0))
-            return false;
+            BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Invalid field name"));
 
           strm_ >> c;
 
@@ -452,7 +452,7 @@ namespace mfast {
         char buf[4];
         strm_ >> std::noskipws >> std::setw(3) >> buf >> std::skipws;
         if (strncmp(buf, "ull", 3) == 0)
-          return false;
+          return true;
       }
       strm_.setstate(std::ios::failbit);
       BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Expect {", c));
