@@ -61,6 +61,10 @@ if(NOT IS_ABSOLUTE "${INSTALL_INCLUDE_DIR}")
  set(INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 endif()
 
+
+include_directories ("${PROJECT_BINARY_DIR}"
+                     "${PROJECT_SOURCE_DIR}/src")
+
 ################################################################################
 ## Setting up Boost Library
 ################################
@@ -96,8 +100,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ############################################################################
 
-include_directories ("${PROJECT_BINARY_DIR}"
-                     "${PROJECT_SOURCE_DIR}/src")
+
 add_subdirectory (src)
 
 link_directories (${PROJECT_BINARY_DIR}/src)
