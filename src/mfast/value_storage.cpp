@@ -51,7 +51,7 @@ namespace mfast
       }
       exponent += exp;
     }
-    else {
+    else if (c != EOF ){
       strm.putback(c);
     }
     storage.mantissa(mantissa);
