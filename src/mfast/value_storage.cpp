@@ -1,6 +1,7 @@
 #include "value_storage.h"
 #include <iostream>
 #include <algorithm>
+#include <cstring>
 
 namespace mfast
 {
