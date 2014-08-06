@@ -24,7 +24,8 @@
 #include <cstring>
 #include <limits>
 #include <vector>
-#include "example.h"
+#include "scp.h"
+#include "emdi_snapshot.h"
 
 #include <boost/exception/diagnostic_information.hpp>
 // #include <boost/chrono/chrono.hpp>
@@ -41,8 +42,7 @@ const char usage[] =
   "  -head n     : process only the first 'n' messages\n"
   "  -c count    : repeat the test 'count' times\n"
   "  -r          : Toggle 'reset encoder on every message' (default false).\n"
-  "  -hfix n     : Skip n byte header before each message\n"
-  "  -arena      : Use arena_allocator\n\n";
+  "  -hfix n     : Skip n byte header before each message\n";
 
 int read_file(const char* filename, std::vector<char>& contents)
 {
@@ -107,18 +107,20 @@ int main(int argc, const char** argv)
     return -1;
   }
 
+  std::stringstream log;
   try {
 
     mfast::arena_allocator arena_alloc;
     mfast::malloc_allocator malloc_allc;
     mfast::allocator* alloc = &malloc_allc;
-    if (use_arena)
-      alloc = &arena_alloc;
 
-    const mfast::templates_description* descriptions[] = { example::description() };
+    const mfast::templates_description* descriptions[] = { scp::description(), emdi_snapshot::description() };
 
     mfast::fast_decoder decoder(alloc);
     decoder.include(descriptions);
+
+    decoder.debug_log(&log);
+
 
 #ifdef WITH_ENCODE
     mfast::fast_encoder encoder(alloc);
@@ -129,6 +131,8 @@ int main(int argc, const char** argv)
 
     mfast::message_type msg_value;
 
+    const int block_header_size = 23;
+
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
 
     // typedef boost::chrono::high_resolution_clock clock;
@@ -137,11 +141,12 @@ int main(int argc, const char** argv)
 
       for (std::size_t j = 0; j < repeat_count; ++j) {
 
-        const char* first = &message_contents[0] + skip_header_bytes;
-        const char* last = &message_contents[0] + message_contents.size();
+        const char* first = &message_contents[block_header_size] + skip_header_bytes;
+        const char* last = &message_contents.back()+1;
         bool first_message = true;
         while (first < last ) {
           mfast::message_cref msg = decoder.decode(first, last, force_reset || first_message );
+          std::cout << msg.id() << "\n";
 
 #ifdef WITH_ENCODE
           encoder.encode(msg, buffer, force_reset || first_message);
@@ -162,6 +167,7 @@ int main(int argc, const char** argv)
     // std::cout << "time spent " << boost::chrono::duration_cast<ms>(clock::now() - start).count() << " ms\n";
   }
   catch (boost::exception& e) {
+    std::cout << log.str();
     std::cerr << boost::diagnostic_information(e);
     return -1;
   }
