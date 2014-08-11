@@ -435,6 +435,14 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
     ref.normalize();
     BOOST_CHECK_EQUAL(ref.mantissa(), 123);
     BOOST_CHECK_EQUAL(ref.exponent(), -1);
+
+  }
+  {
+    mfast::decimal_type x;
+    x.mref ().as (9664.3);
+
+    double y(x.cref());
+    BOOST_CHECK_CLOSE(y, 9664.3, 0.00001);
   }
 
 }

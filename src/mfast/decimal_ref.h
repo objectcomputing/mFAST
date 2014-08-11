@@ -391,11 +391,11 @@ namespace mfast {
       int32_t exp;
       if (!has_const_exponent()) {
         d.backend().extract_parts(m, exp);
-        d *= decimal(decimal_backend(1.0, 18-exp));
+        d *= decimal(decimal_backend(1.0, 17-exp));
         // Don't be distract by the method name -- extract_unsigned_long_long()
         // the returned value is signed
         this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
-        this->storage()->of_decimal.exponent_ = exp-18;
+        this->storage()->of_decimal.exponent_ = exp-17;
         normalize();
       }
       else {
@@ -407,7 +407,7 @@ namespace mfast {
       this->storage()->present(1);
     }
 
-    void as(boost::string_ref decimal_str)
+    void as(boost::string_ref decimal_str) const
     {
       typedef boost::iostreams::stream<boost::iostreams::array_source> array_stream;
       array_stream is(decimal_str.data(), decimal_str.size());
