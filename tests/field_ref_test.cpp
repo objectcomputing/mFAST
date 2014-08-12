@@ -443,6 +443,9 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
 
     double y(x.cref());
     BOOST_CHECK_CLOSE(y, 9664.3, 0.00001);
+
+    x.mref ().as (0);
+    BOOST_CHECK_EQUAL(x.cref().mantissa(), 0LL);
   }
 
 }

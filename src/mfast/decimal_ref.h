@@ -357,15 +357,6 @@ namespace mfast {
     {
     }
 
-    void as (const decimal_cref& cref) const
-    {
-      if (cref.absent()) {
-        omit();
-      }
-      else {
-        as(cref.mantissa(), cref.exponent());
-      }
-    }
 
     int64_t mantissa() const
     {
@@ -377,49 +368,22 @@ namespace mfast {
       return static_cast<int16_t>(this->storage()->of_decimal.exponent_);
     }
 
-    void as (decimal d) const
-#ifndef _MSC_VER
-    {
-      this->as<18,boost::int32_t, void>(d);
-    }
 
-    template <unsigned Digits10, class ExponentType, class Allocator>
-    void as(boost::multiprecision::number<boost::multiprecision::backends::cpp_dec_float<Digits10,ExponentType,Allocator> > d) const
-#endif
+
+    template <typename T>
+    typename boost::enable_if<boost::is_integral<T> >::type as(T v)
     {
-      double m;
-      int32_t exp;
-      if (!has_const_exponent()) {
-        d.backend().extract_parts(m, exp);
-        d *= decimal(decimal_backend(1.0, 17-exp));
-        // Don't be distract by the method name -- extract_unsigned_long_long()
-        // the returned value is signed
-        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
-        this->storage()->of_decimal.exponent_ = exp-17;
-        normalize();
-      }
-      else {
-        const int16_t const_exp = instruction()->initial_value().of_decimal.exponent_;
-        d *= decimal(decimal_backend(1.0, -1*const_exp));
-        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
-        this->storage()->of_decimal.exponent_ = const_exp;
-      }
+      this->storage()->of_decimal.mantissa_ = v;
+      this->storage()->of_decimal.exponent_ = 0;
+
       this->storage()->present(1);
+      normalize();
     }
 
-    void as(boost::string_ref decimal_str) const
+    template <typename T>
+    typename boost::disable_if<boost::is_integral<T> >::type as(T v)
     {
-      typedef boost::iostreams::stream<boost::iostreams::array_source> array_stream;
-      array_stream is(decimal_str.data(), decimal_str.size());
-      is >> *reinterpret_cast<decimal_value_storage*>(this->storage());
-
-      if (!is) {
-        std::string msg(decimal_str.data(), decimal_str.size());
-        msg += " is not a decimal value";
-        BOOST_THROW_EXCEPTION(std::runtime_error(msg));
-      }
-
-      normalize();
+      this->as_i(v);
     }
 
     void as(int64_t mant, int16_t exp) const
@@ -488,6 +452,63 @@ namespace mfast {
     }
 
   private:
+
+    void as_i (decimal d) const
+#ifndef _MSC_VER
+    {
+      this->as_i<18,boost::int32_t, void>(d);
+    }
+
+    template <unsigned Digits10, class ExponentType, class Allocator>
+    void as_i(boost::multiprecision::number<boost::multiprecision::backends::cpp_dec_float<Digits10,ExponentType,Allocator> > d) const
+#endif
+    {
+      double m;
+      int32_t exp;
+      if (!has_const_exponent()) {
+        d.backend().extract_parts(m, exp);
+        d *= decimal(decimal_backend(1.0, 17-exp));
+        // Don't be distract by the method name -- extract_unsigned_long_long()
+        // the returned value is signed
+        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
+        this->storage()->of_decimal.exponent_ = exp-17;
+        normalize();
+      }
+      else {
+        const int16_t const_exp = instruction()->initial_value().of_decimal.exponent_;
+        d *= decimal(decimal_backend(1.0, -1*const_exp));
+        this->storage()->of_decimal.mantissa_ = d.backend().extract_unsigned_long_long();
+        this->storage()->of_decimal.exponent_ = const_exp;
+      }
+      this->storage()->present(1);
+    }
+
+    void as_i(boost::string_ref decimal_str) const
+    {
+      typedef boost::iostreams::stream<boost::iostreams::array_source> array_stream;
+      array_stream is(decimal_str.data(), decimal_str.size());
+      is >> *reinterpret_cast<decimal_value_storage*>(this->storage());
+
+      if (!is) {
+        std::string msg(decimal_str.data(), decimal_str.size());
+        msg += " is not a decimal value";
+        BOOST_THROW_EXCEPTION(std::runtime_error(msg));
+      }
+
+      normalize();
+    }
+
+    void as_i (const decimal_cref& cref) const
+    {
+      if (cref.absent()) {
+        omit();
+      }
+      else {
+        as(cref.mantissa(), cref.exponent());
+      }
+    }
+
+
     bool has_const_exponent() const
     {
       return this->instruction()->field_type() == field_type_exponent && this->instruction()->field_operator() == operator_constant;
