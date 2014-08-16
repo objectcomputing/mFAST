@@ -7,6 +7,7 @@
   <define name="mfast:tag">
     <enum>
       <element name="JSON_UNKNOWN" value="1" />
+      <element name="JSON_IGNORE" value="2" />
     </enum>
   </define>
 
@@ -21,7 +22,7 @@
         <decimal name="price">
           <delta value="0" />
         </decimal>
-        <sequence name="tags" presence="optional">
+        <sequence name="tags" presence="optional"  mfast:tag="JSON_IGNORE">
             <string  />
         </sequence>
         <group name="stock" presence="optional">

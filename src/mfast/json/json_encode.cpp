@@ -32,7 +32,7 @@ namespace mfast {
 
       class json_visitor
       {
-      private:
+      protected:
         std::ostream& strm_;
         char separator_[2];
         unsigned json_object_tag_mask_;
@@ -172,6 +172,52 @@ namespace mfast {
 
       };
 
+
+      class json_visitor_with_ignore_tag
+        : public json_visitor
+      {
+      private:
+        unsigned ignore_tag_mask_;
+
+      public:
+        using json_visitor::visit;
+
+        json_visitor_with_ignore_tag(std::ostream& strm,
+                                     unsigned      json_object_tag_mask,
+                                     unsigned      ignore_tag_mask)
+          : json_visitor(strm, json_object_tag_mask)
+          , ignore_tag_mask_(ignore_tag_mask)
+        {
+        }
+
+        void visit(const mfast::aggregate_cref& ref, int)
+        {
+          if (ref.num_fields()  == 1) {
+            field_cref f0 = ref[0];
+            if (f0.instruction()->field_type() == mfast::field_type_templateref) {
+              if (f0.present())
+                this->visit(mfast::nested_message_cref(f0),0);
+              return;
+            }
+          }
+
+          strm_ << separator_ <<  "{";
+          separator_[0] = '\0';
+
+          for (std::size_t i = 0; i < ref.num_fields(); ++i) {
+            if (ref[i].present() && 0 == (ref[i].instruction()->tag().to_uint64() & ignore_tag_mask_)) {
+              strm_ << separator_ << quoted_string(ref[i].name()) << ":";
+              separator_[0] = '\0';
+              ref[i].accept_accessor(*this);
+              separator_[0] = ',';
+            }
+          }
+
+          strm_ << "}";
+        }
+
+      };
+
     } // namspace encode_detail
 
     bool encode(std::ostream&                os,
@@ -189,6 +235,16 @@ namespace mfast {
     {
       encode_detail::json_visitor visitor(os, json_object_tag_mask);
       visitor.visit(seq, 0);
+      return os.good();
+    }
+
+    bool encode(std::ostream&                  os,
+                const ::mfast::aggregate_cref& msg,
+                unsigned                       json_object_tag_mask,
+                unsigned                       ignore_tag_mask)
+    {
+      encode_detail::json_visitor_with_ignore_tag visitor(os, json_object_tag_mask, ignore_tag_mask);
+      visitor.visit(msg, 0);
       return os.good();
     }
 

@@ -73,19 +73,34 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   // product_ref.set_ext().assign(ext_data, ext_data+sizeof(ext_data)-1);
 
   product_ref.set_ext().refers_to(ext_data, sizeof(ext_data)-1);
-
-  std::ostringstream ostrm;
-  mfast::json::encode(ostrm,
-                      product_ref,
-                      mfast_tag::JSON_UNKNOWN);
-
-
   const char* result = "{\"name\":\"Foo\",\"price\":123.56,\"tags\":[\"Bar with \\\"quote\\\"\",\"Eek with \\\\\"],\"stock\":{\"warehouse\":300,\"retail\":20},\"ext\":{\"test1\":1}}";
-  // std::cout << strm.str() << "\n";
-  // std::cout << result << "\n";
 
-  BOOST_CHECK_EQUAL(ostrm.str(),
-                    std::string(result));
+  {
+    std::ostringstream ostrm;
+    mfast::json::encode(ostrm,
+                        product_ref,
+                        mfast_tag::JSON_UNKNOWN);
+
+
+    // std::cout << strm.str() << "\n";
+    // std::cout << result << "\n";
+
+    BOOST_CHECK_EQUAL(ostrm.str(),
+                      std::string(result));
+  }
+  {
+
+    std::ostringstream ostrm;
+    mfast::json::encode(ostrm,
+                        product_ref,
+                        mfast_tag::JSON_UNKNOWN,
+                        mfast_tag::JSON_IGNORE);
+
+    const char* result = "{\"name\":\"Foo\",\"price\":123.56,\"stock\":{\"warehouse\":300,\"retail\":20},\"ext\":{\"test1\":1}}";
+
+    BOOST_CHECK_EQUAL(ostrm.str(),
+                      std::string(result));
+  }
 
   debug_allocator alloc;
   Product product2_holder(product_ref, &alloc);
@@ -392,7 +407,7 @@ BOOST_AUTO_TEST_CASE(test_decimal_input)
     BOOST_CHECK_EQUAL(storage.mantissa(), 12345LL);
     BOOST_CHECK_EQUAL(storage.exponent(), -2);
     strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
+    BOOST_CHECK_EQUAL(str,                std::string(","));
   }
   {
     std::stringstream strm(" -123.45,");
@@ -400,7 +415,7 @@ BOOST_AUTO_TEST_CASE(test_decimal_input)
     BOOST_CHECK_EQUAL(storage.mantissa(), -12345LL);
     BOOST_CHECK_EQUAL(storage.exponent(), -2);
     strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
+    BOOST_CHECK_EQUAL(str,                std::string(","));
   }
   {
     std::stringstream strm(" 1.2345E+12,");
@@ -408,7 +423,7 @@ BOOST_AUTO_TEST_CASE(test_decimal_input)
     BOOST_CHECK_EQUAL(storage.mantissa(), 12345LL);
     BOOST_CHECK_EQUAL(storage.exponent(), 8);
     strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
+    BOOST_CHECK_EQUAL(str,                std::string(","));
   }
   {
     std::stringstream strm(" 1.2345E-12,");
@@ -416,7 +431,7 @@ BOOST_AUTO_TEST_CASE(test_decimal_input)
     BOOST_CHECK_EQUAL(storage.mantissa(), 12345LL);
     BOOST_CHECK_EQUAL(storage.exponent(), -16);
     strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
+    BOOST_CHECK_EQUAL(str,                std::string(","));
   }
   {
     std::stringstream strm(" 0.123,");
@@ -424,7 +439,7 @@ BOOST_AUTO_TEST_CASE(test_decimal_input)
     BOOST_CHECK_EQUAL(storage.mantissa(), 123LL);
     BOOST_CHECK_EQUAL(storage.exponent(), -3);
     strm >> str;
-    BOOST_CHECK_EQUAL(str, std::string(","));
+    BOOST_CHECK_EQUAL(str,                std::string(","));
   }
 }
 
