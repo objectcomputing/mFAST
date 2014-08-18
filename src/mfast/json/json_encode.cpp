@@ -118,7 +118,7 @@ namespace mfast {
           strm_ << "]";
         }
 
-        void visit(const mfast::aggregate_cref& ref, int)
+        virtual void visit(const mfast::aggregate_cref& ref, int)
         {
           if (ref.num_fields()  == 1) {
             field_cref f0 = ref[0];
@@ -190,7 +190,7 @@ namespace mfast {
         {
         }
 
-        void visit(const mfast::aggregate_cref& ref, int)
+        virtual void visit(const mfast::aggregate_cref& ref, int)
         {
           if (ref.num_fields()  == 1) {
             field_cref f0 = ref[0];
