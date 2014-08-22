@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
   }
   {
     bv_ref.clear();
-    const char data[] = "\"\u4e2d\u83EF\u6c11\u570B\",";
+    const char data[] = "\"\\u4e2d\\u83EF\\u6c11\\u570B\",";
     std::stringstream strm(data);
     BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
     BOOST_CHECK_EQUAL(str,           std::string("中華民國"));
@@ -247,6 +247,12 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
     strm >> str;
     BOOST_CHECK_EQUAL(str, std::string(","));
   }
+  // {
+  //     bv_ref.clear();
+  //     const char data[] = "\"Konu\\u0015fal\\u00131m bir gün\",";
+  //     std::stringstream strm(data);
+  //     BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
+  // }
   {
     bv_ref.clear();
     const char data[] = "\"abc\\nd\",";

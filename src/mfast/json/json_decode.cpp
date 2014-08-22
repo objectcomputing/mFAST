@@ -117,18 +117,23 @@ namespace mfast {
               if (!strm.read(buf, 4))
                 BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid unicode character"));
 
+              escaped = false;
 
               if (pref) {
                 pref->insert(pref->end(), buf, buf+4);
               }
 
-              for (int i = 0; i < 4; ++i, val <<=4 ) {
+              if (!pstr)
+                continue;
+
+              for (int i = 0; i < 4; ++i) {
+                val <<=4;
                 if (buf[i] >= '0' && buf[i] <= '9')
-                  val &= buf[i] - '0';
+                  val |= buf[i] - '0';
                 else if (buf[i] >= 'a' && buf[i] <= 'f')
-                  val &= buf[i] - 'a' + 10;
+                  val |= buf[i] - 'a' + 10;
                 else if (buf[i] >= 'A' && buf[i] <= 'F')
-                  val &= buf[i] - 'A' + 10;
+                  val |= buf[i] - 'A' + 10;
                 else {
                   BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid unicode character"));
                 }
@@ -144,10 +149,11 @@ namespace mfast {
               }
               else {
                 // 3 bytes encoding
-                (*pstr) +=  static_cast<char>((val >> 12) | 0xD0);
-                (*pstr) +=  static_cast<char>((val >> 6) | 0x80);
+                (*pstr) +=  static_cast<char>((val >> 12) | 0xE0);
+                (*pstr) +=  static_cast<char>(((val >> 6) & 0x3F) | 0x80);
                 (*pstr) +=  static_cast<char>((val & 0x3F) | 0x80);
               }
+              continue;
 
             }
             else {
