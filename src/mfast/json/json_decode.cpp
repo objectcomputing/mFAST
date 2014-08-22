@@ -108,6 +108,48 @@ namespace mfast {
               c = escapables[pch-orig];
               escaped = false;
             }
+            else if (c == 'u' ){
+              // This is a unicode character
+              // we need to read 4 hexadecimal digits
+              uint32_t val = 0;
+              char buf[5]={'\x0'};
+
+              if (!strm.read(buf, 4))
+                BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid unicode character"));
+
+
+              if (pref) {
+                pref->insert(pref->end(), buf, buf+4);
+              }
+
+              for (int i = 0; i < 4; ++i, val <<=4 ) {
+                if (buf[i] >= '0' && buf[i] <= '9')
+                  val &= buf[i] - '0';
+                else if (buf[i] >= 'a' && buf[i] <= 'f')
+                  val &= buf[i] - 'a' + 10;
+                else if (buf[i] >= 'A' && buf[i] <= 'F')
+                  val &= buf[i] - 'A' + 10;
+                else {
+                  BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid unicode character"));
+                }
+              }
+
+              // now we need convert the unicode character to UTF8
+              if (val < 0x7F)
+                (*pstr) += static_cast<char>(val);
+              else if (val < 0x07FF) {
+                // 2 bytes encoding
+                (*pstr) +=  static_cast<char>((val >> 6) | 0xC0);
+                (*pstr) +=  static_cast<char>( (val & 0x3F) | 0x80);
+              }
+              else {
+                // 3 bytes encoding
+                (*pstr) +=  static_cast<char>((val >> 12) | 0xD0);
+                (*pstr) +=  static_cast<char>((val >> 6) | 0x80);
+                (*pstr) +=  static_cast<char>((val & 0x3F) | 0x80);
+              }
+
+            }
             else {
               strm.setstate(std::ios::failbit);
               BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid escape character"));
