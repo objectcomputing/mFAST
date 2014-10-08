@@ -19,6 +19,8 @@ namespace mfast {
 
       std::ostream& operator << (std::ostream& os, quoted_string str)
       {
+        boost::io::ios_flags_saver ifs( os );
+
         os.put('"');
         const char* ptr = str.str_;
         while (*ptr != '\x0') {
@@ -42,7 +44,7 @@ namespace mfast {
               break;
             default:
               os.write("\\u00", 4);
-              os << std::hex << static_cast<int>(*ptr) << std::dec;
+              os << std::hex <<  std::setw(2) << std::setfill('0') << static_cast<int>(*ptr);
             }
             ptr++;
             continue;
