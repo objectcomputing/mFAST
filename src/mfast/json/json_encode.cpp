@@ -22,6 +22,31 @@ namespace mfast {
         os.put('"');
         const char* ptr = str.str_;
         while (*ptr != '\x0') {
+          if (*ptr < '\x1F')
+          {
+            switch (*ptr) {
+            case '\x08':
+              os.write("\\b", 2);
+              break;
+            case '\x09':
+              os.write("\\t", 2);
+              break;
+            case '\x0C':
+              os.write("\\f", 2);
+              break;
+            case '\x0A':
+              os.write("\\n", 2);
+              break;
+            case '\x0D':
+              os.write("\\r", 2);
+              break;
+            default:
+              os.write("\\u00", 4);
+              os << std::hex << static_cast<int>(*ptr) << std::dec;
+            }
+            continue;
+          }
+
           if (*ptr == '\\' || *ptr == '"')
             os.put('\\');
           os.put(*ptr++);
