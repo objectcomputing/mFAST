@@ -44,6 +44,7 @@ namespace mfast {
               os.write("\\u00", 4);
               os << std::hex << static_cast<int>(*ptr) << std::dec;
             }
+            ptr++;
             continue;
           }
 
