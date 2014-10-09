@@ -34,8 +34,27 @@ namespace mfast {
                            const mfast::byte_vector_mref* pref,
                            bool                           first_quote_extracted=false);
     bool skip_value (std::istream& strm);
+
+
+    namespace encode_detail {
+
+      struct quoted_string {
+        quoted_string(const char* str)
+          : str_(str)
+        {
+        }
+
+        const char* str_;
+      };
+
+
+      std::ostream& operator << (std::ostream& os, quoted_string str);
+
+
+    }
   }
 }
+
 
 BOOST_AUTO_TEST_SUITE( json_test_suite )
 
@@ -191,6 +210,20 @@ BOOST_AUTO_TEST_CASE(json_decode_null_test)
   }
 }
 
+
+
+BOOST_AUTO_TEST_CASE(test_encode_quoted_string)
+{
+  std::stringstream stream;
+
+  mfast::json::encode_detail::quoted_string str("abcd\x01\b\t\f\n\r\\\"");
+
+  stream << str;
+
+  BOOST_CHECK_EQUAL(stream.str(), std::string("\"abcd\\u0001\\b\\t\\f\\n\\r\\\\\\\"\"") );
+
+}
+
 BOOST_AUTO_TEST_CASE(test_get_quoted_string)
 {
   using namespace mfast;
@@ -255,10 +288,10 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
   // }
   {
     bv_ref.clear();
-    const char data[] = "\"abc\\nd\",";
+    const char data[] = "\"abc\\nd\\/\",";
     std::stringstream strm(data);
     BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
-    BOOST_CHECK_EQUAL(str,           std::string("abc\nd"));
+    BOOST_CHECK_EQUAL(str,           std::string("abc\nd/"));
 
     BOOST_CHECK_EQUAL(bv_ref.size(), sizeof(data)-2);
     BOOST_CHECK(memcmp(data, bv_ref.data(), sizeof(data)-2) ==0);

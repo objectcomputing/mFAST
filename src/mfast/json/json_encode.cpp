@@ -20,39 +20,27 @@ namespace mfast {
       std::ostream& operator << (std::ostream& os, quoted_string str)
       {
         boost::io::ios_flags_saver ifs( os );
-
         os.put('"');
         const char* ptr = str.str_;
-        while (*ptr != '\x0') {
-          if (*ptr < '\x1F')
+        int c;
+        while ( (c = *ptr++) != '\0') {
+          // According to ECMA-404, the control charanter (U+0000 to U+001F) must be escaped
+          if (c < '\x20')
           {
-            switch (*ptr) {
-            case '\x08':
-              os.write("\\b", 2);
-              break;
-            case '\x09':
-              os.write("\\t", 2);
-              break;
-            case '\x0C':
-              os.write("\\f", 2);
-              break;
-            case '\x0A':
-              os.write("\\n", 2);
-              break;
-            case '\x0D':
-              os.write("\\r", 2);
-              break;
-            default:
-              os.write("\\u00", 4);
-              os << std::hex <<  std::setw(2) << std::setfill('0') << static_cast<int>(*ptr);
+            // if c is '\x08', '\x09','\0x0A','\0x0C' and '\0x0D', encoded as "\b", "\t", "\n", "\f", "\r" repsectively;
+            // otherwise encoded as "\uxxxx" where xxxx is 4 digit hexidecimal characters.
+            const char control_table[33]= "uuuuuuuubtnufruuuuuuuuuuuuuuuuuu";
+            char buf[7]="\\";
+            buf[1]=control_table[c];
+            if (buf[1] == 'u') {
+              std::snprintf(buf+2, 5, "%04x", c );
             }
-            ptr++;
+            os << buf;
             continue;
           }
-
-          if (*ptr == '\\' || *ptr == '"')
+          if (c == '\\' || c == '"')
             os.put('\\');
-          os.put(*ptr++);
+          os.put(c);
         }
         os.put('"');
         return os;

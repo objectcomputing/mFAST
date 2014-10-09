@@ -101,8 +101,8 @@ namespace mfast {
           }
           else {
             // escape mode
-            const char* escapables="\b\f\n\r\t\v'\"\\";
-            const char* orig="bfnrtv'\"\\";
+            const char* escapables="\b\t\n\f\r\"/\\";
+            const char* orig="btnfr\"/\\";
             const char* pch = strchr(orig, c);
             if (pch != 0) {
               c = escapables[pch-orig];
