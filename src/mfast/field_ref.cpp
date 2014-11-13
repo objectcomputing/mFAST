@@ -22,6 +22,11 @@ namespace mfast {
   namespace detail {
     const value_storage null_storage;
   }
+
+  bad_optional_access::bad_optional_access()
+    : std::logic_error("Attempted to access the value of an uninitialized optional mfast object.")
+  {
+  }
 }
 
 

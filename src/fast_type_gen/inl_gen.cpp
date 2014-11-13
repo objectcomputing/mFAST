@@ -130,6 +130,14 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
            << "    return " << cref_type_name << "(0, " << cref_type_name << "::instruction_cptr(0));\n";
     out_ << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str() << ");\n"
          << "}\n\n"
+         << "\ninline " << cref_type_name << "\n"
+         << cref_scope_.str() << "acquire_" << name << "() const\n"
+         << "{\n";
+    if (inst->optional())
+      out_ << "  if (" << "(*this)[" << index << "].absent())\n"
+           << "    throw mfast::bad_optional_access();\n";
+    out_ << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str() << ");\n"
+         << "}\n\n"
          << "inline " << mref_type_name << "\n"
          << mref_scope_.str() << "set_" << name << "() const\n"
          << "{\n";
@@ -422,9 +430,11 @@ void inl_gen::visit(const mfast::templateref_instruction* , void* pIndex)
        << cref_scope_.str() << "get_nested_message" << index << "() const\n"
        << "{\n"
        << "  return mfast::nested_message_cref((*this)[" << index << "]);\n"
-       << "}\n\n";
-
-  out_ << "inline\n"
+       << "}\n\n"
+       << cref_scope_.str() << "acquire_nested_message" << index << "() const\n"
+       << "{\n" << "  return mfast::nested_message_cref((*this)[" << index << "]);\n"
+       << "}\n\n"
+       << "inline\n"
        << "mfast::nested_message_mref\n"
        << mref_scope_.str() << "set_nested_message" << index << "() const\n"
        << "{\n"
@@ -521,6 +531,18 @@ void inl_gen::gen_accessors(const mfast::field_instruction* inst,
          << "{\n"
          << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
          << "}\n\n";
+
+    out_ << "inline " << cref_type_name << "\n"
+         << cref_scope_.str() << "acquire_" << name << "() const\n"
+         << "{\n";
+
+   if (inst->optional())
+     out_ << "  if (" << "(*this)[" << index << "].absent())\n"
+          << "    throw mfast::bad_optional_access();\n";
+
+    out_ << "  return static_cast<" << cref_type_name << ">((*this)[" << index << "]);\n"
+         << "}\n\n";
+
     if (!is_const_field(inst)) {
       out_ << "inline " << mref_type_name << "\n"
            << mref_scope_.str() << "set_" << name << "() const\n"

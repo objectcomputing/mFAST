@@ -42,6 +42,7 @@ void hpp_gen::gen_primitive (const char* cpp_type, const mfast::field_instructio
 {
   std::string name(cpp_name(inst));
   header_cref_ << indent << "mfast::"<< cpp_type << "_cref get_" << name << "() const;\n";
+  header_cref_ << indent << "mfast::"<< cpp_type << "_cref acquire_" << name << "() const;\n";
   if (!is_const_field(inst))
   {
     header_mref_ << indent << "mfast::"<< cpp_type << "_mref set_" << name << "() const;\n";
@@ -133,6 +134,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
       header_cref_ << indent << "typedef " << cpp_type << "_cref " << name << "_cref;\n";
       header_mref_ << indent << "typedef " << cpp_type << "_mref " << name << "_mref;\n";
       header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
+      header_cref_ << indent << name << "_cref acquire_" << name << "() const;\n";
       header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
 
       if (inst->optional()) {
@@ -184,6 +186,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
     header_mref_ << indent << "};\n\n";
     if (pIndex) {
       header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
+      header_cref_ << indent << name << "_cref acquire_" << name << "() const;\n";
       header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
       if (inst->optional()) {
         header_mref_ << indent << "void omit_" << name << "() const;\n";
@@ -315,6 +318,7 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 
   if (pIndex) {
     header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
+    header_cref_ << indent << name << "_cref acquire_" << name << "() const;\n";
     header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
     if (inst->optional())
       header_mref_ << indent << "void omit_" << name << "() const;\n";
@@ -444,6 +448,7 @@ void hpp_gen::visit(const mfast::templateref_instruction* , void* pIndex)
 {
   std::size_t index = *static_cast<std::size_t*>(pIndex);
   header_cref_ << indent << "mfast::nested_message_cref get_nested_message" << index << "() const;\n";
+  header_cref_ << indent << "mfast::nested_message_cref acquire_nested_message" << index << "() const;\n";
   header_mref_ << indent << "mfast::nested_message_mref set_nested_message" << index << "() const;\n";
 }
 
@@ -565,6 +570,7 @@ void hpp_gen::visit(const mfast::enum_field_instruction* inst, void* pIndex)
   if (pIndex)
   {
     header_cref_ << indent << name << "_cref get_" << name << "() const;\n";
+    header_cref_ << indent << name << "_cref acquire_" << name << "() const;\n";
     if (inst->field_operator() != mfast::operator_constant)
       header_mref_ << indent << name << "_mref set_" << name << "() const;\n";
     if (inst->optional()) {
