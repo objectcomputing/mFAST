@@ -280,6 +280,22 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
     strm >> str;
     BOOST_CHECK_EQUAL(str, std::string(","));
   }
+
+  {
+    bv_ref.clear();
+    // U+10437 U+24B62
+    const char data[] = "\"\\uD801\\uDC37\\uD852\\uDF62\",";
+    std::stringstream strm(data);
+    BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
+    BOOST_CHECK_EQUAL(str,           std::string("\xF0\x90\x90\xB7\xF0\xA4\xAD\xA2"));
+
+    BOOST_CHECK_EQUAL(bv_ref.size(), sizeof(data)-2 );
+    BOOST_CHECK(memcmp(data, bv_ref.data(), sizeof(data)-2 ) ==0);
+
+    strm >> str;
+    BOOST_CHECK_EQUAL(str, std::string(","));
+  }
+
   // {
   //     bv_ref.clear();
   //     const char data[] = "\"Konu\\u0015fal\\u00131m bir gün\",";

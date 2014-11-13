@@ -1,6 +1,6 @@
 
 #include "json.h"
-
+#include <boost/regex/pending/unicode_iterator.hpp>
 namespace mfast {
 
   namespace json {
@@ -52,6 +52,54 @@ namespace mfast {
       }
 
     };
+
+
+
+    uint32_t read_4_hex_digits(std::istream&                  strm,
+                               const mfast::byte_vector_mref* pref)
+    {
+      uint32_t val = 0;
+      char buf[5]={'\x0'};
+
+      if (!strm.read(buf, 4))
+        BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid unicode character"));
+
+      if (pref) {
+        pref->insert(pref->end(), buf, buf+4);
+      }
+
+      for (int i = 0; i < 4; ++i) {
+        val <<=4;
+        if (buf[i] >= '0' && buf[i] <= '9')
+          val |= buf[i] - '0';
+        else if (buf[i] >= 'a' && buf[i] <= 'f')
+          val |= buf[i] - 'a' + 10;
+        else if (buf[i] >= 'A' && buf[i] <= 'F')
+          val |= buf[i] - 'A' + 10;
+        else {
+          BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid unicode character"));
+        }
+      }
+      return val;
+    }
+
+    void utf32_to_utf8(uint32_t v, std::string& str)
+    {
+      // now we need convert the unicode character to UTF8
+      std::copy(&v, (&v)+1, boost::utf8_output_iterator< std::back_insert_iterator<std::string> >( std::back_inserter(str) ));
+    }
+
+
+    bool is_high_surrogate(uint32_t val)
+    {
+      return (val & 0xFC00) == 0xD800;
+    }
+
+    bool is_low_surrogate(uint32_t val)
+    {
+      return (val & 0xFC00) == 0xDC00;
+    }
+
 
 
     bool get_quoted_string(std::istream&                  strm,
@@ -111,47 +159,56 @@ namespace mfast {
             else if (c == 'u' ){
               // This is a unicode character
               // we need to read 4 hexadecimal digits
-              uint32_t val = 0;
-              char buf[5]={'\x0'};
-
-              if (!strm.read(buf, 4))
-                BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid unicode character"));
-
+              uint32_t val = read_4_hex_digits(strm, pref);
               escaped = false;
-
-              if (pref) {
-                pref->insert(pref->end(), buf, buf+4);
-              }
-
               if (!pstr)
                 continue;
 
-              for (int i = 0; i < 4; ++i) {
-                val <<=4;
-                if (buf[i] >= '0' && buf[i] <= '9')
-                  val |= buf[i] - '0';
-                else if (buf[i] >= 'a' && buf[i] <= 'f')
-                  val |= buf[i] - 'a' + 10;
-                else if (buf[i] >= 'A' && buf[i] <= 'F')
-                  val |= buf[i] - 'A' + 10;
-                else {
-                  BOOST_THROW_EXCEPTION(json_decode_error(strm, "Not a valid unicode character"));
-                }
+              if (!is_high_surrogate(val)) {
+                utf32_to_utf8(val, *pstr);
+                continue;
               }
 
-              // now we need convert the unicode character to UTF8
-              if (val < 0x7F)
-                (*pstr) += static_cast<char>(val);
-              else if (val < 0x07FF) {
-                // 2 bytes encoding
-                (*pstr) +=  static_cast<char>((val >> 6) | 0xC0);
-                (*pstr) +=  static_cast<char>( (val & 0x3F) | 0x80);
-              }
-              else {
-                // 3 bytes encoding
-                (*pstr) +=  static_cast<char>((val >> 12) | 0xE0);
-                (*pstr) +=  static_cast<char>(((val >> 6) & 0x3F) | 0x80);
-                (*pstr) +=  static_cast<char>((val & 0x3F) | 0x80);
+              while (1) {
+                // read the leading \u
+
+                if (strm.peek() != '\\') {
+                  utf32_to_utf8(val, *pstr);
+                  break;
+                }
+
+                strm.get();
+
+                if (strm.peek() != 'u')
+                {
+                  strm.unget();
+                  utf32_to_utf8(val, *pstr);
+                  break;
+                }
+
+                strm.get();
+
+                const char* buf = "\\u";
+                pref->insert(pref->end(), buf, buf+2);
+                uint32_t val2 = read_4_hex_digits(strm, pref);
+
+                if ( is_low_surrogate(val2)) {
+                  // (val, val2) is a surrogate pair
+                    val = (val << 10) + val2 - 0x35FDC00;
+                    utf32_to_utf8(val, *pstr);
+                }
+                else if (!is_high_surrogate(val2)) {
+                  // (val, val2) is not a surrogate pair and val2 is definitely not the start of a surrogate pair
+                  utf32_to_utf8(val, *pstr);
+                  utf32_to_utf8(val2, *pstr);
+                }
+                else {
+                  // (val, val2) is not a surrogate pair but val2 could be the start of a surrogate pair
+                  utf32_to_utf8(val, *pstr);
+                  val = val2;
+                  continue;
+                }
+                break;
               }
               continue;
 
