@@ -502,7 +502,7 @@ namespace mfast {
       strm_ >> std::skipws >> c;
       if (strm_.good() && c == '{') {
         // strm_ >> std::skipws >> c;
-
+        strm_ >> std::ws;
         if (strm_.peek() == '}') {
           strm_ >> c;
           return true;
