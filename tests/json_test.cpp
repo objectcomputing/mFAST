@@ -134,6 +134,7 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
 
   product_ref.omit_stock();
   BOOST_CHECK(product_ref.get_stock().absent());
+  BOOST_CHECK_THROW(product_ref.safe_get_stock(), mfast::bad_optional_access);
 }
 
 BOOST_AUTO_TEST_CASE(json_encode_person_test)
