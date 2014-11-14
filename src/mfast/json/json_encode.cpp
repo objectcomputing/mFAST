@@ -22,18 +22,18 @@ namespace mfast {
         boost::io::ios_flags_saver ifs( os );
         os.put('"');
         const char* ptr = str.str_;
-        int c;
+        char c;
         while ( (c = *ptr++) != '\0') {
           // According to ECMA-404, the control charanter (U+0000 to U+001F) must be escaped
-          if (c < '\x20')
+          if ( (c & 0xE0) == 0 )
           {
             // if c is '\x08', '\x09','\0x0A','\0x0C' and '\0x0D', encoded as "\b", "\t", "\n", "\f", "\r" repsectively;
             // otherwise encoded as "\uxxxx" where xxxx is 4 digit hexidecimal characters.
             const char control_table[33]= "uuuuuuuubtnufruuuuuuuuuuuuuuuuuu";
             char buf[7]="\\";
-            buf[1]=control_table[c];
+            buf[1]=control_table[ static_cast<int>(c) ];
             if (buf[1] == 'u') {
-              std::snprintf(buf+2, 5, "%04x", c );
+              std::snprintf(buf+2, 5, "%04x", static_cast<int>(c) );
             }
             os << buf;
             continue;

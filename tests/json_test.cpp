@@ -28,31 +28,31 @@
 
 
 namespace mfast {
-  namespace json {
-    bool get_quoted_string(std::istream&                  strm,
-                           std::string*                   pstr,
-                           const mfast::byte_vector_mref* pref,
-                           bool                           first_quote_extracted=false);
-    bool skip_value (std::istream& strm);
+namespace json {
+bool get_quoted_string(std::istream&                  strm,
+                       std::string*                   pstr,
+                       const mfast::byte_vector_mref* pref,
+                       bool                           first_quote_extracted=false);
+bool skip_value (std::istream& strm);
 
 
-    namespace encode_detail {
+namespace encode_detail {
 
-      struct quoted_string {
-        quoted_string(const char* str)
-          : str_(str)
-        {
-        }
-
-        const char* str_;
-      };
-
-
-      std::ostream& operator << (std::ostream& os, quoted_string str);
-
-
-    }
+struct quoted_string {
+  quoted_string(const char* str)
+    : str_(str)
+  {
   }
+
+  const char* str_;
+};
+
+
+std::ostream& operator << (std::ostream& os, quoted_string str);
+
+
+}
+}
 }
 
 
@@ -69,20 +69,20 @@ BOOST_AUTO_TEST_CASE(json_encode_product_test)
   product_ref.set_price().as(12356, -2);
   product_ref.set_name().as("Foo");
   Product_mref::tags_mref tags = product_ref.set_tags();
-  BOOST_CHECK_EQUAL(tags.instruction()->field_type(),             mfast::field_type_sequence);
-  BOOST_CHECK_EQUAL(tags.instruction()->subinstructions().size(), 1U);
+    BOOST_CHECK_EQUAL(tags.instruction()->field_type(),             mfast::field_type_sequence);
+    BOOST_CHECK_EQUAL(tags.instruction()->subinstructions().size(), 1U);
 
   tags.resize(2);
-  BOOST_CHECK_EQUAL(tags.size(),                                  2U);
+    BOOST_CHECK_EQUAL(tags.size(),                                  2U);
 
   mfast::ascii_string_mref tag0 = tags[0];
-  BOOST_CHECK_EQUAL(tag0.instruction()->field_type(),             mfast::field_type_ascii_string);
+    BOOST_CHECK_EQUAL(tag0.instruction()->field_type(),             mfast::field_type_ascii_string);
 
 
   tags[0].as("Bar with \"quote\"");
-  BOOST_CHECK_EQUAL(strcmp(tags[0].c_str(), "Bar with \"quote\""),0);
+    BOOST_CHECK_EQUAL(strcmp(tags[0].c_str(), "Bar with \"quote\""),0);
   tags[1].as("Eek with \\");
-  BOOST_CHECK_EQUAL(strcmp(tags[1].c_str(), "Eek with \\"),       0);
+    BOOST_CHECK_EQUAL(strcmp(tags[1].c_str(), "Eek with \\"),       0);
 
   Product_mref::stock_mref stock = product_ref.set_stock();
   stock.set_warehouse().as(300);
@@ -215,14 +215,19 @@ BOOST_AUTO_TEST_CASE(json_decode_null_test)
 
 BOOST_AUTO_TEST_CASE(test_encode_quoted_string)
 {
-  std::stringstream stream;
+  {
+    std::stringstream stream;
+    mfast::json::encode_detail::quoted_string str("abcd\x01\b\t\f\n\r\\\"");
+    stream << str;
+    BOOST_CHECK_EQUAL(stream.str(), std::string("\"abcd\\u0001\\b\\t\\f\\n\\r\\\\\\\"\"") );
+  }
 
-  mfast::json::encode_detail::quoted_string str("abcd\x01\b\t\f\n\r\\\"");
-
-  stream << str;
-
-  BOOST_CHECK_EQUAL(stream.str(), std::string("\"abcd\\u0001\\b\\t\\f\\n\\r\\\\\\\"\"") );
-
+  {
+    std::stringstream stream;
+    mfast::json::encode_detail::quoted_string str("\xE2\x80\x93");
+    stream << str;
+    BOOST_CHECK_EQUAL(stream.str(), std::string("\"\xE2\x80\x93\"") );
+  }
 }
 
 BOOST_AUTO_TEST_CASE(test_get_quoted_string)
