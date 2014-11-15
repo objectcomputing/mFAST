@@ -13,6 +13,7 @@
 #include "../encoder/encoder_presence_map.h"
 #include "encoder_function.h"
 #include <boost/mpl/for_each.hpp>
+#include <boost/mpl/placeholders.hpp>
 #include <boost/tuple/tuple.hpp>
 
 namespace mfast
@@ -296,7 +297,8 @@ namespace mfast
       typename boost::enable_if< boost::is_base_of<mfast::templates_description, Description> >::type
       operator()(Description*)
       {
-        boost::mpl::for_each<typename Description::types>(*this);
+        using boost::mpl::placeholders::_1;
+        boost::mpl::for_each<typename Description::types, boost::add_pointer<_1> >(*this);
       }
 
     };
@@ -305,12 +307,13 @@ namespace mfast
     void fast_encoder_core::init()
     {
       template_id_map_t templates_map;
+      using boost::mpl::placeholders::_1;
 
-      boost::mpl::for_each<Descriptions>(
+      boost::mpl::for_each<Descriptions, boost::add_pointer<_1> >(
         dictionary_builder(this->resetter_, templates_map, &this->template_alloc_)
         );
 
-      boost::mpl::for_each<Descriptions>( construct_encoder_message_info(this, templates_map) );
+      boost::mpl::for_each<Descriptions, boost::add_pointer<_1> >( construct_encoder_message_info(this, templates_map) );
 
       if (this->message_infos_.size() == 1)
       {

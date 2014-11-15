@@ -501,9 +501,8 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
   }
 
   if (desc.size()) {
-    out_ << export_symbol_uppercase_ << "mfast::templates_description* description();\n\n";
 
-    out_ << "struct templates_description\n"
+    out_ << "struct "<< export_symbol_uppercase_ <<" templates_description\n"
          << "  : mfast::templates_description"
          << "{\n"
          << "  typedef boost::mpl::vector<";
@@ -517,15 +516,23 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
         }
         else
           first = false;
-        out_ << "                             " << cpp_name(desc[i]->name()) << "*";
+        out_ << "                             " << cpp_name(desc[i]->name());
       }
     }
 
     out_ << "> types;\n"
-         << "  static mfast::templates_description* instance()\n"
-         << "  { return description(); }\n"
+         << "  templates_description();\n"
+         << "  static const templates_description* instance();"
          << "};\n\n";
+
+    out_ << "inline const templates_description* description()\n"
+         << "{\n"
+         << "  return templates_description::instance();"
+         << "}\n\n";
+
   }
+
+
 
   out_ << "#include \"" << filebase_ << ".inl\"\n"
        << "}\n\n"

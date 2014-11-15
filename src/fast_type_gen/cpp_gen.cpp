@@ -593,15 +593,19 @@ void cpp_gen::generate(mfast::dynamic_templates_description& desc)
     out_ << "const template_instruction* "<< filebase_ << "_templates_instructions[] ={\n"
          << instructions
          << "};\n\n"
-         << "mfast::templates_description* description()\n"
-         << "{\n"
-         << "  static mfast::templates_description desc(\n"
+         << "templates_description::templates_description()\n"
+         << "  : mfast::templates_description(\n"
          << "    \"" << desc.ns()  << "\", // ns\n"
          << "    \"" << desc.template_ns()<< "\", // templateNs\n"
          << "    \"" << desc.dictionary() << "\", // dictionary\n"
-         << "    " << filebase_ << "_templates_instructions);\n"
-         << "  return &desc;\n"
-         << "}\n\n";
+         << "    " << filebase_ << "_templates_instructions)\n"
+         << "{\n"
+         << "}\n\n"
+         << "const templates_description* templates_description::instance()\n"
+         << "{\n"
+         << "  static const templates_description inst;\n"
+         << "  return &inst;\n"
+         << "}\n";
   }
   out_ << "\n}\n";
 }

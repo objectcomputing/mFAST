@@ -45,8 +45,8 @@ class fast_coding_test_case
 {
   public:
     fast_coding_test_case()
-      : encoder_(&alloc_)
-      , decoder_(&alloc_)
+      : encoder_(boost::mpl::vector<DESC>(), &alloc_)
+      , decoder_(boost::mpl::vector<DESC>(), &alloc_)
     {
     }
 
@@ -84,8 +84,8 @@ class fast_coding_test_case
 
   private:
     debug_allocator alloc_;
-    mfast::fast_encoder_v2< boost::mpl::vector<DESC*> > encoder_;
-    mfast::fast_decoder_v2< boost::mpl::vector<DESC*> > decoder_;
+    mfast::fast_encoder_v2 encoder_;
+    mfast::fast_decoder_v2 decoder_;
 };
 
 BOOST_AUTO_TEST_SUITE( test_fast_coder2 )

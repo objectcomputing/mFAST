@@ -108,10 +108,10 @@ int main(int argc, const char** argv)
 
   try {
 
-    mfast::fast_decoder_v2< boost::mpl::vector<example::templates_description*> > decoder;
+    mfast::fast_decoder_v2 decoder( example::description() );
 
 #ifdef WITH_ENCODE
-    mfast::fast_encoder_v2< boost::mpl::vector<example::templates_description*> > encoder;
+    mfast::fast_encoder_v2 encoder( example::description() );
     std::vector<char> buffer;
     buffer.resize(message_contents.size());
 
