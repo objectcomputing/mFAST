@@ -131,7 +131,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
     out_ << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str() << ");\n"
          << "}\n\n"
          << "\ninline " << cref_type_name << "\n"
-         << cref_scope_.str() << "safe_get_" << name << "() const\n"
+         << cref_scope_.str() << "try_get_" << name << "() const\n"
          << "{\n";
     if (inst->optional())
       out_ << "  if (" << "(*this)[" << index << "].absent())\n"
@@ -431,7 +431,7 @@ void inl_gen::visit(const mfast::templateref_instruction* , void* pIndex)
        << "{\n"
        << "  return mfast::nested_message_cref((*this)[" << index << "]);\n"
        << "}\n\n"
-       << cref_scope_.str() << "safe_get_nested_message" << index << "() const\n"
+       << cref_scope_.str() << "try_get_nested_message" << index << "() const\n"
        << "{\n" << "  return mfast::nested_message_cref((*this)[" << index << "]);\n"
        << "}\n\n"
        << "inline\n"
@@ -533,7 +533,7 @@ void inl_gen::gen_accessors(const mfast::field_instruction* inst,
          << "}\n\n";
 
     out_ << "inline " << cref_type_name << "\n"
-         << cref_scope_.str() << "safe_get_" << name << "() const\n"
+         << cref_scope_.str() << "try_get_" << name << "() const\n"
          << "{\n";
 
    if (inst->optional())
