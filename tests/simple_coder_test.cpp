@@ -45,8 +45,8 @@ class fast_coding_test_case
 {
   public:
     fast_coding_test_case()
-      : encoder_(boost::mpl::vector<DESC>(), &alloc_)
-      , decoder_(boost::mpl::vector<DESC>(), &alloc_)
+      : encoder_(DESC::instance(), &alloc_)
+      , decoder_(DESC::instance(), &alloc_)
     {
     }
 

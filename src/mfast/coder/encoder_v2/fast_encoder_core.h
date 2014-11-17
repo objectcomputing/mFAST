@@ -12,8 +12,6 @@
 #include "../encoder/resizable_fast_ostreambuf.h"
 #include "../encoder/encoder_presence_map.h"
 #include "encoder_function.h"
-#include <boost/mpl/for_each.hpp>
-#include <boost/mpl/placeholders.hpp>
 #include <boost/tuple/tuple.hpp>
 
 namespace mfast
@@ -92,11 +90,51 @@ namespace mfast
       template <typename Message>
       void register_message();
 
-      template <typename Templates>
-      void build_dictionary(template_id_map_t& templates_map);
 
-      template <typename Descriptions>
-      void init();
+      void construct_encoder_message_info(template_id_map_t&, const boost::tuples::null_type&)
+      {
+      }
+
+      template <typename MessageTuple>
+      void construct_encoder_message_info(template_id_map_t& templates_map, const MessageTuple& tp)
+      {
+        typedef typename MessageTuple::head_type Message;
+        uint32_t id = Message::the_id;
+        this->message_infos_.emplace(id, boost::make_tuple(templates_map[id],
+                                                           &fast_encoder_core::encode_message<Message>));
+        construct_encoder_message_info(templates_map, tp.get_tail());
+      }
+
+      void construct_encoder_description_info(template_id_map_t&, const boost::tuples::null_type&)
+      {
+      }
+
+
+      template <typename DescriptionsTuple>
+      void construct_encoder_description_info(template_id_map_t& templates_map, const DescriptionsTuple& tp)
+      {
+        typedef typename boost::remove_const< typename boost::remove_pointer<typename DescriptionsTuple::head_type>::type >::type DescriptionType;
+        typedef typename DescriptionType::types messages_type;
+        messages_type t;
+        construct_encoder_message_info(templates_map, t);
+        construct_encoder_description_info(templates_map, tp.get_tail());
+      }
+
+      template <typename DescriptionsTuple>
+      void init(const DescriptionsTuple& tp)
+      {
+        template_id_map_t templates_map;
+
+        dictionary_builder builder(this->resetter_, templates_map, &this->template_alloc_);
+        builder.build_from_tuple(tp);
+
+        construct_encoder_description_info(templates_map, tp);
+
+        if (this->message_infos_.size() == 1)
+        {
+          active_message_info_ = &message_infos_.begin()->second;
+        }
+      }
 
       std::size_t
       encode_i(const message_cref& message,
@@ -267,58 +305,6 @@ namespace mfast
       fast_encoder_visitor visitor(this);
       typename Message::cref_type ref(cref);
       ref.accept(visitor);
-    }
-
-    struct construct_encoder_message_info
-    {
-      fast_encoder_core* core_;
-      template_id_map_t& templates_map_;
-
-      construct_encoder_message_info(fast_encoder_core* core,
-                                     template_id_map_t& templates_map)
-        : core_(core)
-        , templates_map_(templates_map)
-      {
-      }
-
-      template< typename Message>
-      typename boost::disable_if< boost::is_base_of<mfast::templates_description, Message> >::type
-      operator()(Message*)
-      {
-        // fast_encoder_core::message_decode_function_t fun = &fast_encoder_core::decode_message<Message>;
-
-        uint32_t id = Message::the_id;
-        // assert(dynamic_cast<const typename Message::instruction_type*>(templates_map_[Message::the_id]) );
-        core_->message_infos_.emplace(id, boost::make_tuple(templates_map_[Message::the_id],
-                                                            &fast_encoder_core::encode_message<Message>));
-      }
-
-      template< typename Description>
-      typename boost::enable_if< boost::is_base_of<mfast::templates_description, Description> >::type
-      operator()(Description*)
-      {
-        using boost::mpl::placeholders::_1;
-        boost::mpl::for_each<typename Description::types, boost::add_pointer<_1> >(*this);
-      }
-
-    };
-
-    template <typename Descriptions>
-    void fast_encoder_core::init()
-    {
-      template_id_map_t templates_map;
-      using boost::mpl::placeholders::_1;
-
-      boost::mpl::for_each<Descriptions, boost::add_pointer<_1> >(
-        dictionary_builder(this->resetter_, templates_map, &this->template_alloc_)
-        );
-
-      boost::mpl::for_each<Descriptions, boost::add_pointer<_1> >( construct_encoder_message_info(this, templates_map) );
-
-      if (this->message_infos_.size() == 1)
-      {
-        active_message_info_ = &message_infos_.begin()->second;
-      }
     }
 
     inline std::size_t

@@ -478,8 +478,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
       << "#define __" << filebase_upper << "_H__\n"
       << "\n"
       << "#include <mfast.h>\n"
-      << "#include <boost/array.hpp>\n"
-      << "#include <boost/mpl/pair.hpp>\n" ;
+      << "#include <boost/array.hpp>\n";
 
   BOOST_FOREACH(const std::string& dep, dependency_)
   {
@@ -503,31 +502,32 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
   if (desc.size()) {
 
     out_ << "struct "<< export_symbol_uppercase_ <<" templates_description\n"
-         << "  : mfast::templates_description"
+         << "  : mfast::templates_description\n"
          << "{\n"
-         << "  typedef boost::mpl::vector<";
+         << "  typedef boost::tuple<";
 
     bool first = true;
     for (std::size_t i=0; i < desc.size(); ++i)
     {
       if (desc[i]->id() > 0) {
-        if (!first != 0) {
-          out_ << ",\n";
+        if (!first) {
+          out_ << ",\n"
+               << "                       " ;
         }
         else
           first = false;
-        out_ << "                             " << cpp_name(desc[i]->name());
+        out_ << cpp_name(desc[i]->name());
       }
     }
 
     out_ << "> types;\n"
          << "  templates_description();\n"
-         << "  static const templates_description* instance();"
+         << "  static const templates_description* instance();\n"
          << "};\n\n";
 
     out_ << "inline const templates_description* description()\n"
          << "{\n"
-         << "  return templates_description::instance();"
+         << "  return templates_description::instance();\n"
          << "}\n\n";
 
   }

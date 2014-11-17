@@ -111,10 +111,15 @@ namespace mfast {
 
     void build(const templates_description* def);
 
-    template <typename Desc>
-    void operator() (Desc*)
+    void build_from_tuple(const boost::tuples::null_type&)
     {
-      this->build(Desc::instance());
+    }
+
+    template <typename DescriptionTuple>
+    void build_from_tuple(const DescriptionTuple& tp)
+    {
+      this->build( tp.template get<0>() );
+      this->build_from_tuple( tp.get_tail() );
     }
 
   private:

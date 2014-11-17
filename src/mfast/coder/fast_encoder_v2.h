@@ -31,20 +31,20 @@ class fast_encoder_v2
 {
 public:
   /// Consturct a encoder using default memory allocator (i.e. malloc)
-  template <typename Descriptions>
-  fast_encoder_v2(const Descriptions&,
-                  typename boost::disable_if< boost::is_base_of< mfast::templates_description, Descriptions>, allocator*>::type alloc = malloc_allocator::instance())
+  template <typename DescriptionsTuple>
+  fast_encoder_v2(const DescriptionsTuple& tp,
+                  typename boost::disable_if< boost::is_base_of< mfast::templates_description, DescriptionsTuple>, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_encoder_core(alloc)
   {
-    this->init<Descriptions>();
+    this->init(tp);
   }
 
   template <typename T>
-  fast_encoder_v2(const T*,
+  fast_encoder_v2(const T* desc,
                   typename boost::enable_if< boost::is_base_of< mfast::templates_description, T>, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_encoder_core(alloc)
   {
-    this->init< boost::mpl::vector<T> >();
+    this->init(boost::make_tuple(desc));
   }
 
   /// Encode a  message into FAST byte stream.

@@ -13,20 +13,20 @@ class fast_decoder_v2
 {
 public:
 
-  template <typename Descriptions>
-  fast_decoder_v2(const Descriptions&,
-                  typename boost::disable_if< boost::is_base_of< mfast::templates_description, Descriptions>, allocator*>::type alloc = malloc_allocator::instance())
+  template <typename DescriptionsTuple>
+  fast_decoder_v2(const DescriptionsTuple& tp,
+                  typename boost::disable_if< boost::is_base_of< mfast::templates_description, DescriptionsTuple>, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_decoder_core(alloc)
   {
-    init<Descriptions>();
+    init(tp);
   }
 
   template <typename T>
-  fast_decoder_v2(const T*,
+  fast_decoder_v2(const T* desc,
                   typename boost::enable_if< boost::is_base_of< mfast::templates_description, T>, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_decoder_core(alloc)
   {
-    init<boost::mpl::vector<T> >();
+    init(boost::make_tuple(desc));
   }
 
   /// Decode a  message.
