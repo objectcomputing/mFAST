@@ -30,7 +30,7 @@
 #include "debug_allocator.h"
 #include "byte_stream.h"
 #include "mfast/output.h"
-#include "mfast/coder/encoder_v2/encoder_function.h"
+#include "mfast/coder/encoder_v2/fast_encoder_core.h"
 
 using namespace mfast;
 
@@ -111,12 +111,13 @@ encode_ext_cref(const byte_stream&       result_stream,
   typedef typename EXT_REF::cref_type CREF;
   CREF value = ext_ref.get();
 
+  mfast::coder::fast_encoder_core core(alloc);
+
   fast_ostreambuf sb(buffer);
-  fast_ostream strm(alloc);
-  strm.rdbuf(&sb);
+  core.strm_.rdbuf(&sb);
 
   encoder_presence_map pmap;
-  pmap.init(&strm, 7);
+  pmap.init(&core.strm_, 7);
 
   typename CREF::instruction_cptr instruction = value.instruction();
   value_storage& prev_storage = const_cast<value_storage&>(instruction->prev_value());
@@ -125,10 +126,8 @@ encode_ext_cref(const byte_stream&       result_stream,
     instruction->copy_construct_value(prev_storage, old_prev_storage, alloc);
 
   CREF old_prev( &old_prev_storage, instruction);
-
-  mfast::coder::encoder_function fun;
-  fun.encode(ext_ref, strm, pmap);
-  //encoder_operators[instruction->field_operator()]->encode(value, strm, pmap);
+  core.current_ = &pmap;
+  core.visit(ext_ref);
 
   pmap.commit();
 

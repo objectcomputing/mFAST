@@ -21,7 +21,7 @@ namespace mfast
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id));
       }
 
-      template_instruction* instruction = info->instruction_;
+      template_instruction* instruction = info->get<0>();
 
       if ( force_reset ||  instruction->has_reset_attribute())
         resetter_.reset();
@@ -40,7 +40,7 @@ namespace mfast
       }
 
       message_cref message(cref.field_storage(0), instruction);
-      message_encode_function_t encode = info->encode_fun_;
+      message_encode_function_t encode = info->get<1>();
       (this->*encode)(message);
 
       pmap.commit();
