@@ -31,7 +31,7 @@
 #include "byte_stream.h"
 #include "mfast/output.h"
 
-#include <mfast/coder/decoder_v2/decoder_function.h>
+#include <mfast/coder/decoder_v2/fast_decoder_core.h>
 
 using namespace mfast;
 
@@ -122,18 +122,23 @@ decode_ext_mref(const byte_stream&       input_stream,
                 const EXT_MREF&          expected_ext_ref,
                 prev_value_status_enum_t prev_status)
 {
+  mfast::malloc_allocator allocator;
+  mfast::allocator* alloc = &allocator;
+
+  mfast::coder::fast_decoder_core core(alloc);
+
   fast_istreambuf sb(input_stream.data(), input_stream.size());
-  fast_istream strm(&sb);
+  core.strm_.reset(&sb);
+
   decoder_presence_map pmap;
 
   typedef typename  EXT_MREF::cref_type CREF;
   CREF expected = expected_ext_ref.get();
 
-  strm.decode(pmap);
+  core.strm_.decode(pmap);
   uint64_t old_mask = pmap.mask();
 
-  mfast::malloc_allocator allocator;
-  mfast::allocator* alloc = &allocator;
+
   value_storage storage;
 
   typename CREF::instruction_cptr instruction = expected.instruction();
@@ -149,8 +154,8 @@ decode_ext_mref(const byte_stream&       input_stream,
 
   typename EXT_MREF::mref_type ref(alloc, &storage, instruction);
 
-  mfast::coder::decoder_function fun;
-  fun.decode(EXT_MREF(ref), strm, pmap);
+  core.current_ = &pmap;
+  core.visit(EXT_MREF(ref));
 
   bool pmap_check_successful = false;
 

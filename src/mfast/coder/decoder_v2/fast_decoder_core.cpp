@@ -5,16 +5,16 @@ namespace mfast
   namespace coder
   {
     void
-    fast_decoder_core::decode_nested_message(const nested_message_mref& mref)
+    fast_decoder_core::visit(const nested_message_mref& mref)
     {
       decoder_pmap_saver<true_type> saver(this);
       message_info* saved_active_info = this->active_message_info_;
 
 
-      if (current_pmap().is_next_bit_set()) {
+      if (this->current_->is_next_bit_set()) {
         uint32_t template_id;
 
-        strm().decode(template_id, false_type());
+        strm_.decode(template_id, false_type());
         // find the message with corresponding template id
         message_info_map_t::iterator itr = message_infos_.find(template_id);
         if (itr != message_infos_.end())
