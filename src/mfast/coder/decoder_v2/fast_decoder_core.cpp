@@ -8,7 +8,7 @@ namespace mfast
     fast_decoder_core::visit(const nested_message_mref& mref)
     {
       decoder_pmap_saver<true_type> saver(this);
-      message_info* saved_active_info = this->active_message_info_;
+      repo_mapped_type* saved_active_info = this->active_message_info_;
 
 
       if (this->current_->is_next_bit_set()) {
@@ -16,12 +16,9 @@ namespace mfast
 
         strm_.decode(template_id, false_type());
         // find the message with corresponding template id
-        message_info_map_t::iterator itr = message_infos_.find(template_id);
-        if (itr != message_infos_.end())
-        {
-          active_message_info_ = &itr->second;
-        }
-        else {
+        active_message_info_ = this->find(template_id);
+
+        if (active_message_info_ == 0) {
           BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
                                                          << referenced_by_info(active_message_info_->message_.name()));
         }
@@ -51,18 +48,15 @@ namespace mfast
         strm_.decode(template_id, false_type());
 
         // find the message with corresponding template id
-        message_info_map_t::iterator itr = message_infos_.find(template_id);
-        if (itr != message_infos_.end())
-        {
-          active_message_info_ = &itr->second;
-        }
-        else {
+        active_message_info_ = this->find(template_id);
+
+        if (active_message_info_ == 0) {
           BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
         }
       }
 
       if (force_reset_ || active_message_info_->message_.instruction()->has_reset_attribute()) {
-        resetter_.reset();
+        this->reset_dictionary();
       }
 
       // we have to keep the active_message_ in a new variable

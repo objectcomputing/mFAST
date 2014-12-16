@@ -22,7 +22,7 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/malloc_allocator.h"
 #include "../fast_encoder.h"
-#include "../common/dictionary_builder.h"
+#include "../common/template_repo.h"
 #include "../common/exceptions.h"
 #include "mfast/output.h"
 #include "encoder_presence_map.h"
@@ -32,9 +32,11 @@
 
 namespace mfast
 {
+  struct fast_encoder_impl;
 
 
   struct fast_encoder_impl
+    : simple_template_repo_t
   {
 
     enum {
@@ -42,14 +44,9 @@ namespace mfast
     };
 
     fast_ostream strm_;
-    dictionary_resetter resetter_;
-    dictionary_value_destroyer value_destroyer_;
-
-    arena_allocator template_alloc_;
 
     int64_t active_message_id_;
     encoder_presence_map* current_;
-    template_id_map_t templates_map_;
 
 
     fast_encoder_impl(allocator* alloc);
@@ -107,7 +104,6 @@ namespace mfast
   inline
   fast_encoder_impl::fast_encoder_impl(allocator* alloc)
     : strm_(alloc)
-    , value_destroyer_(alloc)
     , active_message_id_(-1)
   {
   }
@@ -223,11 +219,9 @@ namespace mfast
 
     uint32_t template_id = cref.id();
 
-    template_instruction* instruction;
-    template_id_map_t::iterator itr = templates_map_.find(template_id);
+    template_instruction* instruction = *this->find(template_id);
 
-    if (itr != templates_map_.end()) {
-      instruction = itr->second;
+    if (instruction !=0) {
       current_pmap().init(&this->strm_, instruction->segment_pmap_size());
     }
     else {
@@ -236,7 +230,7 @@ namespace mfast
     }
 
     if ( force_reset ||  instruction->has_reset_attribute())
-      resetter_.reset();
+      this->reset_dictionary();
 
 
     bool need_encode_template_id = (active_message_id_ != template_id);
@@ -266,19 +260,14 @@ namespace mfast
     delete impl_;
   }
 
+
   void
   fast_encoder::include(const templates_description** descriptions, std::size_t description_count)
   {
-    dictionary_builder builder(impl_->resetter_,
-                               impl_->templates_map_,
-                               &impl_->template_alloc_,
-                               &impl_->value_destroyer_);
-
-    for (std::size_t i = 0; i < description_count; ++i)
-      builder.build(descriptions[i]);
-
-    if (impl_->templates_map_.size() ==1 ) {
-      impl_->active_message_id_ = impl_->templates_map_.begin()->first;
+    impl_->build(descriptions, description_count);
+    template_instruction** entry = impl_->unique_entry();
+    if (entry != 0) {
+      impl_->active_message_id_ = (*entry)->id();
     }
   }
 
@@ -310,13 +299,7 @@ namespace mfast
   const template_instruction*
   fast_encoder::template_with_id(uint32_t id)
   {
-    template_instruction* instruction =0;
-    template_id_map_t::iterator itr = impl_->templates_map_.find(id);
-
-    if (itr != impl_->templates_map_.end()) {
-      instruction = itr->second;
-    }
-    return instruction;
+    return impl_->get_template(id);
   }
 
   void

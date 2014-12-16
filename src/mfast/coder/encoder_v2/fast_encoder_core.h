@@ -6,7 +6,7 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/nested_message_ref.h"
 #include "mfast/malloc_allocator.h"
-#include "../common/dictionary_builder.h"
+#include "../common/template_repo.h"
 #include "../common/exceptions.h"
 #include "../encoder/fast_ostream.h"
 #include "../encoder/resizable_fast_ostreambuf.h"
@@ -42,9 +42,23 @@ inline bool equivalent (const vector_cref<T>& v, const value_storage& prev)
   return v.size() == prev.of_array.len_-1 && memcmp(v.data(),prev.of_array.content_, v.size()*sizeof(T)) == 0;
 }
 
+struct fast_encoder_core;
+typedef void (fast_encoder_core::* message_encode_function_t) (const message_cref&);
+typedef boost::tuple<template_instruction*, message_encode_function_t> encoder_info_entry;
+
+
 struct MFAST_CODER_EXPORT fast_encoder_core
   : mfast::detail::codec_helper
+  , template_repo< template_repo_entry_converter<fast_encoder_core,
+                                           encoder_info_entry,
+                                           boost::tuple<template_instruction*,
+                                                        message_encode_function_t> > >
 {
+
+  typedef template_repo< template_repo_entry_converter<fast_encoder_core,
+                                                 encoder_info_entry,
+                                                 boost::tuple<template_instruction*,
+                                                              message_encode_function_t> > > template_repo_base;
   fast_encoder_core(allocator* alloc);
 
   void allow_overlong_pmap_i(bool v);
@@ -53,15 +67,6 @@ struct MFAST_CODER_EXPORT fast_encoder_core
   template <typename Message>
   void register_message();
 
-  void construct_encoder_message_info(template_id_map_t&, const boost::tuples::null_type&);
-
-  template <typename MessageTuple>
-  void construct_encoder_message_info(template_id_map_t& templates_map, const MessageTuple& tp);
-
-  void construct_encoder_description_info(template_id_map_t&, const boost::tuples::null_type&);
-
-  template <typename DescriptionsTuple>
-  void construct_encoder_description_info(template_id_map_t& templates_map, const DescriptionsTuple& tp);
 
   template <typename DescriptionsTuple>
   void init(const DescriptionsTuple& tp);
@@ -153,20 +158,29 @@ struct MFAST_CODER_EXPORT fast_encoder_core
                     tail_operator_tag,
                     string_type_tag);
 
+
+  template <typename Message>
+  boost::tuple<template_instruction*, message_encode_function_t>
+  to_repo_entry(template_instruction* inst, Message*)
+  {
+    return boost::make_tuple(inst, &fast_encoder_core::encode_message<Message>);
+  }
+
+  typedef encoder_info_entry repo_mapped_type;
+
+
+  template_instruction* to_instruction(const repo_mapped_type& entry)
+  {
+    return entry.get<0>();
+  }
+
   /// internal states
 
-  typedef void (fast_encoder_core::* message_encode_function_t) (const message_cref&);
-  typedef boost::tuple<template_instruction*, message_encode_function_t> message_info;
-  typedef boost::container::map<uint32_t, message_info> message_info_map_t;
+
 
   fast_ostream strm_;
-  dictionary_resetter resetter_;
-  dictionary_value_destroyer value_destroyer_;
-  arena_allocator template_alloc_;       // template_alloc MUST be constructed before template_messages,
-  message_info_map_t message_infos_;       // Do not change the order of the two
-  message_info* active_message_info_;
+  repo_mapped_type* active_message_info_;
   encoder_presence_map* current_;
-
 };
 
 template <typename T>
@@ -210,62 +224,20 @@ public:
 
 inline
 fast_encoder_core::fast_encoder_core(allocator* alloc)
-  : strm_(alloc)
-  , value_destroyer_(alloc)
+  : template_repo_base(this,alloc)
+  , strm_(alloc)
   , active_message_info_(0)
   , current_(0)
 {
-}
-
-inline void
-fast_encoder_core::construct_encoder_message_info(template_id_map_t&, const boost::tuples::null_type&)
-{
-}
-
-template <typename MessageTuple>
-inline void
-fast_encoder_core::construct_encoder_message_info(template_id_map_t& templates_map, const MessageTuple& tp)
-{
-  typedef typename MessageTuple::head_type Message;
-  uint32_t id = Message::the_id;
-  this->message_infos_.emplace(id, boost::make_tuple(templates_map[id],
-                                                     &fast_encoder_core::encode_message<Message>));
-  construct_encoder_message_info(templates_map, tp.get_tail());
-}
-
-inline void
-fast_encoder_core::construct_encoder_description_info(template_id_map_t&, const boost::tuples::null_type&)
-{
-}
-
-template <typename DescriptionsTuple>
-inline void
-fast_encoder_core::construct_encoder_description_info(template_id_map_t& templates_map, const DescriptionsTuple& tp)
-{
-  typedef typename boost::remove_const< typename boost::remove_pointer<typename DescriptionsTuple::head_type>::type >::type DescriptionType;
-  typedef typename DescriptionType::types messages_type;
-  messages_type t;
-  construct_encoder_message_info(templates_map, t);
-  construct_encoder_description_info(templates_map, tp.get_tail());
 }
 
 template <typename DescriptionsTuple>
 void
 fast_encoder_core::init(const DescriptionsTuple& tp)
 {
-  template_id_map_t templates_map;
-
-  dictionary_builder builder(this->resetter_, templates_map, &this->template_alloc_);
-  builder.build_from_tuple(tp);
-
-  construct_encoder_description_info(templates_map, tp);
-
-  if (this->message_infos_.size() == 1)
-  {
-    active_message_info_ = &message_infos_.begin()->second;
-  }
+  this->build(tp);
+  active_message_info_ = this->unique_entry();
 }
-
 
 template <typename Message>
 void fast_encoder_core::encode_message(const message_cref& cref)
@@ -305,8 +277,6 @@ fast_encoder_core::allow_overlong_pmap_i(bool v)
   this->strm_.allow_overlong_pmap(v);
 }
 
-
-
 template <typename T>
 inline void
 fast_encoder_core::visit(const T& ext_ref)
@@ -318,7 +288,7 @@ fast_encoder_core::visit(const T& ext_ref)
 inline void
 fast_encoder_core::visit(const nested_message_cref& cref)
 {
-  message_info* saved_message_info = active_message_info_;
+  repo_mapped_type* saved_message_info = active_message_info_;
   encoder_presence_map* prev_pmap = this->current_;
   encode_segment(cref.target(), false);
   this->current_ = prev_pmap;
@@ -393,7 +363,6 @@ fast_encoder_core::encode_field(const T& ext_ref, sequence_type_tag)
     this->visit(ext_ref[i]);
   }
 }
-
 
 template <typename T, typename TypeCategory>
 void

@@ -18,7 +18,8 @@
 //
 #include <mfast.h>
 #include <mfast/xml_parser/dynamic_templates_description.h>
-#include <mfast/coder/common/dictionary_builder.h>
+#include <mfast/coder/common/template_repo.h>
+#include <mfast/field_instructions.h>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
@@ -53,13 +54,14 @@ different_dict(const field_instruction* lhs, const field_instruction* rhs)
 }
 
 
-template_id_map_t templates_map;
+mfast::simple_template_repo_t repo;
 
 
 const field_instruction* instruction_of(int template_id, const char* fieldname)
 {
-  int field_index = templates_map[template_id]->find_subinstruction_index_by_name(fieldname);
-  return templates_map[template_id]->subinstruction(field_index);
+  template_instruction* inst =  repo.get_template(template_id);
+  int field_index = inst->find_subinstruction_index_by_name(fieldname);
+  return inst->subinstruction(field_index);
 }
 }
 
@@ -124,13 +126,9 @@ BOOST_AUTO_TEST_CASE(typeRef_test)
    "</template>"
    "</templates>\n";
 
-  dictionary_resetter resetter;
-  arena_allocator alloc;
-
-  dictionary_builder builder(resetter,templates_map,&alloc);
 
   dynamic_templates_description description(xml_content);
-  builder.build(&description);
+  repo.build(&description ,&description+1);
 
   BOOST_CHECK(same_dict(instruction_of(1, "Field1"), instruction_of(6, "Field1"))); // implicit vs explicit global
   BOOST_CHECK(different_dict(instruction_of(1, "Field1"), instruction_of(1, "Field2"))); // different key

@@ -36,93 +36,68 @@ namespace mfast {
 
 // field value is use to store the previous values inside dictionaries.
 
-
-  class dictionary_resetter
-  {
-  public:
-
-    void push_back(value_storage* entry)
-    {
-      impl_.push_back(entry);
-    }
-
-    void reset()
-    {
-      for (std::size_t i = 0; i < impl_.size(); ++i) {
-        impl_[i]->defined(false);
-      }
-    }
-
-    std::size_t size() const
-    {
-      return impl_.size();
-    }
-
-  private:
-    std::vector<value_storage*> impl_;
-  };
-
-
-  class dictionary_value_destroyer
-  {
-  public:
-    dictionary_value_destroyer(allocator* alloc)
-      : alloc_(alloc)
-    {
-    }
-
-    ~dictionary_value_destroyer()
-    {
-      for (std::size_t i = 0; i < impl_.size(); ++i) {
-        if (impl_[i]->of_array.capacity_in_bytes_)
-          alloc_->deallocate(impl_[i]->of_array.content_,
-                             impl_[i]->of_array.capacity_in_bytes_);
-      }
-    }
-
-    void push_back(value_storage* entry)
-    {
-      impl_.push_back(entry);
-    }
-
-    std::size_t size() const
-    {
-      return impl_.size();
-    }
-
-  private:
-    allocator* alloc_;
-    std::vector<value_storage*> impl_;
-  };
-
-
-  typedef std::map<uint32_t, template_instruction*> template_id_map_t;
-
-
+  class template_repo_base;
   class MFAST_CODER_EXPORT dictionary_builder
     : private field_instruction_visitor
   {
   public:
 
-    dictionary_builder(dictionary_resetter&        resetter,
-                       template_id_map_t&          templates_map,
-                       arena_allocator*            allocator,
-                       dictionary_value_destroyer* value_destroyer=0);
+    dictionary_builder(template_repo_base& repo_base);
 
-    void build(const templates_description* def);
+    void build_by_description(const templates_description* def);
 
-    void build_from_tuple(const boost::tuples::null_type&)
+    template <typename Operation>
+    void build(const templates_description* def , const Operation& op)
+    {
+      current_ns_ = def->template_ns();
+      current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
+      for (uint32_t i  = 0; i < def->size(); ++i ) {
+        uint32_t id = (*def)[i]->id();
+        if (id > 0) {
+          op(this->clone_instruction((*def)[i]));
+        }
+      }
+    }
+
+
+    template <typename Operation>
+    void build(const boost::tuples::null_type& , const Operation&)
     {
     }
 
-    template <typename DescriptionTuple>
-    void build_from_tuple(const DescriptionTuple& tp)
+    template <typename DescriptionTuple, typename Operation>
+    void build(const DescriptionTuple& tp, const Operation& op)
     {
-      this->build( tp.template get<0>() );
-      this->build_from_tuple( tp.get_tail() );
+      this->build_description(tp.template get<0>(), op) ;
+      this->build( tp.get_tail(), op );
     }
 
   private:
+
+    template <typename Description, typename Operation>
+    void build_description(const Description* def, const Operation& op)
+    {
+      current_ns_ = def->template_ns();
+      current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
+      build_message_info(op, static_cast<typename Description::types*> (0));
+    }
+
+    template <typename Operation>
+    void build_message_info(const Operation& , boost::tuples::null_type*)
+    {
+    }
+
+
+    template <typename MessageTuple, typename Operation>
+    void build_message_info(const Operation& op, MessageTuple*)
+    {
+      typedef typename MessageTuple::head_type Message;
+      if (Message::the_id == 0)
+        return;
+
+      op(this->clone_instruction(Message::instruction()), static_cast<Message*>(0));
+      this->build_message_info(op, static_cast<typename MessageTuple::tail_type*>(0));
+    }
 
     virtual void visit(const int32_field_instruction*, void*);
     virtual void visit(const uint32_field_instruction*, void*);
@@ -143,7 +118,7 @@ namespace mfast {
 
     virtual void visit(const enum_field_instruction*, void*);
 
-    void build_template(const template_instruction*, void*);
+    template_instruction* clone_instruction(const template_instruction*);
 
     void build_group(const field_instruction*       fi,
                      const group_field_instruction* src,
@@ -166,18 +141,19 @@ namespace mfast {
       value_storage*  storage_;
     };
 
-    dictionary_resetter& resetter_;
     typedef std::map<std::string, indexer_value_type>  indexer_t;
     indexer_t indexer_;
-    arena_allocator* alloc_;
     std::string current_template_;
     std::string current_type_;
     const char* current_ns_;
     const char* current_dictionary_;
-    template_id_map_t& template_id_map_;
-    typedef std::map<std::string, template_instruction*> template_name_map_t;
-    template_name_map_t template_name_map_;
-    dictionary_value_destroyer* value_destroyer_;
+
+    template_repo_base& repo_base_;
+
+    // dictionary_resetter& resetter_;
+    arena_allocator& alloc_;
+    // template_id_map_t& template_id_map_;
+    // dictionary_value_destroyer* value_destroyer_;
   };
 
 
