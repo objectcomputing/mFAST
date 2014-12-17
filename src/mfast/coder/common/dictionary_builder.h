@@ -21,6 +21,7 @@
 
 #include "mfast/field_instructions.h"
 #include "mfast/arena_allocator.h"
+#include "mfast/coder/mfast_coder_export.h"
 #include <vector>
 #include <map>
 #include <string>
@@ -93,7 +94,7 @@ namespace mfast {
   typedef std::map<uint32_t, template_instruction*> template_id_map_t;
 
 
-  class dictionary_builder
+  class MFAST_CODER_EXPORT dictionary_builder
     : private field_instruction_visitor
   {
   public:
