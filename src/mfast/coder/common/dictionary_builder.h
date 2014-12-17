@@ -27,6 +27,11 @@
 #include <string>
 #include <stdexcept>
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4251) // non dll-interface class used as a member for dll-interface class
+#endif //_MSC_VER
+
+
 namespace mfast {
 
 // field value is use to store the previous values inside dictionaries.

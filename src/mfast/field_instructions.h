@@ -20,6 +20,10 @@
 #ifndef FIELD_INSTRUCTION_H_PMKVDZOC
 #define FIELD_INSTRUCTION_H_PMKVDZOC
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4275) // non dll-interface class used as base for dll-interface class
+#endif //_MSC_VER
+
 #include "instructions/int_instructions.h"
 #include "instructions/enum_instruction.h"
 #include "instructions/decimal_instruction.h"

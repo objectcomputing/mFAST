@@ -2,6 +2,11 @@
 #include <boost/io/ios_state.hpp>
 #include <boost/type_traits.hpp>
 #include <cstdio>
+#ifdef _MSC_VER // someday someone at microsoft will read the C++11 standard.
+#define snprintf _snprintf
+#else // _MSCVER
+#define snprintf std::snprintf
+#endif // _MSCVER
 
 namespace mfast {
   namespace json {
@@ -33,11 +38,7 @@ namespace mfast {
             char buf[7]="\\";
             buf[1]=control_table[ static_cast<int>(c) ];
             if (buf[1] == 'u') {
-#ifndef _MSC_VER
-              std::snprintf(buf+2, 5, "%04x", static_cast<int>(c) );
-#else
-              sprintf_s(buf+2, 5,  "%04x", static_cast<int>(c) );
-#endif
+              snprintf(buf+2, 5, "%04x", static_cast<int>(c) );
             }
             os << buf;
             continue;
