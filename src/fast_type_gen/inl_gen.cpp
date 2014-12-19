@@ -496,7 +496,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
          << "}\n\n";
 
     out_ << "template <typename Visitor>\n"
-         << "inline void " << cref_type_name << "::"<< name << "_cref::accept(Visitor& " << print_visitor(inst) << ")\n"
+         << "inline void " << cref_type_name << "::accept(Visitor& " << print_visitor(inst) << ")\n"
          << "{\n"
          << "  using namespace mfast;\n";
 
@@ -531,7 +531,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
          << "}\n\n";
 
     out_ << "template <typename Visitor>\n"
-         << "inline void " << mref_type_name << "::"<< name << "_mref::accept(Visitor& " << print_visitor(inst) << ")\n"
+         << "inline void " << mref_type_name << "::accept(Visitor& " << print_visitor(inst) << ")\n"
          << "{\n"
          << "  using namespace mfast;\n";
 
@@ -613,7 +613,7 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
          << "}\n\n";
 
     out_ << "template <typename Visitor>\n"
-         << "inline void " << cref_scope_.str() << name << "_element_cref::"<< name << "_element_cref::accept(Visitor& " << print_visitor(inst) << ")\n"
+         << "inline void " << cref_scope_.str() << name << "_element_cref::accept(Visitor& " << print_visitor(inst) << ")\n"
          << "{\n"
          << "  using namespace mfast;\n";
 
@@ -626,7 +626,7 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
     out_ << "}\n\n";
 
     out_ << "template <typename Visitor>\n"
-         << "inline void " << mref_scope_.str() << name << "_element_mref::"<< name << "_element_mref::accept(Visitor& " << print_visitor(inst) << ")\n"
+         << "inline void " << mref_scope_.str() << name << "_element_mref::accept(Visitor& " << print_visitor(inst) << ")\n"
          << "{\n"
          << "  using namespace mfast;\n";
 

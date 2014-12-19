@@ -39,27 +39,13 @@ struct fast_decoder_impl;
 
 
 struct fast_decoder_impl
-  : template_repo< template_repo_entry_converter<fast_decoder_impl,
-                                                 message_type,
-                                                 std::pair<mfast::allocator*, template_instruction*> > >
 {
-  typedef template_repo< template_repo_entry_converter<fast_decoder_impl,
-                                                       message_type,
-                                                       std::pair<mfast::allocator*, template_instruction*> > > template_repo_base;
-
   enum {
     visit_absent = 1
   };
 
-  fast_istream strm_;
-  allocator* message_alloc_;
-  message_type* active_message_;
-  bool force_reset_;
-  debug_stream debug_;
-  decoder_presence_map* current_;
-  std::ostream* warning_log_;
 
-  fast_decoder_impl();
+  fast_decoder_impl(mfast::allocator* alloc);
   ~fast_decoder_impl();
   decoder_presence_map& current_pmap();
 
@@ -107,24 +93,48 @@ struct fast_decoder_impl
 
   message_type*  decode_segment(fast_istreambuf& sb);
 
-  std::pair<mfast::allocator*, template_instruction*>
-  to_repo_entry(template_instruction* inst, void*)
-  {
-    return std::make_pair(this->message_alloc_, inst);
-  }
+  typedef message_type info_entry;
 
-  template_instruction* to_instruction(const message_type& msg)
+  struct info_entry_converter
   {
-    return const_cast<template_instruction*>(msg.instruction());
-  }
+    typedef info_entry repo_mapped_type;
 
+    info_entry_converter(mfast::allocator* alloc)
+      : alloc_(alloc)
+    {
+    }
+
+    template <typename Message>
+    std::pair<mfast::allocator*, const template_instruction*>
+    to_repo_entry(const template_instruction* inst, Message*)
+    {
+      return std::make_pair(alloc_, inst);
+    }
+
+    template_instruction* to_instruction(const repo_mapped_type& entry)
+    {
+      return const_cast<template_instruction*>(entry.instruction());
+    }
+
+    mfast::allocator* alloc_;
+  };
+
+  template_repo<info_entry_converter> repo_;
+  allocator* message_alloc_;
+  fast_istream strm_;
+  message_type* active_message_;
+  bool force_reset_;
+  debug_stream debug_;
+  decoder_presence_map* current_;
+  std::ostream* warning_log_;
 };
 
 
 
 inline
-fast_decoder_impl::fast_decoder_impl()
-  : template_repo_base(this)
+fast_decoder_impl::fast_decoder_impl(mfast::allocator* alloc)
+  : repo_(info_entry_converter(alloc))
+  , message_alloc_(alloc)
   , strm_(0)
   , warning_log_(0)
 {
@@ -274,7 +284,7 @@ fast_decoder_impl::visit(nested_message_mref& mref, int)
     debug_ << "   decoded template id -> " << template_id << "\n";
 
     // find the message with corresponding template id
-    active_message_ = this->find(template_id);
+    active_message_ = repo_.find(template_id);
     if (active_message_ == 0)
     {
       using namespace coder;
@@ -313,7 +323,7 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
     debug_ << "decoded template id = " << template_id << "\n";
 
     // find the message with corresponding template id
-    active_message_ = this->find(template_id);
+    active_message_ = repo_.find(template_id);
     if (active_message_ == 0)
     {
       BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
@@ -321,7 +331,7 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
   }
 
   if (force_reset_ || active_message_->instruction()->has_reset_attribute()) {
-    this->reset_dictionary();
+    repo_.reset_dictionary();
   }
 
   // we have to keep the active_message_ in a new variable
@@ -334,9 +344,8 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
 }
 
 fast_decoder::fast_decoder(allocator* alloc)
-  : impl_(new fast_decoder_impl)
+  : impl_(new fast_decoder_impl(alloc))
 {
-  impl_->message_alloc_ = alloc;
 }
 
 fast_decoder::~fast_decoder()
@@ -347,8 +356,8 @@ fast_decoder::~fast_decoder()
 void
 fast_decoder::include(const templates_description** descriptions, std::size_t description_count)
 {
-  impl_->build(descriptions, description_count);
-  impl_->active_message_ = impl_->unique_entry();
+  impl_->repo_.build(descriptions, description_count);
+  impl_->active_message_ = impl_->repo_.unique_entry();
 }
 
 message_cref

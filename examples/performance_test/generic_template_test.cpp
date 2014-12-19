@@ -30,6 +30,11 @@
 
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+
+#if defined(_MSC_VER)
+#pragma warning(disable:4996)
+#endif
+
 const char usage[] =
   "  -t file     : Template file, default file=" TEMPLATE_FILE "\n"
   "  -f file     : FAST Message file, default file=" DATA_FILE "\n"

@@ -133,7 +133,7 @@ namespace mfast
 
     int properties() const
     {
-      return  (optional() ? 1 : 0) |  (segment_pmap_size()  << 1);
+      return  static_cast<int>((optional() ? 1 : 0) |  (segment_pmap_size()  << 1));
     }
 
     virtual void construct_value(value_storage& storage,

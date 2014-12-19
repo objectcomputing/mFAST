@@ -36,6 +36,10 @@
 #include <boost/date_time/microsec_time_clock.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#if defined(_MSC_VER)
+#pragma warning(disable:4996)
+#endif
+
 const char usage[] =
   "  -f file     : FAST Message file, default file=" DATA_FILE "\n"
   "  -head n     : process only the first 'n' messages\n"

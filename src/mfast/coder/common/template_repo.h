@@ -3,12 +3,9 @@
 
 #include "dictionary_builder.h"
 #include <boost/container/map.hpp>
+#include <map>
 
 namespace mfast {
-
-
-template <typename T>
-struct template_repo_mapped_type;
 
 class template_repo_base
 {
@@ -67,7 +64,14 @@ class template_repo
   : public template_repo_base
 {
   typedef typename EntryValueConverter::repo_mapped_type repo_mapped_type;
+  // typedef boost::container::map<uint32_t, repo_mapped_type> templates_map_t;
+
+#ifdef BOOST_NO_RVALUE_REFERENCES
   typedef boost::container::map<uint32_t, repo_mapped_type> templates_map_t;
+#else
+  // MSVC does not work well with boost::container::map when the mapped type is non-copyable but movable object.
+  typedef std::map<uint32_t, repo_mapped_type> templates_map_t;
+#endif
 
   struct repo_entry_inserter
   {
@@ -189,33 +193,6 @@ struct trivial_template_repo_entry_converter
 };
 
 typedef template_repo<trivial_template_repo_entry_converter> simple_template_repo_t;
-
-
-template <typename T, typename MappedType, typename MappedTypeConstructionTuple>
-struct template_repo_entry_converter
-{
-  typedef MappedType repo_mapped_type;
-  T* impl_;
-
-  template_repo_entry_converter(T* impl)
-    : impl_(impl)
-  {
-  }
-
-  template_instruction*
-  to_instruction(const repo_mapped_type& entry) const
-  {
-    return impl_->to_instruction(entry);
-  }
-
-  template <typename Message>
-  MappedTypeConstructionTuple
-  to_repo_entry(template_instruction* inst, Message* msg) const
-  {
-    return impl_->to_repo_entry(inst, msg);
-  }
-
-};
 
 }
 

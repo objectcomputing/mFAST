@@ -32,8 +32,6 @@
 
 using namespace boost::filesystem;
 
-
-
 int main(int argc, const char** argv)
 {
   mfast::template_registry registry;
@@ -47,8 +45,14 @@ int main(int argc, const char** argv)
       i = 3;
     }
 
+#ifdef BOOST_NO_RVALUE_REFERENCES
     boost::container::vector<mfast::dynamic_templates_description> descriptions;
-    boost::container::vector<std::string> filebases;
+#else
+    // MSVC does not work well with boost::container::vector when the value type is non-copyable but movable.
+    std::vector<mfast::dynamic_templates_description> descriptions;
+#endif
+
+    std::vector<std::string> filebases;
 
     mfast::simple_template_repo_t repo;
 

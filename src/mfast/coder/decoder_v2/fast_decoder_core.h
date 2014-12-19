@@ -26,37 +26,14 @@ struct fast_decoder_core;
 typedef void (fast_decoder_core::* message_decode_function_t) (const message_mref&);
 
 
-struct decoder_info_entry
-{
-  decoder_info_entry(const boost::tuple<allocator*,
-                                        const template_instruction*,
-                                        coder::message_decode_function_t>& inputs)
-    : message_(inputs.get<0>(), inputs.get<1>())
-    , decode_fun_(inputs.get<2>())
-  {
-  }
-
-  message_type message_;
-  coder::message_decode_function_t decode_fun_;
-};
 
 
 struct MFAST_CODER_EXPORT fast_decoder_core
   : detail::codec_helper
-  , template_repo< template_repo_entry_converter<fast_decoder_core,
-                                                 decoder_info_entry,
-                                                 boost::tuple<mfast::allocator*,
-                                                              template_instruction*,
-                                                              message_decode_function_t> > >
 {
-  typedef template_repo< template_repo_entry_converter<fast_decoder_core,
-                                                       decoder_info_entry,
-                                                       boost::tuple<mfast::allocator*,
-                                                                    template_instruction*,
-                                                                    message_decode_function_t> > > template_repo_base;
   fast_decoder_core(allocator* alloc);
 
-  message_type* decode_segment(fast_istreambuf& sb);
+  message_type& decode_segment(fast_istreambuf& sb);
   message_cref decode_stream(const char*& first, const char* last, bool force_reset);
 
 
@@ -133,29 +110,73 @@ struct MFAST_CODER_EXPORT fast_decoder_core
                     string_type_tag);
 
 
-  typedef decoder_info_entry repo_mapped_type;
-
-
-
-  template <typename Message>
-  boost::tuple<mfast::allocator*, template_instruction*, message_decode_function_t>
-  to_repo_entry(template_instruction* inst, Message*)
+  typedef boost::tuple<mfast::allocator*,
+                       template_instruction*,
+                       message_decode_function_t> entry_init_tuple_t;
+  struct info_entry
   {
-    return boost::make_tuple(this->message_alloc_, inst, &fast_decoder_core::decode_message<Message>);
+#ifdef BOOST_NO_RVALUE_REFERENCES
+    BOOST_MOVABLE_BUT_NOT_COPYABLE(info_entry)
+#endif
+  public:
+    info_entry(const entry_init_tuple_t& inputs)
+      : message_(inputs.get<0>(), inputs.get<1>())
+      , decode_fun_(inputs.get<2>())
+    {
+    }
+
+    info_entry(BOOST_RV_REF(info_entry) other)
+      : message_(boost::move(other.message_))
+      , decode_fun_ (other.decode_fun_)
+    {
+
+    }
+
+    info_entry& operator = (BOOST_RV_REF(info_entry) other)
+    {
+      message_ = boost::move(other.message_);
+      decode_fun_ = other.decode_fun_;
+      return *this;
+    }
+
+    message_type message_;
+    coder::message_decode_function_t decode_fun_;
+  };
+
+  struct info_entry_converter
+  {
+    typedef info_entry repo_mapped_type;
+    info_entry_converter(allocator* alloc)
+      : alloc_(alloc)
+    {
+    }
+
+    template_instruction*
+    to_instruction(const info_entry& entry) const
+    {
+      return const_cast<template_instruction*>(entry.message_.instruction());
+    }
+
+    template <typename Message>
+    entry_init_tuple_t
+    to_repo_entry(template_instruction* inst, Message*) const
+    {
+      return entry_init_tuple_t(alloc_, inst, &fast_decoder_core::decode_message<Message>);
+    }
+    mfast::allocator* alloc_;
+  };
+
+  message_type& active_message()
+  {
+    return active_message_info_->message_;
   }
 
-  template_instruction* to_instruction(const repo_mapped_type& entry)
-  {
-    return const_cast<template_instruction*>(entry.message_.instruction());
-  }
-
+  template_repo< info_entry_converter > repo_;
   fast_istream strm_;
   allocator* message_alloc_;
-  repo_mapped_type* active_message_info_;
+  info_entry* active_message_info_;
   bool force_reset_;
   decoder_presence_map* current_;
-
-
 };
 
 
@@ -200,7 +221,7 @@ public:
 
 inline
 fast_decoder_core::fast_decoder_core(allocator* alloc)
-  : template_repo_base(this)
+  : repo_(info_entry_converter(alloc), 0)
   , strm_(0)
   , message_alloc_(alloc)
   , active_message_info_(0)
@@ -311,8 +332,8 @@ template <typename DescriptionsTuple>
 inline void
 fast_decoder_core::init(const DescriptionsTuple& tp)
 {
-  this->build(tp);
-  active_message_info_ = this->unique_entry();
+  repo_.build(tp);
+  active_message_info_ = repo_.unique_entry();
 }
 
 template <typename T, typename TypeCategory>

@@ -10,7 +10,7 @@ namespace mfast
     {
       uint32_t template_id = cref.id();
 
-      repo_mapped_type* info = this->find(template_id);
+      info_entry* info = repo_.find(template_id);
 
       if (info == 0) {
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id));
@@ -19,7 +19,7 @@ namespace mfast
       template_instruction* instruction = info->get<0>();
 
       if ( force_reset ||  instruction->has_reset_attribute())
-        this->reset_dictionary();
+        repo_.reset_dictionary();
 
       bool need_encode_template_id = (active_message_info_ != info);
 

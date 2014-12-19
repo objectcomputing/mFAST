@@ -21,6 +21,7 @@
 #define FAST_OSTREAMBUF_H_TWEMCH8
 
 #include <stdexcept>
+#include "mfast/coder/mfast_coder_export.h"
 #include "mfast/exceptions.h"
 
 namespace mfast
@@ -37,7 +38,7 @@ namespace mfast
 
   };
 
-  class fast_ostreambuf
+  class MFAST_CODER_EXPORT fast_ostreambuf
   {
   public:
     fast_ostreambuf(char* buf, std::size_t size);

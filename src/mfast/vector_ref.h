@@ -366,7 +366,7 @@ namespace mfast {
         reserve(n);
         int64_t bytes_to_set = n - this->size();
         if (bytes_to_set > 0)
-          std::memset(end(), c, bytes_to_set);
+          std::memset(end(), c, static_cast<size_t>(bytes_to_set));
       }
       this->storage()->array_length(static_cast<uint32_t>(n));
     }

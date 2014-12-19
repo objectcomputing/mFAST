@@ -43,22 +43,12 @@ inline bool equivalent (const vector_cref<T>& v, const value_storage& prev)
 }
 
 struct fast_encoder_core;
-typedef void (fast_encoder_core::* message_encode_function_t) (const message_cref&);
-typedef boost::tuple<template_instruction*, message_encode_function_t> encoder_info_entry;
+
 
 
 struct MFAST_CODER_EXPORT fast_encoder_core
   : mfast::detail::codec_helper
-  , template_repo< template_repo_entry_converter<fast_encoder_core,
-                                           encoder_info_entry,
-                                           boost::tuple<template_instruction*,
-                                                        message_encode_function_t> > >
 {
-
-  typedef template_repo< template_repo_entry_converter<fast_encoder_core,
-                                                 encoder_info_entry,
-                                                 boost::tuple<template_instruction*,
-                                                              message_encode_function_t> > > template_repo_base;
   fast_encoder_core(allocator* alloc);
 
   void allow_overlong_pmap_i(bool v);
@@ -159,27 +149,32 @@ struct MFAST_CODER_EXPORT fast_encoder_core
                     string_type_tag);
 
 
-  template <typename Message>
-  boost::tuple<template_instruction*, message_encode_function_t>
-  to_repo_entry(template_instruction* inst, Message*)
+
+  typedef void (fast_encoder_core::* message_encode_function_t) (const message_cref&);
+  typedef boost::tuple<template_instruction*, message_encode_function_t> info_entry;
+
+  struct info_entry_converter
   {
-    return boost::make_tuple(inst, &fast_encoder_core::encode_message<Message>);
-  }
+    typedef info_entry repo_mapped_type;
 
-  typedef encoder_info_entry repo_mapped_type;
+    template <typename Message>
+    info_entry
+    to_repo_entry(template_instruction* inst, Message*)
+    {
+      return info_entry(inst, &fast_encoder_core::encode_message<Message>);
+    }
 
-
-  template_instruction* to_instruction(const repo_mapped_type& entry)
-  {
-    return entry.get<0>();
-  }
+    template_instruction* to_instruction(const repo_mapped_type& entry)
+    {
+      return entry.get<0>();
+    }
+  };
 
   /// internal states
 
-
-
+  template_repo< info_entry_converter > repo_;
   fast_ostream strm_;
-  repo_mapped_type* active_message_info_;
+  info_entry* active_message_info_;
   encoder_presence_map* current_;
 };
 
@@ -224,7 +219,7 @@ public:
 
 inline
 fast_encoder_core::fast_encoder_core(allocator* alloc)
-  : template_repo_base(this,alloc)
+  : repo_(alloc)
   , strm_(alloc)
   , active_message_info_(0)
   , current_(0)
@@ -235,8 +230,8 @@ template <typename DescriptionsTuple>
 void
 fast_encoder_core::init(const DescriptionsTuple& tp)
 {
-  this->build(tp);
-  active_message_info_ = this->unique_entry();
+  repo_.build(tp);
+  active_message_info_ = repo_.unique_entry();
 }
 
 template <typename Message>
@@ -288,7 +283,7 @@ fast_encoder_core::visit(const T& ext_ref)
 inline void
 fast_encoder_core::visit(const nested_message_cref& cref)
 {
-  repo_mapped_type* saved_message_info = active_message_info_;
+  info_entry* saved_message_info = active_message_info_;
   encoder_presence_map* prev_pmap = this->current_;
   encode_segment(cref.target(), false);
   this->current_ = prev_pmap;

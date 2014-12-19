@@ -30,9 +30,9 @@ namespace mfast
   template <typename CRef>
   class composite_type
   {
-  private:
+#ifdef BOOST_NO_RVALUE_REFERENCES
     BOOST_MOVABLE_BUT_NOT_COPYABLE(composite_type)
-
+#endif
   public:
 
     typedef typename CRef::instruction_cptr instruction_cptr;

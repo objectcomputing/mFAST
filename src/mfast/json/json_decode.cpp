@@ -18,7 +18,7 @@ namespace mfast {
         std::streambuf* buf = is.rdbuf();
         char unconsumed[127];
         std::streamsize n = buf->sgetn( unconsumed, 127 );
-        this->value().assign(unconsumed, n);
+        this->value().assign(unconsumed, static_cast<unsigned>(n));
       }
 
     };
