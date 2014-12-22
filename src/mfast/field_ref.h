@@ -42,7 +42,7 @@ namespace mfast {
   struct field_cref_core_access;
 
 
-  class MFAST_EXPORT bad_optional_access
+  class bad_optional_access
     : public virtual boost::exception, virtual public std::logic_error
   {
   public:

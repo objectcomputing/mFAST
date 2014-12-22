@@ -21,10 +21,16 @@
 #include "../mfast_coder_export.h"
 #include "mfast/field_instructions.h"
 #include "mfast/arena_allocator.h"
+#include "mfast/coder/mfast_coder_export.h"
 #include <vector>
 #include <map>
 #include <string>
 #include <stdexcept>
+
+#ifdef _MSC_VER
+#pragma warning(disable: 4251) // non dll-interface class used as a member for dll-interface class
+#endif //_MSC_VER
+
 
 namespace mfast {
 
