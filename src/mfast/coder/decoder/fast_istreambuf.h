@@ -30,7 +30,7 @@ namespace mfast
   class decoder_presence_map;
 
   namespace coder {
-    struct fast_decoder_core;
+    struct fast_decoder_base;
   }
 
   class fast_istreambuf
@@ -60,11 +60,16 @@ namespace mfast
       BOOST_THROW_EXCEPTION(fast_dynamic_error("Buffer underflow"));
     }
 
+    const char* gptr()
+    {
+      return gptr_;
+    }
+
   protected:
     friend class fast_istream;
     friend class decoder_presence_map;
     friend class fast_decoder;
-    friend struct coder::fast_decoder_core;
+    friend struct coder::fast_decoder_base;
 
     void gbump (std::ptrdiff_t n)
     {
@@ -83,10 +88,6 @@ namespace mfast
       return *gptr_;
     }
 
-    const char* gptr()
-    {
-      return gptr_;
-    }
 
     const char* egptr()
     {

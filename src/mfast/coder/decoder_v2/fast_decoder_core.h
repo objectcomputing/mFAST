@@ -22,31 +22,28 @@ namespace mfast
 {
 namespace coder
 {
-struct fast_decoder_core;
-typedef void (fast_decoder_core::* message_decode_function_t) (const message_mref&);
+struct fast_decoder_base;
+typedef void (fast_decoder_base::* message_decode_function_t) (const message_mref&);
 
 
 
 
-struct MFAST_CODER_EXPORT fast_decoder_core
+struct MFAST_CODER_EXPORT fast_decoder_base
   : detail::codec_helper
 {
-  fast_decoder_core(allocator* alloc);
+  fast_decoder_base(allocator* alloc);
 
-  message_type& decode_segment(fast_istreambuf& sb);
-  message_cref decode_stream(const char*& first, const char* last, bool force_reset);
+
 
 
   template <typename Message>
   void decode_message(const message_mref& mref);
 
-  template <typename DescriptionsTuple>
-  void init(const DescriptionsTuple& tp);
 
   template <typename T>
   void visit(const T& ext_ref);
 
-  void visit(const nested_message_mref& mref);
+  virtual void visit(const nested_message_mref& mref)=0;
 
   template <typename T, typename TypeCategory>
   void decode_field(const T &ext_ref, TypeCategory);
@@ -110,34 +107,93 @@ struct MFAST_CODER_EXPORT fast_decoder_core
                     string_type_tag);
 
 
+
+  fast_istream strm_;
+  allocator* message_alloc_;
+  bool force_reset_;
+  decoder_presence_map* current_;
+};
+
+
+template <typename T>
+class decoder_pmap_saver
+{
+  decoder_presence_map pmap_;
+  decoder_presence_map* prev_pmap_;
+  fast_decoder_base* base_;
+
+public:
+  decoder_pmap_saver(fast_decoder_base* base)
+    : prev_pmap_(base->current_)
+    , base_(base)
+  {
+    base_->current_ = &pmap_;
+    base_->strm_.decode(pmap_);
+  }
+
+  ~decoder_pmap_saver()
+  {
+    base_->current_ = this->prev_pmap_;
+  }
+
+};
+
+template <>
+class decoder_pmap_saver<pmap_segment_size_zero>
+{
+public:
+  decoder_pmap_saver(fast_decoder_base*)
+  {
+  }
+
+  ~decoder_pmap_saver()
+  {
+  }
+
+};
+
+
+template <unsigned NumTokens>
+struct fast_decoder_core
+  : public fast_decoder_base
+{
+  fast_decoder_core(allocator* alloc);
+
+  template <typename DescriptionsTuple>
+  void init(const DescriptionsTuple& tp);
+
+  using fast_decoder_base::visit;
+  virtual void visit(const nested_message_mref& mref);
+
+  message_type& decode_segment(fast_istreambuf& sb);
+  message_cref decode_stream(const char*& first, const char* last, bool force_reset);
+
   typedef boost::tuple<mfast::allocator*,
                        template_instruction*,
                        message_decode_function_t> entry_init_tuple_t;
   struct info_entry
   {
-#ifdef BOOST_NO_RVALUE_REFERENCES
-    BOOST_MOVABLE_BUT_NOT_COPYABLE(info_entry)
-#endif
-  public:
+  //   BOOST_MOVABLE_BUT_NOT_COPYABLE(info_entry)
+  // public:
     info_entry(const entry_init_tuple_t& inputs)
       : message_(inputs.get<0>(), inputs.get<1>())
       , decode_fun_(inputs.get<2>())
     {
     }
 
-    info_entry(BOOST_RV_REF(info_entry) other)
-      : message_(boost::move(other.message_))
-      , decode_fun_ (other.decode_fun_)
-    {
-
-    }
-
-    info_entry& operator = (BOOST_RV_REF(info_entry) other)
-    {
-      message_ = boost::move(other.message_);
-      decode_fun_ = other.decode_fun_;
-      return *this;
-    }
+    // info_entry(BOOST_RV_REF(info_entry) other)
+    //   : message_(boost::move(other.message_))
+    //   , decode_fun_ (other.decode_fun_)
+    // {
+    //
+    // }
+    //
+    // info_entry& operator = (BOOST_RV_REF(info_entry) other)
+    // {
+    //   message_ = boost::move(other.message_);
+    //   decode_fun_ = other.decode_fun_;
+    //   return *this;
+    // }
 
     message_type message_;
     coder::message_decode_function_t decode_fun_;
@@ -161,8 +217,9 @@ struct MFAST_CODER_EXPORT fast_decoder_core
     entry_init_tuple_t
     to_repo_entry(template_instruction* inst, Message*) const
     {
-      return entry_init_tuple_t(alloc_, inst, &fast_decoder_core::decode_message<Message>);
+      return entry_init_tuple_t(alloc_, inst, &fast_decoder_base::decode_message<Message>);
     }
+
     mfast::allocator* alloc_;
   };
 
@@ -172,59 +229,15 @@ struct MFAST_CODER_EXPORT fast_decoder_core
   }
 
   template_repo< info_entry_converter > repo_;
-  fast_istream strm_;
-  allocator* message_alloc_;
   info_entry* active_message_info_;
-  bool force_reset_;
-  decoder_presence_map* current_;
-};
-
-
-template <typename T>
-class decoder_pmap_saver
-{
-  decoder_presence_map pmap_;
-  decoder_presence_map* prev_pmap_;
-  fast_decoder_core* core_;
-
-public:
-  decoder_pmap_saver(fast_decoder_core* core)
-    : prev_pmap_(core->current_)
-    , core_(core)
-  {
-    core_->current_ = &pmap_;
-    core_->strm_.decode(pmap_);
-  }
-
-  ~decoder_pmap_saver()
-  {
-    core_->current_ = this->prev_pmap_;
-  }
-
-};
-
-template <>
-class decoder_pmap_saver<pmap_segment_size_zero>
-{
-public:
-  decoder_pmap_saver(fast_decoder_core*)
-  {
-  }
-
-  ~decoder_pmap_saver()
-  {
-  }
-
 };
 
 
 
 inline
-fast_decoder_core::fast_decoder_core(allocator* alloc)
-  : repo_(info_entry_converter(alloc), 0)
-  , strm_(0)
+fast_decoder_base::fast_decoder_base(allocator* alloc)
+  : strm_(0)
   , message_alloc_(alloc)
-  , active_message_info_(0)
   , force_reset_(false)
   , current_(0)
 {
@@ -232,7 +245,7 @@ fast_decoder_core::fast_decoder_core(allocator* alloc)
 
 template <typename T>
 inline void
-fast_decoder_core::visit(const T& ext_ref)
+fast_decoder_base::visit(const T& ext_ref)
 {
   typedef typename T::type_category type_category;
   this->decode_field(ext_ref, type_category());
@@ -240,7 +253,7 @@ fast_decoder_core::visit(const T& ext_ref)
 
 template <typename T, typename TypeCategory>
 inline void
-fast_decoder_core::decode_field(const T& ext_ref, TypeCategory)
+fast_decoder_base::decode_field(const T& ext_ref, TypeCategory)
 {
   this->decode_field(ext_ref,
                      typename T::operator_category(),
@@ -250,7 +263,7 @@ fast_decoder_core::decode_field(const T& ext_ref, TypeCategory)
 
 template <typename T>
 inline void
-fast_decoder_core::decode_field(const T& ext_ref, split_decimal_type_tag)
+fast_decoder_base::decode_field(const T& ext_ref, split_decimal_type_tag)
 {
 
   typename T::exponent_type exponent_ref = ext_ref.set_exponent();
@@ -263,7 +276,7 @@ fast_decoder_core::decode_field(const T& ext_ref, split_decimal_type_tag)
 
 template <typename T>
 inline void
-fast_decoder_core::decode_field(const T& ext_ref, int_vector_type_tag)
+fast_decoder_base::decode_field(const T& ext_ref, int_vector_type_tag)
 {
   typename T::mref_type mref = ext_ref.set();
 
@@ -281,7 +294,7 @@ fast_decoder_core::decode_field(const T& ext_ref, int_vector_type_tag)
 
 template <typename T>
 inline void
-fast_decoder_core::decode_field(const T& ext_ref, group_type_tag)
+fast_decoder_base::decode_field(const T& ext_ref, group_type_tag)
 {
   // If a group field is optional, it will occupy a single bit in the presence map.
   // The contents of the group may appear in the stream iff the bit is set.
@@ -299,7 +312,7 @@ fast_decoder_core::decode_field(const T& ext_ref, group_type_tag)
 
 template <typename T>
 inline void
-fast_decoder_core::decode_field(const T& ext_ref, sequence_type_tag)
+fast_decoder_base::decode_field(const T& ext_ref, sequence_type_tag)
 {
   value_storage storage;
 
@@ -322,22 +335,15 @@ fast_decoder_core::decode_field(const T& ext_ref, sequence_type_tag)
 
 template <typename Message>
 inline void
-fast_decoder_core::decode_message(const message_mref& mref)
+fast_decoder_base::decode_message(const message_mref& mref)
 {
   typename Message::mref_type ref(mref);
   ref.accept(*this);
 }
 
-template <typename DescriptionsTuple>
-inline void
-fast_decoder_core::init(const DescriptionsTuple& tp)
-{
-  repo_.build(tp);
-  active_message_info_ = repo_.unique_entry();
-}
 
 template <typename T, typename TypeCategory>
-void fast_decoder_core::decode_field (const T& ext_ref,
+void fast_decoder_base::decode_field (const T& ext_ref,
                                       none_operator_tag,
                                       TypeCategory)
 {
@@ -357,7 +363,7 @@ void fast_decoder_core::decode_field (const T& ext_ref,
 }
 
 template <typename T, typename TypeCategory>
-void fast_decoder_core::decode_field(const T& ext_ref,
+void fast_decoder_base::decode_field(const T& ext_ref,
                                      constant_operator_tag,
                                      TypeCategory)
 {
@@ -384,7 +390,7 @@ void fast_decoder_core::decode_field(const T& ext_ref,
 }
 
 template <typename T, typename TypeCategory>
-void fast_decoder_core::decode_field(const T& ext_ref,
+void fast_decoder_base::decode_field(const T& ext_ref,
                                      copy_operator_tag,
                                      TypeCategory)
 {
@@ -436,7 +442,7 @@ void fast_decoder_core::decode_field(const T& ext_ref,
 }
 
 template <typename T, typename TypeCategory>
-void fast_decoder_core::decode_field(const T& ext_ref,
+void fast_decoder_base::decode_field(const T& ext_ref,
                                      increment_operator_tag,
                                      TypeCategory)
 {
@@ -490,7 +496,7 @@ void fast_decoder_core::decode_field(const T& ext_ref,
 }
 
 template <typename T, typename TypeCategory>
-void fast_decoder_core::decode_field(const T& ext_ref,
+void fast_decoder_base::decode_field(const T& ext_ref,
                                      default_operator_tag,
                                      TypeCategory)
 {
@@ -521,7 +527,7 @@ void fast_decoder_core::decode_field(const T& ext_ref,
 }
 
 template <typename T>
-void fast_decoder_core::decode_field(const T& ext_ref,
+void fast_decoder_base::decode_field(const T& ext_ref,
                                      delta_operator_tag,
                                      integer_type_tag)
 {
@@ -547,7 +553,7 @@ void fast_decoder_core::decode_field(const T& ext_ref,
 }
 
 template <typename T>
-void fast_decoder_core::decode_field(const T& ext_ref,
+void fast_decoder_base::decode_field(const T& ext_ref,
                                      delta_operator_tag,
                                      string_type_tag)
 {
@@ -583,7 +589,7 @@ void fast_decoder_core::decode_field(const T& ext_ref,
 }
 
 template <typename T>
-void fast_decoder_core::decode_field(const T& ext_ref,
+void fast_decoder_base::decode_field(const T& ext_ref,
                                      delta_operator_tag,
                                      decimal_type_tag)
 {
@@ -605,7 +611,7 @@ void fast_decoder_core::decode_field(const T& ext_ref,
 }
 
 template <typename T>
-void fast_decoder_core::decode_field(const T& ext_ref,
+void fast_decoder_base::decode_field(const T& ext_ref,
                                      tail_operator_tag,
                                      string_type_tag)
 {
@@ -665,6 +671,106 @@ void fast_decoder_core::decode_field(const T& ext_ref,
   }
   save_previous_value(mref);
 }
+
+/////////////////////////////////////////////////////////
+template <unsigned NumTokens>
+inline
+fast_decoder_core<NumTokens>::fast_decoder_core(allocator* alloc)
+  : fast_decoder_base(alloc)
+  , repo_(info_entry_converter(alloc), 0)
+  , active_message_info_(0)
+{
+}
+
+template <unsigned NumTokens>
+template <typename DescriptionsTuple>
+inline void
+fast_decoder_core<NumTokens>::init(const DescriptionsTuple& tp)
+{
+  repo_.build(tp);
+  active_message_info_ = repo_.unique_entry();
+}
+
+template <unsigned NumTokens>
+void
+fast_decoder_core<NumTokens>::visit(const nested_message_mref& mref)
+{
+  decoder_pmap_saver<true_type> saver(this);
+  info_entry* saved_active_info = this->active_message_info_;
+
+
+  if (this->current_->is_next_bit_set()) {
+    uint32_t template_id;
+
+    strm_.decode(template_id, false_type());
+    // find the message with corresponding template id
+    active_message_info_ = repo_.find(template_id);
+
+    if (active_message_info_ == 0) {
+      BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
+                                                     << referenced_by_info(this->active_message().name()));
+    }
+  }
+
+  mref.set_target_instruction(this->active_message().instruction(), false_type() );
+  message_decode_function_t decode = active_message_info_->decode_fun_;
+  (this->*decode)(mref.target());
+
+  this->active_message_info_ = saved_active_info;
+
+}
+
+template <unsigned NumTokens>
+message_type&
+fast_decoder_core<NumTokens>::decode_segment(fast_istreambuf& sb)
+{
+
+  strm_.reset(&sb);
+
+  decoder_presence_map pmap;
+  this->current_ = &pmap;
+  strm_.decode(pmap);
+
+  if (pmap.is_next_bit_set()) {
+    uint32_t template_id;
+
+    strm_.decode(template_id, false_type());
+
+    // find the message with corresponding template id
+    active_message_info_ = repo_.find(template_id);
+
+    if (active_message_info_ == 0) {
+      BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
+    }
+  }
+
+  // we have to keep the active_message_ in a new variable
+  // because after the accept_mutator(), the active_message_
+  // may change because of the decoding of dynamic template reference
+  message_type& message = this->active_message();
+
+  if (force_reset_ || message.instruction()->has_reset_attribute()) {
+    repo_.reset_dictionary();
+  }
+
+  message_decode_function_t decode = active_message_info_->decode_fun_;
+  (this->*decode)(message.mref());
+
+  return message;
+}
+
+template <unsigned NumTokens>
+message_cref
+fast_decoder_core<NumTokens>::decode_stream(const char*& first, const char* last, bool force_reset)
+{
+  assert(first < last);
+  fast_istreambuf sb(first, last-first);
+  this->force_reset_ = force_reset;
+  message_cref result = this->decode_segment(sb).cref();
+  first = sb.gptr();
+  return result;
+}
+
 
 }   /* coder */
 

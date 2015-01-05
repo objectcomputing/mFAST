@@ -213,7 +213,9 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
             << "  : private boost::array<mfast::value_storage, " << inst->subinstructions().size() << ">\n"
             << "  , public mfast::group_type\n"
             << "{\n"
-            << "  typedef mfast::group_type base_type;\n"
+            << "  private:\n"
+            << "    typedef  boost::array<mfast::value_storage, " << inst->subinstructions().size() << "> base_array;\n"
+            << "    typedef mfast::group_type base_type;\n"
             << "  public:\n"
             << "    typedef mfast::group_instruction_ex<" << name << "_cref> instruction_type;\n\n"
             << "    typedef " << name << "_cref cref_type;\n"
@@ -228,8 +230,10 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
             << "    mref_type ref();\n"
             << "    mref_type mref();\n"
             << "    static const instruction_type* instruction();\n"
-            << "  private:\n"
+            << "\n"
+            << "    " << name << "(" << name << "&&) noexcept;\n"
             << "    " << name << "(const " << name << "&);\n"
+            << "    " << name << "& operator = ("  << name << "&&) noexcept;\n"
             << "    " << name << "& operator = (const "  << name << "&);\n"
             << "};\n\n";
   }

@@ -9,14 +9,14 @@ namespace mfast
 {
 
 class fast_decoder_v2
-  : coder::fast_decoder_core
+  : coder::fast_decoder_core<0>
 {
 public:
 
   template <typename DescriptionsTuple>
   fast_decoder_v2(const DescriptionsTuple& tp,
                   typename boost::disable_if< boost::is_base_of< mfast::templates_description, DescriptionsTuple>, allocator*>::type alloc = malloc_allocator::instance())
-    : coder::fast_decoder_core(alloc)
+    : coder::fast_decoder_core<0>(alloc)
   {
     init(tp);
   }
@@ -24,7 +24,7 @@ public:
   template <typename T>
   fast_decoder_v2(const T* desc,
                   typename boost::enable_if< boost::is_base_of< mfast::templates_description, T>, allocator*>::type alloc = malloc_allocator::instance())
-    : coder::fast_decoder_core(alloc)
+    : coder::fast_decoder_core<0>(alloc)
   {
     init(boost::make_tuple(desc));
   }

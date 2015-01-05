@@ -259,6 +259,14 @@ BOOST_AUTO_TEST_CASE(test_template)
 
   BOOST_CHECK(person1.cref() == person3.cref());
 
+  Person person4(person1);
+
+  BOOST_CHECK(person1.cref() == person4.cref());
+
+
+  Person person5;
+  person5 = person1;
+  BOOST_CHECK(person1.cref() == person5.cref());
 
 }
 

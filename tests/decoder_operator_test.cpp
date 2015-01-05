@@ -125,7 +125,7 @@ decode_ext_mref(const byte_stream&       input_stream,
   mfast::malloc_allocator allocator;
   mfast::allocator* alloc = &allocator;
 
-  mfast::coder::fast_decoder_core core(alloc);
+  mfast::coder::fast_decoder_core<0> core(alloc);
 
   fast_istreambuf sb(input_stream.data(), input_stream.size());
   core.strm_.reset(&sb);

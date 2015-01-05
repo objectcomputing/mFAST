@@ -79,7 +79,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 # Select flags.
 # Initialize CXXFLAGS.
 if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-    set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS} -std=c++11")
 elseif (MSVC)
     add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS /DBOOST_ALL_DYN_LINK)
 endif()

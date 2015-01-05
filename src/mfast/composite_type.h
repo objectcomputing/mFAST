@@ -30,9 +30,9 @@ namespace mfast
   template <typename CRef>
   class composite_type
   {
-#ifdef BOOST_NO_RVALUE_REFERENCES
-    BOOST_MOVABLE_BUT_NOT_COPYABLE(composite_type)
-#endif
+// #ifdef BOOST_NO_RVALUE_REFERENCES
+//     BOOST_MOVABLE_BUT_NOT_COPYABLE(composite_type)
+// #endif
   public:
 
     typedef typename CRef::instruction_cptr instruction_cptr;
@@ -51,7 +51,9 @@ namespace mfast
     composite_type(const cref_type & other,
                    mfast::allocator* alloc);
 
-    composite_type(BOOST_RV_REF(composite_type)other)
+    composite_type(const composite_type& other);
+
+    composite_type(composite_type&& other) noexcept
       : alloc_(other.alloc_)
       , instruction_ (other.instruction_)
     {
@@ -60,7 +62,7 @@ namespace mfast
       other.instruction_ = 0;
     }
 
-    composite_type& operator = (BOOST_RV_REF(composite_type)other)
+    composite_type& operator = (composite_type&& other) noexcept
     {
       // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
       if (this->instruction())
@@ -73,6 +75,10 @@ namespace mfast
       other.instruction_ = 0;
       return *this;
     }
+
+
+
+    composite_type& operator = (const composite_type& other);
 
     mref_type ref();
     mref_type mref();
@@ -96,6 +102,35 @@ namespace mfast
                    instruction_cptr     instruction,
                    value_storage*       fields_storage,
                    const value_storage* other_fields_storage);
+
+    composite_type(composite_type&& other,
+                   value_storage*   fields_storage) noexcept
+      : alloc_(other.alloc_)
+      , instruction_ (other.instruction_)
+    {
+      my_storage_.of_group.own_content_ =  0;
+      my_storage_.of_group.is_link_ = 0;
+      my_storage_.of_group.content_ = fields_storage;
+      other.instruction_ = 0;
+    }
+
+
+    void assign(composite_type&& other,
+                value_storage* fields_storage) noexcept
+    {
+      // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
+      if (this->instruction())
+        this->instruction()->destruct_value(my_storage_, alloc_);
+
+      alloc_ = other.alloc_;
+      instruction_ = other.instruction_;
+
+      my_storage_.of_group.own_content_ =  0;
+      my_storage_.of_group.is_link_ = 0;
+      my_storage_.of_group.content_ = fields_storage;
+
+      other.instruction_ = 0;
+    }
 
     friend struct fast_decoder_impl;
 
@@ -175,6 +210,25 @@ namespace mfast
                                               my_storage_,
                                               alloc,
                                               0);
+  }
+
+  template <typename CRef>
+  inline
+  composite_type<CRef>::composite_type(const composite_type& other)
+    : alloc_(other.alloc_)
+    , instruction_ (other.instruction_)
+  {
+    this->instruction()->copy_construct_value(other.my_storage_,
+                                              my_storage_,
+                                              alloc_,
+                                              0);
+  }
+
+  template <typename CRef>
+  inline composite_type<CRef>&
+  composite_type<CRef>::operator = (const composite_type<CRef>& other)
+  {
+    return this->operator=(composite_type<CRef>(other));
   }
 
   template <typename CRef>
