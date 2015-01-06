@@ -28,7 +28,6 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/message_ref.h"
 #include "mfast/nested_message_ref.h"
-#include <boost/utility/enable_if.hpp>
 #include <boost/foreach.hpp>
 namespace mfast {
 

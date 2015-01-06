@@ -48,7 +48,7 @@ namespace mfast
   {
   public:
     typedef const group_field_instruction* instruction_cptr;
-    typedef boost::false_type is_mutable;
+    static const bool is_mutable=false;
     typedef group_type_tag type_category;
 
     aggregate_cref(const value_storage*           storage_array=0,
@@ -163,7 +163,7 @@ namespace mfast
     : public ConstRef
   {
   public:
-    typedef boost::true_type is_mutable;
+    static const bool is_mutable=true;
     typedef ConstRef cref_type;
     typedef typename ConstRef::instruction_cptr instruction_cptr;
 

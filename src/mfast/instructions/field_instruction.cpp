@@ -21,28 +21,6 @@
 
 namespace mfast {
 
-  field_instruction::field_instruction(operator_enum_t operator_id,
-                                       int             field_type,
-                                       presence_enum_t optional,
-                                       uint32_t        id,
-                                       const char*     name,
-                                       const char*     ns,
-                                       instruction_tag tag)
-    : operator_id_(operator_id)
-    , is_array_(field_type >= field_type_ascii_string && field_type <= field_type_sequence )
-    , optional_flag_(optional)
-    , nullable_flag_( optional &&  (operator_id != operator_constant) )
-    , has_pmap_bit_(operator_id > operator_delta || ((operator_id == operator_constant) && optional))
-    , has_initial_value_(false)
-    , field_type_(field_type)
-    , previous_value_shared_(false)
-    , id_(id)
-    , name_(name)
-    , ns_(ns)
-    , tag_(tag)
-  {
-  }
-
   field_instruction::field_instruction(const field_instruction& other)
     : operator_id_(other.operator_id_)
     , is_array_(other.is_array_ )

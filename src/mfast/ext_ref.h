@@ -11,13 +11,13 @@ namespace mfast
 
   template <int V>
   struct fast_operator_tag
-    : boost::integral_constant<int, V>
+    : std::integral_constant<int, V>
   {
   };
 
   template <int V>
   struct properties_type
-    : boost::integral_constant<int, V>
+    : std::integral_constant<int, V>
   {
   };
 
@@ -37,15 +37,18 @@ namespace mfast
   // a group_mref decay to an aggregate_mref
   // which would lose the ability to reset
   // the presence flag
+  //
+  // typedef std::integral_constant<bool, true>  true_type;
+  // typedef std::integral_constant<bool, false>  false_type;
 
-  typedef boost::integral_constant<bool, true>  true_type;
-  typedef boost::integral_constant<bool, false>  false_type;
+  using std::true_type;
+  using std::false_type;
 
 
   template <typename Properties>
   struct presence_checker
   {
-    typedef boost::integral_constant<bool, ((Properties::value & presence_optional) > 0)> is_optional_type;
+    typedef std::integral_constant<bool, ((Properties::value & presence_optional) > 0)> is_optional_type;
 
     is_optional_type optional() const
     {
@@ -61,11 +64,11 @@ namespace mfast
     const static bool IsOptional = presence_checker<Properties>::is_optional_type::value;
     typedef Properties properties_type;
 
-    typedef boost::integral_constant<bool, ((Properties::value & presence_optional) > 0)> is_optional_type;
-    typedef boost::integral_constant<bool, (OperatorType::value != operator_constant && IsOptional )> is_nullable_type;
-    typedef boost::integral_constant<bool, ((OperatorType::value & field_has_initial_value) > 0 && !IsOptional )> mandatory_without_initial_value_type;
-    typedef boost::integral_constant<bool, (OperatorType::value > operator_delta || ((OperatorType::value == operator_constant) && IsOptional )) > has_pmap_type;
-    typedef boost::integral_constant<bool, (Properties::value == field_previous_value_shared) > previous_value_shared_type;
+    typedef std::integral_constant<bool, ((Properties::value & presence_optional) > 0)> is_optional_type;
+    typedef std::integral_constant<bool, (OperatorType::value != operator_constant && IsOptional )> is_nullable_type;
+    typedef std::integral_constant<bool, ((OperatorType::value & field_has_initial_value) > 0 && !IsOptional )> mandatory_without_initial_value_type;
+    typedef std::integral_constant<bool, (OperatorType::value > operator_delta || ((OperatorType::value == operator_constant) && IsOptional )) > has_pmap_type;
+    typedef std::integral_constant<bool, (Properties::value == field_previous_value_shared) > previous_value_shared_type;
 
     is_nullable_type nullable() const
     {
@@ -89,13 +92,13 @@ namespace mfast
 
   };
 
-  typedef boost::integral_constant<unsigned int,0> pmap_segment_size_zero;
+  typedef std::integral_constant<unsigned int,0> pmap_segment_size_zero;
 
   template <typename Properties>
   struct ext_ref_properties<group_type_tag, Properties>
     : presence_checker<Properties>
   {
-    typedef boost::integral_constant<unsigned int, (Properties::value >> 1) > pmap_segment_size_type;
+    typedef std::integral_constant<unsigned int, (Properties::value >> 1) > pmap_segment_size_type;
     typedef Properties properties_type;
 
     pmap_segment_size_type pmap_segment_size() const

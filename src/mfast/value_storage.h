@@ -24,7 +24,6 @@
 #include <stdint.h>
 #include <cstring>
 #include <boost/type_traits/is_pointer.hpp>
-#include <boost/utility/enable_if.hpp>
 #include <boost/array.hpp>
 
 namespace mfast
@@ -134,28 +133,28 @@ namespace mfast
     }
 
     template <typename T>
-    typename boost::disable_if< boost::is_pointer<T>, T>::type
+    typename std::enable_if<!std::is_pointer<T>::value, T>::type
     get() const
     {
       return static_cast<T>(of_uint.content_);
     }
 
     template <typename T>
-    typename boost::enable_if< boost::is_pointer<T>, T>::type
+    typename std::enable_if< std::is_pointer<T>::value, T>::type
     get() const
     {
       return reinterpret_cast<T>(of_array.content_);
     }
 
     template <typename T>
-    typename boost::disable_if< boost::is_pointer<T>, void>::type
+    typename std::enable_if< !std::is_pointer<T>::value, void>::type
     set(T v)
     {
       of_uint.content_ = static_cast<uint64_t>(v);
     }
 
     template <typename T>
-    typename boost::enable_if< boost::is_pointer<T>, void>::type
+    typename std::enable_if< std::is_pointer<T>::value, void>::type
     set(T v)
     {
       of_array.content_ = v;

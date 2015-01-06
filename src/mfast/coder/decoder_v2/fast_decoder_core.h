@@ -18,6 +18,7 @@
 #include "../decoder/fast_istream.h"
 #include "fast_istream_extractor.h"
 #include <boost/tuple/tuple.hpp>
+#include <vector>
 namespace mfast
 {
 namespace coder
@@ -152,12 +153,44 @@ public:
 
 };
 
+template <bool MoreThanOneToken>
+struct token_base
+{
+  unsigned current_token_;
+
+
+  void get_token() const
+  {
+    return current_token_;
+  }
+
+  void set_token(unsigned token)
+  {
+    current_token_ = token;
+  }
+};
+
+template <>
+struct token_base<0>
+{
+  unsigned get_token() const
+  {
+    return 0;
+  }
+
+  void set_token(unsigned)
+  {
+  }
+};
 
 template <unsigned NumTokens>
 struct fast_decoder_core
   : public fast_decoder_base
+  , token_base< (NumTokens>1) >
 {
   fast_decoder_core(allocator* alloc);
+
+  const static unsigned num_reserved_msgs= (NumTokens == 0 ? 1 : NumTokens);
 
   template <typename DescriptionsTuple>
   void init(const DescriptionsTuple& tp);
@@ -165,38 +198,31 @@ struct fast_decoder_core
   using fast_decoder_base::visit;
   virtual void visit(const nested_message_mref& mref);
 
-  message_type& decode_segment(fast_istreambuf& sb);
-  message_cref decode_stream(const char*& first, const char* last, bool force_reset);
+  const message_mref& decode_segment(fast_istreambuf& sb);
 
-  typedef boost::tuple<mfast::allocator*,
-                       template_instruction*,
-                       message_decode_function_t> entry_init_tuple_t;
+  const message_mref& decode_stream(unsigned token, const char*& first, const char* last,  bool force_reset);
+
+  typedef std::vector<mfast::message_type> message_resources_t;
+
+  typedef std::pair<message_resources_t::iterator,
+                    coder::message_decode_function_t> info_entry_init_t;
+
   struct info_entry
   {
-  //   BOOST_MOVABLE_BUT_NOT_COPYABLE(info_entry)
-  // public:
-    info_entry(const entry_init_tuple_t& inputs)
-      : message_(inputs.get<0>(), inputs.get<1>())
-      , decode_fun_(inputs.get<2>())
+    mfast::message_mref messages_[num_reserved_msgs];
+    coder::message_decode_function_t decode_fun_;
+
+    info_entry() = default;
+    info_entry(info_entry_init_t init_pair)
+      : decode_fun_(init_pair.second)
     {
+      auto itr = init_pair.first;
+      for (unsigned i = 0; i < num_reserved_msgs; ++i) {
+        messages_[i].refers_to(itr->mref());
+        ++itr;
+      }
     }
 
-    // info_entry(BOOST_RV_REF(info_entry) other)
-    //   : message_(boost::move(other.message_))
-    //   , decode_fun_ (other.decode_fun_)
-    // {
-    //
-    // }
-    //
-    // info_entry& operator = (BOOST_RV_REF(info_entry) other)
-    // {
-    //   message_ = boost::move(other.message_);
-    //   decode_fun_ = other.decode_fun_;
-    //   return *this;
-    // }
-
-    message_type message_;
-    coder::message_decode_function_t decode_fun_;
   };
 
   struct info_entry_converter
@@ -210,26 +236,32 @@ struct fast_decoder_core
     template_instruction*
     to_instruction(const info_entry& entry) const
     {
-      return const_cast<template_instruction*>(entry.message_.instruction());
+      return const_cast<template_instruction*>(entry.messages_[0].instruction());
     }
 
     template <typename Message>
-    entry_init_tuple_t
-    to_repo_entry(template_instruction* inst, Message*) const
+    info_entry_init_t
+    to_repo_entry(template_instruction* inst, Message*)
     {
-      return entry_init_tuple_t(alloc_, inst, &fast_decoder_base::decode_message<Message>);
+      std::size_t index =  message_resources_.size();
+      for (std::size_t i = 0; i < num_reserved_msgs; ++i)
+        message_resources_.emplace_back(alloc_, inst, nullptr);
+
+      return std::make_pair(message_resources_.begin()+index, &fast_decoder_base::decode_message<Message>);
     }
 
     mfast::allocator* alloc_;
+    message_resources_t message_resources_;
   };
 
-  message_type& active_message()
+  const message_mref& active_message()
   {
-    return active_message_info_->message_;
+    return active_message_info_->messages_[this->get_token()];
   }
 
   template_repo< info_entry_converter > repo_;
   info_entry* active_message_info_;
+
 };
 
 
@@ -340,7 +372,6 @@ fast_decoder_base::decode_message(const message_mref& mref)
   typename Message::mref_type ref(mref);
   ref.accept(*this);
 }
-
 
 template <typename T, typename TypeCategory>
 void fast_decoder_base::decode_field (const T& ext_ref,
@@ -677,7 +708,7 @@ template <unsigned NumTokens>
 inline
 fast_decoder_core<NumTokens>::fast_decoder_core(allocator* alloc)
   : fast_decoder_base(alloc)
-  , repo_(info_entry_converter(alloc), 0)
+  , repo_(info_entry_converter(alloc), NumTokens == 0 ? 0 : alloc)
   , active_message_info_(0)
 {
 }
@@ -721,7 +752,7 @@ fast_decoder_core<NumTokens>::visit(const nested_message_mref& mref)
 }
 
 template <unsigned NumTokens>
-message_type&
+const message_mref&
 fast_decoder_core<NumTokens>::decode_segment(fast_istreambuf& sb)
 {
 
@@ -747,30 +778,30 @@ fast_decoder_core<NumTokens>::decode_segment(fast_istreambuf& sb)
   // we have to keep the active_message_ in a new variable
   // because after the accept_mutator(), the active_message_
   // may change because of the decoding of dynamic template reference
-  message_type& message = this->active_message();
+  const message_mref& message = this->active_message();
 
   if (force_reset_ || message.instruction()->has_reset_attribute()) {
     repo_.reset_dictionary();
   }
 
   message_decode_function_t decode = active_message_info_->decode_fun_;
-  (this->*decode)(message.mref());
+  (this->*decode)(message);
 
   return message;
 }
 
 template <unsigned NumTokens>
-message_cref
-fast_decoder_core<NumTokens>::decode_stream(const char*& first, const char* last, bool force_reset)
+const message_mref&
+fast_decoder_core<NumTokens>::decode_stream(unsigned token, const char*& first, const char* last, bool force_reset)
 {
   assert(first < last);
   fast_istreambuf sb(first, last-first);
+  this->set_token(token);
   this->force_reset_ = force_reset;
-  message_cref result = this->decode_segment(sb).cref();
+  const auto& result = this->decode_segment(sb);
   first = sb.gptr();
   return result;
 }
-
 
 }   /* coder */
 

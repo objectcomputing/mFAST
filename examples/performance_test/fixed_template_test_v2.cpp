@@ -112,7 +112,7 @@ int main(int argc, const char** argv)
 
   try {
 
-    mfast::fast_decoder_v2 decoder( example::description() );
+    mfast::fast_decoder_v2<0> decoder( example::description() );
 
 #ifdef WITH_ENCODE
     mfast::fast_encoder_v2 encoder( example::description() );

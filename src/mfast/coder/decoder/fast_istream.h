@@ -38,7 +38,7 @@ namespace mfast
      * @return false if the decoded value is null
      **/
     template <typename T, typename Nullable>
-    typename boost::enable_if< boost::is_integral<T>,bool>::type
+    typename std::enable_if< std::is_integral<T>::value,bool>::type
     decode(T& result, Nullable nullable);
 
 
@@ -289,7 +289,7 @@ namespace mfast
   }
 
   template <typename T, typename Nullable>
-  typename boost::enable_if< boost::is_integral<T>,bool>::type
+  typename std::enable_if< std::is_integral<T>::value,bool>::type
   fast_istream::decode(T& result, Nullable nullable)
   {
     typename detail::int_trait<T>::temp_type tmp = 0;
@@ -297,7 +297,7 @@ namespace mfast
     char c = buf_->sbumpc();
     // bool decrement_value = true;
     int decrement_value = nullable;
-    if (boost::is_unsigned<T>::value) {
+    if (std::is_unsigned<T>::value) {
       tmp = c & 0x7F;
     }
     else {

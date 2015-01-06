@@ -390,7 +390,7 @@ namespace mfast {
 
 
     template <typename T>
-    typename boost::enable_if<boost::is_integral<T> >::type as(T v)
+    typename std::enable_if<std::is_integral<T>::value >::type as(T v)
     {
       this->storage()->of_decimal.mantissa_ = v;
       this->storage()->of_decimal.exponent_ = 0;
@@ -400,7 +400,7 @@ namespace mfast {
     }
 
     template <typename T>
-    typename boost::disable_if<boost::is_integral<T> >::type as(T v)
+    typename std::enable_if<!std::is_integral<T>::value >::type as(T v)
     {
       this->as_i(v);
     }

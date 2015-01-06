@@ -103,14 +103,14 @@ namespace mfast {
   namespace detail {
 
     template <typename T>
-    inline typename boost::enable_if<boost::is_signed<T>, bool>::type
+    inline typename std::enable_if<std::is_signed<T>::value, bool>::type
     is_positive(T v)
     {
       return v >= 0;
     }
 
     template <typename T>
-    inline typename boost::enable_if<boost::is_unsigned<T>, bool>::type
+    inline typename std::enable_if<std::is_unsigned<T>::value, bool>::type
     is_positive(T)
     {
       return true;
@@ -197,7 +197,7 @@ namespace mfast {
 
     ++i;
 
-    if (boost::is_signed<IntType>::value) {
+    if (std::is_signed<IntType>::value) {
       if (positive) {
         // check if the sign bit is on
         if (buffer[i] & 0x40 ) {

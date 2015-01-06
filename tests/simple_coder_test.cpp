@@ -85,7 +85,7 @@ class fast_coding_test_case
   private:
     debug_allocator alloc_;
     mfast::fast_encoder_v2 encoder_;
-    mfast::fast_decoder_v2 decoder_;
+    mfast::fast_decoder_v2<0> decoder_;
 };
 
 BOOST_AUTO_TEST_SUITE( test_fast_coder2 )

@@ -33,7 +33,7 @@ public:
   /// Consturct a encoder using default memory allocator (i.e. malloc)
   template <typename DescriptionsTuple>
   fast_encoder_v2(const DescriptionsTuple& tp,
-                  typename boost::disable_if< boost::is_base_of< mfast::templates_description, DescriptionsTuple>, allocator*>::type alloc = malloc_allocator::instance())
+                  typename std::enable_if<!boost::is_base_of< mfast::templates_description, DescriptionsTuple>::value, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_encoder_core(alloc)
   {
     this->init(tp);
@@ -41,7 +41,7 @@ public:
 
   template <typename T>
   fast_encoder_v2(const T* desc,
-                  typename boost::enable_if< boost::is_base_of< mfast::templates_description, T>, allocator*>::type alloc = malloc_allocator::instance())
+                  typename std::enable_if< std::is_base_of< mfast::templates_description, T>::value, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_encoder_core(alloc)
   {
     this->init(boost::make_tuple(desc));

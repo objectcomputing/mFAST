@@ -33,7 +33,7 @@ namespace mfast
   public:
     typedef templateref_instruction instruction_type;
     typedef const templateref_instruction* instruction_cptr;
-    typedef boost::false_type is_mutable;
+    static const bool is_mutable=false;
     typedef group_type_tag type_category;
 
     nested_message_cref()
@@ -86,7 +86,7 @@ namespace mfast
     : public make_field_mref<nested_message_cref>
   {
   public:
-    typedef boost::true_type is_mutable;
+    static const bool is_mutable=true;
     typedef mfast::allocator allocator_type;
 
     nested_message_mref()

@@ -25,8 +25,8 @@
 #include <iostream>
 #include <typeinfo>
 #include <boost/config.hpp>
-#include <boost/type_traits.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
+
 
 namespace mfast {
 
@@ -53,8 +53,8 @@ namespace mfast {
   {
   public:
 
-    typedef boost::false_type is_mutable;
-    typedef boost::true_type canbe_optional;
+    static const bool is_mutable=false;
+    static const bool canbe_optional=true;
     typedef const field_instruction* instruction_cptr;
 
     field_cref()
@@ -166,7 +166,7 @@ namespace mfast {
 
   namespace detail
   {
-    template <typename T, typename CanBeEmpty>
+    template <typename T, bool CanBeEmpty>
     class make_field_mref_base
     {
     protected:
@@ -177,7 +177,7 @@ namespace mfast {
     };
 
     template <typename T>
-    class make_field_mref_base<T, boost::true_type>
+    class make_field_mref_base<T, true>
     {
     private:
       const field_instruction* my_instruction() const
@@ -221,10 +221,10 @@ namespace mfast {
   class make_field_mref
     : public ConstFieldRef
     , public detail::make_field_mref_base< make_field_mref<ConstFieldRef>,
-                                           typename ConstFieldRef::canbe_optional >
+                                           ConstFieldRef::canbe_optional >
   {
   public:
-    typedef boost::true_type is_mutable;
+    static const bool is_mutable=true;
     typedef typename ConstFieldRef::instruction_cptr instruction_cptr;
     typedef ConstFieldRef cref_type;
     typedef mfast::allocator allocator_type;
@@ -269,7 +269,7 @@ namespace mfast {
     allocator_type* alloc_;
 
     friend class detail::make_field_mref_base< make_field_mref<ConstFieldRef>,
-                                               typename ConstFieldRef::canbe_optional >;
+                                               ConstFieldRef::canbe_optional >;
 
     template <typename T>
     friend class make_field_mref;
@@ -303,7 +303,7 @@ namespace mfast {
 
 
   template <typename T1, typename T2>
-  typename boost::disable_if<typename T1::is_mutable, T1>::type
+  typename std::enable_if<! T1::is_mutable, T1>::type
   dynamic_cast_as(const T2& ref)
   {
     typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
@@ -313,7 +313,7 @@ namespace mfast {
   }
 
   template <typename T1, typename T2>
-  typename boost::enable_if<typename T1::is_mutable, T1>::type
+  typename std::enable_if< T1::is_mutable, T1>::type
   dynamic_cast_as(const T2& ref)
   {
     typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());

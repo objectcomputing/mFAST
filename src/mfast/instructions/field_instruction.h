@@ -116,9 +116,10 @@ namespace mfast {
 
   class field_instruction_visitor;
 
-  class MFAST_EXPORT instruction_tag
+  class instruction_tag
   {
   public:
+    constexpr
     instruction_tag(uint64_t v=0)
       : uint64_value_(v)
     {
@@ -215,6 +216,7 @@ namespace mfast {
 
     const char* field_type_name() const;
 
+    constexpr
     field_instruction(operator_enum_t operator_id,
                       int             field_type,
                       presence_enum_t optional,
@@ -275,7 +277,7 @@ namespace mfast {
       has_pmap_bit_ = operator_id_ > operator_delta || ((operator_id_ == operator_constant) && optional_flag_);
     }
 
-    uint16_t field_index_;
+    // uint16_t field_index_;
     uint16_t operator_id_ : 3;
     uint16_t is_array_ : 1;
     uint16_t optional_flag_ : 1;
@@ -320,6 +322,30 @@ namespace mfast {
     const T* ref_instruction_;
     const char* cpp_ns_;
   };
+
+  constexpr
+  field_instruction::field_instruction(operator_enum_t operator_id,
+                                       int             field_type,
+                                       presence_enum_t optional,
+                                       uint32_t        id,
+                                       const char*     name,
+                                       const char*     ns,
+                                       instruction_tag tag)
+    : operator_id_(operator_id)
+    , is_array_(field_type >= field_type_ascii_string && field_type <= field_type_sequence )
+    , optional_flag_(optional)
+    , nullable_flag_( optional &&  (operator_id != operator_constant) )
+    , has_pmap_bit_(operator_id > operator_delta || ((operator_id == operator_constant) && optional))
+    , has_initial_value_(false)
+    , field_type_(field_type)
+    , previous_value_shared_(false)
+    , id_(id)
+    , name_(name)
+    , ns_(ns)
+    , tag_(tag)
+  {
+  }
+
 }
 
 #endif /* end of include guard: FIELD_INSTRUCTION_H_E6BIAZAB */
