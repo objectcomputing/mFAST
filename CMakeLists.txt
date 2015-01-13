@@ -2,11 +2,8 @@
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
 
-if(MSVC_IDE)
-	cmake_minimum_required (VERSION 2.8.8)
-else()
-	cmake_minimum_required (VERSION 2.6.4)
-endif()
+cmake_minimum_required (VERSION 2.8.8)
+
 
 project (mFAST)
 
@@ -18,14 +15,15 @@ endif()
 
 set(MFAST_MAJOR_VERSION 1)
 set(MFAST_MINOR_VERSION 2)
-set(MFAST_PATCH_VERSION 0)
+set(MFAST_PATCH_VERSION 1)
 set(MFAST_VERSION ${MFAST_MAJOR_VERSION}.${MFAST_MINOR_VERSION}.${MFAST_PATCH_VERSION})
 
 set(CPACK_PACKAGE_VERSION ${MFAST_VERSION})
 set(CPACK_PACKAGE_NAME "mfast")
 include(CPack)
 
-
+set(BOOST_TEST_HEADER_ONLY OFF CACHE BOOL "including the Boost Unit Testing Framework sources directly into test project")
+set(BUILD_FAST_TYPE_GEN ON CACHE BOOL "Build fast_type_gen from source")
 # flag to enable building shared/dynamic library
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "build shared/dynamic library")
 # Offer the user the choice of overriding the installation directories
@@ -69,9 +67,23 @@ include_directories ("${PROJECT_BINARY_DIR}"
 ## Setting up Boost Library
 ################################
 
-find_package( Boost 1.53.0 REQUIRED unit_test_framework system filesystem)
-include_directories(${Boost_INCLUDE_DIR})
+if (BUILD_FAST_TYPE_GEN)
+    find_package(Boost 1.53.0 REQUIRED unit_test_framework system filesystem)
+    set(FAST_TYPE_GEN "${PROJECT_BINARY_DIR}/bin/fast_type_gen")
+else(BUILD_FAST_TYPE_GEN)
+    find_package(Boost 1.53.0)
+    if (NOT Boost_FOUND)
+        message( FATAL_ERROR "Unable to find the requested Boost libraries." )
+    endif(NOT Boost_FOUND)
+    find_program(FAST_TYPE_GEN NAMES fast_type_gen)
+    if (${FAST_TYPE_GEN} STREQUAL "FAST_TYPE_GEN-NOTFOUND")
+         message( FATAL_ERROR "Unable to find the required program fast_type_gen." )
+    endif()
+endif(BUILD_FAST_TYPE_GEN)
+
 link_directories(${Boost_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIR})
+
 
 ################################################################################
 
@@ -81,7 +93,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS} -std=c++11")
 elseif (MSVC)
-    add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS /DBOOST_ALL_DYN_LINK)
+    add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 # variables to be used later
@@ -148,32 +160,41 @@ endif()
 ## Not at the time when "make" is called.
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-
-if (MSVC_IDE)
+if (BUILD_FAST_TYPE_GEN)
+    if (MSVC_IDE AND NOT Boost_USE_STATIC_LIBS AND NOT BOOST_TEST_HEADER_ONLY)
+    	add_custom_command(
+    	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+    	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat
+    	  ARGS $<TARGET_FILE:fast_type_gen>  ${INPUTS}
+    	  DEPENDS ${ARGN} fast_type_gen
+    	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+    	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    elseif (CMAKE_SUPPORT_GENERATOR_EXPRESSION)
+    	add_custom_command(
+    	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+    	  COMMAND $<TARGET_FILE:fast_type_gen>
+    	  ARGS ${INPUTS}
+    	  DEPENDS ${ARGN} fast_type_gen
+    	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+    	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    else()
+    	add_custom_command(
+    	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+    	  COMMAND "${PROJECT_BINARY_DIR}/bin/fast_type_gen"
+    	  ARGS ${INPUTS}
+    	  DEPENDS ${ARGN} fast_type_gen
+    	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+    	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+    endif()
+else(BUILD_FAST_TYPE_GEN)
 	add_custom_command(
 	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat
-	  ARGS $<TARGET_FILE:fast_type_gen>  ${INPUTS}
-	  DEPENDS ${ARGN} fast_type_gen
-	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-elseif (CMAKE_SUPPORT_GENERATOR_EXPRESSION)
-	add_custom_command(
-	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-	  COMMAND $<TARGET_FILE:fast_type_gen>
+	  COMMAND "${FAST_TYPE_GEN}"
 	  ARGS ${INPUTS}
-	  DEPENDS ${ARGN} fast_type_gen
+	  DEPENDS ${ARGN}
 	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
 	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-else()
-	add_custom_command(
-	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-	  COMMAND ${PROJECT_BINARY_DIR}/bin/fast_type_gen
-	  ARGS ${INPUTS}
-	  DEPENDS ${ARGN} fast_type_gen
-	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+endif(BUILD_FAST_TYPE_GEN)
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 set(FASTTYPEGEN_${Name}_DEFINED TRUE)
@@ -216,7 +237,9 @@ if (NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
   export(PACKAGE ${CMAKE_PROJECT_NAME})
 endif(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
 
-export(TARGETS fast_type_gen ${MFAST_LIBRARIES} FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
+if (BUILD_FAST_TYPE_GEN)
+  export(TARGETS fast_type_gen ${MFAST_LIBRARIES} FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
+endif()
 
 # Create the mFASTConfig.cmake for the build tree
 set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src" "${PROJECT_BINARY_DIR}")

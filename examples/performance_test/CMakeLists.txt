@@ -3,10 +3,27 @@ set(TEST_LIBS ${MFAST_LIBRARIES}
               # ${Boost_SYSTEM_LIBRARY}
     )
 
-set_property(
-   DIRECTORY
-   PROPERTY COMPILE_DEFINITIONS DATA_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/complex30000.dat\" TEMPLATE_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/example.xml\";
-   )
+set(DATA_FILE "complex30000.dat")
+set(TEMPLATE_FILE "example.xml")
+
+
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    # SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
+    # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}" )
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+    file(COPY ${DATA_FILE} ${TEMPLATE_FILE} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  --preload-file ${DATA_FILE}  --preload-file ${TEMPLATE_FILE}")
+    set_property(
+       DIRECTORY
+       PROPERTY COMPILE_DEFINITIONS DATA_FILE=\"${DATA_FILE}\" TEMPLATE_FILE=\"${TEMPLATE_FILE}\";
+       )
+else()
+    set_property(
+       DIRECTORY
+       PROPERTY COMPILE_DEFINITIONS DATA_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/${DATA_FILE}\" TEMPLATE_FILE=\"${CMAKE_CURRENT_SOURCE_DIR}/${TEMPLATE_FILE}\";
+       )
+endif(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
 
 add_executable (mf_generic_decode generic_template_test.cpp)
 target_link_libraries (mf_generic_decode

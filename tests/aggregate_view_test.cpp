@@ -17,14 +17,15 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <boost/test/test_tools.hpp>
+#include <boost/test/unit_test.hpp>
+
 #include <sstream>
 #include "mfast.h"
 #include <mfast/xml_parser/dynamic_templates_description.h>
 #include "test5.h"
 
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
+
 #include "debug_allocator.h"
 #define MULTILINE(...) #__VA_ARGS__
 

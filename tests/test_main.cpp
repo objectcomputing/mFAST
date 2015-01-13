@@ -16,6 +16,17 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#define BOOST_TEST_DYN_LINK
+// #define BOOST_TEST_DYN_LINK
+
+
+
 #define BOOST_TEST_MODULE mFast Test Suite
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#ifdef BOOST_TEST_HEADER_ONLY
+#include <boost/test/included/unit_test.hpp>
+#else
 #include <boost/test/unit_test.hpp>
+#endif

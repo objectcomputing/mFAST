@@ -17,13 +17,10 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <mfast/value_storage.h>
-
-
-#define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <mfast/value_storage.h>
 using namespace mfast;
 
 static const void* NULLPTR = 0;

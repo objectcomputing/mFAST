@@ -17,13 +17,11 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "test4.h"
-#include <mfast/field_comparator.h>
-
-
-#define BOOST_TEST_DYN_LINK
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
+
+#include "test4.h"
+#include <mfast/field_comparator.h>
 #include "debug_allocator.h"
 #include <boost/foreach.hpp>
 #include <boost/assign/list_of.hpp> // for 'list_of()'

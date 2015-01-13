@@ -16,13 +16,13 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
+#include <boost/test/test_tools.hpp>
+#include <boost/test/unit_test.hpp>
+
 #include <mfast.h>
 #include <mfast/xml_parser/dynamic_templates_description.h>
 #include <mfast/coder/common/template_repo.h>
 #include <mfast/field_instructions.h>
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
 #include <cstring>
 #include <stdexcept>
 

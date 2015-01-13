@@ -68,7 +68,7 @@ class debug_allocator
     virtual void deallocate(void* pointer, std::size_t)
     {
 
-      BOOST_CHECK(leased_addresses_.count(pointer));
+      BOOST_CHECK_EQUAL(leased_addresses_.count(pointer)!=0, true );
       std::free(pointer);
       leased_addresses_.erase(pointer);
     }

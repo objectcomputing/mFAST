@@ -16,13 +16,13 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <mfast/coder/decoder/fast_istream.h>
-#include <mfast/coder/decoder/fast_istream_extractor.h>
-#include <mfast/output.h>
-#define BOOST_TEST_DYN_LINK
+
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <mfast/coder/decoder/fast_istream.h>
+#include <mfast/coder/decoder/fast_istream_extractor.h>
+#include <mfast/output.h>
 #include "debug_allocator.h"
 #include <stdexcept>
 #include "byte_stream.h"

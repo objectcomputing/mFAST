@@ -19,6 +19,7 @@
 #include "arena_allocator.h"
 #include <cstring>
 #include <algorithm>
+#include <cstdlib>
 
 namespace mfast {
 

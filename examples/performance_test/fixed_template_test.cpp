@@ -49,7 +49,7 @@ const char usage[] =
 
 int read_file(const char* filename, std::vector<char>& contents)
 {
-  std::FILE*fp = std::fopen(filename, "rb");
+  std::FILE* fp = std::fopen(filename, "rb");
   if (fp)
   {
     std::fseek(fp, 0, SEEK_END);

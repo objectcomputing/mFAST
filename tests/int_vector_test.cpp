@@ -17,17 +17,15 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <boost/test/test_tools.hpp>
+#include <boost/test/unit_test.hpp>
+#include <boost/test/test_case_template.hpp>
 
 #include <mfast.h>
 #include <mfast/coder/fast_encoder.h>
 #include <mfast/vector_ref.h>
 #include <mfast/coder/common/codec_helper.h>
 #include <mfast/xml_parser/dynamic_templates_description.h>
-
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
-#include <boost/test/test_case_template.hpp>
 #include <boost/mpl/list.hpp>
 
 

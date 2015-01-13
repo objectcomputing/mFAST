@@ -1,23 +1,13 @@
-// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
-// All rights reserved.
-//
-// This file is part of mFAST.
-//
-//     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
-//
-//     mFAST is distributed in the hope that it will be useful,
-//     but WITHOUT ANY WARRANTY; without even the implied warranty of
-//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//     GNU General Public License for more details.
-//
-//     You should have received a copy of the GNU Lesser General Public License
-//     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
-//
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
+#define BOOST_CHECK_EQUAL(x,y)\
+if ( (x) != (y) )  { std::cerr << "Test failed at " << __FILE__ << ":" << __LINE__ << "\n";  }
+
+
+#define BOOST_CHECK(x)\
+if (!static_cast<bool>(x)) { std::cerr << "Test failed at " << __FILE__ << ":" << __LINE__ << "\n"; return -1; }
+
+#define BOOST_REQUIRE(x)\
+if (!static_cast<bool>(x)) { std::cerr << "Test failed at " << __FILE__ << ":" << __LINE__ << "\n"; return -1; }
+
 
 #include <mfast.h>
 #include <mfast/field_comparator.h>
@@ -37,6 +27,25 @@
 #include "byte_stream.h"
 #include "debug_allocator.h"
 
+
+class predicate_result
+{
+public:
+  predicate_result(bool r) : result_(r) {}
+  std::stringstream& message() { return msg_; }
+  operator bool() const {
+    return result_;
+  }
+  void print_message(const char* file, int line) const {
+    std::cerr << "Test failed at " << file << ":" << line << "  " << msg_.str() << "\n";
+  }
+private:
+  bool result_;
+  std::stringstream msg_;
+};
+
+
+
 using namespace mfast;
 
 template <typename DESC>
@@ -49,7 +58,7 @@ class fast_coding_test_case
     {
     }
 
-    boost::test_tools::predicate_result
+    predicate_result
     encoding(const message_cref& msg_ref, const byte_stream& result, bool reset=false)
     {
       const int buffer_size = 128;
@@ -63,12 +72,12 @@ class fast_coding_test_case
       if (result == byte_stream(buffer, encoded_size))
         return true;
 
-      boost::test_tools::predicate_result res( false );
+      predicate_result res( false );
       res.message() << "Got \"" << byte_stream(buffer, encoded_size) << "\" instead.";
       return res;
     }
 
-    boost::test_tools::predicate_result
+    predicate_result
     decoding(const byte_stream& bytes, const message_cref& result, bool reset=false)
     {
       const char* first = bytes.data();
@@ -77,7 +86,7 @@ class fast_coding_test_case
       if (msg == result)
         return true;
 
-      boost::test_tools::predicate_result res( false );
+      predicate_result res( false );
       return res;
     }
 
@@ -87,10 +96,10 @@ class fast_coding_test_case
     mfast::fast_decoder_v2<0> decoder_;
 };
 
-BOOST_AUTO_TEST_SUITE( test_fast_coder2 )
+//BOOST_AUTO_TEST_SUITE( test_fast_coder2 )
+int main() {
 
-
-BOOST_AUTO_TEST_CASE(simple_coder_test)
+//BOOST_AUTO_TEST_CASE(simple_coder_test)
 {
   fast_coding_test_case<simple1::templates_description> test_case;
 
@@ -108,7 +117,7 @@ BOOST_AUTO_TEST_CASE(simple_coder_test)
   BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
 }
 
-BOOST_AUTO_TEST_CASE(group_coder_test)
+//BOOST_AUTO_TEST_CASE(group_coder_test)
 {
   fast_coding_test_case<simple2::templates_description> test_case;
 
@@ -123,18 +132,9 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
   BOOST_CHECK(test_case.encoding(msg_ref, "\xB0\x81\xE0\x82\x83"));
   BOOST_CHECK(test_case.decoding("\xB0\x81\xE0\x82\x83", msg_ref));
 
-  // mfast::fast_decoder_v2< boost::mpl::vector<simple2::templates_description*> > decoder;
-  // const char* strm = "\xB0\x81\xE0\x82\x83";
-  //
-  // simple2::Test_cref ref(decoder.decode(strm, strm +5));
-  // BOOST_CHECK_EQUAL(ref.get_field1().value(), 1);
-  // BOOST_CHECK(ref.get_group1().present());
-  // BOOST_CHECK_EQUAL(ref.get_group1().get_field2().value(), 2);
-  // BOOST_CHECK_EQUAL(ref.get_group1().get_field3().value(), 3);
-
 }
 
-BOOST_AUTO_TEST_CASE(sequence_coder_test)
+//BOOST_AUTO_TEST_CASE(sequence_coder_test)
 {
   fast_coding_test_case<simple3::templates_description> test_case;
 
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(sequence_coder_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
+//BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
 {
   fast_coding_test_case<simple4::templates_description> test_case;
 
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
 }
 
 
-BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
+//BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
 {
   fast_coding_test_case<simple5::templates_description> test_case;
 
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
   BOOST_CHECK(test_case.decoding("\xE0\x82\x81\xF0\x81\x82\x83", msg_ref));
 }
 
-BOOST_AUTO_TEST_CASE(manual_reset_test)
+//BOOST_AUTO_TEST_CASE(manual_reset_test)
 {
   fast_coding_test_case<simple6::templates_description> test_case;
 
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
 
 }
 
-BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
+//BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
 {
   fast_coding_test_case<simple7::templates_description> test_case;
 
@@ -262,5 +262,6 @@ BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
   BOOST_CHECK(test_case.decoding("\x80", msg_ref));
 }
 
-
-BOOST_AUTO_TEST_SUITE_END()
+return 0;
+}
+//BOOST_AUTO_TEST_SUITE_END()

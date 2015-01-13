@@ -18,6 +18,8 @@
 //
 
 
+#include <boost/test/test_tools.hpp>
+#include <boost/test/unit_test.hpp>
 
 #include <mfast/int_ref.h>
 #include <mfast/string_ref.h>
@@ -25,10 +27,6 @@
 #include <mfast/group_ref.h>
 #include <mfast/sequence_ref.h>
 #include <mfast/coder/common/codec_helper.h>
-
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
 #include "debug_allocator.h"
 
 using namespace mfast;
