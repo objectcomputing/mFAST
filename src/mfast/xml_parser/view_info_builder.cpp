@@ -220,7 +220,7 @@ namespace mfast
         const indeces_t& field_indeces = it->second;
         // replace every instance -2 with the indeces in []
 
-        int64_t* nest_indices = static_cast<int64_t*>(alloc_.allocate( sizeof(int64_t) * field_indeces.size() + 1 ));
+        ssize_t* nest_indices = static_cast<ssize_t*>(alloc_.allocate( sizeof(ssize_t) * field_indeces.size() + 1 ));
 
         unsigned i=0, j = 0;
         for (i = 0; i < field_indeces.size(); ++i ) {

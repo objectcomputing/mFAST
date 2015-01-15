@@ -104,7 +104,7 @@ namespace mfast
     void as(bool v) const
     {
       this->storage()->present(1);
-      this->storage()->set<uint64_t>(v);
+      this->storage()->set<uint_fast32_t>(v);
     }
 
   };

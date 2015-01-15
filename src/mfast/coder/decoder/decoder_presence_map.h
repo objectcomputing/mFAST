@@ -38,6 +38,7 @@ namespace mfast {
       mask_ >>=1;
       if (mask_ == 0 && continue_) {
         load(continue_);
+        mask_ >>=1;
       }
       bool result = (cur_bitmap_ & mask_) != 0;
       return result;
@@ -52,7 +53,7 @@ namespace mfast {
     }
 
     // only used for test case verification
-    uint64_t mask() const
+    size_t mask() const
     {
       return mask_;
     }
@@ -61,25 +62,26 @@ namespace mfast {
 
     bool load(const char*& addr)
     {
-      bool load_complete = false;
-      const int max_load_byes = sizeof(uint64_t)*8/7;
+      const int max_load_byes = sizeof(size_t)*8/7;
       mask_ = 1;
-      int i;
-      for (i = 0; i < max_load_byes && !load_complete; ++i, ++addr)
+      for (int i = 0; i < max_load_byes; ++i, ++addr)
       {
         char c = *addr;
         cur_bitmap_ <<= 7;
         cur_bitmap_ |= c & '\x7F';
         mask_ <<= 7;
         if ('\x80' == (c & '\x80')) {
-          load_complete = true;
+          ++addr;
+          continue_ = 0;
+          return true;
         }
       }
-      return load_complete;
+      continue_ = addr;
+      return false;
     }
 
-    uint64_t cur_bitmap_;
-    uint64_t mask_;
+    size_t cur_bitmap_;
+    size_t mask_;
     const char* continue_;
     friend std::ostream& operator << (std::ostream&, const mfast::decoder_presence_map&);
   };

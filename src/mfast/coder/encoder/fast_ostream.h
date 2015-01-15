@@ -68,7 +68,7 @@ namespace mfast {
   private:
     friend class encoder_presence_map;
 
-    void write_bytes_at(uint64_t* bytes, std::size_t nbytes, std::size_t offset, bool pmap_end);
+    void write_bytes_at(std::size_t* bytes, std::size_t nbytes, std::size_t offset, bool pmap_end);
 
     std::size_t offset() const
     {
@@ -295,7 +295,7 @@ namespace mfast {
   }
 
   inline void
-  fast_ostream::write_bytes_at(uint64_t* bytes, std::size_t nbytes, std::size_t offset, bool pmap_end)
+  fast_ostream::write_bytes_at(std::size_t* bytes, std::size_t nbytes, std::size_t offset, bool pmap_end)
   {
     rdbuf()->write_bytes_at(reinterpret_cast<const char*>(bytes), nbytes, offset, pmap_end && !allow_overlong_pmap_);
   }

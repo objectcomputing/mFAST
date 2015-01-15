@@ -96,6 +96,11 @@ elseif (MSVC)
     add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+add_definitions(-DSIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-warn-absolute-paths -s AGGRESSIVE_VARIABLE_ELIMINATION=1 -s OUTLINING_LIMIT=20000")
+endif()
 # variables to be used later
 set(MFAST_DYNAMIC_COMPONENTS CACHE INTERNAL "")
 set(MFAST_STATIC_COMPONENTS CACHE INTERNAL "")

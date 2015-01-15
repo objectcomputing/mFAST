@@ -88,7 +88,7 @@ namespace mfast {
 
     void save_to(value_storage& v) const
     {
-      v.of_uint.content_ = this->storage()->of_uint.content_;
+      v.of_uint64.content_ = this->storage()->of_uint64.content_;
       v.defined(true);
       v.present(this->present());
     }
@@ -177,7 +177,7 @@ namespace mfast {
     // T& value_ref() const
     // {
     //   this->storage()->present(1);
-    //   return *reinterpret_cast<T*>(&this->storage()->of_uint.content_);
+    //   return *reinterpret_cast<T*>(&this->storage()->of_uint64.content_);
     // }
 
     void as_present(bool present) const

@@ -51,7 +51,7 @@ decode_mref(const byte_stream&       input_stream,
   decoder_presence_map pmap;
 
   strm.decode(pmap);
-  uint64_t old_mask = pmap.mask();
+  std::size_t old_mask = pmap.mask();
 
   mfast::allocator* alloc = expected.allocator();
   value_storage storage;
@@ -135,7 +135,7 @@ decode_ext_mref(const byte_stream&       input_stream,
   CREF expected = expected_ext_ref.get();
 
   core.strm_.decode(pmap);
-  uint64_t old_mask = pmap.mask();
+  std::size_t old_mask = pmap.mask();
 
 
   value_storage storage;

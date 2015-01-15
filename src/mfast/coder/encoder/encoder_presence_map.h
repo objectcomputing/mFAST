@@ -25,6 +25,13 @@
 
 namespace mfast
 {
+#ifdef BOOST_BIG_ENDIAN
+  const int SMALLEST_ADDRESS_BYTE = sizeof(std::size_t)-1;
+#else
+  const int SMALLEST_ADDRESS_BYTE = 0;
+#endif
+
+  constexpr std::size_t init_mask = static_cast<std::size_t>(1) << ((SMALLEST_ADDRESS_BYTE*8)+7);
 
   class encoder_presence_map
   {
@@ -40,7 +47,7 @@ namespace mfast
     void reset();
 
     std::size_t nbytes_;
-    uint64_t value_, mask_;
+    std::size_t value_, mask_;
     fast_ostream* stream_;
     std::size_t offset_;
     std::size_t maxbytes_;
@@ -69,31 +76,33 @@ namespace mfast
   {
     nbytes_ = 0;
     value_ = 0;
-
-#ifdef BOOST_BIG_ENDIAN
-    mask_ =  0x80ULL << 56;
-#else
-    mask_ =  0x80ULL;
-#endif
+    mask_ = init_mask;
   }
 
   inline void
   encoder_presence_map::commit()
   {
 #ifdef BOOST_BIG_ENDIAN
-    const uint64_t stop_bit_mask = (0x8000000000000000ULL >> (nbytes_ * 8));
+    const std::size_t stop_bit_mask = (init_mask >> (nbytes_ * 8));
 #else
-    const uint64_t stop_bit_mask = (0x80ULL << (nbytes_ * 8));
+    const std::size_t stop_bit_mask = (init_mask << (nbytes_ * 8));
 #endif
 
     value_ |= stop_bit_mask;
     stream_->write_bytes_at(&value_, ++nbytes_, offset_, true);
   }
 
+  constexpr std::size_t get_next_bit_mask(std::size_t i)
+  {
+    return i==0 ? 0 : (get_next_bit_mask(i-1) << 8) | 0x01;
+  }
+
   inline void
   encoder_presence_map::set_next_bit(bool v)
   {
-    if ( (mask_ & 0x0101010101010101ULL) != 0) {
+    std::size_t next_bit_mask = get_next_bit_mask( sizeof(std::size_t) );
+
+    if ( (mask_ & next_bit_mask) != 0) {
 #ifdef BOOST_BIG_ENDIAN
       mask_ >>= 2;
 #else
@@ -107,9 +116,9 @@ namespace mfast
 
     if (mask_ == 0) {
       // we need to commit the current pmap before preceed
-      stream_->write_bytes_at(&value_, 8, offset_, false);
-      offset_ += 8;
-      maxbytes_ -= 8;
+      stream_->write_bytes_at(&value_, sizeof(std::size_t), offset_, false);
+      offset_ += sizeof(std::size_t);
+      maxbytes_ -= sizeof(std::size_t);
       reset();
       mask_ >>= 1;
     }

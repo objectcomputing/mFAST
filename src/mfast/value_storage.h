@@ -36,7 +36,16 @@ namespace mfast
       uint32_t padding_ : 31;
       uint32_t defined_bit_ : 1;
       uint64_t content_;
-    } of_uint;
+    } of_uint64;
+
+#if SIZEOF_VOID_P == 4
+    struct {
+      uint32_t present_;                ///< indicate if the value is present,
+      uint32_t padding_ : 31;
+      uint32_t defined_bit_ : 1;
+      uint32_t content_;
+    } of_uint32;
+#endif
 
     struct {
       uint32_t present_;                ///< indicate if the value is present,
@@ -80,17 +89,17 @@ namespace mfast
     // construct an undefined value
     value_storage()
     {
-      of_uint.content_ = 0;
+      of_uint64.content_ = 0;
       of_templateref.of_instruction.dummy_ = 0;
     };
 
     // construct a default numeric value
     value_storage(int)
     {
-      of_uint.content_ = 0;
-      of_uint.padding_ = 0;
-      of_uint.defined_bit_ = 1;
-      of_uint.present_ = 1;
+      of_uint64.content_ = 0;
+      of_uint64.padding_ = 0;
+      of_uint64.defined_bit_ = 1;
+      of_uint64.present_ = 1;
     };
 
     // construct a default zero length string value
@@ -132,13 +141,28 @@ namespace mfast
       of_array.len_ = n+1;
     }
 
+#if SIZEOF_VOID_P == 4
+    template <typename T>
+    typename std::enable_if<!std::is_pointer<T>::value && sizeof(T)<=4, T>::type
+    get() const
+    {
+      return static_cast<T>(of_uint32.content_);
+    }
+
+    template <typename T>
+    typename std::enable_if<!std::is_pointer<T>::value && sizeof(T)==8, T>::type
+    get() const
+    {
+      return static_cast<T>(of_uint64.content_);
+    }
+#else
     template <typename T>
     typename std::enable_if<!std::is_pointer<T>::value, T>::type
     get() const
     {
-      return static_cast<T>(of_uint.content_);
+      return static_cast<T>(of_uint64.content_);
     }
-
+#endif
     template <typename T>
     typename std::enable_if< std::is_pointer<T>::value, T>::type
     get() const
@@ -146,16 +170,32 @@ namespace mfast
       return reinterpret_cast<T>(of_array.content_);
     }
 
+#if SIZEOF_VOID_P == 4
+    template <typename T>
+    typename std::enable_if< std::is_integral<T>::value && (sizeof(T)<=4), void>::type
+    set(T v)
+    {
+      of_uint32.content_ = static_cast<uint32_t>(v);
+    }
+
+    template <typename T>
+    typename std::enable_if< std::is_integral<T>::value && (sizeof(T)>4), void>::type
+    set(T v)
+    {
+      of_uint64.content_ = static_cast<uint64_t>(v);
+    }
+#else
     template <typename T>
     typename std::enable_if< !std::is_pointer<T>::value, void>::type
     set(T v)
     {
-      of_uint.content_ = static_cast<uint64_t>(v);
+      of_uint64.content_ = static_cast<uint64_t>(v);
     }
+#endif
 
     template <typename T>
     typename std::enable_if< std::is_pointer<T>::value, void>::type
-    set(T v)
+    set(void* v)
     {
       of_array.content_ = v;
     }
@@ -170,7 +210,7 @@ namespace mfast
 
     int_value_storage()
     {
-      storage_.of_uint.defined_bit_ = 1;
+      storage_.of_uint64.defined_bit_ = 1;
     }
 
     explicit int_value_storage(const value_storage& s)
@@ -180,8 +220,8 @@ namespace mfast
 
     int_value_storage(IntType v)
     {
-      storage_.of_uint.defined_bit_ = 1;
-      storage_.of_uint.present_ = 1;
+      storage_.of_uint64.defined_bit_ = 1;
+      storage_.of_uint64.present_ = 1;
 
       storage_.set<IntType>(v);
     }

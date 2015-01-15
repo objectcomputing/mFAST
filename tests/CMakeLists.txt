@@ -16,7 +16,7 @@ FASTTYPEGEN_TARGET(simple_types7 simple7.xml)
 
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
-    add_executable(non_utf_tests
+    add_executable(mfast_test
                    non_utf_tests.cpp
                    ${FASTTYPEGEN_simple_types1_OUTPUTS}
                    ${FASTTYPEGEN_simple_types2_OUTPUTS}
@@ -27,11 +27,11 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
                    ${FASTTYPEGEN_simple_types7_OUTPUTS}
                )
 
-    target_link_libraries (non_utf_tests
+    target_link_libraries (mfast_test
                            mfast_static
                            mfast_coder_static)
 
-    add_test(mfast_test non_utf_tests)
+    add_test(mfast_test mfast_test)
 
 else()
     FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)

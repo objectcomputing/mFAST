@@ -33,9 +33,9 @@ BOOST_AUTO_TEST_CASE(default_constructor_test)
 {
   value_storage value;
 
-  BOOST_CHECK_EQUAL(value.of_uint.present_,                                0U);
-  BOOST_CHECK_EQUAL(value.of_uint.defined_bit_,                            0U);
-  BOOST_CHECK_EQUAL(value.of_uint.content_,                              0ULL);
+  BOOST_CHECK_EQUAL(value.of_uint64.present_,                                0U);
+  BOOST_CHECK_EQUAL(value.of_uint64.defined_bit_,                            0U);
+  BOOST_CHECK_EQUAL(value.of_uint64.content_,                              0ULL);
 
   BOOST_CHECK_EQUAL(value.of_decimal.present_,                             0U);
   BOOST_CHECK_EQUAL(value.of_decimal.exponent_,                             0);
@@ -60,9 +60,9 @@ BOOST_AUTO_TEST_CASE(non_empty_constructor_test)
 {
   value_storage value(1);
 
-  BOOST_CHECK(value.of_uint.present_ != 0);
-  BOOST_CHECK_EQUAL(value.of_uint.defined_bit_, 1U);
-  BOOST_CHECK_EQUAL(value.of_uint.content_,   0ULL);
+  BOOST_CHECK(value.of_uint64.present_ != 0);
+  BOOST_CHECK_EQUAL(value.of_uint64.defined_bit_, 1U);
+  BOOST_CHECK_EQUAL(value.of_uint64.content_,   0ULL);
 
   BOOST_CHECK(value.of_decimal.present_ != 0);
   BOOST_CHECK_EQUAL(value.of_decimal.exponent_,     0);
@@ -84,13 +84,13 @@ BOOST_AUTO_TEST_CASE(defined_test)
 {
   value_storage value;
   value.defined(true);
-  BOOST_CHECK_EQUAL(value.of_uint.defined_bit_,    1U);
+  BOOST_CHECK_EQUAL(value.of_uint64.defined_bit_,    1U);
   BOOST_CHECK_EQUAL(value.of_decimal.defined_bit_, 1U);
   BOOST_CHECK_EQUAL(value.of_group.defined_bit_,   1U);
   BOOST_CHECK_EQUAL(value.of_array.defined_bit_,   1U);
 
   value.defined(false);
-  BOOST_CHECK_EQUAL(value.of_uint.defined_bit_,    0U);
+  BOOST_CHECK_EQUAL(value.of_uint64.defined_bit_,    0U);
   BOOST_CHECK_EQUAL(value.of_decimal.defined_bit_, 0U);
   BOOST_CHECK_EQUAL(value.of_group.defined_bit_,   0U);
   BOOST_CHECK_EQUAL(value.of_array.defined_bit_,   0U);
@@ -102,14 +102,14 @@ BOOST_AUTO_TEST_CASE(empty_test)
 
   value.present(true);
   BOOST_CHECK_EQUAL(value.is_empty(), false);
-  BOOST_CHECK(value.of_uint.present_ != 0);
+  BOOST_CHECK(value.of_uint64.present_ != 0);
   BOOST_CHECK(value.of_decimal.present_ != 0);
   BOOST_CHECK(value.of_group.present_ != 0);
   BOOST_CHECK(value.of_array.len_ != 0);
 
   value.present(false);
   BOOST_CHECK_EQUAL(value.is_empty(),        true);
-  BOOST_CHECK_EQUAL(value.of_uint.present_,    0U);
+  BOOST_CHECK_EQUAL(value.of_uint64.present_,    0U);
   BOOST_CHECK_EQUAL(value.of_decimal.present_, 0U);
   BOOST_CHECK_EQUAL(value.of_group.present_,   0U);
   BOOST_CHECK_EQUAL(value.of_array.len_,       0U);

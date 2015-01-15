@@ -25,7 +25,7 @@ namespace mfast {
   std::ostream&
   operator << (std::ostream& os, const decoder_presence_map& pmap)
   {
-    uint64_t mask = pmap.mask_ >> 1;
+    size_t mask = pmap.mask_ >> 1;
     if (mask == 0) {
       os << "0";
       return os;

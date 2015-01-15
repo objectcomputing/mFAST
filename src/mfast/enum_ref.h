@@ -34,7 +34,8 @@ class MFAST_EXPORT enum_cref
   : public field_cref
 {
 public:
-  typedef uint64_t value_type;
+
+  typedef uint_fast32_t value_type;
   typedef enum_field_instruction instruction_type;
   typedef const instruction_type* instruction_cptr;
   typedef integer_type_tag type_category;
@@ -71,9 +72,9 @@ public:
             (this->absent() || value() == this->instruction()->initial_value().get<uint64_t>()));
   }
 
-  uint64_t value() const
+  value_type value() const
   {
-    return storage_->get<uint64_t>();
+    return storage_->get<value_type>();
   }
 
   const char* value_name() const
@@ -139,10 +140,10 @@ public:
     }
   }
 
-  void as(uint64_t v) const
+  void as(value_type v) const
   {
     this->storage()->present(1);
-    this->storage()->set(v);
+    this->storage()->set<value_type>(v);
   }
 
   void to_initial_value() const
@@ -150,9 +151,9 @@ public:
     *this->storage() = this->instruction()->initial_value();
   }
 
-  uint64_t value() const
+  value_type value() const
   {
-    return this->storage()->get<uint64_t>();
+    return this->storage()->get<value_type>();
   }
 
 };
