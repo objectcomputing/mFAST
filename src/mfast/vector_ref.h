@@ -364,7 +364,7 @@ namespace mfast {
       size_t len = n+1;
       if ( len > this->capacity()) {
         reserve(n);
-        ssize_t bytes_to_set = n - this->size();
+        std::make_signed<std::size_t>::type bytes_to_set = n - this->size();
         if (bytes_to_set > 0)
           std::memset(end(), c, static_cast<size_t>(bytes_to_set));
       }

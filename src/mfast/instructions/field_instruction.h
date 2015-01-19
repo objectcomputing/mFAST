@@ -119,7 +119,7 @@ namespace mfast {
   class instruction_tag
   {
   public:
-    constexpr
+    inline BOOST_CONSTEXPR
     instruction_tag(uint64_t v=0)
       : uint64_value_(v)
     {
@@ -215,8 +215,7 @@ namespace mfast {
     }
 
     const char* field_type_name() const;
-
-    constexpr
+    inline BOOST_CONSTEXPR
     field_instruction(operator_enum_t operator_id,
                       int             field_type,
                       presence_enum_t optional,
@@ -323,7 +322,7 @@ namespace mfast {
     const char* cpp_ns_;
   };
 
-  constexpr
+  inline BOOST_CONSTEXPR
   field_instruction::field_instruction(operator_enum_t operator_id,
                                        int             field_type,
                                        presence_enum_t optional,

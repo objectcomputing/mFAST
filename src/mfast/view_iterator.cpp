@@ -24,7 +24,7 @@ namespace mfast
     }
 
     std::size_t nest_level = itr->non_leaves_.size()-1;
-    ssize_t index = itr->view_info_->nest_indices[nest_level];
+    field_view_info::nest_index_t index = itr->view_info_->nest_indices[nest_level];
     bool finished = false;
     do
     {

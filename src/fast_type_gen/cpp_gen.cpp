@@ -706,7 +706,7 @@ void cpp_gen::generate(const mfast::aggregate_view_info& info)
   indeces_sizes.reserve(info.data_.size());
 
   out_ << "namespace {\n\n"
-       << "  const static ssize_t __"<< my_name << "__indeces__[]={\n";
+       << "  const static std::make_signed<std::size_t>::type __"<< my_name << "__indeces__[]={\n";
 
   int k = 0;
   for(std::size_t i = 0; i < info.data_.size()-1; ++i)

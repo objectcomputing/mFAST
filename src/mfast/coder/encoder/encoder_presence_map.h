@@ -31,7 +31,7 @@ namespace mfast
   const int SMALLEST_ADDRESS_BYTE = 0;
 #endif
 
-  constexpr std::size_t init_mask = static_cast<std::size_t>(1) << ((SMALLEST_ADDRESS_BYTE*8)+7);
+  const std::size_t init_mask = static_cast<std::size_t>(1) << ((SMALLEST_ADDRESS_BYTE*8)+7);
 
   class encoder_presence_map
   {
@@ -92,7 +92,8 @@ namespace mfast
     stream_->write_bytes_at(&value_, ++nbytes_, offset_, true);
   }
 
-  constexpr std::size_t get_next_bit_mask(std::size_t i)
+  inline BOOST_CONSTEXPR
+  std::size_t get_next_bit_mask(std::size_t i)
   {
     return i==0 ? 0 : (get_next_bit_mask(i-1) << 8) | 0x01;
   }
@@ -100,7 +101,7 @@ namespace mfast
   inline void
   encoder_presence_map::set_next_bit(bool v)
   {
-    std::size_t next_bit_mask = get_next_bit_mask( sizeof(std::size_t) );
+    const std::size_t next_bit_mask = get_next_bit_mask( sizeof(std::size_t) );
 
     if ( (mask_ & next_bit_mask) != 0) {
 #ifdef BOOST_BIG_ENDIAN

@@ -231,9 +231,9 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
             << "    mref_type mref();\n"
             << "    static const instruction_type* instruction();\n"
             << "\n"
-            << "    " << name << "(" << name << "&&) noexcept;\n"
+            << "    " << name << "(" << name << "&&) BOOST_NOEXCEPT;\n"
             << "    " << name << "(const " << name << "&);\n"
-            << "    " << name << "& operator = ("  << name << "&&) noexcept;\n"
+            << "    " << name << "& operator = ("  << name << "&&) BOOST_NOEXCEPT;\n"
             << "    " << name << "& operator = (const "  << name << "&);\n"
             << "};\n\n";
   }

@@ -21,9 +21,10 @@
 
 
 #define BOOST_TEST_MODULE mFast Test Suite
-
+#ifdef __GNUG__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
 
 #ifdef BOOST_TEST_HEADER_ONLY
 #include <boost/test/included/unit_test.hpp>

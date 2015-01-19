@@ -53,7 +53,7 @@ namespace mfast
 
     composite_type(const composite_type& other);
 
-    composite_type(composite_type&& other) noexcept
+    composite_type(composite_type&& other) BOOST_NOEXCEPT
       : alloc_(other.alloc_)
       , instruction_ (other.instruction_)
     {
@@ -62,7 +62,7 @@ namespace mfast
       other.instruction_ = 0;
     }
 
-    composite_type& operator = (composite_type&& other) noexcept
+    composite_type& operator = (composite_type&& other) BOOST_NOEXCEPT
     {
       // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
       if (this->instruction())
@@ -104,7 +104,7 @@ namespace mfast
                    const value_storage* other_fields_storage);
 
     composite_type(composite_type&& other,
-                   value_storage*   fields_storage) noexcept
+                   value_storage*   fields_storage) BOOST_NOEXCEPT
       : alloc_(other.alloc_)
       , instruction_ (other.instruction_)
     {
@@ -116,7 +116,7 @@ namespace mfast
 
 
     void assign(composite_type&& other,
-                value_storage* fields_storage) noexcept
+                value_storage* fields_storage) BOOST_NOEXCEPT
     {
       // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
       if (this->instruction())

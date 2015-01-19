@@ -14,7 +14,8 @@ namespace mfast
     static const uint64_t  CONTINUE_BIT = (1LL << 63);
 
     uint64_t prop;
-    const ssize_t* nest_indices;
+    typedef std::make_signed<std::size_t>::type nest_index_t;
+    const nest_index_t* nest_indices;
 
     bool cont() const
     {

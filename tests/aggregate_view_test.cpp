@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(parse_view_test)
     BOOST_CHECK_EQUAL( info.data_[6].nest_indices[1], -1);
 
     BOOST_CHECK_EQUAL( info.data_[7].cont(), false);
-    BOOST_CHECK_EQUAL( info.data_[7].nest_indices, (ssize_t*) 0);
+    BOOST_CHECK_EQUAL( info.data_[7].nest_indices, (void*) 0);
   }
   catch(boost::exception& e)
   {
