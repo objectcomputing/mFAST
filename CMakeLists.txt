@@ -2,7 +2,7 @@
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
 
-cmake_minimum_required (VERSION 2.8.8)
+cmake_minimum_required (VERSION 2.8.0)
 
 
 project (mFAST)
@@ -22,6 +22,8 @@ set(CPACK_PACKAGE_VERSION ${MFAST_VERSION})
 set(CPACK_PACKAGE_NAME "mfast")
 include(CPack)
 
+
+
 set(BOOST_TEST_HEADER_ONLY OFF CACHE BOOL "including the Boost Unit Testing Framework sources directly into test project")
 set(BUILD_FAST_TYPE_GEN ON CACHE BOOL "Build fast_type_gen from source")
 # flag to enable building shared/dynamic library
@@ -33,6 +35,14 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH
 "Installation directory for header files")
 set(INSTALL_DATA_DIR share CACHE PATH
 "Installation directory for data files")
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
+    if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        set(CMAKE_INSTALL_PREFIX $ENV{EMSCRIPTEN}/system/local CACHE PATH "default install path" FORCE)
+    endif()
+    set(BUILD_FAST_TYPE_GEN OFF)
+    set(BUILD_SHARED_LIBS OFF)
+endif()
 
 # determine default path for CMake files
 if(WIN32 AND NOT CYGWIN)
@@ -137,6 +147,12 @@ endif(MSVC_IDE)
 #============================================================
 #
 
+if (NOT DEFINED FAST_TYPE_GEN)
+    get_property(FAST_TYPE_GEN TARGET fast_type_gen PROPERTY LOCATION)
+else()
+    set(fast_type_gen_location ${FAST_TYPE_GEN})
+endif()
+
 macro(FASTTYPEGEN_TARGET Name)
 set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]")
 set(INPUTS)
@@ -166,40 +182,27 @@ endif()
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if (BUILD_FAST_TYPE_GEN)
-    if (MSVC_IDE AND NOT Boost_USE_STATIC_LIBS AND NOT BOOST_TEST_HEADER_ONLY)
-    	add_custom_command(
-    	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-    	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat
-    	  ARGS $<TARGET_FILE:fast_type_gen>  ${INPUTS}
-    	  DEPENDS ${ARGN} fast_type_gen
-    	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-    	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    elseif (CMAKE_SUPPORT_GENERATOR_EXPRESSION)
-    	add_custom_command(
-    	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-    	  COMMAND $<TARGET_FILE:fast_type_gen>
-    	  ARGS ${INPUTS}
-    	  DEPENDS ${ARGN} fast_type_gen
-    	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-    	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    else()
-    	add_custom_command(
-    	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-    	  COMMAND "${PROJECT_BINARY_DIR}/bin/fast_type_gen"
-    	  ARGS ${INPUTS}
-    	  DEPENDS ${ARGN} fast_type_gen
-    	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-    	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-    endif()
-else(BUILD_FAST_TYPE_GEN)
+    get_property(FAST_TYPE_GEN TARGET fast_type_gen PROPERTY LOCATION)
+endif()
+
+if (MSVC_IDE)
+	add_custom_command(
+	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat
+	  ARGS ${FAST_TYPE_GEN}  ${INPUTS}
+	  DEPENDS ${ARGN} fast_type_gen
+	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+else()
 	add_custom_command(
 	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
 	  COMMAND "${FAST_TYPE_GEN}"
 	  ARGS ${INPUTS}
-	  DEPENDS ${ARGN}
+	  DEPENDS ${ARGN} fast_type_gen
 	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
 	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-endif(BUILD_FAST_TYPE_GEN)
+endif()
+
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 set(FASTTYPEGEN_${Name}_DEFINED TRUE)
