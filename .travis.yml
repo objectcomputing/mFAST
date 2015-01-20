@@ -13,6 +13,7 @@ before_install:
     # Install GNU GCC 4.8 required by use of C++11
     - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+    - if [ "$CXX" = "clang++" ]; then sudo apt-get install libstdc++-4.8-dev; fi
 install:
     # Install mfast dependencies
     - sudo apt-get install -qq libboost1.55
