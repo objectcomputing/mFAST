@@ -18,3 +18,5 @@ target_link_libraries (fast_type_gen
 install(TARGETS fast_type_gen
         EXPORT  mFASTTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)
+
+set(FAST_TYPE_GEN_INSTALL_LOCATION "${INSTALL_BIN_DIR}/fast_type_gen${CMAKE_EXECUTABLE_SUFFIX}" PARENT_SCOPE)
