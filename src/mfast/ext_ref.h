@@ -143,13 +143,13 @@ namespace mfast
 
 
   template <typename ExponentOp, typename MantissaOp, typename Properties>
-  class ext_cref<decimal_cref, boost::mpl::pair<ExponentOp,MantissaOp>,  Properties>
+  class ext_cref<decimal_cref, std::tuple<ExponentOp,MantissaOp>,  Properties>
   {
   public:
 
     typedef decimal_cref cref_type;
-    typedef typename Properties::first exponent_properties;
-    typedef typename Properties::second mantissa_properties;
+    typedef typename std::tuple_element<0, Properties>::type exponent_properties;
+    typedef typename std::tuple_element<1, Properties>::type mantissa_properties;
     typedef split_decimal_type_tag type_category;
     typedef invalid_operator_tag operator_category;
 
@@ -349,14 +349,14 @@ namespace mfast
 
 
   template <typename ExponentOp, typename MantissaOp, typename Properties>
-  class ext_mref<decimal_mref, boost::mpl::pair<ExponentOp,MantissaOp>, Properties >
+  class ext_mref<decimal_mref, std::tuple<ExponentOp,MantissaOp>, Properties >
   {
   public:
 
     typedef decimal_mref mref_type;
     typedef decimal_cref cref_type;
-    typedef typename Properties::first exponent_properties;
-    typedef typename Properties::second mantissa_properties;
+    typedef typename std::tuple_element<0, Properties>::type exponent_properties;
+    typedef typename std::tuple_element<1, Properties>::type mantissa_properties;
     typedef invalid_operator_tag operator_category;
 
     typedef ext_mref<exponent_mref, ExponentOp, exponent_properties > exponent_type;

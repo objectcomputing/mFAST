@@ -82,8 +82,8 @@ public:
   {
     out_ << "ext_cref<decimal_cref, ";
     if (inst->field_type() == field_type_exponent) {
-      out_ << "boost::mpl::pair<" << get_operator_tag(inst) << ", " <<  get_operator_tag(inst->mantissa_instruction()) << ">, "
-           << "boost::mpl::pair<" << get_properties_type(inst) << ", " <<  get_properties_type(inst->mantissa_instruction()) << "> >";
+      out_ << "std::tuple<" << get_operator_tag(inst) << ", " <<  get_operator_tag(inst->mantissa_instruction()) << ">, "
+           << "std::tuple<" << get_properties_type(inst) << ", " <<  get_properties_type(inst->mantissa_instruction()) << "> >";
     }
     else {
       out_ << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
@@ -209,8 +209,8 @@ public:
   {
     out_ << "ext_mref<decimal_mref, ";
     if (inst->field_type() == field_type_exponent) {
-      out_ << "boost::mpl::pair<" << get_operator_tag(inst) << ", " <<  get_operator_tag(inst->mantissa_instruction()) << ">, "
-           << "boost::mpl::pair<" << get_properties_type(inst) << ", " <<  get_properties_type(inst->mantissa_instruction()) << "> >";
+      out_ << "std::tuple<" << get_operator_tag(inst) << ", " <<  get_operator_tag(inst->mantissa_instruction()) << ">, "
+           << "std::tuple<" << get_properties_type(inst) << ", " <<  get_properties_type(inst->mantissa_instruction()) << "> >";
     }
     else {
       out_ << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
