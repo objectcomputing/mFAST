@@ -3,6 +3,7 @@ add_subdirectory (mfast)
 
 if (BUILD_FAST_TYPE_GEN)
     add_subdirectory (fast_type_gen)
+    set(FAST_TYPE_GEN_INSTALL_LOCATION "${FAST_TYPE_GEN_INSTALL_LOCATION}" PARENT_SCOPE)
 endif()
 
 install(FILES "mfast.h" DESTINATION "${INSTALL_INCLUDE_DIR}")
