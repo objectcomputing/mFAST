@@ -2,7 +2,6 @@
 #define FAST_ISTREAM_H_LBVLPJ93
 
 #include <limits>
-#include <boost/type_traits.hpp>
 
 #include "mfast/instructions/string_instructions.h"
 #include "mfast/instructions/byte_vector_instruction.h"

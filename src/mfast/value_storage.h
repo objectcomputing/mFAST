@@ -23,7 +23,6 @@
 #include "mfast/mfast_export.h"
 #include <stdint.h>
 #include <cstring>
-#include <boost/type_traits/is_pointer.hpp>
 #include <boost/array.hpp>
 
 namespace mfast

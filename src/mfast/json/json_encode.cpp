@@ -1,6 +1,5 @@
 #include "json.h"
 #include <boost/io/ios_state.hpp>
-#include <boost/type_traits.hpp>
 #include <cstdio>
 #ifdef _MSC_VER // someday someone at microsoft will read the C++11 standard.
 #define snprintf _snprintf
