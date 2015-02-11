@@ -13,7 +13,7 @@
 #include "../encoder/encoder_presence_map.h"
 #include "mfast/ext_ref.h"
 #include "fast_ostream_inserter.h"
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 namespace mfast
 {
@@ -151,7 +151,7 @@ struct MFAST_CODER_EXPORT fast_encoder_core
 
 
   typedef void (fast_encoder_core::* message_encode_function_t) (const message_cref&);
-  typedef boost::tuple<template_instruction*, message_encode_function_t> info_entry;
+  typedef std::tuple<template_instruction*, message_encode_function_t> info_entry;
 
   struct info_entry_converter
   {
@@ -166,7 +166,7 @@ struct MFAST_CODER_EXPORT fast_encoder_core
 
     template_instruction* to_instruction(const repo_mapped_type& entry)
     {
-      return entry.get<0>();
+      return std::get<0>(entry);
     }
   };
 

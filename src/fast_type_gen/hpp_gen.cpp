@@ -508,7 +508,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
     out_ << "struct "<< export_symbol_uppercase_ <<" templates_description\n"
          << "  : mfast::templates_description\n"
          << "{\n"
-         << "  typedef boost::tuple<";
+         << "  typedef std::tuple<";
 
     bool first = true;
     for (std::size_t i=0; i < desc.size(); ++i)

@@ -47,7 +47,7 @@ public:
                   typename std::enable_if< std::is_base_of< mfast::templates_description, T>::value, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_decoder_core<NumTokens>(alloc)
   {
-    this->init(boost::make_tuple(desc));
+    this->init(std::make_tuple(desc));
   }
 
   /// Decode a  message.
@@ -87,7 +87,7 @@ public:
                   typename std::enable_if< std::is_base_of< mfast::templates_description, T>::value, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_decoder_core<0>(alloc)
   {
-    this->init(boost::make_tuple(desc));
+    this->init(std::make_tuple(desc));
   }
 
   /// Decode a  message.

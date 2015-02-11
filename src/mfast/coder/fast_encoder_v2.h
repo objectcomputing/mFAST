@@ -44,7 +44,7 @@ public:
                   typename std::enable_if< std::is_base_of< mfast::templates_description, T>::value, allocator*>::type alloc = malloc_allocator::instance())
     : coder::fast_encoder_core(alloc)
   {
-    this->init(boost::make_tuple(desc));
+    this->init(std::make_tuple(desc));
   }
 
   /// Encode a  message into FAST byte stream.

@@ -18,6 +18,7 @@
 //
 #ifndef DICTIONARY_BUILDER_H_F26FXFII
 #define DICTIONARY_BUILDER_H_F26FXFII
+#include <tuple>
 #include "../mfast_coder_export.h"
 #include "mfast/field_instructions.h"
 #include "mfast/arena_allocator.h"
@@ -59,45 +60,73 @@ namespace mfast {
       }
     }
 
-
-    template <typename Operation>
-    void build(const boost::tuples::null_type& , const Operation&)
-    {
-    }
-
     template <typename DescriptionTuple, typename Operation>
     void build(const DescriptionTuple& tp, const Operation& op)
     {
-      this->build_description(tp.template get<0>(), op) ;
-      this->build( tp.get_tail(), op );
+      std::cout << "build a description tuple\n";
+      builder_helper<0,std::tuple_size<DescriptionTuple>::value, DescriptionTuple, Operation>::build(*this, tp, op);
     }
 
   private:
 
+
+    template <int BeginIndex, int EndIndex, typename DescriptionTuple, typename Operation>
+    struct builder_helper
+    {
+      static void build(dictionary_builder& builder, const DescriptionTuple& tp, const Operation& op)
+      {
+        builder.build_description(std::get<BeginIndex>(tp), op) ;
+        builder_helper<BeginIndex+1, EndIndex, DescriptionTuple, Operation>::build(builder, tp, op);
+      }
+    };
+
+    template <int EndIndex, typename DescriptionTuple, typename Operation>
+    struct builder_helper<EndIndex, EndIndex, DescriptionTuple, Operation>
+    {
+      static void build(dictionary_builder& , const DescriptionTuple& , const Operation& )
+      {
+      }
+    };
+
+    template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
+    struct message_info_helper
+    {
+      static void build(dictionary_builder& builder, const Operation& op)
+      {
+        using Message = typename std::tuple_element<BeginIndex, MessageTuple>::type;
+        if (Message::the_id == 0)
+          return;
+        std::cout << "building id= " << Message::the_id << "\n";
+        op(builder.clone_instruction(Message::instruction()), static_cast<Message*>(0));
+
+        message_info_helper<BeginIndex+1, EndIndex, MessageTuple, Operation>::build(builder, op);
+      }
+    };
+
+    template <int EndIndex, typename MessageTuple, typename Operation>
+    struct message_info_helper<EndIndex, EndIndex, MessageTuple, Operation>
+    {
+      static void build(dictionary_builder&, const Operation&)
+      {
+      }
+    };
+
+
     template <typename Description, typename Operation>
     void build_description(const Description* def, const Operation& op)
     {
-      current_ns_ = def->template_ns();
-      current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
-      build_message_info(op, static_cast<typename Description::types*> (0));
+      this->current_ns_ = def->template_ns();
+      this->current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
+      const int num_messages = std::tuple_size<typename Description::types>::value;
+
+      message_info_helper<0, num_messages, typename Description::types, Operation>::build ( *this, op);
     }
 
-    template <typename Operation>
-    void build_message_info(const Operation& , boost::tuples::null_type*)
-    {
-    }
+    template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
+    friend struct builder_helper;
 
-
-    template <typename MessageTuple, typename Operation>
-    void build_message_info(const Operation& op, MessageTuple*)
-    {
-      typedef typename MessageTuple::head_type Message;
-      if (Message::the_id == 0)
-        return;
-
-      op(this->clone_instruction(Message::instruction()), static_cast<Message*>(0));
-      this->build_message_info(op, static_cast<typename MessageTuple::tail_type*>(0));
-    }
+    template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
+    friend struct message_info_helper;
 
     virtual void visit(const int32_field_instruction*, void*);
     virtual void visit(const uint32_field_instruction*, void*);

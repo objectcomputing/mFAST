@@ -17,7 +17,7 @@
 #include "../common/codec_helper.h"
 #include "../decoder/fast_istream.h"
 #include "fast_istream_extractor.h"
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 #include <vector>
 namespace mfast
 {
