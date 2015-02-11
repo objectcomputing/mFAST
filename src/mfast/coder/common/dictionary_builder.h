@@ -63,7 +63,6 @@ namespace mfast {
     template <typename DescriptionTuple, typename Operation>
     void build(const DescriptionTuple& tp, const Operation& op)
     {
-      std::cout << "build a description tuple\n";
       builder_helper<0,std::tuple_size<DescriptionTuple>::value, DescriptionTuple, Operation>::build(*this, tp, op);
     }
 
@@ -96,7 +95,6 @@ namespace mfast {
         using Message = typename std::tuple_element<BeginIndex, MessageTuple>::type;
         if (Message::the_id == 0)
           return;
-        std::cout << "building id= " << Message::the_id << "\n";
         op(builder.clone_instruction(Message::instruction()), static_cast<Message*>(0));
 
         message_info_helper<BeginIndex+1, EndIndex, MessageTuple, Operation>::build(builder, op);
