@@ -23,7 +23,6 @@ namespace mfast {
 
       std::ostream& operator << (std::ostream& os, quoted_string str)
       {
-        boost::io::ios_flags_saver ifs( os );
         os.put('"');
         const char* ptr = str.str_;
         char c;
