@@ -1,5 +1,4 @@
 #include "tables_creator.h"
-#include <boost/foreach.hpp>
 #include <boost/exception/all.hpp>
 
 namespace mfast
@@ -107,7 +106,7 @@ namespace mfast
     void tables_creator::traverse_subinstructions(const group_field_instruction* inst)
     {
       std::size_t i = 0;
-      BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
+      for (auto subinst: inst->subinstructions())
       {
         if (!masks_.to_skip(subinst))
           subinst->accept(*this, &i);

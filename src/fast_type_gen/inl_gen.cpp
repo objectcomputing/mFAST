@@ -869,7 +869,7 @@ void inl_gen::visit(const mfast::templateref_instruction*, void* pIndex)
 void inl_gen::generate(mfast::dynamic_templates_description& desc)
 {
   codegen_base::traverse(desc);
-  BOOST_FOREACH(const mfast::aggregate_view_info& info, desc.view_infos())
+  for (auto&& info: desc.view_infos())
   {
     this->generate(info);
   }
@@ -1011,7 +1011,7 @@ void inl_gen::generate(const mfast::aggregate_view_info& info)
        << "template <typename FieldAccessor>\n"
        << "inline void  " << my_name << "::accept_accessor(FieldAccessor& accessor) const\n"
        << "{\n"
-       << "  BOOST_FOREACH(mfast::field_cref f, *this)\n"
+       << "  for (mfast::field_cref f: *this)\n"
        << "  {\n"
        << "    if (FieldAccessor::visit_absent || f.present())"
        << "      f.accept_accessor(accessor);\n"

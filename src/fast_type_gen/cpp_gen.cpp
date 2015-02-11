@@ -581,7 +581,7 @@ void cpp_gen::generate(mfast::dynamic_templates_description& desc)
   this->traverse(desc);
 
 
-  BOOST_FOREACH(const mfast::aggregate_view_info& info, desc.view_infos())
+  for (auto&& info: desc.view_infos())
   {
     this->generate(info);
   }

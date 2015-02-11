@@ -143,7 +143,7 @@ namespace mfast
   {
     subinstructions_ = instructions;
     segment_pmap_size_ = 0;
-    BOOST_FOREACH(const field_instruction* inst, instructions)
+    for (const field_instruction* inst: instructions)
     {
       segment_pmap_size_ += inst->pmap_size();
     }

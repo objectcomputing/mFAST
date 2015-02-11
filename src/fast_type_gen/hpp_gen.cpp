@@ -17,7 +17,6 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "hpp_gen.h"
-#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 
 indent_t indent;
@@ -484,7 +483,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
       << "#include <mfast.h>\n"
       << "#include <boost/array.hpp>\n";
 
-  BOOST_FOREACH(const std::string& dep, dependency_)
+  for (const std::string& dep: dependency_)
   {
     if (dep != "mfast")
       out_ << "#include \"" << dep << ".h\"\n";
@@ -498,7 +497,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
        << content_.str()
        << "\n";
 
-  BOOST_FOREACH(const mfast::aggregate_view_info& info, desc.view_infos())
+  for (const mfast::aggregate_view_info& info: desc.view_infos())
   {
     this->generate(info);
   }

@@ -39,7 +39,7 @@ namespace mfast
         infos_[current_context_] = current_indeces_;
       }
       std::size_t i = 0;
-      BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
+      for (auto subinst: inst->subinstructions())
       {
         subinst->accept(*this, &i);
         ++i;
@@ -72,7 +72,7 @@ namespace mfast
       // std::cout << "inserting " << current_context_ << "\n";
 
       std::size_t i = 0;
-      BOOST_FOREACH(const field_instruction* subinst, inst->subinstructions())
+      for (auto subinst: inst->subinstructions())
       {
         subinst->accept(*this, &i);
         ++i;
@@ -292,7 +292,7 @@ namespace mfast
 
     void view_info_builder::print()
     {
-      BOOST_FOREACH(field_infos_t::reference v, infos_)
+      for (auto v: infos_)
       {
         std::cout << v.first << "=>";
         for (unsigned i = 0; i < v.second.size(); ++i)

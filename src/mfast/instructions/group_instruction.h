@@ -21,7 +21,6 @@
 
 #include "field_instruction.h"
 #include "../array_view.h"
-#include <boost/foreach.hpp>
 
 namespace mfast
 {

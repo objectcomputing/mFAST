@@ -18,7 +18,6 @@
 //
 #include "codegen_base.h"
 #include <cctype>
-#include <boost/foreach.hpp>
 
 codegen_base::codegen_base(const char* filebase, const char* fileext)
   : filebase_(filebase)
@@ -40,7 +39,7 @@ codegen_base::dont_generate(const mfast::field_instruction* /*inst*/) const
 
 void codegen_base::traverse(mfast::dynamic_templates_description& desc)
 {
-  BOOST_FOREACH(const mfast::field_instruction* inst, desc.defined_type_instructions())
+  for (auto inst: desc.defined_type_instructions())
   {
     // we use the second parameter to identify wether the instruction is nested. If the
     // second parameter is not 0, it is nested inside another composite types.

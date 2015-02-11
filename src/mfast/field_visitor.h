@@ -28,7 +28,6 @@
 #include "mfast/sequence_ref.h"
 #include "mfast/message_ref.h"
 #include "mfast/nested_message_ref.h"
-#include <boost/foreach.hpp>
 namespace mfast {
 
   namespace detail {
@@ -48,7 +47,7 @@ namespace mfast {
 
       void visit(const aggregate_cref& ref)
       {
-        BOOST_FOREACH(field_cref r, ref)
+        for (field_cref r: ref)
         {
           if (r.present() || FieldAccessor::visit_absent ) {
             r.instruction()->accept(*this, const_cast<value_storage*>(field_cref_core_access::storage_of(r)));
@@ -184,7 +183,7 @@ namespace mfast {
 
       void visit(const aggregate_mref& ref)
       {
-        BOOST_FOREACH(field_mref r, ref)
+        for (field_mref r: ref)
         {
           if (r.present() || FieldMutator::visit_absent ) {
             r.instruction()->accept(*this, field_mref_core_access::storage_of(r));

@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
     ref.as(values[index++]);
   }
 
-  BOOST_FOREACH(mfast::ascii_string_cref ref, emails.cref())
+  for (auto ref: emails.cref())
   {
     BOOST_CHECK_EQUAL(ref.value(), values[--index] );
   }
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   Addresses addresses;
 
-  BOOST_FOREACH (Address_mref addr, addresses.mref())
+  for (auto addr: addresses.mref())
   {
     addr.instruction();
   }
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   index = 0;
 
 
-  BOOST_FOREACH (Address_mref addr, addresses.mref())
+  for (auto addr: addresses.mref())
   {
     addr.set_postalCode().as(static_cast<uint32_t>(index+10000));
     ++index;
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   index = 0;
 
-  BOOST_FOREACH(Address_cref addr, addresses.cref())
+  for (auto addr: addresses.cref())
   {
     BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
     ++index;
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_template)
 
   int num_addresses = 0;
 
-  BOOST_FOREACH(Address_cref addr, person_mref.get_addresses())
+  for (auto addr: person_mref.get_addresses())
   {
     num_addresses += 1;
     addr.instruction(); // avoid unused variable warning
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(test_template)
 
 
   unsigned index = 0;
-  BOOST_FOREACH (Address_mref addr, person1.mref().set_addresses())
+  for (auto addr: person1.mref().set_addresses())
   {
     addr.set_postalCode().as(index+10000);
     ++index;
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_template)
 
   index = 0;
 
-  BOOST_FOREACH(Address_cref addr, person1.cref().get_addresses())
+  for (auto addr: person1.cref().get_addresses())
   {
     BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
     ++index;

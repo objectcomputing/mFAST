@@ -19,7 +19,6 @@
 #include "field_builder.h"
 #include "field_op.h"
 #include "mfast/exceptions.h"
-#include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 #include "mfast/field_instructions.h"
 
@@ -785,7 +784,7 @@ namespace mfast
             boost::char_separator<char> sep("| ");
             std::string tag (tag_);
             boost::tokenizer< boost::char_separator<char> > tokens(tag, sep);
-            BOOST_FOREACH (const std::string &t, tokens)
+            for (auto&& t: tokens)
             {
               uint64_t result;
               if (parse_enum_value(inst, t.c_str(), result))

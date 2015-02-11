@@ -2,7 +2,6 @@
 #include "converter_core.h"
 #include "error.h"
 #include "tables_creator.h"
-#include <boost/foreach.hpp>
 #include <boost/io/ios_state.hpp>
 #include <mfast/output.h>
 #include <boost/lexical_cast.hpp>
@@ -17,7 +16,7 @@ namespace mfast
     format_binding(const bindings_t& binding)
     {
       std::stringstream strm;
-      BOOST_FOREACH(bindings_t::const_reference entry, binding)
+      for (auto&& entry, binding)
       {
         strm << "?" << entry.first << "=" << entry.second << "\t";
       }
@@ -73,7 +72,7 @@ namespace mfast
       }
 
 
-      BOOST_FOREACH (tables_creator::insert_map_t::const_reference v, the_map)
+      for (auto&& v: the_map)
       {
 #if 0
         std::cout << "preparing statement : " << v.second.insert_item_stmt << "\n";
