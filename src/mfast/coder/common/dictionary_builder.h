@@ -35,8 +35,6 @@
 
 namespace mfast {
 
-// field value is use to store the previous values inside dictionaries.
-
   class template_repo_base;
   class MFAST_CODER_EXPORT dictionary_builder
     : private field_instruction_visitor
@@ -120,11 +118,11 @@ namespace mfast {
       message_info_helper<0, num_messages, typename Description::types, Operation>::build ( *this, op);
     }
 
-    template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
-    friend struct builder_helper;
-
-    template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
-    friend struct message_info_helper;
+    // template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
+    // friend struct builder_helper;
+    //
+    // template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
+    // friend struct message_info_helper;
 
     virtual void visit(const int32_field_instruction*, void*);
     virtual void visit(const uint32_field_instruction*, void*);
@@ -176,11 +174,7 @@ namespace mfast {
     const char* current_dictionary_;
 
     template_repo_base& repo_base_;
-
-    // dictionary_resetter& resetter_;
     arena_allocator& alloc_;
-    // template_id_map_t& template_id_map_;
-    // dictionary_value_destroyer* value_destroyer_;
   };
 
 
