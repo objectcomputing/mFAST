@@ -99,9 +99,10 @@ include_directories(${Boost_INCLUDE_DIR})
 
 # Select flags.
 # Initialize CXXFLAGS.
-if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
+if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"))
     set(CMAKE_CXX_FLAGS "-W -Wall ${CMAKE_CXX_FLAGS} -std=c++11")
-elseif (MSVC)
+endif()
+if (MSVC)
     add_definitions(/D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS)
 endif()
 
@@ -173,8 +174,12 @@ endif()
 ## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated.
 ## Not at the time when "make" is called.
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-cmake_policy(SET CMP0026 OLD)
+
+
 if (${BUILD_FAST_TYPE_GEN})
+    if (POLICY CMP0026)
+        cmake_policy(SET CMP0026 OLD)
+    endif()
     get_property(FAST_TYPE_GEN TARGET fast_type_gen PROPERTY LOCATION)
     set(FAST_TYPE_GEN_TARGET fast_type_gen)
 endif()
