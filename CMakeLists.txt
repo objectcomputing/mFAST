@@ -173,8 +173,8 @@ endif()
 ## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated.
 ## Not at the time when "make" is called.
 # file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-if (BUILD_FAST_TYPE_GEN)
+cmake_policy(SET CMP0026 OLD)
+if (${BUILD_FAST_TYPE_GEN})
     get_property(FAST_TYPE_GEN TARGET fast_type_gen PROPERTY LOCATION)
     set(FAST_TYPE_GEN_TARGET fast_type_gen)
 endif()
