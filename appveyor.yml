@@ -55,5 +55,4 @@ build:
   project: C:\projects\mfast\build\mfast.sln
 
 test_script:
-  - cmd: ctest -C Release -VV
-  - cmd: ctest -C Debug -VV
+  - cmd: ctest -C %configuration% -VV
