@@ -156,6 +156,7 @@ int main(int argc, const char** argv)
     }
     boost::posix_time::ptime stop = boost::posix_time::microsec_clock::universal_time();
     std::cout << "time spent " <<  static_cast<unsigned long>((stop - start).total_milliseconds()) << " msec\n";
+	std::cin.get();
   }
   catch (boost::exception& e) {
     std::cerr << boost::diagnostic_information(e);
