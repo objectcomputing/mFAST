@@ -16,6 +16,7 @@ if (UNIX)
 	set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
 endif()
 set_target_properties(mfast_xml_parser_static PROPERTIES COMPILE_FLAGS -DMFAST_CODER_STATIC_DEFINE)
+set_target_properties(mfast_xml_parser_static PROPERTIES LINKER_LANGUAGE CXX)
 
 install(TARGETS mfast_xml_parser_static
         EXPORT  mFASTTargets
@@ -36,6 +37,7 @@ if (BUILD_SHARED_LIBS)
   endif()
   target_link_libraries(mfast_xml_parser mfast)
   set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+  set_target_properties(mfast_xml_parser PROPERTIES LINKER_LANGUAGE CXX)
 
 
   install(TARGETS mfast_xml_parser
