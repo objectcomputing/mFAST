@@ -77,18 +77,19 @@ include_directories ("${PROJECT_BINARY_DIR}"
 ## Setting up Boost Library
 ################################
 
-if (BUILD_FAST_TYPE_GEN)
-    find_package(Boost 1.53.0 REQUIRED unit_test_framework system filesystem)
-else(BUILD_FAST_TYPE_GEN)
-    find_package(Boost 1.53.0)
-    if (NOT Boost_FOUND)
-        message( FATAL_ERROR "Unable to find the requested Boost libraries." )
-    endif(NOT Boost_FOUND)
+if (BUILD_FAST_TYPE_GEN AND NOT BOOST_TEST_HEADER_ONLY)
+    find_package(Boost 1.55.0 REQUIRED unit_test_framework)
+else()
+    find_package(Boost 1.55.0 REQUIRED)
+endif()
+
+
+if (NOT BUILD_FAST_TYPE_GEN)
     find_program(FAST_TYPE_GEN NAMES fast_type_gen)
     if (${FAST_TYPE_GEN} STREQUAL "FAST_TYPE_GEN-NOTFOUND")
          message( FATAL_ERROR "Unable to find the required program fast_type_gen." )
     endif()
-endif(BUILD_FAST_TYPE_GEN)
+endif(NOT BUILD_FAST_TYPE_GEN)
 
 link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIR})
@@ -184,23 +185,14 @@ if (${BUILD_FAST_TYPE_GEN})
     set(FAST_TYPE_GEN_TARGET fast_type_gen)
 endif()
 
-if (MSVC_IDE)
-	add_custom_command(
-	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-	  COMMAND ${PROJECT_BINARY_DIR}/bin/invoke.bat
-	  ARGS ${FAST_TYPE_GEN}  ${INPUTS}
-	  DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
-	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-else()
-	add_custom_command(
-	  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-	  COMMAND "${FAST_TYPE_GEN}"
-	  ARGS ${INPUTS}
-	  DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
-	  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-	  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+
+add_custom_command(
+  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+  COMMAND "${FAST_TYPE_GEN}"
+  ARGS ${INPUTS}
+  DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
+  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 
 include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})

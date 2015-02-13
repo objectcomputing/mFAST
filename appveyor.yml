@@ -2,7 +2,8 @@
 version: "{build}"
 
 # Operating system (build VM template)
-# os: Windows Server 2012 R2
+os: Windows Server 2012 R2
+#os: unstable
 
 # build platform, i.e. Win32 (instead of x86), x64, Any CPU. This setting is optional.
 platform:
@@ -47,9 +48,8 @@ before_build:
   - cmd: md build
   - cmd: cd build
   # We generate project files for Visual Studio 12 because the boost binaries installed on the test server are for Visual Studio 12.
-  - cmd: if "%platform%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 12
-  - cmd: if "%platform%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 12 Win64
-  - cmd: cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" -DBoost_USE_STATIC_LIBS="ON" ..
+  - cmd: if "%platform%"=="Win32" cmake -G "Visual Studio 12" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" -DBoost_USE_STATIC_LIBS="ON" ..
+  - cmd: if "%platform%"=="x64" cmake -G "Visual Studio 12 Win64" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" -DBOOST_TEST_HEADER_ONLY="ON" ..
 
 build:
   project: C:\projects\mfast\build\mfast.sln

@@ -1,4 +1,5 @@
-# mFAST [![Build Status](https://travis-ci.org/objectcomputing/mFAST.svg?branch=master)](https://travis-ci.org/objectcomputing/mFAST)
+# mFAST [![Build Status](https://travis-ci.org/objectcomputing/mFAST.svg?branch=master)](https://travis-ci.org/objectcomputing/mFAST)[![Build status](https://ci.appveyor.com/api/projects/status/0rkg9d8ey6kidmrd?svg=true)](https://ci.appveyor.com/project/huangminghuang/mfast)
+
 
 ### Introduction
 

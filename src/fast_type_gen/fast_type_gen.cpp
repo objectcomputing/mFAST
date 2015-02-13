@@ -25,12 +25,12 @@
 #include "mfast/coder/common/dictionary_builder.h"
 #include "mfast/coder/common/template_repo.h"
 
-#include <boost/filesystem.hpp>
+// #include <boost/filesystem.hpp>
+#include <stdlib.h>
 #include <fstream>
 #include <iterator>
-#include <boost/container/vector.hpp>
 
-using namespace boost::filesystem;
+// using namespace boost::filesystem;
 
 int main(int argc, const char** argv)
 {
@@ -45,12 +45,8 @@ int main(int argc, const char** argv)
       i = 3;
     }
 
-#ifdef BOOST_NO_RVALUE_REFERENCES
-    boost::container::vector<mfast::dynamic_templates_description> descriptions;
-#else
-    // MSVC does not work well with boost::container::vector when the value type is non-copyable but movable.
+
     std::vector<mfast::dynamic_templates_description> descriptions;
-#endif
 
     std::vector<std::string> filebases;
 
@@ -69,9 +65,32 @@ int main(int argc, const char** argv)
       std::string xml((std::istreambuf_iterator<char>(ifs)),
                       std::istreambuf_iterator<char>());
 
-      path f(path(argv[i]).stem());
-      filebases.push_back(f.string());
+      //path f(path(argv[i]).stem());
 
+#ifdef _WINDOWS
+     char filebase[_MAX_FNAME];
+     _splitpath(argv[i], NULL, NULL, filebase, NULL);
+#else
+
+     const char* fullpath = argv[i];
+     auto last_slash_pos = strrchr(fullpath, '/');
+     const char* filebase_begin;
+     if (last_slash_pos == 0)
+       filebase_begin =fullpath;
+     else
+       filebase_begin = last_slash_pos+1;
+
+     const char* filebase_end = strrchr(filebase_begin, '.');
+
+     std::string filebase;
+
+     if (filebase_end == 0)
+       filebase = filebase_begin;
+     else
+       filebase.assign(filebase_begin,filebase_end);
+#endif
+
+      filebases.push_back(filebase);
 
       descriptions.emplace_back(xml.c_str(),
                                 filebases[j].c_str(),
