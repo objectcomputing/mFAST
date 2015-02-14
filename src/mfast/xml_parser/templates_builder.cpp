@@ -190,7 +190,18 @@ namespace mfast
                                                                template_registry* registry)
   {
     XMLDocument document;
-    if (document.Parse(xml_content) == 0) {
+
+	// Get document length
+	size_t len = strlen(xml_content);
+
+	// Make sure that the document ends in ">"
+	while (xml_content[len] != '>')
+	{
+		--len;
+	}
+	++len;
+
+    if (document.Parse(xml_content, len) == 0) {
       xml_parser::templates_builder builder(this, cpp_ns, registry);
       document.Accept(&builder);
     }

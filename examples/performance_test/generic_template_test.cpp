@@ -125,8 +125,8 @@ int main(int argc, const char** argv)
 #ifdef WITH_ENCODE
     mfast::fast_encoder encoder(alloc);
     encoder.include(descriptions);
-    std::vector<char> buffer;
-    buffer.resize(message_contents.size());
+	size_t buf_size = message_contents.size();
+	char* buffer = new char[buf_size];
 #endif
 
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
@@ -135,7 +135,7 @@ int main(int argc, const char** argv)
       for (std::size_t j = 0; j < repeat_count; ++j) {
 #ifdef WITH_ENCODE
         char* buf_beg = &buffer[0];
-        char* buf_end = &buffer[buffer.size()];
+		char* buf_end = &buffer[buf_size];	// Past the end pointer
 #endif
         const char* first = &message_contents[0] + skip_header_bytes;
         const char* last = &message_contents[0] + message_contents.size();
@@ -155,7 +155,12 @@ int main(int argc, const char** argv)
       }
     }
     boost::posix_time::ptime stop = boost::posix_time::microsec_clock::universal_time();
+
+#ifdef WITH_ENCODE
+	delete[] buffer;
+#endif
     std::cout << "time spent " <<  static_cast<unsigned long>((stop - start).total_milliseconds()) << " msec\n";
+	std::cin.get();
   }
   catch (boost::exception& e) {
     std::cerr << boost::diagnostic_information(e);
