@@ -135,7 +135,7 @@ int main(int argc, const char** argv)
       for (std::size_t j = 0; j < repeat_count; ++j) {
 #ifdef WITH_ENCODE
         char* buf_beg = &buffer[0];
-        char* buf_end = &buffer[buffer.size()];
+        char* buf_end = buf_beg + buffer.size();
 #endif
         const char* first = &message_contents[0] + skip_header_bytes;
         const char* last = &message_contents[0] + message_contents.size();
