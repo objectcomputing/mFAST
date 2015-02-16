@@ -112,6 +112,7 @@ int main(int argc, const char** argv)
   }
 
   try {
+    template_contents.resize(template_contents.size()+1); // add null terminator at the end of the string
     mfast::dynamic_templates_description description(&template_contents[0]);
 
     mfast::malloc_allocator malloc_allc;
