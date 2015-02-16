@@ -11,7 +11,7 @@
 get_filename_component(MFAST_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include("${MFAST_CMAKE_DIR}/mFASTTargets.cmake")
 
-find_package( Boost 1.53.0 )
+find_package( Boost 1.55.0 )
 set(MFAST_INCLUDE_DIR ${Boost_INCLUDE_DIR} "@CONF_INCLUDE_DIRS@")
 set(MFAST_LIBRARY_DIRS "@CONF_LIBRARY_DIRS@")
 
@@ -89,3 +89,7 @@ endmacro()
 
 message("mFAST Found! Used components:${MFAST_USED_COMPONENTS}")
 message("Used libraries: ${MFAST_LIBRARIES}")
+
+if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"))
+    add_definitions(-std=c++11)
+endif()
