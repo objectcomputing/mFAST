@@ -21,6 +21,11 @@
 #include <stdint.h>
 #include "fast_istreambuf.h"
 
+
+#ifndef __GNUC__
+#define __builtin_expect(expr, expected_value) (expr)
+#endif
+
 namespace mfast {
 
   class decoder_presence_map
@@ -36,7 +41,7 @@ namespace mfast {
     bool is_next_bit_set()
     {
       mask_ >>=1;
-      if (mask_ == 0 && continue_) {
+      if (__builtin_expect(mask_ == 0 && continue_, 0)) {
         load(continue_);
         mask_ >>=1;
       }
