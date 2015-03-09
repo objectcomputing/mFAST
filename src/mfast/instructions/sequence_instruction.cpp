@@ -48,6 +48,8 @@ namespace mfast
     , element_instruction_(element_instruction)
   {
     field_type_ = field_type_sequence;
+    has_pmap_bit_ = sequence_length_instruction ? sequence_length_instruction->pmap_size() : 0;
+
     if (ref_inst) {
       ref_instruction(ref_inst);
       if (ref_inst->field_type() == field_type_sequence) {
