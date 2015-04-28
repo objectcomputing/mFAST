@@ -60,6 +60,12 @@ namespace mfast
                                   const char*        cpp_ns="",
                                   template_registry* registry = template_registry::instance());
 
+
+    dynamic_templates_description(const std::string& xml_content)
+      : dynamic_templates_description(xml_content.c_str())
+    {
+    }
+
     const std::deque<const field_instruction*>& defined_type_instructions() const;
     const std::deque<aggregate_view_info>& view_infos() const
     {
