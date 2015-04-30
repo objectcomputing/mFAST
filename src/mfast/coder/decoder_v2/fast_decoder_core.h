@@ -762,17 +762,18 @@ fast_decoder_core<NumTokens>::decode_segment(fast_istreambuf& sb)
   this->current_ = &pmap;
   strm_.decode(pmap);
 
+  uint32_t template_id=0;
+
   if (pmap.is_next_bit_set()) {
-    uint32_t template_id;
 
     strm_.decode(template_id, false_type());
 
     // find the message with corresponding template id
     active_message_info_ = repo_.find(template_id);
+  }
 
-    if (active_message_info_ == 0) {
-      BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
-    }
+  if (active_message_info_ == 0) {
+    BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
   }
 
   // we have to keep the active_message_ in a new variable

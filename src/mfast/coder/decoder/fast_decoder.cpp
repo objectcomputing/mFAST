@@ -314,9 +314,9 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
   debug_ << "decoding segment : pmap -> " << pmap << "\n"
          << "                   entity -> " << strm_  << "\n";
 
+  uint32_t template_id =0;
 
   if (pmap.is_next_bit_set()) {
-    uint32_t template_id;
 
     strm_.decode(template_id, false);
 
@@ -324,10 +324,11 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
 
     // find the message with corresponding template id
     active_message_ = repo_.find(template_id);
-    if (active_message_ == 0)
-    {
-      BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
-    }
+  }
+
+  if (active_message_ == 0)
+  {
+    BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
   }
 
   if (force_reset_ || active_message_->instruction()->has_reset_attribute()) {
