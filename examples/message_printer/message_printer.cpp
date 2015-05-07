@@ -23,6 +23,6 @@ int main()
   entry.set_NumberOfOrders().as(100);
 
   message_printer printer(std::cout);
-  ref.accept_accessor(printer);
+  printer.visit(ref, 0);
   return 0;
 }
