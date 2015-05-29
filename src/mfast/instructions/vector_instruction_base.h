@@ -54,16 +54,16 @@ namespace mfast
     }
 
     virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
+                                 allocator*     alloc) const override;
     virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const;
+                                allocator*     alloc) const override;
 
 
     // perform deep copy
     virtual void copy_construct_value(const value_storage& src,
                                       value_storage&       dest,
                                       allocator*           alloc,
-                                      value_storage*       fields_storage=0) const;
+                                      value_storage*       fields_storage=nullptr) const override;
 
   protected:
     std::size_t element_size_;

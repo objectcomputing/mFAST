@@ -51,8 +51,8 @@ namespace mfast
     static const bool is_mutable=false;
     typedef group_type_tag type_category;
 
-    aggregate_cref(const value_storage*           storage_array=0,
-                   const group_field_instruction* instruction=0);
+    aggregate_cref(const value_storage*           storage_array=nullptr,
+                   const group_field_instruction* instruction=nullptr);
 
     aggregate_cref(const aggregate_cref& other);
 
@@ -80,7 +80,7 @@ namespace mfast
 
     bool absent () const
     {
-      return storage_array_ == 0;
+      return storage_array_ == nullptr;
     }
 
     bool present() const
@@ -101,8 +101,8 @@ namespace mfast
                                        , field_cref>
     {
     public:
-      iterator(const value_storage*           storage_array=0,
-               const const_instruction_ptr_t* instruction_array=0);
+      iterator(const value_storage*           storage_array=nullptr,
+               const const_instruction_ptr_t* instruction_array=nullptr);
 
     private:
       friend class boost::iterator_core_access;
@@ -284,7 +284,7 @@ namespace mfast
 
       this->instruction_ = static_cast<const group_field_instruction*> (
         field_cref_core_access::storage_of(other)->of_templateref.of_instruction.instruction_);
-      if (this->instruction_ == 0)
+      if (this->instruction_ == nullptr)
         BOOST_THROW_EXCEPTION(unbouned_templateref_error());
       // if you hit the exeception, you have to use dynamic_nested_message_mref::rebind() to bind a valid
       // template_instruction intead. If this is a static templateRef, please use the resolved templates
@@ -407,7 +407,7 @@ namespace mfast
   template <typename ConstRef>
   inline
   make_aggregate_mref<ConstRef>::make_aggregate_mref()
-    : alloc_(0)
+    : alloc_(nullptr)
   {
   }
 

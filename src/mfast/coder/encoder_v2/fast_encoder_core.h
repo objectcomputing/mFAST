@@ -221,8 +221,8 @@ inline
 fast_encoder_core::fast_encoder_core(allocator* alloc)
   : repo_(alloc)
   , strm_(alloc)
-  , active_message_info_(0)
-  , current_(0)
+  , active_message_info_(nullptr)
+  , current_(nullptr)
 {
 }
 
@@ -549,7 +549,7 @@ fast_encoder_core::encode_field(const T& ext_ref,
   }
   else {
     value_storage bv = delta_base_value_of( cref );
-    typename T::cref_type base(&bv, 0);
+    typename T::cref_type base(&bv, nullptr);
 
     int64_t delta = static_cast<int64_t>(cref.value() - base.value());
 

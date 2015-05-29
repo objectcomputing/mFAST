@@ -29,9 +29,9 @@ namespace mfast {
   public:
     static malloc_allocator* instance();
 
-    virtual void* allocate(std::size_t s);
-    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size);
-    virtual void deallocate(void* pointer,std::size_t);
+    virtual void* allocate(std::size_t s) override;
+    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size) override;
+    virtual void deallocate(void* pointer,std::size_t) override;
   };
 
 }

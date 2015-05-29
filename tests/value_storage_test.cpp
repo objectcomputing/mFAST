@@ -23,7 +23,7 @@
 #include <mfast/value_storage.h>
 using namespace mfast;
 
-static const void* NULLPTR = 0;
+static const void* NULLPTR = nullptr;
 
 BOOST_AUTO_TEST_SUITE( test_value_storage )
 

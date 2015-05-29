@@ -43,15 +43,15 @@ namespace mfast
 
 
     virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
+                                 allocator*     alloc) const override;
     virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const;
+                                allocator*     alloc) const override;
 
 
     virtual void construct_value(value_storage& storage,
                                  value_storage* fields_storage,
                                  allocator*     alloc,
-                                 bool           construct_subfields) const;
+                                 bool           construct_subfields) const override;
 
     void construct_sequence_elements(value_storage& storage,
                                      std::size_t    start,
@@ -66,9 +66,9 @@ namespace mfast
     virtual void copy_construct_value(const value_storage& src,
                                       value_storage&       dest,
                                       allocator*           alloc,
-                                      value_storage*       fields_storage=0) const;
+                                      value_storage*       fields_storage=nullptr) const override;
 
-    virtual void accept(field_instruction_visitor&, void*) const;
+    virtual void accept(field_instruction_visitor&, void*) const override;
     const uint32_field_instruction* length_instruction() const
     {
       return sequence_length_instruction_;
@@ -79,7 +79,7 @@ namespace mfast
       return sequence_length_instruction_;
     }
 
-    virtual sequence_field_instruction* clone(arena_allocator& alloc) const;
+    virtual sequence_field_instruction* clone(arena_allocator& alloc) const override;
 
     const group_field_instruction* element_instruction() const
     {
@@ -133,7 +133,7 @@ namespace mfast
     {
     }
 
-    virtual sequence_instruction_ex<T>* clone(arena_allocator& alloc) const
+    virtual sequence_instruction_ex<T>* clone(arena_allocator& alloc) const override
     {
       return new (alloc) sequence_instruction_ex<T>(*this);
     }

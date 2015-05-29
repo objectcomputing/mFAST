@@ -41,11 +41,11 @@ namespace mfast {
       const field_instruction*
       find(const char* ns, const char* name) const
       {
-        map_type::const_iterator itr = types_.find(get_key(ns, name));
+        auto itr = types_.find(get_key(ns, name));
         if (itr != types_.end()) {
           return itr->second;
         }
-        return 0;
+        return nullptr;
       }
 
       void add(const char* ns, const field_instruction* inst)

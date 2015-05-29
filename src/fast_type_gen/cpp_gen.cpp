@@ -23,8 +23,8 @@
 std::string cpp_gen::prefix_string() const
 {
   std::stringstream strm;
-  for (std::size_t i = 0; i < prefixes_.size(); ++i) {
-    strm << prefixes_[i] << "__";
+  for (auto & elem : prefixes_) {
+    strm << elem << "__";
   }
   return strm.str();
 }
@@ -32,8 +32,8 @@ std::string cpp_gen::prefix_string() const
 std::string cpp_gen::cref_scope() const
 {
   std::stringstream strm;
-  for (std::size_t i = 0; i < prefixes_.size(); ++i) {
-    strm << prefixes_[i] << "_cref::";
+  for (auto & elem : prefixes_) {
+    strm << elem << "_cref::";
   }
   return strm.str();
 }
@@ -70,7 +70,7 @@ std::string
 cpp_gen::gen_op_context(const char*                name,
                         const mfast::op_context_t* context)
 {
-  if (context == 0)
+  if (context == nullptr)
     return "0";
 
   out_ << "const static " << "op_context_t " << prefix_string() << name << "_opContext ={\n"
@@ -169,7 +169,7 @@ void cpp_gen::visit(const mfast::decimal_field_instruction* inst, void* pIndex)
     if (inst->mantissa_instruction() )
       out_ << "  &" << prefix_string() << name << "_mantissa_instruction,\n";
     else
-      out_ << "  0, // mantissa_instruction\n";
+      out_ << "  nullptr, // mantissa_instruction\n";
   }
 
   const mfast::value_storage& init_value = inst->initial_value();
@@ -310,7 +310,7 @@ void cpp_gen::output_subinstructions()
 
 bool cpp_gen::need_generate_subinstructions(const mfast::group_field_instruction* inst)
 {
-  return inst->ref_instruction()==0 && !this->contains_only_templateref(inst);
+  return inst->ref_instruction()==nullptr && !this->contains_only_templateref(inst);
 }
 
 std::string
@@ -353,7 +353,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
     qualified_name = cpp_type_of(inst);
   }
 
-  if (pIndex == 0) {
+  if (pIndex == nullptr) {
     out_ << "const " << qualified_name << "::instruction_type*\n"
          << name << "::instruction()\n"
          << "{\n";
@@ -374,7 +374,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
 
   std::string subinstruction_arg = get_subinstructions(inst);
 
-  if (pIndex == 0) {
+  if (pIndex == nullptr) {
     out_ << "const static " << name << "::instruction_type\n"
          << "  the_instruction(\n";
   }
@@ -399,7 +399,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
        << "  \"\", // cpp_ns\n"
        << "  " << inst->tag() << "); // tag\n\n";
 
-  if (pIndex == 0) {
+  if (pIndex == nullptr) {
     out_ << "  return &the_instruction;\n"
          << "}\n\n";
   }
@@ -408,7 +408,7 @@ void cpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
 void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 {
   std::string name( cpp_name( inst ) );
-  bool to_gen_subinstruction =  inst->ref_instruction() == 0 && inst->element_instruction()==0;
+  bool to_gen_subinstruction =  inst->ref_instruction() == nullptr && inst->element_instruction()==nullptr;
 
   std::string qualified_name = name;
   if (inst->ref_instruction())
@@ -416,7 +416,7 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
     qualified_name = cpp_type_of(inst);
   }
 
-  if (pIndex == 0) {
+  if (pIndex == nullptr) {
     out_ << "const " << qualified_name << "::instruction_type*\n"
          << name << "::instruction()\n"
          << "{\n";
@@ -469,7 +469,7 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
     subinstruction_arg << "  "<< prefix_string() << "subinstructions,\n";
   }
   else {
-    subinstruction_arg << "  instructions_view_t(0,0),\n";
+    subinstruction_arg << "  instructions_view_t(nullptr,0),\n";
   }
 
   if (inst->element_instruction()) {
@@ -483,12 +483,12 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
     subinstruction_arg << "  " << cpp_type_of(inst->ref_instruction()) << "::instruction(), // ref_instruction\n ";
   }
   else {
-    subinstruction_arg << "  0, // ref_instruction\n";
+    subinstruction_arg << "  nullptr, // ref_instruction\n";
   }
 
   prefixes_.pop_back();
 
-  if (pIndex == 0) {
+  if (pIndex == nullptr) {
     out_ << "const static " << name << "::instruction_type\n"
          << "  the_instruction(\n";
   }
@@ -512,7 +512,7 @@ void cpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
        << "  \"\", // cpp_ns\n"
        << "  " << inst->tag() << "); //tag \n\n";
 
-  if (pIndex == 0) {
+  if (pIndex == nullptr) {
     out_ << "  return &the_instruction;\n"
          << "}\n\n";
   }
@@ -625,7 +625,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* pIndex)
     qualified_name = cpp_type_of(inst);
   }
 
-  if (pIndex == 0) {
+  if (pIndex == nullptr) {
     out_ << "const " << qualified_name << "::instruction_type*\n"
          << name << "::instruction()\n"
          << "{\n";
@@ -692,7 +692,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction* inst, void* pIndex)
        << "  0, // cpp_ns\n"
        << "  " << inst->tag() << "); //tag \n\n";
 
-  if (pIndex == 0) {
+  if (pIndex == nullptr) {
     out_ << "  return &the_instruction;\n"
          << "}\n\n";
   }

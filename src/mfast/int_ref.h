@@ -136,10 +136,7 @@ namespace mfast {
     {
     }
 
-    int_mref(const int_mref& other)
-      : base_type(other)
-    {
-    }
+    int_mref(const int_mref&  other) = default;
 
     explicit int_mref(const field_mref_base& other)
       : base_type(other)

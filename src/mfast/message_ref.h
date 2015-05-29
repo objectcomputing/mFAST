@@ -41,7 +41,8 @@ namespace mfast {
     make_message_cref(const value_storage* storage_array,
                       instruction_cptr     instruction);
 
-    make_message_cref(const make_message_cref&);
+    make_message_cref(const make_message_cref& )=default;
+    //make_message_cref(make_message_cref&& ) = default;
 
     template <typename T>
     explicit make_message_cref(const make_message_cref<T, template_instruction>& other,
@@ -77,8 +78,8 @@ namespace mfast {
                       instruction_cptr  instruction);
 
 
-    make_message_mref(const make_message_mref&);
-
+    make_message_mref(const make_message_mref& ) = default;
+    //make_message_mref(make_message_mref&& ) = default;
 
     template <typename T>
     explicit make_message_mref(const make_message_mref<T, template_instruction>& other,
@@ -158,13 +159,6 @@ namespace mfast {
   {
   }
 
-  template <typename AggregateCRef, typename TemplateType>
-
-  inline
-  make_message_cref<AggregateCRef,TemplateType>::make_message_cref(const make_message_cref<AggregateCRef,TemplateType>& other)
-    : AggregateCRef(other)
-  {
-  }
 
   // template <typename AggregateCRef, typename TemplateType>
   // template <typename T>
@@ -253,12 +247,12 @@ namespace mfast {
   {
   }
 
-  template <typename AggregateMRef, typename TemplateType>
-  inline
-  make_message_mref<AggregateMRef,TemplateType>::make_message_mref(const make_message_mref<AggregateMRef,TemplateType>& mref)
-    : AggregateMRef(mref)
-  {
-  }
+  // template <typename AggregateMRef, typename TemplateType>
+  // inline
+  // make_message_mref<AggregateMRef,TemplateType>::make_message_mref(const make_message_mref<AggregateMRef,TemplateType>& mref)
+  //   : AggregateMRef(mref)
+  // {
+  // }
 
   // template <typename AggregateMRef, typename TemplateType>
   // inline

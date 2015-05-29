@@ -28,7 +28,7 @@ namespace mfast {
 
 inline bool is_empty_string(const char* str)
 {
-  return str == 0 || str[0] == '\0';
+  return str == nullptr || str[0] == '\0';
 }
 
 namespace {
@@ -97,10 +97,10 @@ void dictionary_builder::build_by_description(const templates_description* def)
   current_ns_ = def->template_ns();
   current_dictionary_ = is_empty_string(def->dictionary()) ?  "global" : def->dictionary();
 
-  for (uint32_t i  = 0; i < def->size(); ++i ) {
-    uint32_t id = (*def)[i]->id();
+  for (auto & elem : *def) {
+    uint32_t id = elem->id();
     if (id > 0) {
-      this->clone_instruction((*def)[i]);
+      this->clone_instruction(elem);
     }
   }
 }
@@ -154,7 +154,7 @@ dictionary_builder::clone_instruction(const template_instruction* src_inst)
     BOOST_THROW_EXCEPTION(duplicate_template_id_error(id) << template_name_info( src_inst->name()));
   }
 
-  template_instruction* dest = new (alloc_) template_instruction(*src_inst);
+  auto  dest = new (alloc_) template_instruction(*src_inst);
 
   const char* ns = src_inst->ns();
   if (is_empty_string(ns)) {
@@ -170,7 +170,7 @@ void dictionary_builder::visit(const template_instruction* src_inst, void* dest_
 {
   template_instruction*& dest = *static_cast<template_instruction**>(dest_inst);
   dest = repo_base_.get_template(src_inst->id());
-  if (dest == 0) {
+  if (dest == nullptr) {
     BOOST_THROW_EXCEPTION(coder::template_not_found_error(src_inst->name(), current_template_.c_str()));
   }
 }
@@ -209,7 +209,7 @@ void dictionary_builder::visit(const sequence_field_instruction* src_inst, void*
       0,
       "",
       "",
-      0,
+      nullptr,
       int_value_storage<uint32_t>()
       );
   }
@@ -282,7 +282,7 @@ dictionary_builder::get_dictionary_storage(const char*         key,
   qualified_key += "::";
   qualified_key += qualified_name(ns, key);
 
-  indexer_t::iterator itr = indexer_.find(qualified_key);
+  auto itr = indexer_.find(qualified_key);
 
   if (itr != indexer_.end()) {
     if (itr->second.field_type_ == field_type) {

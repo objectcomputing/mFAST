@@ -43,13 +43,13 @@ namespace mfast
     dest.of_array.defined_bit_ = 1;
     dest.of_array.len_ = src.of_array.len_;
     if (src.of_array.len_) {
-      dest.of_array.content_ = 0;
+      dest.of_array.content_ = nullptr;
       dest.of_array.capacity_in_bytes_ = alloc->reallocate(dest.of_array.content_, 0, src.of_array.len_ * element_size_);
       std::memcpy(dest.of_array.content_, src.of_array.content_, src.of_array.len_ * element_size_);
     }
     else {
       dest.of_array.capacity_in_bytes_ = 0;
-      dest.of_array.content_ = 0;
+      dest.of_array.content_ = nullptr;
     }
   }
 

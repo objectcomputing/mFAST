@@ -40,15 +40,15 @@ namespace mfast
     ascii_field_instruction(const ascii_field_instruction& other);
 
     virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
+                                 allocator*     alloc) const override;
     // perform deep copy
     virtual void copy_construct_value(const value_storage& src,
                                       value_storage&       dest,
                                       allocator*           alloc,
-                                      value_storage*       fields_storage=0) const;
+                                      value_storage*       fields_storage=nullptr) const override;
 
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
-    virtual ascii_field_instruction* clone(arena_allocator& alloc) const;
+    virtual void accept(field_instruction_visitor& visitor, void* context) const override;
+    virtual ascii_field_instruction* clone(arena_allocator& alloc) const override;
 
     value_storage& prev_value()
     {
@@ -86,7 +86,7 @@ namespace mfast
 
   protected:
 
-    virtual void update_invariant()
+    virtual void update_invariant() override
     {
       field_instruction::update_invariant();
       has_initial_value_= ! initial_value_.is_empty();
@@ -138,8 +138,8 @@ namespace mfast
     {
     }
 
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
-    virtual unicode_field_instruction* clone(arena_allocator& alloc) const;
+    virtual void accept(field_instruction_visitor& visitor, void* context) const override;
+    virtual unicode_field_instruction* clone(arena_allocator& alloc) const override;
 
     uint32_t length_id() const
     {

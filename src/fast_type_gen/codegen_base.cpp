@@ -44,12 +44,12 @@ void codegen_base::traverse(mfast::dynamic_templates_description& desc)
     // we use the second parameter to identify wether the instruction is nested. If the
     // second parameter is not 0, it is nested inside another composite types.
      if (!dont_generate(inst))
-       inst->accept(*this, 0);
+       inst->accept(*this, nullptr);
   }
 
   for (size_t i = 0; i < desc.size(); ++i)
   {
-    desc[i]->accept(*this, 0);
+    desc[i]->accept(*this, nullptr);
   }
 }
 
@@ -101,7 +101,7 @@ bool codegen_base::is_const_field(const mfast::field_instruction* inst) const
     return false;
   if (inst->field_type() == mfast::field_type_exponent) {
     const mfast::decimal_field_instruction* the_inst = static_cast<const mfast::decimal_field_instruction*>(inst);
-    if (the_inst->mantissa_instruction() ==0 || the_inst->mantissa_instruction()->field_operator() != mfast::operator_constant)
+    if (the_inst->mantissa_instruction() ==nullptr || the_inst->mantissa_instruction()->field_operator() != mfast::operator_constant)
       return false;
   }
   return true;
@@ -124,52 +124,52 @@ public:
   {
   }
 
-  virtual void visit(const int32_field_instruction*, void*)
+  virtual void visit(const int32_field_instruction*, void*) override
   {
     name_ = "mfast::int32";
   }
 
-  virtual void visit(const uint32_field_instruction*, void*)
+  virtual void visit(const uint32_field_instruction*, void*) override
   {
     name_ = "mfast::uint32";
   }
 
-  virtual void visit(const int64_field_instruction*, void*)
+  virtual void visit(const int64_field_instruction*, void*) override
   {
     name_ = "mfast::uint64";
   }
 
-  virtual void visit(const uint64_field_instruction*, void*)
+  virtual void visit(const uint64_field_instruction*, void*) override
   {
     name_ = "mfast::int64";
   }
 
-  virtual void visit(const decimal_field_instruction*, void*)
+  virtual void visit(const decimal_field_instruction*, void*) override
   {
     name_ = "mfast::decimal";
   }
 
-  virtual void visit(const ascii_field_instruction*, void*)
+  virtual void visit(const ascii_field_instruction*, void*) override
   {
     name_ = "mfast::ascii_string";
   }
 
-  virtual void visit(const unicode_field_instruction*, void*)
+  virtual void visit(const unicode_field_instruction*, void*) override
   {
     name_ = "mfast::unicode_string";
   }
 
-  virtual void visit(const byte_vector_field_instruction*, void*)
+  virtual void visit(const byte_vector_field_instruction*, void*) override
   {
     name_ = "mfast::byte_vector";
   }
 
-  virtual void visit(const group_field_instruction* inst, void* pIndex)
+  virtual void visit(const group_field_instruction* inst, void* pIndex) override
   {
     if (inst->ref_instruction()) {
       inst->ref_instruction()->accept(*this, pIndex);
     }
-    else if (inst->cpp_ns()==0 || inst->cpp_ns()[0] == 0 ||
+    else if (inst->cpp_ns()==nullptr || inst->cpp_ns()[0] == 0 ||
              strcmp(caller_cpp_ns_, inst->cpp_ns()) ==0)
     {
       name_ = inst->name();
@@ -182,47 +182,47 @@ public:
 
   }
 
-  virtual void visit(const sequence_field_instruction* inst, void*)
+  virtual void visit(const sequence_field_instruction* inst, void*) override
   {
-    this->visit(static_cast<const group_field_instruction*>(inst), 0);
+    this->visit(static_cast<const group_field_instruction*>(inst), nullptr);
   }
 
-  virtual void visit(const template_instruction* inst, void*)
+  virtual void visit(const template_instruction* inst, void*) override
   {
-    this->visit(static_cast<const group_field_instruction*>(inst), 0);
+    this->visit(static_cast<const group_field_instruction*>(inst), nullptr);
   }
 
-  virtual void visit(const templateref_instruction*, void*)
+  virtual void visit(const templateref_instruction*, void*) override
   {
     name_ = "mfast::nested_message";
   }
 
-  virtual void visit(const int32_vector_field_instruction*, void*)
+  virtual void visit(const int32_vector_field_instruction*, void*) override
   {
     name_ = "mfast::int32_vector";
   }
 
-  virtual void visit(const uint32_vector_field_instruction*, void*)
+  virtual void visit(const uint32_vector_field_instruction*, void*) override
   {
     name_ = "mfast::uint32_vector";
   }
 
-  virtual void visit(const int64_vector_field_instruction*, void*)
+  virtual void visit(const int64_vector_field_instruction*, void*) override
   {
     name_ = "mfast::int64_vector";
   }
 
-  virtual void visit(const uint64_vector_field_instruction*, void*)
+  virtual void visit(const uint64_vector_field_instruction*, void*) override
   {
     name_ = "mfast::uint64_vector";
   }
 
-  virtual void visit(const enum_field_instruction* inst, void* pIndex)
+  virtual void visit(const enum_field_instruction* inst, void* pIndex) override
   {
     if (inst->ref_instruction()) {
       inst->ref_instruction()->accept(*this, pIndex);
     }
-    else if (inst->cpp_ns()==0 || inst->cpp_ns()[0] == 0 ||
+    else if (inst->cpp_ns()==nullptr || inst->cpp_ns()[0] == 0 ||
              strcmp(caller_cpp_ns_, inst->cpp_ns()) ==0)
     {
       name_ = inst->name();
@@ -242,7 +242,7 @@ codegen_base::cpp_type_of(const mfast::field_instruction* inst,
                           std::set<std::string>*          dependency) const
 {
   type_name_finder finder(cpp_ns_.c_str(), dependency);
-  inst->accept(finder, 0);
+  inst->accept(finder, nullptr);
   return finder.name_;
 }
 
@@ -258,7 +258,7 @@ codegen_base::get_element_instruction(const mfast::sequence_field_instruction* i
     return inst->element_instruction();
   if (inst->subinstructions().size() == 1 && inst->subinstruction(0)->name()[0] == 0 )
     return inst->subinstruction(0);
-  return 0;
+  return nullptr;
 }
 
 

@@ -41,7 +41,7 @@ namespace mfast
 
     integer_field_instruction_base(const integer_field_instruction_base& other);
     virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
+                                 allocator*     alloc) const override;
 
 
 
@@ -91,7 +91,7 @@ namespace mfast
     const value_storage* initial_or_default_value_;
     static const value_storage default_value_;
 
-    virtual void update_invariant()
+    virtual void update_invariant() override
     {
       field_instruction::update_invariant();
       has_initial_value_= ! initial_value_.is_empty();
@@ -114,8 +114,8 @@ namespace mfast
                           instruction_tag      tag = instruction_tag());
 
     int_field_instruction(const int_field_instruction& other);
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
-    virtual int_field_instruction<T>* clone(arena_allocator& alloc) const;
+    virtual void accept(field_instruction_visitor& visitor, void* context) const override;
+    virtual int_field_instruction<T>* clone(arena_allocator& alloc) const override;
   };
 
 

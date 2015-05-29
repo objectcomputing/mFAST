@@ -165,7 +165,7 @@ namespace mfast
     get_optional_attr(const tinyxml2::XMLElement & element, const char* attr_name, const char* default_value)
     {
       const tinyxml2::XMLAttribute* attr = element.FindAttribute(attr_name);
-      if (attr == 0) {
+      if (attr == nullptr) {
         return default_value;
       }
       return attr->Value();
@@ -179,7 +179,7 @@ namespace mfast
       std::string ref_name = get_optional_attr(element,"name", "");
       if (ref_name.size())
       {
-        field_view_info result = {field_view_info::CONTINUE_BIT, 0};
+        field_view_info result = {field_view_info::CONTINUE_BIT, nullptr};
 
         std::vector<int> sequence_indeces;
 
@@ -213,7 +213,7 @@ namespace mfast
         while (new_pos != std::string::npos);
         // find the field index
         // std::cout << "finding " << ref_name_no_seq_index << "\n";
-        field_infos_t::iterator it = infos_.find(ref_name_no_seq_index);
+        auto it = infos_.find(ref_name_no_seq_index);
         if (it == infos_.end()) {
           BOOST_THROW_EXCEPTION(fast_static_error("Invalid reference specification, no such reference name exists") << reference_name_info(ref_name));
         }
@@ -251,13 +251,13 @@ namespace mfast
     view_info_builder::build(const tinyxml2::XMLElement &          element,
                              const mfast::group_field_instruction* inst)
     {
-      const char* name =  get_optional_attr(element,"name", 0);
+      const char* name =  get_optional_attr(element,"name", nullptr);
 
-      if (name == 0)
+      if (name == nullptr)
         BOOST_THROW_EXCEPTION(fast_static_error("A view must has a name attribute"));
 
 
-      this->visit(inst, 0);
+      this->visit(inst, nullptr);
       aggregate_view_info result;
       result.max_depth_ = 0;
 
@@ -267,11 +267,11 @@ namespace mfast
       std::deque<field_view_info> fields;
 
       const tinyxml2::XMLElement* child = element.FirstChildElement();
-      while (child != 0) {
+      while (child != nullptr) {
         if (std::strcmp(child->Name(), "field") == 0)
         {
           const tinyxml2::XMLElement* grandchild = child->FirstChildElement();
-          while (grandchild != 0) {
+          while (grandchild != nullptr) {
             build_field_view(*grandchild, result.max_depth_, fields);
             grandchild = grandchild->NextSiblingElement();
           }
@@ -280,10 +280,10 @@ namespace mfast
         }
         child = child->NextSiblingElement();
       }
-      field_view_info terminator = {0, 0};
+      field_view_info terminator = {0, nullptr};
       fields.push_back( terminator );
 
-      field_view_info* data = new (alloc_) field_view_info[ fields.size() ];
+      auto  data = new (alloc_) field_view_info[ fields.size() ];
       std::copy(fields.begin(), fields.end(), data);
       result.data_ = mfast::array_view<const field_view_info>(data, fields.size());
       result.instruction_ = inst;
@@ -295,8 +295,8 @@ namespace mfast
       for (auto v: infos_)
       {
         std::cout << v.first << "=>";
-        for (unsigned i = 0; i < v.second.size(); ++i)
-          std::cout << v.second[i] << ", ";
+        for (auto & elem : v.second)
+          std::cout << elem << ", ";
         std::cout << "\n";
       }
     }

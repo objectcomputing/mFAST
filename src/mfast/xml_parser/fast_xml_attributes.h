@@ -42,46 +42,46 @@ namespace mfast
       const char* tag_;
 
       fast_xml_attributes()
-        : name_(0)
-        , id_(0)
-        , ns_(0)
-        , templateNs_(0)
-        , dictionary_(0)
-        , presence_(0)
-        , charset_(0)
-        , tag_(0)
+        : name_(nullptr)
+        , id_(nullptr)
+        , ns_(nullptr)
+        , templateNs_(nullptr)
+        , dictionary_(nullptr)
+        , presence_(nullptr)
+        , charset_(nullptr)
+        , tag_(nullptr)
       {
       }
 
       fast_xml_attributes(const char* name)
         : name_ (name)
-        , id_(0)
-        , ns_(0)
-        , templateNs_(0)
-        , dictionary_(0)
-        , presence_(0)
-        , charset_(0)
-        , tag_(0)
+        , id_(nullptr)
+        , ns_(nullptr)
+        , templateNs_(nullptr)
+        , dictionary_(nullptr)
+        , presence_(nullptr)
+        , charset_(nullptr)
+        , tag_(nullptr)
       {
       }
 
       fast_xml_attributes(const XMLAttribute* attr)
       {
-        name_ = 0;
-        id_ = 0;
-        ns_ = 0;
-        templateNs_ = 0;
-        dictionary_ = 0;
-        presence_ = 0;
-        charset_ = 0;
-        tag_ = 0;
+        name_ = nullptr;
+        id_ = nullptr;
+        ns_ = nullptr;
+        templateNs_ = nullptr;
+        dictionary_ = nullptr;
+        presence_ = nullptr;
+        charset_ = nullptr;
+        tag_ = nullptr;
 
         set(attr);
       }
 
       void set(const XMLAttribute* attr)
       {
-        while (attr != 0) {
+        while (attr != nullptr) {
 
           const char* name = attr->Name();
 
@@ -107,7 +107,7 @@ namespace mfast
 
       presence_enum_t get_presence(const field_instruction* inst) const
       {
-        bool is_optional =  (presence_ == 0) ? inst->optional() : (std::strcmp(presence_, "optional") == 0);
+        bool is_optional =  (presence_ == nullptr) ? inst->optional() : (std::strcmp(presence_, "optional") == 0);
         return is_optional ? presence_optional : presence_mandatory;
       }
 

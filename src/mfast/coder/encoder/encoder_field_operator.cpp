@@ -140,56 +140,56 @@ namespace mfast
 
       virtual void encode(const int32_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint32_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const int64_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint64_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const ascii_string_cref& cref,
                           fast_ostream&            stream,
-                          encoder_presence_map&    pmap) const
+                          encoder_presence_map&    pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const unicode_string_cref& cref,
                           fast_ostream&              stream,
-                          encoder_presence_map&      pmap) const
+                          encoder_presence_map&      pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const byte_vector_cref& cref,
                           fast_ostream&           stream,
-                          encoder_presence_map&   pmap) const
+                          encoder_presence_map&   pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const decimal_cref&   cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_decimal(cref, stream, pmap);
       }
@@ -224,56 +224,56 @@ namespace mfast
 
       virtual void encode(const int32_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint32_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const int64_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint64_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const ascii_string_cref& cref,
                           fast_ostream&            stream,
-                          encoder_presence_map&    pmap) const
+                          encoder_presence_map&    pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const unicode_string_cref& cref,
                           fast_ostream&              stream,
-                          encoder_presence_map&      pmap) const
+                          encoder_presence_map&      pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const byte_vector_cref& cref,
                           fast_ostream&           stream,
-                          encoder_presence_map&   pmap) const
+                          encoder_presence_map&   pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const decimal_cref&   cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_decimal(cref, stream,pmap);
       }
@@ -376,56 +376,56 @@ namespace mfast
 
       virtual void encode(const int32_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint32_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const int64_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint64_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const ascii_string_cref& cref,
                           fast_ostream&            stream,
-                          encoder_presence_map&    pmap) const
+                          encoder_presence_map&    pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const unicode_string_cref& cref,
                           fast_ostream&              stream,
-                          encoder_presence_map&      pmap) const
+                          encoder_presence_map&      pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const byte_vector_cref& cref,
                           fast_ostream&           stream,
-                          encoder_presence_map&   pmap) const
+                          encoder_presence_map&   pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const decimal_cref&   cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_decimal(cref, stream,pmap);
       }
@@ -454,28 +454,28 @@ namespace mfast
 
       virtual void encode(const int32_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint32_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const int64_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint64_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
@@ -526,56 +526,56 @@ namespace mfast
 
       virtual void encode(const int32_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint32_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const int64_cref&     cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const uint64_cref&    cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const ascii_string_cref& cref,
                           fast_ostream&            stream,
-                          encoder_presence_map&    pmap) const
+                          encoder_presence_map&    pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const unicode_string_cref& cref,
                           fast_ostream&              stream,
-                          encoder_presence_map&      pmap) const
+                          encoder_presence_map&      pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const byte_vector_cref& cref,
                           fast_ostream&           stream,
-                          encoder_presence_map&   pmap) const
+                          encoder_presence_map&   pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const decimal_cref&   cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         encode_decimal(cref, stream,pmap);
       }
@@ -596,7 +596,7 @@ namespace mfast
         }
         else {
           value_storage bv = delta_base_value_of( cref );
-          T base(&bv, 0);
+          T base(&bv, nullptr);
 
           int64_t delta = static_cast<int64_t>(cref.value() - base.value());
 
@@ -664,35 +664,35 @@ namespace mfast
 
       virtual void encode(const int32_cref& cref,
                           fast_ostream&     stream,
-                          encoder_presence_map      & /* pmap */) const
+                          encoder_presence_map      & /* pmap */) const override
       {
         this->encode_integer(cref, stream);
       }
 
       virtual void encode(const uint32_cref& cref,
                           fast_ostream&      stream,
-                          encoder_presence_map       & /* pmap */) const
+                          encoder_presence_map       & /* pmap */) const override
       {
         encode_integer(cref, stream);
       }
 
       virtual void encode(const int64_cref& cref,
                           fast_ostream&     stream,
-                          encoder_presence_map      & /* pmap */) const
+                          encoder_presence_map      & /* pmap */) const override
       {
         encode_integer(cref, stream);
       }
 
       virtual void encode(const uint64_cref& cref,
                           fast_ostream&      stream,
-                          encoder_presence_map       & /* pmap */) const
+                          encoder_presence_map       & /* pmap */) const override
       {
         encode_integer(cref, stream);
       }
 
       virtual void encode(const decimal_cref&   cref,
                           fast_ostream&         stream,
-                          encoder_presence_map& pmap) const
+                          encoder_presence_map& pmap) const override
       {
         if(!cref.has_individual_operators()) {
 
@@ -724,21 +724,21 @@ namespace mfast
 
       virtual void encode(const ascii_string_cref& cref,
                           fast_ostream&            stream,
-                          encoder_presence_map&    pmap) const
+                          encoder_presence_map&    pmap) const override
       {
         encode_string(cref, stream, pmap);
       }
 
       virtual void encode(const unicode_string_cref& cref,
                           fast_ostream&              stream,
-                          encoder_presence_map&      pmap) const
+                          encoder_presence_map&      pmap) const override
       {
         encode_string(cref, stream, pmap);
       }
 
       virtual void encode(const byte_vector_cref& cref,
                           fast_ostream&           stream,
-                          encoder_presence_map&   pmap) const
+                          encoder_presence_map&   pmap) const override
       {
         encode_string(cref, stream, pmap);
       }
@@ -821,21 +821,21 @@ namespace mfast
 
       virtual void encode(const ascii_string_cref& cref,
                           fast_ostream&            stream,
-                          encoder_presence_map&    pmap) const
+                          encoder_presence_map&    pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const unicode_string_cref& cref,
                           fast_ostream&              stream,
-                          encoder_presence_map&      pmap) const
+                          encoder_presence_map&      pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }
 
       virtual void encode(const byte_vector_cref& cref,
                           fast_ostream&           stream,
-                          encoder_presence_map&   pmap) const
+                          encoder_presence_map&   pmap) const override
       {
         encode_impl(cref, stream, pmap);
       }

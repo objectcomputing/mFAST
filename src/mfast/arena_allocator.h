@@ -36,12 +36,12 @@ namespace mfast {
     arena_allocator();
     ~arena_allocator();
 
-    virtual void* allocate(std::size_t n);
-    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size);
+    virtual void* allocate(std::size_t n) override;
+    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size) override;
 
     /// Release all previously allocated memory blocks
     virtual bool reset();
-    virtual void deallocate(void* pointer, std::size_t);
+    virtual void deallocate(void* pointer, std::size_t) override;
 
   private:
 

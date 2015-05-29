@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(int32_test)
 boost::test_tools::predicate_result
 decode_string(const byte_stream& bs, bool nullable, const char* result, std::size_t result_len)
 {
-  ascii_field_instruction* instruction = 0;
+  ascii_field_instruction* instruction = nullptr;
 
   fast_istreambuf sb(bs.data(), bs.size());
   fast_istream strm(&sb);
@@ -100,7 +100,7 @@ decode_string(const byte_stream& bs, bool nullable, const char* result, std::siz
 
   bool not_null = strm.decode(str, len, instruction, nullable);
 
-  if ((str == 0 && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
+  if ((str == nullptr && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
     return true;
 
   boost::test_tools::predicate_result res( false );
@@ -116,16 +116,16 @@ BOOST_AUTO_TEST_CASE(ascii_string_test)
   BOOST_CHECK(decode_string( "\x80", false, "",  0));
   BOOST_CHECK(decode_string( "\x00\x80", false, "\x0",  1));
 
-  BOOST_CHECK(decode_string( "\x80", true, 0,  0));
+  BOOST_CHECK(decode_string( "\x80", true, nullptr,  0));
   BOOST_CHECK(decode_string( "\x00\x80", true, "",  0));
   BOOST_CHECK(decode_string( "\x00\x00\x80", true, "\x0",  1));
 
   BOOST_CHECK(decode_string( "\x40\x40\xC0", true, "\x40\x40\xC0",  3));
   BOOST_CHECK(decode_string( "\x40\x40\xC0", false, "\x40\x40\xC0",  3));
 
-  BOOST_CHECK_THROW(decode_string("\x00\xC0", false, 0, 0),    mfast::fast_error );
-  BOOST_CHECK_THROW(decode_string("\x00\xC0", true, 0, 0),     mfast::fast_error );
-  BOOST_CHECK_THROW(decode_string("\x00\x00\xC0", true, 0, 0), mfast::fast_error );
+  BOOST_CHECK_THROW(decode_string("\x00\xC0", false, nullptr, 0),    mfast::fast_error );
+  BOOST_CHECK_THROW(decode_string("\x00\xC0", true, nullptr, 0),     mfast::fast_error );
+  BOOST_CHECK_THROW(decode_string("\x00\x00\xC0", true, nullptr, 0), mfast::fast_error );
 }
 
 boost::test_tools::predicate_result
@@ -135,12 +135,12 @@ decode_byte_vector(const byte_stream& bs, bool nullable, const char* result, std
   fast_istreambuf sb(bs.data(), bs.size());
   fast_istream strm(&sb);
 
-  const unsigned char* str=0;
+  const unsigned char* str=nullptr;
   uint32_t len;
 
-  bool not_null = strm.decode(str, len, 0, nullable);
+  bool not_null = strm.decode(str, len, nullptr, nullable);
 
-  if ((result == 0 && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
+  if ((result == nullptr && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
     return true;
 
   boost::test_tools::predicate_result res( false );
@@ -153,7 +153,7 @@ decode_byte_vector(const byte_stream& bs, bool nullable, const char* result, std
 
 BOOST_AUTO_TEST_CASE(byte_vector_test)
 {
-  BOOST_CHECK(decode_byte_vector( "\x80", true, 0,  0)); // null
+  BOOST_CHECK(decode_byte_vector( "\x80", true, nullptr,  0)); // null
   BOOST_CHECK(decode_byte_vector( "\x80", false, "",  0)); // empty byte vector
   BOOST_CHECK(decode_byte_vector( "\x81", true, "",  0)); // empty byte vector
 
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(extractor_test)
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    decimal_value_storage(INT64_MAX,64));
 
     inst.construct_value(storage, &alloc);

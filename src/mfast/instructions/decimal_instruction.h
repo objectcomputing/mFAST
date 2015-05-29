@@ -31,7 +31,7 @@ namespace mfast
     mantissa_field_instruction(operator_enum_t            operator_id,
                                const op_context_t*        context,
                                int_value_storage<int64_t> initial_value)
-      : int64_field_instruction(operator_id, presence_mandatory, 0, 0, 0, context, initial_value, instruction_tag())
+      : int64_field_instruction(operator_id, presence_mandatory, 0, nullptr, nullptr, context, initial_value, instruction_tag())
     {
     }
 
@@ -65,7 +65,7 @@ namespace mfast
                                        decimal_context,
                                        initial_value.storage_,
                                        tag)
-      , mantissa_instruction_(0)
+      , mantissa_instruction_(nullptr)
     {
     }
 
@@ -102,15 +102,15 @@ namespace mfast
     virtual void copy_construct_value(const value_storage& src,
                                       value_storage&       dest,
                                       allocator*           alloc,
-                                      value_storage*       fields_storage=0) const;
+                                      value_storage*       fields_storage=nullptr) const override;
 
 
     virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
+                                 allocator*     alloc) const override;
 
 
-    virtual void accept(field_instruction_visitor&, void*) const;
-    virtual decimal_field_instruction* clone(arena_allocator& alloc) const;
+    virtual void accept(field_instruction_visitor&, void*) const override;
+    virtual decimal_field_instruction* clone(arena_allocator& alloc) const override;
 
     const mantissa_field_instruction* mantissa_instruction() const
     {

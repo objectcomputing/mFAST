@@ -59,8 +59,8 @@ namespace mfast {
 
       field_op()
         : op_(operator_none)
-        , context_(0)
-        , alloc_(0)
+        , context_(nullptr)
+        , alloc_(nullptr)
       {
       }
 
@@ -77,7 +77,7 @@ namespace mfast {
           const XMLElement* field_op_element = find_field_op_element(*element);
           if (field_op_element) {
             parse_field_op(*field_op_element, alloc);
-            const char* init_value_str = get_optional_attr(*field_op_element, "value", 0);
+            const char* init_value_str = get_optional_attr(*field_op_element, "value", nullptr);
             if (init_value_str)
               set_init_value(init_value_str, inst);
           }

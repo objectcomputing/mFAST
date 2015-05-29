@@ -57,7 +57,7 @@ class debug_stream
     std::ostream* os_;
   public:
     debug_stream()
-      : os_(0)
+      : os_(nullptr)
     {
     }
 
@@ -69,7 +69,7 @@ class debug_stream
     template <class T>
     const debug_stream& operator<<(const T& t ) const
     {
-      if (os_ != 0) *os_ << t;
+      if (os_ != nullptr) *os_ << t;
       return *this;
     }
 
@@ -79,7 +79,7 @@ class debug_stream
     const debug_stream& operator<<(ostream_manipulator manip) const
     {
       // call the function, but we cannot return it's value
-      if (os_ != 0) *os_ << manip;
+      if (os_ != nullptr) *os_ << manip;
       return *this;
     }
 

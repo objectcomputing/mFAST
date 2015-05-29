@@ -37,15 +37,15 @@ class debug_allocator
       BOOST_CHECK_EQUAL(leased_addresses_.size(), 0U);
     }
 
-    virtual void* allocate(std::size_t s)
+    virtual void* allocate(std::size_t s) override
     {
       void* pointer = std::malloc(s);
-      if (pointer == 0) throw std::bad_alloc();
+      if (pointer == nullptr) throw std::bad_alloc();
       leased_addresses_.insert(pointer);
       return pointer;
     }
 
-    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)
+    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size) override
     {
       new_size = std::max<std::size_t>(2*new_size, 64) & (~63);
 
@@ -57,7 +57,7 @@ class debug_allocator
       else
         pointer = std::malloc(new_size);
       leased_addresses_.erase(old_ptr);
-      if (pointer == 0) {
+      if (pointer == nullptr) {
         std::free(old_ptr);
         throw std::bad_alloc();
       }
@@ -65,7 +65,7 @@ class debug_allocator
       return new_size;
     }
 
-    virtual void deallocate(void* pointer, std::size_t)
+    virtual void deallocate(void* pointer, std::size_t) override
     {
 
       BOOST_CHECK_EQUAL(leased_addresses_.count(pointer)!=0, true );

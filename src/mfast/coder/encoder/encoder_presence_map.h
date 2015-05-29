@@ -55,7 +55,7 @@ namespace mfast
 
   inline
   encoder_presence_map::encoder_presence_map()
-    : stream_(0)
+    : stream_(nullptr)
     , offset_(0)
     , maxbytes_(0)
   {

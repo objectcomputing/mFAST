@@ -32,7 +32,7 @@ namespace mfast {
       , public boost::exception
     {
     public:
-      json_decode_error(std::istream& is, const char* reason, const char* got=0)
+      json_decode_error(std::istream& is, const char* reason, const char* got=nullptr)
         : std::runtime_error(reason)
       {
         if (got)
@@ -152,7 +152,7 @@ namespace mfast {
             const char* escapables="\b\t\n\f\r\"/\\";
             const char* orig="btnfr\"/\\";
             const char* pch = strchr(orig, c);
-            if (pch != 0) {
+            if (pch != nullptr) {
               c = escapables[pch-orig];
               escaped = false;
             }
@@ -259,7 +259,7 @@ namespace mfast {
             return true;
         }
         else if (c == '"') {
-          if (!get_quoted_string(strm, 0, pref, true))
+          if (!get_quoted_string(strm, nullptr, pref, true))
             return false;
         }
       }
@@ -273,9 +273,9 @@ namespace mfast {
 
       strm >> std::skipws >> c1;
       if (c1 == '{' || c1 == '[')
-        return skip_matching(strm, c1, 0);
+        return skip_matching(strm, c1, nullptr);
       else if (c1 == '"')
-        return get_quoted_string(strm, 0, 0, true);
+        return get_quoted_string(strm, nullptr, nullptr, true);
       else if (c1 == 'n') {
         // check if it's null
         strm.get(rest, 4);
@@ -407,7 +407,7 @@ namespace mfast {
       void visit(const mfast::string_mref<Char>& ref)
       {
         std::string str;
-        if (get_quoted_string(strm_, &str, 0)) {
+        if (get_quoted_string(strm_, &str, nullptr)) {
           ref.as(str);
         }
       }
@@ -430,7 +430,7 @@ namespace mfast {
         else {
           // write it as a hex string
           std::string str;
-          if (get_quoted_string(strm_, &str, 0)) {
+          if (get_quoted_string(strm_, &str, nullptr)) {
             ref.resize(str.size()/2+1);
             ptrdiff_t len = byte_vector_field_instruction::hex2binary(str.c_str(), ref.data());
             ref.resize(len);
@@ -510,7 +510,7 @@ namespace mfast {
 
         do {
           std::string key;
-          if (!get_quoted_string(strm_, &key, 0))
+          if (!get_quoted_string(strm_, &key, nullptr))
             BOOST_THROW_EXCEPTION(json_decode_error(strm_,"Invalid field name"));
 
           strm_ >> c;

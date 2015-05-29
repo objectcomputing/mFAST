@@ -277,7 +277,7 @@ namespace mfast
 
   inline fast_istream::fast_istream(fast_istreambuf* sb)
     : buf_(sb)
-    , warning_log_(0)
+    , warning_log_(nullptr)
   {
   }
 

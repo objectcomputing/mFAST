@@ -38,7 +38,7 @@ int main(int argc, const char** argv)
 
   try {
     int i = 1;
-    const char* export_symbol = 0;
+    const char* export_symbol = nullptr;
 
     if (std::strcmp(argv[1], "-E") == 0) {
       export_symbol = argv[2];
@@ -75,7 +75,7 @@ int main(int argc, const char** argv)
      const char* fullpath = argv[i];
      auto last_slash_pos = strrchr(fullpath, '/');
      const char* filebase_begin;
-     if (last_slash_pos == 0)
+     if (last_slash_pos == nullptr)
        filebase_begin =fullpath;
      else
        filebase_begin = last_slash_pos+1;
@@ -84,7 +84,7 @@ int main(int argc, const char** argv)
 
      std::string filebase;
 
-     if (filebase_end == 0)
+     if (filebase_end == nullptr)
        filebase = filebase_begin;
      else
        filebase.assign(filebase_begin,filebase_end);

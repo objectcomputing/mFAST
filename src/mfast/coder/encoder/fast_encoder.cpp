@@ -60,7 +60,7 @@ namespace mfast
       encoder_presence_map* prev_pmap_;
 
       pmap_state()
-        : prev_pmap_(0)
+        : prev_pmap_(nullptr)
       {
       }
 
@@ -174,7 +174,7 @@ namespace mfast
 
     value_storage storage;
 
-    uint32_mref length_mref(0, &storage, cref.instruction()->length_instruction());
+    uint32_mref length_mref(nullptr, &storage, cref.instruction()->length_instruction());
 
     if (cref.present())
       length_mref.as(cref.size());
@@ -221,7 +221,7 @@ namespace mfast
 
     template_instruction* instruction = *this->find(template_id);
 
-    if (instruction !=0) {
+    if (instruction !=nullptr) {
       current_pmap().init(&this->strm_, instruction->segment_pmap_size());
     }
     else {
@@ -266,7 +266,7 @@ namespace mfast
   {
     impl_->build(descriptions, description_count);
     template_instruction** entry = impl_->unique_entry();
-    if (entry != 0) {
+    if (entry != nullptr) {
       impl_->active_message_id_ = (*entry)->id();
     }
   }

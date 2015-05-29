@@ -119,12 +119,12 @@ namespace mfast
     if (sequence_length_instruction_ && initial_length > 0) {
       std::size_t element_size = this->group_content_byte_count();
       std::size_t reserve_size = initial_length*element_size;
-      storage.of_array.content_ = 0;
+      storage.of_array.content_ = nullptr;
       storage.of_array.capacity_in_bytes_ =  alloc->reallocate(storage.of_array.content_, 0, reserve_size);
       construct_sequence_elements(storage,0, storage.of_array.capacity_in_bytes_/element_size, alloc);
     }
     else {
-      storage.of_array.content_ = 0;
+      storage.of_array.content_ = nullptr;
       storage.of_array.capacity_in_bytes_ = 0;
     }
   }
@@ -162,7 +162,7 @@ namespace mfast
       std::size_t element_size = this->group_content_byte_count();
       std::size_t reserve_size = size*element_size;
 
-      dest.of_array.content_ = 0;
+      dest.of_array.content_ = nullptr;
       dest.of_array.capacity_in_bytes_ =  alloc->reallocate(dest.of_array.content_, 0, reserve_size);
 
       const value_storage* src_elements = static_cast<const value_storage*>(src.of_array.content_);
@@ -180,7 +180,7 @@ namespace mfast
       }
     }
     else {
-      dest.of_array.content_ = 0;
+      dest.of_array.content_ = nullptr;
       dest.of_array.capacity_in_bytes_ = 0;
     }
   }

@@ -97,7 +97,7 @@ namespace mfast
                                                 allocator*     alloc,
                                                 bool           construct_subfields) const
   {
-    storage.of_group.own_content_ = fields_storage == 0;
+    storage.of_group.own_content_ = fields_storage == nullptr;
     storage.of_group.is_link_ = !construct_subfields;
     storage.of_group.content_ = fields_storage ? fields_storage :
                                 static_cast<value_storage*>(alloc->allocate(this->group_content_byte_count()));
@@ -114,7 +114,7 @@ namespace mfast
                                                      value_storage*       dest_fields_storage) const
   {
     dest.of_group.present_ = src.of_group.present_;
-    dest.of_group.own_content_ = dest_fields_storage == 0;
+    dest.of_group.own_content_ = dest_fields_storage == nullptr;
     dest.of_group.is_link_ =  0;
     dest.of_group.content_ = dest_fields_storage ? dest_fields_storage :
                              static_cast<value_storage*>(alloc->allocate( group_content_byte_count() ));

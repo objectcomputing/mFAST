@@ -93,7 +93,7 @@ namespace mfast
         const XMLElement* field_op_element = find_field_op_element(*element);
         if (field_op_element) {
           parse_field_op(*field_op_element, alloc);
-          const char* init_value_str = get_optional_attr(*field_op_element, "value", 0);
+          const char* init_value_str = get_optional_attr(*field_op_element, "value", nullptr);
 
           if (init_value_str) {
             if (strcmp(element->Name(), "exponent") != 0 )
@@ -134,13 +134,13 @@ namespace mfast
 
       static std::set<const char*, cstr_compare> field_op_set (field_op_names, field_op_names + 6);
 
-      for (const XMLElement* child = element.FirstChildElement(); child != 0; child = child->NextSiblingElement())
+      for (const XMLElement* child = element.FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
       {
         if (field_op_set.count(child->Name())) {
           return child;
         }
       }
-      return 0;
+      return nullptr;
     }
 
     void field_op::parse_field_op(const XMLElement& field_op_element,
@@ -156,7 +156,7 @@ namespace mfast
           ("increment", operator_increment)
           ("tail",operator_tail);
 
-      operator_map_t::const_iterator itr = operator_map.find(field_op_element.Name());
+      auto itr = operator_map.find(field_op_element.Name());
       if (itr == operator_map.end())
       {
         BOOST_THROW_EXCEPTION(fast_static_error("S1") << reason_info(std::string("Invalid field operator ") + field_op_element.Name()));
@@ -164,12 +164,12 @@ namespace mfast
 
       op_ = itr->second;
 
-      const char* opContext_key = get_optional_attr(field_op_element, "key", context_ ? context_->key_ : 0);
-      const char* opContext_dict = get_optional_attr(field_op_element, "dictionary", context_ ? context_->dictionary_ : 0 );
-      const char* opContext_ns = get_optional_attr(field_op_element, "ns", context_ ? context_->ns_ : 0);
+      const char* opContext_key = get_optional_attr(field_op_element, "key", context_ ? context_->key_ : nullptr);
+      const char* opContext_dict = get_optional_attr(field_op_element, "dictionary", context_ ? context_->dictionary_ : nullptr );
+      const char* opContext_ns = get_optional_attr(field_op_element, "ns", context_ ? context_->ns_ : nullptr);
 
       if (opContext_key || opContext_dict || opContext_ns) {
-        op_context_t* new_context = new (alloc) op_context_t;
+        auto  new_context = new (alloc) op_context_t;
 
         new_context->key_ = string_dup(opContext_key, alloc);
         new_context->ns_ = string_dup(opContext_ns, alloc);

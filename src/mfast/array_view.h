@@ -9,7 +9,7 @@ namespace mfast
   {
   public:
     array_view()
-      : data_(0)
+      : data_(nullptr)
       , sz_(0)
     {
     }

@@ -49,12 +49,12 @@ namespace mfast
                           name,
                           ns,
                           tag)
-      , referable_instruction<group_field_instruction>(0, cpp_ns)
+      , referable_instruction<group_field_instruction>(nullptr, cpp_ns)
       , dictionary_(dictionary)
       , typeref_name_(typeref_name)
       , typeref_ns_(typeref_ns)
       , segment_pmap_size_(0)
-      , subinstructions_(0,0)
+      , subinstructions_(nullptr,0)
     {
       set_subinstructions(subinstructions);
     }
@@ -136,9 +136,9 @@ namespace mfast
     }
 
     virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const;
+                                 allocator*     alloc) const override;
     virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const;
+                                allocator*     alloc) const override;
 
 
     virtual void construct_value(value_storage& storage,
@@ -149,10 +149,10 @@ namespace mfast
     virtual void copy_construct_value(const value_storage& src,
                                       value_storage&       dest,
                                       allocator*           alloc,
-                                      value_storage*       fields_storage=0) const;
+                                      value_storage*       fields_storage=nullptr) const override;
 
-    virtual void accept(field_instruction_visitor&, void*) const;
-    virtual group_field_instruction* clone(arena_allocator& alloc) const;
+    virtual void accept(field_instruction_visitor&, void*) const override;
+    virtual group_field_instruction* clone(arena_allocator& alloc) const override;
 
 
     void link_value(value_storage& storage,
@@ -228,7 +228,7 @@ namespace mfast
       this->ref_instruction(ref_instruction);
     }
 
-    virtual group_instruction_ex<T>* clone(arena_allocator& alloc) const
+    virtual group_instruction_ex<T>* clone(arena_allocator& alloc) const override
     {
       return new (alloc) group_instruction_ex<T>(*this);
     }

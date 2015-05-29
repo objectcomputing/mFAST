@@ -212,8 +212,8 @@ namespace mfast
       storage_.of_uint64.defined_bit_ = 1;
     }
 
-    explicit int_value_storage(const value_storage& s)
-      : storage_(s)
+    explicit int_value_storage(value_storage  s)
+      : storage_(std::move(s))
     {
     }
 
@@ -236,8 +236,8 @@ namespace mfast
       storage_.of_decimal.defined_bit_ = 1;
     }
 
-    explicit decimal_value_storage(const value_storage& s)
-      : storage_(s)
+    explicit decimal_value_storage(value_storage  s)
+      : storage_(std::move(s))
     {
     }
 
@@ -280,8 +280,8 @@ namespace mfast
       storage_.of_array.defined_bit_ = 1;
     }
 
-    explicit string_value_storage(const value_storage& s)
-      : storage_(s)
+    explicit string_value_storage(value_storage  s)
+      : storage_(std::move(s))
     {
     }
 

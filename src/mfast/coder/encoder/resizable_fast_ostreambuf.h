@@ -30,7 +30,7 @@ namespace mfast {
   {
   public:
     resizable_fast_ostreambuf(std::vector<char>& buf)
-      : fast_ostreambuf(0, 0)
+      : fast_ostreambuf(nullptr, 0)
       , buf_(buf)
     {
       std::size_t old_size = buf.size();
@@ -41,7 +41,7 @@ namespace mfast {
 
     }
 
-    virtual void overflow(std::size_t n)
+    virtual void overflow(std::size_t n) override
     {
       std::size_t len = length();
       buf_.resize(2*(len + n));

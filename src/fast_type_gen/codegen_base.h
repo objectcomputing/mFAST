@@ -63,7 +63,7 @@ protected:
 
 
   std::string cpp_type_of(const mfast::field_instruction* inst,
-                          std::set<std::string>*          dependency=0) const;
+                          std::set<std::string>*          dependency=nullptr) const;
 
   bool is_const_field(const mfast::field_instruction* inst) const;
 

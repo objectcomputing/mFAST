@@ -67,17 +67,17 @@ namespace mfast
     {
     }
 
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
-    virtual enum_field_instruction* clone(arena_allocator& alloc) const;
+    virtual void accept(field_instruction_visitor& visitor, void* context) const override;
+    virtual enum_field_instruction* clone(arena_allocator& alloc) const override;
 
     const char* element_name(uint64_t v) const
     {
-      if (element_values_ == 0)
+      if (element_values_ == nullptr)
         return elements_[v];
       const uint64_t* it = std::lower_bound(element_values_, element_values_+num_elements_, v);
       if (it != element_values_+num_elements_ && *it == v)
         return elements_[it-element_values_];
-      return 0;
+      return nullptr;
     }
 
     uint64_t num_elements() const

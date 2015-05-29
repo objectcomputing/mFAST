@@ -224,7 +224,7 @@ namespace mfast {
   {
     assert( ascii || nullable );
 
-    if (nullable && ascii==0) {
+    if (nullable && ascii==nullptr) {
       rdbuf()->sputc('\x80');
       return;
     }
@@ -262,7 +262,7 @@ namespace mfast {
     // non-nullable string cannot have a null value
     assert( unicode || nullable );
 
-    encode(len, unicode == 0, nullable);
+    encode(len, unicode == nullptr, nullable);
     if (unicode && len > 0) {
       rdbuf()->sputn(unicode, len);
     }
@@ -278,7 +278,7 @@ namespace mfast {
     // non-nullable byteVector cannot have a null value
     assert( bv || nullable );
 
-    encode(len, bv == 0, nullable);
+    encode(len, bv == nullptr, nullable);
     if (bv && len > 0) {
       rdbuf()->sputn(reinterpret_cast<const char*>(bv), len);
     }

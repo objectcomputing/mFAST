@@ -50,10 +50,10 @@ namespace mfast {
     {
       current_ns_ = def->template_ns();
       current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
-      for (uint32_t i  = 0; i < def->size(); ++i ) {
-        uint32_t id = (*def)[i]->id();
+      for (auto & elem : *def) {
+        uint32_t id = elem->id();
         if (id > 0) {
-          op(this->clone_instruction((*def)[i]));
+          op(this->clone_instruction(elem));
         }
       }
     }
@@ -93,7 +93,7 @@ namespace mfast {
         using Message = typename std::tuple_element<BeginIndex, MessageTuple>::type;
         if (Message::the_id == 0)
           return;
-        op(builder.clone_instruction(Message::instruction()), static_cast<Message*>(0));
+        op(builder.clone_instruction(Message::instruction()), static_cast<Message*>(nullptr));
 
         message_info_helper<BeginIndex+1, EndIndex, MessageTuple, Operation>::build(builder, op);
       }
@@ -124,24 +124,24 @@ namespace mfast {
     // template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
     // friend struct message_info_helper;
 
-    virtual void visit(const int32_field_instruction*, void*);
-    virtual void visit(const uint32_field_instruction*, void*);
-    virtual void visit(const int64_field_instruction*, void*);
-    virtual void visit(const uint64_field_instruction*, void*);
-    virtual void visit(const decimal_field_instruction*, void*);
-    virtual void visit(const ascii_field_instruction*, void*);
-    virtual void visit(const unicode_field_instruction*, void*);
-    virtual void visit(const byte_vector_field_instruction*, void*);
-    virtual void visit(const int32_vector_field_instruction*, void*);
-    virtual void visit(const uint32_vector_field_instruction*, void*);
-    virtual void visit(const int64_vector_field_instruction*, void*);
-    virtual void visit(const uint64_vector_field_instruction*, void*);
-    virtual void visit(const group_field_instruction*, void*);
-    virtual void visit(const sequence_field_instruction*, void*);
-    virtual void visit(const template_instruction*, void*);
-    virtual void visit(const templateref_instruction*, void*);
+    virtual void visit(const int32_field_instruction*, void*) override;
+    virtual void visit(const uint32_field_instruction*, void*) override;
+    virtual void visit(const int64_field_instruction*, void*) override;
+    virtual void visit(const uint64_field_instruction*, void*) override;
+    virtual void visit(const decimal_field_instruction*, void*) override;
+    virtual void visit(const ascii_field_instruction*, void*) override;
+    virtual void visit(const unicode_field_instruction*, void*) override;
+    virtual void visit(const byte_vector_field_instruction*, void*) override;
+    virtual void visit(const int32_vector_field_instruction*, void*) override;
+    virtual void visit(const uint32_vector_field_instruction*, void*) override;
+    virtual void visit(const int64_vector_field_instruction*, void*) override;
+    virtual void visit(const uint64_vector_field_instruction*, void*) override;
+    virtual void visit(const group_field_instruction*, void*) override;
+    virtual void visit(const sequence_field_instruction*, void*) override;
+    virtual void visit(const template_instruction*, void*) override;
+    virtual void visit(const templateref_instruction*, void*) override;
 
-    virtual void visit(const enum_field_instruction*, void*);
+    virtual void visit(const enum_field_instruction*, void*) override;
 
     template_instruction* clone_instruction(const template_instruction*);
 

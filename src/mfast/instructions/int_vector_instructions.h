@@ -77,8 +77,8 @@ namespace mfast
     {
     }
 
-    virtual void accept(field_instruction_visitor& visitor, void* context) const;
-    virtual vector_field_instruction<T>* clone(arena_allocator& alloc) const;
+    virtual void accept(field_instruction_visitor& visitor, void* context) const override;
+    virtual vector_field_instruction<T>* clone(arena_allocator& alloc) const override;
     static const vector_field_instruction<T>* default_instruction();
 
   };

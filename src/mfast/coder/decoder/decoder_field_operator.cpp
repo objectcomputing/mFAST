@@ -137,56 +137,56 @@ namespace mfast
 
       virtual void decode(const int32_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint32_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const int64_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint64_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const ascii_string_mref& mref,
                           fast_istream&            stream,
-                          decoder_presence_map&    pmap) const
+                          decoder_presence_map&    pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const unicode_string_mref& mref,
                           fast_istream&              stream,
-                          decoder_presence_map&      pmap) const
+                          decoder_presence_map&      pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const byte_vector_mref& mref,
                           fast_istream&           stream,
-                          decoder_presence_map&   pmap) const
+                          decoder_presence_map&   pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const decimal_mref&   mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_decimal(mref, stream,pmap);
       }
@@ -229,56 +229,56 @@ namespace mfast
 
       virtual void decode(const int32_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint32_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const int64_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint64_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const ascii_string_mref& mref,
                           fast_istream&            stream,
-                          decoder_presence_map&    pmap) const
+                          decoder_presence_map&    pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const unicode_string_mref& mref,
                           fast_istream&              stream,
-                          decoder_presence_map&      pmap) const
+                          decoder_presence_map&      pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const byte_vector_mref& mref,
                           fast_istream&           stream,
-                          decoder_presence_map&   pmap) const
+                          decoder_presence_map&   pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const decimal_mref&   mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_decimal(mref, stream,pmap);
       }
@@ -363,56 +363,56 @@ namespace mfast
 
       virtual void decode(const int32_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint32_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const int64_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint64_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const ascii_string_mref& mref,
                           fast_istream&            stream,
-                          decoder_presence_map&    pmap) const
+                          decoder_presence_map&    pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const unicode_string_mref& mref,
                           fast_istream&              stream,
-                          decoder_presence_map&      pmap) const
+                          decoder_presence_map&      pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const byte_vector_mref& mref,
                           fast_istream&           stream,
-                          decoder_presence_map&   pmap) const
+                          decoder_presence_map&   pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const decimal_mref&   mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_decimal(mref, stream,pmap);
       }
@@ -441,28 +441,28 @@ namespace mfast
 
       virtual void decode(const int32_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint32_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const int64_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint64_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
@@ -508,56 +508,56 @@ namespace mfast
 
       virtual void decode(const int32_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint32_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const int64_mref&     mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const uint64_mref&    mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const ascii_string_mref& mref,
                           fast_istream&            stream,
-                          decoder_presence_map&    pmap) const
+                          decoder_presence_map&    pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const unicode_string_mref& mref,
                           fast_istream&              stream,
-                          decoder_presence_map&      pmap) const
+                          decoder_presence_map&      pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const byte_vector_mref& mref,
                           fast_istream&           stream,
-                          decoder_presence_map&   pmap) const
+                          decoder_presence_map&   pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const decimal_mref&   mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         decode_decimal(mref, stream,pmap);
       }
@@ -577,7 +577,7 @@ namespace mfast
         if (stream.decode(d, mref.instruction()->is_nullable())) {
 
           value_storage bv = delta_base_value_of( mref );
-          T tmp(0, &bv, 0);
+          T tmp(nullptr, &bv, nullptr);
 
           check_overflow(tmp.value(), d, mref.instruction(), stream);
           mref.as( static_cast<typename T::value_type>(tmp.value()+d) );
@@ -609,7 +609,7 @@ namespace mfast
             BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
 
           uint32_t delta_len;
-          const typename T::value_type* delta_str=0;
+          const typename T::value_type* delta_str=nullptr;
           stream.decode(delta_str, delta_len, mref.instruction(), false);
 
           this->apply_string_delta(mref,
@@ -631,35 +631,35 @@ namespace mfast
 
       virtual void decode(const int32_mref& mref,
                           fast_istream&     stream,
-                          decoder_presence_map      & /* pmap */) const
+                          decoder_presence_map      & /* pmap */) const override
       {
         this->decode_integer(mref, stream);
       }
 
       virtual void decode(const uint32_mref& mref,
                           fast_istream&      stream,
-                          decoder_presence_map       & /* pmap */) const
+                          decoder_presence_map       & /* pmap */) const override
       {
         decode_integer(mref, stream);
       }
 
       virtual void decode(const int64_mref& mref,
                           fast_istream&     stream,
-                          decoder_presence_map      & /* pmap */) const
+                          decoder_presence_map      & /* pmap */) const override
       {
         decode_integer(mref, stream);
       }
 
       virtual void decode(const uint64_mref& mref,
                           fast_istream&      stream,
-                          decoder_presence_map       & /* pmap */) const
+                          decoder_presence_map       & /* pmap */) const override
       {
         decode_integer(mref, stream);
       }
 
       virtual void decode(const decimal_mref&   mref,
                           fast_istream&         stream,
-                          decoder_presence_map& pmap) const
+                          decoder_presence_map& pmap) const override
       {
         if(!mref.has_individual_operators()) {
           stream >> mref;
@@ -691,21 +691,21 @@ namespace mfast
 
       virtual void decode(const ascii_string_mref& mref,
                           fast_istream&            stream,
-                          decoder_presence_map&    pmap) const
+                          decoder_presence_map&    pmap) const override
       {
         decode_string(mref, stream, pmap);
       }
 
       virtual void decode(const unicode_string_mref& mref,
                           fast_istream&              stream,
-                          decoder_presence_map&      pmap) const
+                          decoder_presence_map&      pmap) const override
       {
         decode_string(mref, stream, pmap);
       }
 
       virtual void decode(const byte_vector_mref& mref,
                           fast_istream&           stream,
-                          decoder_presence_map&   pmap) const
+                          decoder_presence_map&   pmap) const override
       {
         decode_string(mref, stream, pmap);
       }
@@ -781,21 +781,21 @@ namespace mfast
 
       virtual void decode(const ascii_string_mref& mref,
                           fast_istream&            stream,
-                          decoder_presence_map&    pmap) const
+                          decoder_presence_map&    pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const unicode_string_mref& mref,
                           fast_istream&              stream,
-                          decoder_presence_map&      pmap) const
+                          decoder_presence_map&      pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }
 
       virtual void decode(const byte_vector_mref& mref,
                           fast_istream&           stream,
-                          decoder_presence_map&   pmap) const
+                          decoder_presence_map&   pmap) const override
       {
         decode_impl(mref, stream, pmap);
       }

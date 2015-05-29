@@ -366,10 +366,7 @@ namespace mfast {
     {
     }
 
-    decimal_mref(const decimal_mref& other)
-      : base_type(other)
-    {
-    }
+    decimal_mref(const decimal_mref&  other) = default;
 
     explicit decimal_mref(const field_mref_base& other)
       : base_type(other)
@@ -434,12 +431,12 @@ namespace mfast {
 
     exponent_mref set_exponent() const
     {
-      return exponent_mref(0, this->storage(), this->instruction());
+      return exponent_mref(nullptr, this->storage(), this->instruction());
     }
 
     int64_mref set_mantissa() const
     {
-      return int64_mref(0, this->storage(), this->instruction()->mantissa_instruction());
+      return int64_mref(nullptr, this->storage(), this->instruction()->mantissa_instruction());
     }
 
     void normalize() const
@@ -551,21 +548,21 @@ namespace mfast {
     typedef decimal_cref cref_type;
     typedef decimal_mref mref_type;
 
-    decimal_type(mfast::allocator* =0,
+    decimal_type(mfast::allocator* =nullptr,
                  instruction_cptr instruction = decimal_field_instruction::default_instruction())
       : instruction_(instruction)
     {
-      instruction_->construct_value(my_storage_, 0);
+      instruction_->construct_value(my_storage_, nullptr);
     }
 
     mref_type ref()
     {
-      return mref_type(0, &my_storage_, instruction_);
+      return mref_type(nullptr, &my_storage_, instruction_);
     }
 
     mref_type mref()
     {
-      return mref_type(0, &my_storage_, instruction_);
+      return mref_type(nullptr, &my_storage_, instruction_);
     }
 
     cref_type ref() const

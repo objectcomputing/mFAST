@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
 
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
 
 
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
                                  presence_mandatory,
                                  1,
                                  "test_int32","",
-                                 0,
+                                 nullptr,
                                  int_value_storage<int32_t>(INT32_MIN));
 
     inst.construct_value(storage, &allocator);
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
                                 presence_mandatory,
                                 1,
                                 "test_uint32","",
-                                0,
+                                nullptr,
                                 int_value_storage<uint32_t>());
 
   BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    decimal_value_storage(INT64_MAX,64));
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
   }
@@ -185,34 +185,34 @@ BOOST_AUTO_TEST_CASE(decimal_field_instruction_test)
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    decimal_value_storage());
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
   }
   {
     mantissa_field_instruction mantissa_inst(operator_copy,
-                                             0,
+                                             nullptr,
                                              int_value_storage<int64_t>());
 
     decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    &mantissa_inst,
                                    decimal_value_storage());
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
   }
   {
     mantissa_field_instruction mantissa_inst(operator_copy,
-                                             0,
+                                             nullptr,
                                              int_value_storage<int64_t>());
 
     decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    &mantissa_inst,
                                    decimal_value_storage(0, 3));
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
@@ -229,11 +229,11 @@ BOOST_AUTO_TEST_CASE(decimal_field_test)
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    decimal_value_storage(INT64_MAX,64));
 
     inst.construct_value(storage, &allocator);
-    BOOST_CHECK(inst.mantissa_instruction() == 0);
+    BOOST_CHECK(inst.mantissa_instruction() == nullptr);
 
     decimal_cref cref(&storage, &inst);
 
@@ -337,12 +337,12 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
   value_storage storage;
 
   {
-    mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
+    mantissa_field_instruction mantissa_inst(operator_copy, nullptr, int_value_storage<int64_t>(6));
     decimal_field_instruction inst(operator_copy,
                                    presence_optional,
                                    1,
                                    "test_decimal2","",
-                                   0,
+                                   nullptr,
                                    &mantissa_inst,
                                    decimal_value_storage(0,64));
 
@@ -391,12 +391,12 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
   }
 
   {
-    mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
+    mantissa_field_instruction mantissa_inst(operator_copy, nullptr, int_value_storage<int64_t>(6));
     decimal_field_instruction inst(operator_default,
                                    presence_optional,
                                    1,
                                    "test_decimal2","",
-                                   0,
+                                   nullptr,
                                    &mantissa_inst,
                                    decimal_value_storage());
 
@@ -411,12 +411,12 @@ BOOST_AUTO_TEST_CASE(decimal_field_test2)
   }
 
   {
-    mantissa_field_instruction mantissa_inst(operator_copy, 0, int_value_storage<int64_t>(6));
+    mantissa_field_instruction mantissa_inst(operator_copy, nullptr, int_value_storage<int64_t>(6));
     decimal_field_instruction inst(operator_constant,
                                    presence_mandatory,
                                    1,
                                    "test_decimal3","",
-                                   0,
+                                   nullptr,
                                    &mantissa_inst,
                                    decimal_value_storage(0, -1));
 
@@ -458,7 +458,7 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), false);
@@ -468,7 +468,7 @@ BOOST_AUTO_TEST_CASE(string_field_instruction_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage());
 
     BOOST_CHECK_EQUAL(inst.initial_value().is_empty(), true);
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE(string_field_test)
                                presence_optional,
                                1,
                                "test_ascii","",
-                               0,
+                               nullptr,
                                string_value_storage(default_value));
 
   inst.construct_value(storage, &alloc);
@@ -656,7 +656,7 @@ BOOST_AUTO_TEST_CASE(string_delta_test)
                                presence_optional,
                                1,
                                "test_ascii","",
-                               0,
+                               nullptr,
                                string_value_storage(default_value));
 
   inst.construct_value(storage, &alloc);
@@ -701,15 +701,15 @@ BOOST_AUTO_TEST_CASE(group_field_test)
                                       presence_optional,
                                       1,
                                       "test_byte_vector","",
-                                      0,
+                                      nullptr,
                                       byte_vector_value_storage(f0_initial,sizeof(f0_initial)),
-                                      0, 0, 0);
+                                      0, nullptr, nullptr);
 
   unicode_field_instruction inst1(operator_copy,
                                   presence_optional,
                                   2,
                                   "test_unicode","",
-                                  0,
+                                  nullptr,
                                   string_value_storage(f1_initial), 0, "", "");
 
   const field_instruction* instructions[] = {
@@ -726,7 +726,7 @@ BOOST_AUTO_TEST_CASE(group_field_test)
 
   group_inst.construct_value(storage, &alloc);
 
-  BOOST_CHECK(storage.of_group.content_ != 0);
+  BOOST_CHECK(storage.of_group.content_ != nullptr);
   {
     group_cref ref(&storage, &group_inst);
     BOOST_CHECK_EQUAL(ref.present(),                         false);
@@ -801,22 +801,22 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
                                       presence_optional,
                                       1,
                                       "test_byte_vector","",
-                                      0,
+                                      nullptr,
                                       byte_vector_value_storage(f0_initial,sizeof(f0_initial)),
-                                      0, 0, 0);
+                                      0, nullptr, nullptr);
 
   unicode_field_instruction inst1(operator_copy,
                                   presence_optional,
                                   2,
                                   "test_unicode","",
-                                  0,
+                                  nullptr,
                                   string_value_storage(f1_initial), 0, "", "");
 
   uint32_field_instruction length_inst(operator_none,
                                        presence_mandatory,
                                        4,
                                        "","",
-                                       0,
+                                       nullptr,
                                        2);
 
 
@@ -827,7 +827,7 @@ BOOST_AUTO_TEST_CASE(sequence_field_test)
   sequence_field_instruction sequence_inst(presence_optional,
                                            3, // id
                                            "test_group","","",
-                                           instructions,0,0,
+                                           instructions,nullptr,nullptr,
                                            &length_inst, "", "", "");
 
   BOOST_CHECK_EQUAL(sequence_inst.subinstructions().size(),    2U);
@@ -923,13 +923,13 @@ public:
 
 
   virtual void construct_value(value_storage& /* storage */,
-                               allocator*       /* alloc */) const
+                               allocator*       /* alloc */) const override
   {
     construct_value_called_++;
   }
 
   virtual void destruct_value(value_storage& /* storage */,
-                              allocator*       /* alloc */) const
+                              allocator*       /* alloc */) const override
   {
     destruct_value_called_++;
   }
@@ -942,11 +942,11 @@ public:
     copy_value_deep_called_++;
   }
 
-  virtual void accept(field_instruction_visitor&, void*) const
+  virtual void accept(field_instruction_visitor&, void*) const override
   {
   }
 
-  virtual mock_field_instruction* clone(arena_allocator& alloc) const
+  virtual mock_field_instruction* clone(arena_allocator& alloc) const override
   {
     return new (alloc) mock_field_instruction(*this);
   }
@@ -962,7 +962,7 @@ public:
   {
   }
 
-  virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size)
+  virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size) override
   {
     void* old_ptr = pointer;
     if (pointer) {
@@ -972,7 +972,7 @@ public:
     else
       pointer = std::malloc(new_size);
     leased_addresses_.erase(old_ptr);
-    if (pointer == 0) {
+    if (pointer == nullptr) {
       std::free(old_ptr);
       throw std::bad_alloc();
     }
@@ -998,13 +998,13 @@ BOOST_AUTO_TEST_CASE(sequence_resize_test)
                                        presence_mandatory,
                                        4,
                                        "","",
-                                       0,
+                                       nullptr,
                                        int_value_storage<uint32_t>(0));
 
   sequence_field_instruction sequence_inst(presence_optional,
                                            3, // id
                                            "test_group","","",
-                                           instructions,0,0,
+                                           instructions,nullptr,nullptr,
                                            &length_inst, "", "", "");
 
   sequence_inst.construct_value(storage, &alloc);

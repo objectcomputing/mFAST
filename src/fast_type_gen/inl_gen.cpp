@@ -58,27 +58,27 @@ public:
     return out_.str();
   }
 
-  virtual void visit(const int32_field_instruction* inst, void*)
+  virtual void visit(const int32_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<int32_cref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const uint32_field_instruction* inst, void*)
+  virtual void visit(const uint32_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<uint32_cref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const int64_field_instruction* inst, void*)
+  virtual void visit(const int64_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<int64_cref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const uint64_field_instruction* inst, void*)
+  virtual void visit(const uint64_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<uint64_cref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const decimal_field_instruction* inst, void*)
+  virtual void visit(const decimal_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<decimal_cref, ";
     if (inst->field_type() == field_type_exponent) {
@@ -90,59 +90,59 @@ public:
     }
   }
 
-  virtual void visit(const ascii_field_instruction* inst, void*)
+  virtual void visit(const ascii_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<ascii_string_cref, "<< get_operator_tag(inst) << ", " << get_properties_type(inst) <<">";
   }
 
-  virtual void visit(const unicode_field_instruction* inst, void*)
+  virtual void visit(const unicode_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<unicode_string_cref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const byte_vector_field_instruction* inst, void*)
+  virtual void visit(const byte_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<byte_vector_cref, "  << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const group_field_instruction* inst, void*)
+  virtual void visit(const group_field_instruction* inst, void*) override
   {
     out_ << "ext_cref< " << codegen_base::cpp_name(inst) << "_cref,  group_type_tag, " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const sequence_field_instruction* inst, void*);
+  virtual void visit(const sequence_field_instruction* inst, void*) override;
 
-  virtual void visit(const template_instruction* inst, void*)
+  virtual void visit(const template_instruction* inst, void*) override
   {
     out_ << "ext_cref< " << codegen_base::cpp_name(inst) << "_cref, group_type_tag, " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const templateref_instruction*, void*)
+  virtual void visit(const templateref_instruction*, void*) override
   {
     out_ << "nested_message_cref";
   }
 
-  virtual void visit(const int32_vector_field_instruction* inst, void*)
+  virtual void visit(const int32_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_cref< int32_vector_cref, "  << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const uint32_vector_field_instruction* inst, void*)
+  virtual void visit(const uint32_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_cref< uint32_vector_cref, "  << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const int64_vector_field_instruction* inst, void*)
+  virtual void visit(const int64_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_cref< int64_vector_cref, "  << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const uint64_vector_field_instruction* inst, void*)
+  virtual void visit(const uint64_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_cref< uint64_vector_cref, "  << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const enum_field_instruction* inst, void*)
+  virtual void visit(const enum_field_instruction* inst, void*) override
   {
     out_ << "ext_cref<enum_cref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
@@ -153,7 +153,7 @@ public:
 std::string get_ext_cref_type(const field_instruction* inst)
 {
   ext_cref_type_getter getter;
-  inst->accept(getter, 0);
+  inst->accept(getter, nullptr);
   return getter.get();
 }
 
@@ -185,27 +185,27 @@ public:
     return out_.str();
   }
 
-  virtual void visit(const int32_field_instruction* inst, void*)
+  virtual void visit(const int32_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<int32_mref, "  << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const uint32_field_instruction* inst, void*)
+  virtual void visit(const uint32_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<uint32_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const int64_field_instruction* inst, void*)
+  virtual void visit(const int64_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<int64_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const uint64_field_instruction* inst, void*)
+  virtual void visit(const uint64_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<uint64_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const decimal_field_instruction* inst, void*)
+  virtual void visit(const decimal_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<decimal_mref, ";
     if (inst->field_type() == field_type_exponent) {
@@ -217,58 +217,58 @@ public:
     }
   }
 
-  virtual void visit(const ascii_field_instruction* inst, void*)
+  virtual void visit(const ascii_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<ascii_string_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const unicode_field_instruction* inst, void*)
+  virtual void visit(const unicode_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<unicode_string_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const byte_vector_field_instruction* inst, void*)
+  virtual void visit(const byte_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<byte_vector_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const group_field_instruction* inst, void*)
+  virtual void visit(const group_field_instruction* inst, void*) override
   {
     out_ << "ext_mref< " << codegen_base::cpp_name(inst) << "_mref, group_type_tag, " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const sequence_field_instruction* inst, void*);
-  virtual void visit(const template_instruction* inst, void*)
+  virtual void visit(const sequence_field_instruction* inst, void*) override;
+  virtual void visit(const template_instruction* inst, void*) override
   {
     out_ << "ext_mref< " << codegen_base::cpp_name(inst) << "_mref, group_type_tag, " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const templateref_instruction*, void*)
+  virtual void visit(const templateref_instruction*, void*) override
   {
     out_ << "nested_message_mref";
   }
 
-  virtual void visit(const int32_vector_field_instruction* inst, void*)
+  virtual void visit(const int32_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<int32_vector_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const uint32_vector_field_instruction* inst, void*)
+  virtual void visit(const uint32_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<uint32_vector_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const int64_vector_field_instruction* inst, void*)
+  virtual void visit(const int64_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<int64_vector_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const uint64_vector_field_instruction* inst, void*)
+  virtual void visit(const uint64_vector_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<uint64_vector_mref, " << get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
 
-  virtual void visit(const enum_field_instruction* inst, void*)
+  virtual void visit(const enum_field_instruction* inst, void*) override
   {
     out_ << "ext_mref<enum_mref, "<< get_operator_tag(inst) << ", " << get_properties_type(inst) << ">";
   }
@@ -278,7 +278,7 @@ public:
 std::string get_ext_mref_type(const field_instruction* inst)
 {
   ext_mref_type_getter getter;
-  inst->accept(getter,0);
+  inst->accept(getter,nullptr);
   return getter.get();
 }
 
@@ -406,7 +406,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
 {
   std::string name (cpp_name(inst));
 
-  std::size_t index = pIndex == 0 ? 0 : *static_cast<std::size_t*>(pIndex);
+  std::size_t index = pIndex == nullptr ? 0 : *static_cast<std::size_t*>(pIndex);
 
   std::string cref_type_name = cref_scope_.str() + name + "_cref";
   std::string mref_type_name = mref_scope_.str() + name + "_mref";
@@ -473,7 +473,7 @@ void inl_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
     }
   }
 
-  if (inst->ref_instruction() == 0 && !embed_only_dyn_tempateref) {
+  if (inst->ref_instruction() == nullptr && !embed_only_dyn_tempateref) {
 
     out_ << "inline\n"
          << cref_type_name << "::"<< name << "_cref()\n"
@@ -619,7 +619,7 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
 
   const mfast::field_instruction* element_instruction = get_element_instruction(inst);
 
-  if (inst->ref_instruction() == 0 && element_instruction==0) {
+  if (inst->ref_instruction() == nullptr && element_instruction==nullptr) {
     out_ << "inline\n"
          << cref_scope_.str() << name << "_element_cref::"<< name << "_element_cref(\n"
          << "  const mfast::value_storage*   storage,\n"
@@ -666,7 +666,7 @@ void inl_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
     traverse(inst, "_element");
   }
 
-  if (pIndex == 0)
+  if (pIndex == nullptr)
   {
     out_ << "inline\n"
          << name << "::" << name << "(\n"
@@ -882,7 +882,7 @@ void inl_gen::visit(const mfast::enum_field_instruction* inst, void* pIndex)
   std::string mref_type_name = mref_scope_.str() + name + "_mref";
 
 
-  if (inst->ref_instruction() == 0) {
+  if (inst->ref_instruction() == nullptr) {
 
     out_ << "inline\n"
          << cref_type_name << "::"<< name << "_cref(\n"

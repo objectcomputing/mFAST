@@ -32,7 +32,7 @@ namespace mfast {
   malloc_allocator::allocate(std::size_t s)
   {
     void* pointer = std::malloc(s);
-    if (pointer == 0) throw std::bad_alloc();
+    if (pointer == nullptr) throw std::bad_alloc();
     return pointer;
   }
 
@@ -45,7 +45,7 @@ namespace mfast {
     new_size = std::max<std::size_t>(2*new_size, 64) & (~63);
     void* old_ptr = pointer;
     pointer = std::realloc(pointer, new_size);
-    if (pointer == 0) {
+    if (pointer == nullptr) {
       std::free(old_ptr);
       throw std::bad_alloc();
     }

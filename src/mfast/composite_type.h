@@ -39,9 +39,9 @@ namespace mfast
     typedef CRef cref_type;
     typedef typename mref_of<cref_type>::type mref_type;
 
-    composite_type(mfast::allocator* alloc=0,
+    composite_type(mfast::allocator* alloc=nullptr,
                    instruction_cptr  instruction=0,
-                   value_storage*    fields_storage=0);
+                   value_storage*    fields_storage=nullptr);
 
     // a special constructor to facilitate puting a message_type instance in an associative container
     // using emplace()
@@ -59,7 +59,7 @@ namespace mfast
     {
       // g++ 4.7.1 doesn't allow this member function to defined out of class declaration
       my_storage_ = other.my_storage_;
-      other.instruction_ = 0;
+      other.instruction_ = nullptr;
     }
 
     composite_type& operator = (composite_type&& other) BOOST_NOEXCEPT
@@ -111,7 +111,7 @@ namespace mfast
       my_storage_.of_group.own_content_ =  0;
       my_storage_.of_group.is_link_ = 0;
       my_storage_.of_group.content_ = fields_storage;
-      other.instruction_ = 0;
+      other.instruction_ = nullptr;
     }
 
 
@@ -129,7 +129,7 @@ namespace mfast
       my_storage_.of_group.is_link_ = 0;
       my_storage_.of_group.content_ = fields_storage;
 
-      other.instruction_ = 0;
+      other.instruction_ = nullptr;
     }
 
     friend struct fast_decoder_impl;
@@ -162,7 +162,7 @@ namespace mfast
     : alloc_(p.first)
     , instruction_(p.second)
   {
-    instruction_->construct_value(my_storage_, 0, alloc_);
+    instruction_->construct_value(my_storage_, nullptr, alloc_);
   }
 
   template <typename CRef>
@@ -209,7 +209,7 @@ namespace mfast
     this->instruction()->copy_construct_value(other_storage,
                                               my_storage_,
                                               alloc,
-                                              0);
+                                              nullptr);
   }
 
   template <typename CRef>
@@ -221,7 +221,7 @@ namespace mfast
     this->instruction()->copy_construct_value(other.my_storage_,
                                               my_storage_,
                                               alloc_,
-                                              0);
+                                              nullptr);
   }
 
   template <typename CRef>

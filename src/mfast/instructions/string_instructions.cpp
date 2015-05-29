@@ -73,7 +73,7 @@ namespace mfast
     dest.of_array.defined_bit_ = 1;
     size_t len = src.of_array.len_;
     if (len && src.of_array.content_ != initial_value_.of_array.content_) {
-      dest.of_array.content_ = 0;
+      dest.of_array.content_ = nullptr;
       dest.of_array.capacity_in_bytes_ = alloc->reallocate(dest.of_array.content_, 0, len * element_size_);
       std::memcpy(dest.of_array.content_, src.of_array.content_, len * element_size_);
     }
@@ -92,7 +92,7 @@ namespace mfast
 
   const ascii_field_instruction* ascii_field_instruction::default_instruction()
   {
-    static const ascii_field_instruction inst(operator_none,presence_mandatory,0,"","",0, string_value_storage());
+    static const ascii_field_instruction inst(operator_none,presence_mandatory,0,"","",nullptr, string_value_storage());
     return &inst;
   }
 
@@ -111,7 +111,7 @@ namespace mfast
 
   const unicode_field_instruction* unicode_field_instruction::default_instruction()
   {
-    static const unicode_field_instruction inst(operator_none,presence_mandatory,0,"","",0, string_value_storage(), 0, "", "");
+    static const unicode_field_instruction inst(operator_none,presence_mandatory,0,"","",nullptr, string_value_storage(), 0, "", "");
     return &inst;
   }
 

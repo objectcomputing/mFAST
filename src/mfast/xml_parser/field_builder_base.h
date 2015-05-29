@@ -42,7 +42,7 @@ namespace mfast
                          const type_map_t*       types)
         : registry_(registry)
         , local_types_(types)
-        , resolved_ns_(0)
+        , resolved_ns_(nullptr)
       {
       }
 
@@ -77,12 +77,12 @@ namespace mfast
       const field_instruction*
       find_type(const char* ns, const char* name) const
       {
-        if (ns == 0) {
-          type_map_t::const_iterator itr = local_types_->find(std::string(name));
+        if (ns == nullptr) {
+          auto itr = local_types_->find(std::string(name));
           if (itr != local_types_->end()) {
             return itr->second;
           }
-          return 0;
+          return nullptr;
         }
         return registry_->find(ns, name);
       }

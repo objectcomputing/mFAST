@@ -83,7 +83,7 @@ namespace mfast
   const byte_vector_field_instruction*
   byte_vector_field_instruction::default_instruction()
   {
-    static const byte_vector_field_instruction inst(operator_none,presence_mandatory,0,"","",0, string_value_storage(), 0, "", "");
+    static const byte_vector_field_instruction inst(operator_none,presence_mandatory,0,"","",nullptr, string_value_storage(), 0, "", "");
     return &inst;
   }
 

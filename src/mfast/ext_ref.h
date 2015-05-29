@@ -216,7 +216,7 @@ namespace mfast
     get_length(value_storage& storage) const
     {
 
-      uint32_mref length_mref(0, &storage, base_.instruction()->length_instruction());
+      uint32_mref length_mref(nullptr, &storage, base_.instruction()->length_instruction());
       length_mref.as(base_.size());
       return length_type(length_mref);
     }
@@ -311,8 +311,8 @@ namespace mfast
     typedef OpType operator_category;
 
 
-    ext_mref(const field_mref& other)
-      : base_(other)
+    ext_mref(field_mref  other)
+      : base_(std::move(other))
     {
     }
 
@@ -482,7 +482,7 @@ namespace mfast
     set_length(value_storage& storage) const
     {
 
-      field_mref_base length_mref(0, &storage, base_.instruction()->length_instruction());
+      field_mref_base length_mref(nullptr, &storage, base_.instruction()->length_instruction());
       return length_type(length_mref);
     }
 
@@ -523,8 +523,8 @@ namespace mfast
     typedef nested_message_cref cref_type;
     typedef nested_message_mref mref_type;
 
-    explicit ext_mref(const field_mref& other)
-      : base_(other)
+    explicit ext_mref(field_mref  other)
+      : base_(std::move(other))
     {
     }
 

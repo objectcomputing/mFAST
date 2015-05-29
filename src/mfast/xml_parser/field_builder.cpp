@@ -74,10 +74,10 @@ namespace mfast
           field_type_name_ = content_element_->Name();
           if (strcmp(field_type_name_, "type")==0) {
             field_type_name_ = name_;
-            name_ = 0;
+            name_ = nullptr;
             fast_xml_attributes::set(content_element_->FirstAttribute());
 
-            if (name_ == 0)
+            if (name_ == nullptr)
               throw std::runtime_error("type element does not have a name");
             std::swap(field_type_name_, name_);
           }
@@ -91,7 +91,7 @@ namespace mfast
       }
 
       resolved_ns_ = ns_;
-      if (resolved_ns_ == 0 && parent_) {
+      if (resolved_ns_ == nullptr && parent_) {
         resolved_ns_ = parent_->resolved_ns();
       }
 
@@ -100,19 +100,19 @@ namespace mfast
 
     const field_instruction* field_builder::find_prototype(const char* type_name)
     {
-      if (type_name == 0)
+      if (type_name == nullptr)
       {
         BOOST_THROW_EXCEPTION(fast_static_error("S1") << reason_info("no field type specified"));
       }
-      const field_instruction* instruction = 0;
+      const field_instruction* instruction = nullptr;
 
       if (std::strcmp(type_name, "string") == 0) {
-        if (this->charset_ == 0)
+        if (this->charset_ == nullptr)
           this->charset_ = get_optional_attr(element_, "charset", "ascii");
 
         if (std::strcmp(this->charset_, "unicode") == 0 )
         {
-          static unicode_field_instruction prototype (operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
+          static unicode_field_instruction prototype (operator_none,presence_mandatory,0,nullptr,"",nullptr, string_value_storage(), 0, "", "");
           instruction = &prototype;
         }
       }
@@ -122,14 +122,14 @@ namespace mfast
       }
       else if (std::strcmp(type_name, "typeRef") == 0 || std::strcmp(type_name, "length") == 0)
       {
-        return 0;
+        return nullptr;
       }
 
-      if (instruction == 0) {
+      if (instruction == nullptr) {
         instruction = this->find_type(ns_, type_name);
       }
 
-      if ( instruction == 0 )
+      if ( instruction == nullptr )
       {
         BOOST_THROW_EXCEPTION(fast_static_error("S1") << reason_info((std::string("Invalid field type specified : ") + type_name)));
       }
@@ -164,7 +164,7 @@ namespace mfast
       const field_instruction* prototype =
         find_prototype(resolve_field_type(element_));
       if (prototype) {
-        prototype->accept(*this, 0);
+        prototype->accept(*this, nullptr);
       }
     }
 
@@ -215,11 +215,11 @@ namespace mfast
       field_instruction* instruction;
       if (base_mantissa_instruction || mantissa_element || exponent_element) {
 
-        mantissa_field_instruction* mantissa_instruction = 0;
+        mantissa_field_instruction* mantissa_instruction = nullptr;
 
-        if (base_mantissa_instruction == 0)
+        if (base_mantissa_instruction == nullptr)
         {
-          static const mantissa_field_instruction mantissa_prototype(operator_none, 0, int_value_storage<int64_t>(0));
+          static const mantissa_field_instruction mantissa_prototype(operator_none, nullptr, int_value_storage<int64_t>(0));
           base_mantissa_instruction = &mantissa_prototype;
         }
 
@@ -290,7 +290,7 @@ namespace mfast
     {
       field_op fop(inst, &element_, alloc());
 
-      const XMLAttribute* length_attributes = 0;
+      const XMLAttribute* length_attributes = nullptr;
       const XMLElement* length_element = element_.FirstChildElement("length");
 
       if (length_element) {
@@ -319,7 +319,7 @@ namespace mfast
     {
       field_op fop(inst, &element_, alloc());
 
-      const XMLAttribute* length_attributes = 0;
+      const XMLAttribute* length_attributes = nullptr;
       const XMLElement* length_element = element_.FirstChildElement("length");
 
       if (length_element) {
@@ -397,7 +397,7 @@ namespace mfast
         const template_instruction* target =
           dynamic_cast<const template_instruction*> (this->find_type( resolved_ns, name_));
 
-        if (target == 0) {
+        if (target == nullptr) {
           BOOST_THROW_EXCEPTION(template_not_found_error(name_,
                                                          parent_->name()));
         }
@@ -451,14 +451,14 @@ namespace mfast
     field_builder::build_subfields()
     {
       const XMLElement* child = content_element_->FirstChildElement();
-      while (child != 0) {
+      while (child != nullptr) {
 
         field_builder builder(this, *child);
         builder.build();
         child = child->NextSiblingElement();
       }
 
-      const_instruction_ptr_t* result = new (alloc())const_instruction_ptr_t[this->num_instructions()];
+      auto  result = new (alloc())const_instruction_ptr_t[this->num_instructions()];
       std::copy(instructions_.begin(), instructions_.end(), result);
       return instructions_view_t(result, this->num_instructions());
     }
@@ -466,21 +466,21 @@ namespace mfast
     const group_field_instruction* field_builder::get_sole_templateref()
     {
       const XMLElement* child = content_element_->FirstChildElement();
-      if (strcmp(child->Name(), "templateRef") == 0 && child->NextSibling() == 0) {
-        const char* target_name = child->Attribute("name", 0);
+      if (strcmp(child->Name(), "templateRef") == 0 && child->NextSibling() == nullptr) {
+        const char* target_name = child->Attribute("name", nullptr);
         if (target_name) {
           const char* target_ns = get_optional_attr(*child, "templateNs",  parent_->resolved_ns());
 
           const group_field_instruction* target =
             dynamic_cast<const group_field_instruction*>(this->find_type(target_ns, target_name));
 
-          if (target == 0)
+          if (target == nullptr)
             BOOST_THROW_EXCEPTION(template_not_found_error(target_name, this->name()));
 
           return target;
         }
       }
-      return 0;
+      return nullptr;
     }
 
     void
@@ -492,7 +492,7 @@ namespace mfast
         subinstructions = build_subfields();
       }
 
-      group_field_instruction* instruction = new (alloc())group_field_instruction (
+      auto  instruction = new (alloc())group_field_instruction (
         get_presence(inst),
         get_id(inst),
         get_name(alloc()),
@@ -559,12 +559,12 @@ namespace mfast
       instructions_view_t subinstructions = inst->subinstructions();
 
       sequence_field_instruction* instruction;
-      const group_field_instruction* element_instruction =0;
+      const group_field_instruction* element_instruction =nullptr;
 
       if (inst->subinstructions().size() == 0) {
         subinstructions = build_subfields();
         element_instruction = get_sole_templateref();
-        if (element_instruction  == 0 && subinstructions.size() ==1 && subinstructions[0]->name()[0]==0)
+        if (element_instruction  == nullptr && subinstructions.size() ==1 && subinstructions[0]->name()[0]==0)
         {
           element_instruction = dynamic_cast<const group_field_instruction*>(subinstructions[0]);
           if (element_instruction)
@@ -572,7 +572,7 @@ namespace mfast
         }
       }
 
-      const group_field_instruction* ref_inst = inst->subinstructions().size() == 0 ? 0 : inst;
+      const group_field_instruction* ref_inst = inst->subinstructions().size() == 0 ? nullptr : inst;
 
 
       instruction = new (alloc())sequence_field_instruction (
@@ -599,7 +599,7 @@ namespace mfast
     {
       bool reset = false;
       const XMLAttribute* reset_attr = element_.FindAttribute("scp:reset");
-      if (reset_attr == 0)
+      if (reset_attr == nullptr)
         reset_attr = element_.FindAttribute("reset");
 
       if (reset_attr) {
@@ -607,7 +607,7 @@ namespace mfast
           reset = true;
       }
 
-      template_instruction* instruction = new (alloc())template_instruction (
+      auto  instruction = new (alloc())template_instruction (
         id_ ? boost::lexical_cast<uint32_t>(id_) : 0,
         string_dup(name_,       alloc()),
         string_dup(ns_,         alloc()),
@@ -668,23 +668,23 @@ namespace mfast
       uint64_t num_elements = inst->num_elements();
       const uint64_t* enum_element_values = inst->element_values();
 
-      const char* init_value_str = 0;
+      const char* init_value_str = nullptr;
       if (!fop.initial_value_.is_defined())
       {
         // if the  defined flag is false, the content value is parsed string from XML
         init_value_str = fop.initial_value_.get<const char*>();
       }
 
-      if (enum_element_names == 0 ) {
+      if (enum_element_names == nullptr ) {
 
         std::deque<const char*> names;
         std::deque<uint64_t> values;
 
         const XMLElement* xml_element = content_element_->FirstChildElement("element");
-        for (; xml_element != 0; xml_element = xml_element->NextSiblingElement("element"))
+        for (; xml_element != nullptr; xml_element = xml_element->NextSiblingElement("element"))
         {
           const char* name_attr = xml_element->Attribute("name");
-          if (name_attr != 0) {
+          if (name_attr != nullptr) {
             if (init_value_str && std::strcmp(name_attr, init_value_str) == 0)
             {
               fop.initial_value_.set<uint64_t>(names.size());
@@ -740,7 +740,7 @@ namespace mfast
 
       if (!fop.initial_value_.is_defined())
       {
-        if (fop.initial_value_.get<const char*>() != 0) {
+        if (fop.initial_value_.get<const char*>() != nullptr) {
           std::string msg = "Invalid initial value for enum : ";
           throw std::runtime_error(msg + init_value_str);
         }
@@ -750,7 +750,7 @@ namespace mfast
         }
       }
 
-      enum_field_instruction* instruction = new (alloc())enum_field_instruction (
+      auto  instruction = new (alloc())enum_field_instruction (
         fop.op_,
         get_presence(inst),
         get_id(inst),
@@ -761,7 +761,7 @@ namespace mfast
         enum_element_names,
         enum_element_values,
         num_elements,
-        inst->elements_ == 0 ? 0 : inst,
+        inst->elements_ == nullptr ? nullptr : inst,
         inst->cpp_ns(),
         parse_tag(inst)
         );
@@ -777,7 +777,7 @@ namespace mfast
           value |= boost::lexical_cast<uint64_t>(tag_);
         }
         catch (...) {
-          const enum_field_instruction* inst = dynamic_cast<const enum_field_instruction*>(this->find_type(0, "mfast:tag"));
+          const enum_field_instruction* inst = dynamic_cast<const enum_field_instruction*>(this->find_type(nullptr, "mfast:tag"));
           if (inst) {
             // treat the input tag as a "|" delimited tokens
 

@@ -17,9 +17,9 @@ namespace mfast
     typedef CRef cref_type;
     typedef typename mref_of<cref_type>::type mref_type;
 
-    squence_type_base(mfast::allocator* alloc=0,
+    squence_type_base(mfast::allocator* alloc=nullptr,
                       instruction_cptr  instruction=0,
-                      value_storage*    fields_storage=0);
+                      value_storage*    fields_storage=nullptr);
 
     // a special constructor to facilitate puting a message_type instance in an associative container
     // using emplace()
@@ -132,7 +132,7 @@ namespace mfast
     this->instruction()->copy_construct_value(*field_cref_core_access::storage_of(other),
                                               my_storage_,
                                               alloc,
-                                              0);
+                                              nullptr);
   }
 
   template <typename CRef>

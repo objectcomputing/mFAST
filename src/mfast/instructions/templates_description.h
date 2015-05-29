@@ -81,7 +81,7 @@ namespace mfast
         if (instructions_[i]->id() == id)
           return instructions_[i];
       }
-      return 0;
+      return nullptr;
     }
 
     uint32_t size() const

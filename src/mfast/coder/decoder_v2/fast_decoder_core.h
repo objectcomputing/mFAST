@@ -217,8 +217,8 @@ struct fast_decoder_core
       : decode_fun_(init_pair.second)
     {
       auto itr = init_pair.first;
-      for (unsigned i = 0; i < num_reserved_msgs; ++i) {
-        messages_[i].refers_to(itr->mref());
+      for (auto & elem : messages_) {
+        elem.refers_to(itr->mref());
         ++itr;
       }
     }
@@ -268,10 +268,10 @@ struct fast_decoder_core
 
 inline
 fast_decoder_base::fast_decoder_base(allocator* alloc)
-  : strm_(0)
+  : strm_(nullptr)
   , message_alloc_(alloc)
   , force_reset_(false)
-  , current_(0)
+  , current_(nullptr)
 {
 }
 
@@ -570,7 +570,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
   if (stream.decode(d, ext_ref.nullable() )) {
 
     value_storage bv = delta_base_value_of( mref );
-    typename T::mref_type tmp(0, &bv, 0);
+    typename T::mref_type tmp(nullptr, &bv, nullptr);
 
     // check_overflow(tmp.value(), d, mref.instruction(), stream);
     mref.as( static_cast<int_type>(tmp.value()+d) );
@@ -604,7 +604,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
       BOOST_THROW_EXCEPTION(fast_dynamic_error("D7"));
 
     uint32_t delta_len;
-    const typename T::mref_type::value_type* delta_str=0;
+    const typename T::mref_type::value_type* delta_str=nullptr;
     stream.decode(delta_str, delta_len, mref.instruction(), false_type());
 
     this->apply_string_delta(mref,
@@ -708,8 +708,8 @@ template <unsigned NumTokens>
 inline
 fast_decoder_core<NumTokens>::fast_decoder_core(allocator* alloc)
   : fast_decoder_base(alloc)
-  , repo_(info_entry_converter(alloc), NumTokens == 0 ? 0 : alloc)
-  , active_message_info_(0)
+  , repo_(info_entry_converter(alloc), NumTokens == 0 ? nullptr : alloc)
+  , active_message_info_(nullptr)
 {
 }
 
@@ -737,7 +737,7 @@ fast_decoder_core<NumTokens>::visit(const nested_message_mref& mref)
     // find the message with corresponding template id
     active_message_info_ = repo_.find(template_id);
 
-    if (active_message_info_ == 0) {
+    if (active_message_info_ == nullptr) {
       BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
                                                      << referenced_by_info(this->active_message().name()));
     }
@@ -772,7 +772,7 @@ fast_decoder_core<NumTokens>::decode_segment(fast_istreambuf& sb)
     active_message_info_ = repo_.find(template_id);
   }
 
-  if (active_message_info_ == 0) {
+  if (active_message_info_ == nullptr) {
     BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
   }
 

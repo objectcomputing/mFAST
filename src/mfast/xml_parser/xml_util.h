@@ -32,7 +32,7 @@ namespace mfast
                                          const char*        default_value)
     {
       const XMLAttribute* attr = element.FindAttribute(attr_name);
-      if (attr == 0) {
+      if (attr == nullptr) {
         return default_value;
       }
       return attr->Value();
@@ -41,7 +41,7 @@ namespace mfast
     inline const char*
     string_dup(const char* str, arena_allocator&  alloc)
     {
-      if (str == 0 || str[0] == '\x0')
+      if (str == nullptr || str[0] == '\x0')
         return "";
       std::size_t len = std::strlen(str);
       char* result = static_cast<char*>( alloc.allocate(len+1) );

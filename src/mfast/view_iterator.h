@@ -43,7 +43,7 @@ namespace mfast
                         unsigned                                 max_depth)
       : name_(name)
       , instruction_(inst)
-      , data_(data)
+      , data_(std::move(data))
       , max_depth_(max_depth)
     {
     }

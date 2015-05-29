@@ -41,8 +41,8 @@ namespace mfast
     typedef const instruction_type* instruction_cptr;
 
     boolean_cref(
-      const mfast::value_storage* storage=0,
-      instruction_cptr            instruction=0)
+      const mfast::value_storage* storage=nullptr,
+      instruction_cptr            instruction=nullptr)
       : base_type(storage, instruction)
     {
     }
@@ -79,9 +79,9 @@ namespace mfast
     typedef const instruction_type* instruction_cptr;
 
     boolean_mref(
-      mfast::allocator*     alloc=0,
-      mfast::value_storage* storage=0,
-      instruction_cptr      instruction=0)
+      mfast::allocator*     alloc=nullptr,
+      mfast::value_storage* storage=nullptr,
+      instruction_cptr      instruction=nullptr)
       : base_type(alloc, storage, instruction)
     {
     }

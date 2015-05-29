@@ -288,10 +288,7 @@ namespace mfast {
     {
     }
 
-    vector_mref_base(const vector_mref_base& other)
-      : base_type(other)
-    {
-    }
+    vector_mref_base(const vector_mref_base&  other) = default;
 
     explicit vector_mref_base(const field_mref_base& other)
       : base_type(other)
@@ -424,7 +421,7 @@ namespace mfast {
 
       assert( n < static_cast<size_t>((std::numeric_limits<int32_t>::max)()) );
       if (this->storage()->of_array.capacity_in_bytes_ > 0 &&
-          this->storage()->of_array.content_ != 0) {
+          this->storage()->of_array.content_ != nullptr) {
         this->allocator()->deallocate(this->storage()->of_array.content_,
                                       this->storage()->of_array.capacity_in_bytes_);
       }
@@ -618,7 +615,7 @@ namespace mfast {
     typedef CREF cref_type;
     typedef typename mref_of<CREF>::type mref_type;
 
-    vector_type(mfast::allocator* alloc=0,
+    vector_type(mfast::allocator* alloc=nullptr,
                 instruction_cptr  instruction = instruction_type::default_instruction())
       : alloc_(alloc)
       , instruction_(instruction)
@@ -683,7 +680,7 @@ namespace mfast {
     }
     else {
       void* old_addr = this->storage()->of_array.content_;
-      this->storage()->of_array.content_ = 0;
+      this->storage()->of_array.content_ = nullptr;
       this->storage()->of_array.capacity_in_bytes_
         = this->alloc_->reallocate(this->storage()->of_array.content_, 0, reserve_size);
       // Copy the old content to the new buffer.

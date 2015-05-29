@@ -34,7 +34,7 @@ namespace mfast {
     decoder_presence_map()
       : cur_bitmap_ (0)
       , mask_(0)
-      , continue_(0)
+      , continue_(nullptr)
     {
     }
 
@@ -77,7 +77,7 @@ namespace mfast {
         mask_ <<= 7;
         if ('\x80' == (c & '\x80')) {
           ++addr;
-          continue_ = 0;
+          continue_ = nullptr;
           return true;
         }
       }

@@ -21,25 +21,25 @@ namespace mfast
       {
       }
 
-      virtual void visit(const int32_field_instruction*, void*);
-      virtual void visit(const uint32_field_instruction*, void*);
-      virtual void visit(const int64_field_instruction*, void*);
-      virtual void visit(const uint64_field_instruction*, void*);
-      virtual void visit(const decimal_field_instruction*, void*);
-      virtual void visit(const ascii_field_instruction*, void*);
-      virtual void visit(const unicode_field_instruction*, void*);
-      virtual void visit(const byte_vector_field_instruction*, void*);
-      virtual void visit(const group_field_instruction*, void*);
-      virtual void visit(const sequence_field_instruction*, void*);
-      virtual void visit(const template_instruction*, void*);
-      virtual void visit(const templateref_instruction*, void*);
+      virtual void visit(const int32_field_instruction*, void*) override;
+      virtual void visit(const uint32_field_instruction*, void*) override;
+      virtual void visit(const int64_field_instruction*, void*) override;
+      virtual void visit(const uint64_field_instruction*, void*) override;
+      virtual void visit(const decimal_field_instruction*, void*) override;
+      virtual void visit(const ascii_field_instruction*, void*) override;
+      virtual void visit(const unicode_field_instruction*, void*) override;
+      virtual void visit(const byte_vector_field_instruction*, void*) override;
+      virtual void visit(const group_field_instruction*, void*) override;
+      virtual void visit(const sequence_field_instruction*, void*) override;
+      virtual void visit(const template_instruction*, void*) override;
+      virtual void visit(const templateref_instruction*, void*) override;
 
-      virtual void visit(const int32_vector_field_instruction*, void*);
-      virtual void visit(const uint32_vector_field_instruction*, void*);
-      virtual void visit(const int64_vector_field_instruction*, void*);
-      virtual void visit(const uint64_vector_field_instruction*, void*);
+      virtual void visit(const int32_vector_field_instruction*, void*) override;
+      virtual void visit(const uint32_vector_field_instruction*, void*) override;
+      virtual void visit(const int64_vector_field_instruction*, void*) override;
+      virtual void visit(const uint64_vector_field_instruction*, void*) override;
 
-      virtual void visit(const enum_field_instruction* inst, void* data);
+      virtual void visit(const enum_field_instruction* inst, void* data) override;
 
       void print();
 

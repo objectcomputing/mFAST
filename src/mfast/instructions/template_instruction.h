@@ -67,11 +67,11 @@ namespace mfast
     virtual void copy_construct_value(const value_storage& src,
                                       value_storage&       dest,
                                       allocator*           alloc,
-                                      value_storage*       fields_storage=0) const;
+                                      value_storage*       fields_storage=nullptr) const override;
 
 
-    virtual void accept(field_instruction_visitor&, void*) const;
-    virtual template_instruction* clone(arena_allocator& alloc) const;
+    virtual void accept(field_instruction_visitor&, void*) const override;
+    virtual template_instruction* clone(arena_allocator& alloc) const override;
 
     bool has_reset_attribute() const
     {
@@ -108,7 +108,7 @@ namespace mfast
     {
     }
 
-    virtual template_instruction_ex<T>* clone(arena_allocator& alloc) const
+    virtual template_instruction_ex<T>* clone(arena_allocator& alloc) const override
     {
       return new (alloc) template_instruction_ex<T>(*this);
     }

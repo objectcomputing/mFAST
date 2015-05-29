@@ -209,7 +209,7 @@ namespace mfast {
         {
         }
 
-        virtual void visit(const mfast::aggregate_cref& ref, int)
+        virtual void visit(const mfast::aggregate_cref& ref, int) override
         {
           if (ref.num_fields()  == 1) {
             field_cref f0 = ref[0];

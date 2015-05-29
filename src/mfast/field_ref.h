@@ -58,7 +58,7 @@ namespace mfast {
     typedef const field_instruction* instruction_cptr;
 
     field_cref()
-      : instruction_(0)
+      : instruction_(nullptr)
       , storage_(&detail::null_storage)
     {
     }
@@ -80,7 +80,7 @@ namespace mfast {
     explicit field_cref(const T& ref);
     bool absent () const
     {
-      return instruction_== 0 ||  (optional() && storage_->is_empty());
+      return instruction_== nullptr ||  (optional() && storage_->is_empty());
     }
 
     bool present() const
@@ -307,7 +307,7 @@ namespace mfast {
   dynamic_cast_as(const T2& ref)
   {
     typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
-    if (instruction == 0)
+    if (instruction == nullptr)
       throw std::bad_cast();
     return T1(field_mref_core_access::storage_of(ref), instruction);
   }

@@ -35,7 +35,7 @@ namespace mfast
   void templateref_instruction::construct_value(value_storage& storage,
                                                 allocator*     alloc) const
   {
-    this->construct_value(storage, alloc, 0, true);
+    this->construct_value(storage, alloc, nullptr, true);
   }
 
   void templateref_instruction::construct_value(value_storage&              storage,
@@ -54,7 +54,7 @@ namespace mfast
         memset(storage.of_templateref.content_, 0, from_inst->group_content_byte_count());
     }
     else {
-      storage.of_templateref.content_ = 0;
+      storage.of_templateref.content_ = nullptr;
     }
   }
 

@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
 
   std::string str;
 
-  const byte_vector_field_instruction byte_vector_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
+  const byte_vector_field_instruction byte_vector_field_instruction_prototype(operator_none,presence_mandatory,0,nullptr,"",nullptr, string_value_storage(), 0, "", "");
   value_storage storage;
 
   byte_vector_field_instruction_prototype.construct_value(storage, &alloc);
@@ -400,7 +400,7 @@ BOOST_AUTO_TEST_CASE(test_seq_codegen)
   BOOST_CHECK(strcmp(seq1_inst->name(), "seq1")==0);
   BOOST_CHECK_EQUAL(seq1_inst->subinstructions().size(), 2U);
   BOOST_CHECK_EQUAL(seq1_inst->ref_instruction(),        SeqTemplate1::instruction());
-  BOOST_CHECK_EQUAL(seq1_inst->element_instruction(),    (const mfast::group_field_instruction*) 0);
+  BOOST_CHECK_EQUAL(seq1_inst->element_instruction(),    (const mfast::group_field_instruction*) nullptr);
 
 
   const mfast::sequence_field_instruction* seq2_inst = dynamic_cast<const mfast::sequence_field_instruction*>(top_inst->subinstruction(2));

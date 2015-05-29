@@ -64,10 +64,10 @@ namespace mfast
         return field_type_name_;
       }
 
-      virtual const char* name() const;
-      virtual std::size_t num_instructions() const;
-      virtual void add_instruction(const field_instruction*);
-      virtual void add_template(const char* ns, template_instruction* inst);
+      virtual const char* name() const override;
+      virtual std::size_t num_instructions() const override;
+      virtual void add_instruction(const field_instruction*) override;
+      virtual void add_template(const char* ns, template_instruction* inst) override;
 
     protected:
 
@@ -96,32 +96,32 @@ namespace mfast
         return dictionary_ ? string_dup(dictionary_, alloc()) : inst->dictionary();
       }
 
-      virtual void visit(const int32_field_instruction*, void*);
-      virtual void visit(const uint32_field_instruction*, void*);
-      virtual void visit(const int64_field_instruction*, void*);
-      virtual void visit(const uint64_field_instruction*, void*);
+      virtual void visit(const int32_field_instruction*, void*) override;
+      virtual void visit(const uint32_field_instruction*, void*) override;
+      virtual void visit(const int64_field_instruction*, void*) override;
+      virtual void visit(const uint64_field_instruction*, void*) override;
       template <typename IntType>
       void build_integer(const int_field_instruction<IntType>* inst);
 
-      virtual void visit(const decimal_field_instruction*, void*);
+      virtual void visit(const decimal_field_instruction*, void*) override;
 
-      virtual void visit(const ascii_field_instruction*, void*);
+      virtual void visit(const ascii_field_instruction*, void*) override;
 
-      virtual void visit(const unicode_field_instruction*, void*);
-      virtual void visit(const byte_vector_field_instruction*, void*);
+      virtual void visit(const unicode_field_instruction*, void*) override;
+      virtual void visit(const byte_vector_field_instruction*, void*) override;
 
-      virtual void visit(const group_field_instruction*, void*);
-      virtual void visit(const sequence_field_instruction*, void*);
-      virtual void visit(const template_instruction*, void*);
-      virtual void visit(const templateref_instruction*, void*);
+      virtual void visit(const group_field_instruction*, void*) override;
+      virtual void visit(const sequence_field_instruction*, void*) override;
+      virtual void visit(const template_instruction*, void*) override;
+      virtual void visit(const templateref_instruction*, void*) override;
 
-      virtual void visit(const int32_vector_field_instruction*, void*);
-      virtual void visit(const uint32_vector_field_instruction*, void*);
-      virtual void visit(const int64_vector_field_instruction*, void*);
-      virtual void visit(const uint64_vector_field_instruction*, void*);
+      virtual void visit(const int32_vector_field_instruction*, void*) override;
+      virtual void visit(const uint32_vector_field_instruction*, void*) override;
+      virtual void visit(const int64_vector_field_instruction*, void*) override;
+      virtual void visit(const uint64_vector_field_instruction*, void*) override;
 
 
-      virtual void visit(const enum_field_instruction*, void*);
+      virtual void visit(const enum_field_instruction*, void*) override;
 
       instructions_view_t build_subfields();
       const group_field_instruction* get_sole_templateref();

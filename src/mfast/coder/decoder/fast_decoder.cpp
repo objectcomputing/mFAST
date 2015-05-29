@@ -56,7 +56,7 @@ struct fast_decoder_impl
     decoder_presence_map* prev_pmap_;
 
     pmap_state()
-      : prev_pmap_(0)
+      : prev_pmap_(nullptr)
     {
     }
 
@@ -135,8 +135,8 @@ inline
 fast_decoder_impl::fast_decoder_impl(mfast::allocator* alloc)
   : repo_(info_entry_converter(alloc))
   , message_alloc_(alloc)
-  , strm_(0)
-  , warning_log_(0)
+  , strm_(nullptr)
+  , warning_log_(nullptr)
 {
 }
 
@@ -227,7 +227,7 @@ fast_decoder_impl::visit(sequence_mref& mref, int)
   value_storage storage;
 
   debug_ << "  decoding sequence length " << mref.name()  << " : stream -> " << strm_ << "\n";
-  uint32_mref length_mref(0, &storage, length_instruction);
+  uint32_mref length_mref(nullptr, &storage, length_instruction);
   this->visit(length_mref);
 
 
@@ -285,7 +285,7 @@ fast_decoder_impl::visit(nested_message_mref& mref, int)
 
     // find the message with corresponding template id
     active_message_ = repo_.find(template_id);
-    if (active_message_ == 0)
+    if (active_message_ == nullptr)
     {
       using namespace coder;
 
@@ -326,7 +326,7 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
     active_message_ = repo_.find(template_id);
   }
 
-  if (active_message_ == 0)
+  if (active_message_ == nullptr)
   {
     BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << coder::template_id_info(template_id));
   }

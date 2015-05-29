@@ -63,101 +63,101 @@ namespace mfast {
         }
       }
 
-      virtual void visit(const int32_field_instruction* inst, void* storage)
+      virtual void visit(const int32_field_instruction* inst, void* storage) override
       {
         int32_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const uint32_field_instruction* inst, void* storage)
+      virtual void visit(const uint32_field_instruction* inst, void* storage) override
       {
         uint32_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const int64_field_instruction* inst, void* storage)
+      virtual void visit(const int64_field_instruction* inst, void* storage) override
       {
         int64_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const uint64_field_instruction* inst, void* storage)
+      virtual void visit(const uint64_field_instruction* inst, void* storage) override
       {
         uint64_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const decimal_field_instruction* inst, void* storage)
+      virtual void visit(const decimal_field_instruction* inst, void* storage) override
       {
         decimal_cref ref(static_cast<value_storage*>(storage),inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const ascii_field_instruction* inst, void* storage)
+      virtual void visit(const ascii_field_instruction* inst, void* storage) override
       {
         ascii_string_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const unicode_field_instruction* inst, void* storage)
+      virtual void visit(const unicode_field_instruction* inst, void* storage) override
       {
         unicode_string_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const byte_vector_field_instruction* inst, void* storage)
+      virtual void visit(const byte_vector_field_instruction* inst, void* storage) override
       {
         byte_vector_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const int32_vector_field_instruction* inst, void* storage)
+      virtual void visit(const int32_vector_field_instruction* inst, void* storage) override
       {
         int32_vector_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const uint32_vector_field_instruction* inst, void* storage)
+      virtual void visit(const uint32_vector_field_instruction* inst, void* storage) override
       {
         uint32_vector_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const int64_vector_field_instruction* inst, void* storage)
+      virtual void visit(const int64_vector_field_instruction* inst, void* storage) override
       {
         int64_vector_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const uint64_vector_field_instruction* inst, void* storage)
+      virtual void visit(const uint64_vector_field_instruction* inst, void* storage) override
       {
         uint64_vector_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
       }
 
-      virtual void visit(const group_field_instruction* inst, void* storage)
+      virtual void visit(const group_field_instruction* inst, void* storage) override
       {
         group_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref, 0);
       }
 
-      virtual void visit(const sequence_field_instruction* inst, void* storage)
+      virtual void visit(const sequence_field_instruction* inst, void* storage) override
       {
         sequence_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref, 0);
       }
 
-      virtual void visit(const template_instruction*, void* )
+      virtual void visit(const template_instruction*, void* ) override
       {
       }
 
-      virtual void visit(const templateref_instruction* inst, void* storage)
+      virtual void visit(const templateref_instruction* inst, void* storage) override
       {
         nested_message_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref, 0);
       }
 
-      virtual void visit(const enum_field_instruction* inst, void* storage)
+      virtual void visit(const enum_field_instruction* inst, void* storage) override
       {
         enum_cref ref(static_cast<value_storage*>(storage), inst);
         accssor_.visit(ref);
@@ -199,101 +199,101 @@ namespace mfast {
         }
       }
 
-      virtual void visit(const int32_field_instruction* inst, void* storage)
+      virtual void visit(const int32_field_instruction* inst, void* storage) override
       {
         int32_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const uint32_field_instruction* inst, void* storage)
+      virtual void visit(const uint32_field_instruction* inst, void* storage) override
       {
         uint32_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const int64_field_instruction* inst, void* storage)
+      virtual void visit(const int64_field_instruction* inst, void* storage) override
       {
         int64_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const uint64_field_instruction* inst, void* storage)
+      virtual void visit(const uint64_field_instruction* inst, void* storage) override
       {
         uint64_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const decimal_field_instruction* inst, void* storage)
+      virtual void visit(const decimal_field_instruction* inst, void* storage) override
       {
         decimal_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const ascii_field_instruction* inst, void* storage)
+      virtual void visit(const ascii_field_instruction* inst, void* storage) override
       {
         ascii_string_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const unicode_field_instruction* inst, void* storage)
+      virtual void visit(const unicode_field_instruction* inst, void* storage) override
       {
         unicode_string_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const byte_vector_field_instruction* inst, void* storage)
+      virtual void visit(const byte_vector_field_instruction* inst, void* storage) override
       {
         byte_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const int32_vector_field_instruction* inst, void* storage)
+      virtual void visit(const int32_vector_field_instruction* inst, void* storage) override
       {
         int32_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const uint32_vector_field_instruction* inst, void* storage)
+      virtual void visit(const uint32_vector_field_instruction* inst, void* storage) override
       {
         uint32_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const int64_vector_field_instruction* inst, void* storage)
+      virtual void visit(const int64_vector_field_instruction* inst, void* storage) override
       {
         int64_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const uint64_vector_field_instruction* inst, void* storage)
+      virtual void visit(const uint64_vector_field_instruction* inst, void* storage) override
       {
         uint64_vector_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);
       }
 
-      virtual void visit(const group_field_instruction* inst, void* storage)
+      virtual void visit(const group_field_instruction* inst, void* storage) override
       {
         group_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref, 0);
       }
 
-      virtual void visit(const sequence_field_instruction* inst, void* storage)
+      virtual void visit(const sequence_field_instruction* inst, void* storage) override
       {
         sequence_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref, 0);
       }
 
-      virtual void visit(const template_instruction*, void* )
+      virtual void visit(const template_instruction*, void* ) override
       {
       }
 
-      virtual void visit(const templateref_instruction* inst, void* storage)
+      virtual void visit(const templateref_instruction* inst, void* storage) override
       {
         nested_message_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref, 0);
       }
 
-      virtual void visit(const enum_field_instruction* inst, void* storage)
+      virtual void visit(const enum_field_instruction* inst, void* storage) override
       {
         enum_mref ref(alloc_, static_cast<value_storage*>(storage), inst);
         mutator_.visit(ref);

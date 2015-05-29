@@ -36,27 +36,27 @@ public:
   void set_export_symbol(const char* symbol);
   void generate(mfast::dynamic_templates_description& desc);
 
-  virtual void visit(const mfast::int32_field_instruction*, void*);
-  virtual void visit(const mfast::uint32_field_instruction*, void*);
-  virtual void visit(const mfast::int64_field_instruction*, void*);
-  virtual void visit(const mfast::uint64_field_instruction*, void*);
-  virtual void visit(const mfast::decimal_field_instruction*, void*);
-  virtual void visit(const mfast::ascii_field_instruction*, void*);
-  virtual void visit(const mfast::unicode_field_instruction*, void*);
-  virtual void visit(const mfast::byte_vector_field_instruction*, void*);
-  virtual void visit(const mfast::int32_vector_field_instruction*, void*);
-  virtual void visit(const mfast::uint32_vector_field_instruction*, void*);
-  virtual void visit(const mfast::int64_vector_field_instruction*, void*);
-  virtual void visit(const mfast::uint64_vector_field_instruction*, void*);
-  virtual void visit(const mfast::group_field_instruction*, void*);
-  virtual void visit(const mfast::sequence_field_instruction*, void*);
-  virtual void visit(const mfast::template_instruction*, void*);
-  virtual void visit(const mfast::templateref_instruction*, void*);
-  virtual void visit(const mfast::enum_field_instruction*, void*);
+  virtual void visit(const mfast::int32_field_instruction*, void*) override;
+  virtual void visit(const mfast::uint32_field_instruction*, void*) override;
+  virtual void visit(const mfast::int64_field_instruction*, void*) override;
+  virtual void visit(const mfast::uint64_field_instruction*, void*) override;
+  virtual void visit(const mfast::decimal_field_instruction*, void*) override;
+  virtual void visit(const mfast::ascii_field_instruction*, void*) override;
+  virtual void visit(const mfast::unicode_field_instruction*, void*) override;
+  virtual void visit(const mfast::byte_vector_field_instruction*, void*) override;
+  virtual void visit(const mfast::int32_vector_field_instruction*, void*) override;
+  virtual void visit(const mfast::uint32_vector_field_instruction*, void*) override;
+  virtual void visit(const mfast::int64_vector_field_instruction*, void*) override;
+  virtual void visit(const mfast::uint64_vector_field_instruction*, void*) override;
+  virtual void visit(const mfast::group_field_instruction*, void*) override;
+  virtual void visit(const mfast::sequence_field_instruction*, void*) override;
+  virtual void visit(const mfast::template_instruction*, void*) override;
+  virtual void visit(const mfast::templateref_instruction*, void*) override;
+  virtual void visit(const mfast::enum_field_instruction*, void*) override;
 
 private:
   void gen_primitive (const char* cpp_type, const mfast::field_instruction* inst);
-  virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix);
+  virtual void traverse(const mfast::group_field_instruction* inst, const char* name_suffix) override;
   virtual void generate(const mfast::aggregate_view_info& info);
   void gen_sequence_typedef(const mfast::sequence_field_instruction* inst, const std::string& name);
 

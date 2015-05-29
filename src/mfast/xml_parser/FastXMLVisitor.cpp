@@ -23,7 +23,7 @@
 const char* FastXMLVisitor::get_optional_attr(const XMLElement & element, const char* attr_name, const char* default_value) const
 {
   const XMLAttribute* attr = element.FindAttribute(attr_name);
-  if (attr == 0) {
+  if (attr == nullptr) {
     return default_value;
   }
   return attr->Value();
@@ -279,9 +279,9 @@ FastXMLVisitor::only_child(const XMLElement & element)
   if (strcmp(first_elem->Name(), "length") == 0) {
     first_elem = first_elem->NextSiblingElement();
   }
-  if (first_elem->NextSibling() == 0)
+  if (first_elem->NextSibling() == nullptr)
     return first_elem;
-  return 0;
+  return nullptr;
 }
 
 // if element has only child and the child element is templateRef, it returns
@@ -292,5 +292,5 @@ FastXMLVisitor::only_child_templateRef(const XMLElement & element)
   const XMLElement* first_elem = only_child(element);
   if (first_elem && strcmp(first_elem->Name(), "templateRef") == 0)
     return first_elem;
-  return 0;
+  return nullptr;
 }

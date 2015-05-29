@@ -18,17 +18,17 @@ public:
 
   virtual ~template_repo_base()
   {
-    for (std::size_t i = 0; i < vector_enties_.size(); ++i) {
-      if (vector_enties_[i]->of_array.capacity_in_bytes_)
-        dictionary_alloc_->deallocate(vector_enties_[i]->of_array.content_,
-                                      vector_enties_[i]->of_array.capacity_in_bytes_);
+    for (auto & elem : vector_enties_) {
+      if (elem->of_array.capacity_in_bytes_)
+        dictionary_alloc_->deallocate(elem->of_array.content_,
+                                      elem->of_array.capacity_in_bytes_);
     }
   }
 
   void reset_dictionary()
   {
-    for (std::size_t i = 0; i < reset_entries_.size(); ++i) {
-      reset_entries_[i]->defined(false);
+    for (auto & elem : reset_entries_) {
+      elem->defined(false);
     }
   }
 
@@ -83,7 +83,7 @@ class template_repo
 
     void operator() (template_instruction* inst) const
     {
-      repo_->add_template(inst, (void*) 0);
+      repo_->add_template(inst, (void*) nullptr);
     }
 
     template <typename Message>
@@ -95,15 +95,15 @@ class template_repo
   };
 
 public:
-  template_repo(mfast::allocator* dictionary_alloc=0)
+  template_repo(mfast::allocator* dictionary_alloc=nullptr)
     : template_repo_base(dictionary_alloc)
   {
   }
 
   template_repo(EntryValueConverter converter,
-                mfast::allocator*   dictionary_alloc=0)
+                mfast::allocator*   dictionary_alloc=nullptr)
     : template_repo_base(dictionary_alloc)
-    , converter_(converter)
+    , converter_(std::move(converter))
   {
   }
 
@@ -138,19 +138,19 @@ public:
 
   repo_mapped_type* find(uint32_t id)
   {
-    typename templates_map_t::iterator it = templates_map_.find(id);
+    auto it = templates_map_.find(id);
     if (it != templates_map_.end())
       return &it->second;
-    return 0;
+    return nullptr;
   }
 
-  template_instruction* get_template(uint32_t id)
+  template_instruction* get_template(uint32_t id) override
   {
     repo_mapped_type* entry = this->find(id);
     if (entry) {
       return converter_.to_instruction( *entry );
     }
-    return 0;
+    return nullptr;
   }
 
   repo_mapped_type* unique_entry()
@@ -158,7 +158,7 @@ public:
     if (templates_map_.size() == 1) {
       return &templates_map_.begin()->second;
     }
-    return 0;
+    return nullptr;
   }
 
   template <typename Message>

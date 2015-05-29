@@ -28,7 +28,7 @@ namespace mfast
   boolean::instruction()
   {
     static const boolean_cref::instruction_type
-      the_instruction(operator_none,presence_mandatory,0,"boolean","",0,0,boolean_elements,0, 2,0,"mfast");
+      the_instruction(operator_none,presence_mandatory,0,"boolean","",nullptr,0,boolean_elements,nullptr, 2,nullptr,"mfast");
 
     return &the_instruction;
   }

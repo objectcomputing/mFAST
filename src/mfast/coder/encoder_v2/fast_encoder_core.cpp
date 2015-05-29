@@ -12,7 +12,7 @@ namespace mfast
 
       info_entry* info = repo_.find(template_id);
 
-      if (info == 0) {
+      if (info == nullptr) {
         BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id));
       }
 

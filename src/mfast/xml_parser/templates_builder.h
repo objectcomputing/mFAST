@@ -23,15 +23,15 @@ namespace mfast
                         const char*                    cpp_ns,
                         template_registry*             registry);
 
-      virtual bool  VisitEnter (const XMLElement & element, const XMLAttribute* attr);
-      virtual bool  VisitExit (const XMLElement & element);
+      virtual bool  VisitEnter (const XMLElement & element, const XMLAttribute* attr) override;
+      virtual bool  VisitExit (const XMLElement & element) override;
 
 
-      virtual std::size_t num_instructions() const;
-      virtual void add_instruction(const field_instruction*);
-      void add_template(const char* ns, template_instruction* inst);
+      virtual std::size_t num_instructions() const override;
+      virtual void add_instruction(const field_instruction*) override;
+      void add_template(const char* ns, template_instruction* inst) override;
 
-      virtual const char* name() const
+      virtual const char* name() const override
       {
         return cpp_ns_;
       }

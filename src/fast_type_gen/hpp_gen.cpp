@@ -197,7 +197,7 @@ void hpp_gen::visit(const mfast::group_field_instruction* inst, void* pIndex)
     }
   }
 
-  if (pIndex == 0)
+  if (pIndex == nullptr)
   {
     content_<< header_cref_.str() << header_mref_.str();
 
@@ -283,7 +283,7 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
     }
 
   }
-  else if (element_instruction == 0)
+  else if (element_instruction == nullptr)
   {
     std::string element_type = name + "_element";
 
@@ -336,7 +336,7 @@ void hpp_gen::visit(const mfast::sequence_field_instruction* inst, void* pIndex)
       header_mref_ << indent << "void omit_" << name << "() const;\n";
   }
 
-  if (pIndex==0)
+  if (pIndex==nullptr)
   {
     content_<< header_cref_.str() << header_mref_.str();
 

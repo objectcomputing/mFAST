@@ -318,10 +318,7 @@ namespace mfast {
   public:
 
     typedef base_type::instruction_cptr instruction_cptr;
-    vector_mref()
-      : base_type()
-    {
-    }
+    vector_mref() = default;
 
     vector_mref(mfast::allocator* alloc,
                 value_storage*    storage,
@@ -330,10 +327,7 @@ namespace mfast {
     {
     }
 
-    vector_mref(const vector_mref<char>& other)
-      : base_type(other)
-    {
-    }
+    vector_mref(const vector_mref<char>& other) = default;
 
     explicit vector_mref(const field_mref_base& other)
       : base_type(other)

@@ -153,7 +153,7 @@ namespace mfast {
     virtual void copy_construct_value(const value_storage& src,
                                       value_storage&       dest,
                                       allocator*           alloc,
-                                      value_storage*       fields_storage=0) const;
+                                      value_storage*       fields_storage=nullptr) const;
 
     virtual void accept(field_instruction_visitor&, void*) const=0;
     virtual field_instruction* clone(arena_allocator& alloc) const =0;
@@ -215,7 +215,7 @@ namespace mfast {
     }
 
     const char* field_type_name() const;
-    inline BOOST_CONSTEXPR
+    inline
     field_instruction(operator_enum_t operator_id,
                       int             field_type,
                       presence_enum_t optional,
@@ -322,7 +322,7 @@ namespace mfast {
     const char* cpp_ns_;
   };
 
-  inline BOOST_CONSTEXPR
+  inline
   field_instruction::field_instruction(operator_enum_t operator_id,
                                        int             field_type,
                                        presence_enum_t optional,
@@ -341,7 +341,7 @@ namespace mfast {
     , id_(id)
     , name_(name)
     , ns_(ns)
-    , tag_(tag)
+    , tag_(std::move(tag))
   {
   }
 

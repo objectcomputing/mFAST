@@ -31,7 +31,7 @@ namespace mfast
   namespace xml_parser
   {
 
-    static const uint32_field_instruction length_instruction_prototype(operator_none,presence_mandatory,0,"__length__","",0, int_value_storage<uint32_t>());
+    static const uint32_field_instruction length_instruction_prototype(operator_none,presence_mandatory,0,"__length__","",nullptr, int_value_storage<uint32_t>());
 
     templates_builder::templates_builder(dynamic_templates_description* definition,
                                          const char*                    cpp_ns,
@@ -39,42 +39,42 @@ namespace mfast
       : field_builder_base(registry->impl_, &this->member)
       , definition_(definition)
       , cpp_ns_(string_dup(cpp_ns, this->alloc()))
-      , template_instruction_prototype_(0,0,"","","",instructions_view_t(0,0),0,0,0,cpp_ns_)
-      , group_field_instruction_prototype_(presence_mandatory,0,0,"","",instructions_view_t(0,0), "", "", cpp_ns_)
-      , sequence_field_instruction_prototype_(presence_mandatory,0,0,"","",instructions_view_t(0,0),0,0,&length_instruction_prototype, "", "", cpp_ns_)
-      , enum_field_instruction_prototype_(operator_none,presence_mandatory,0,0,"",0,0,0,0,0,0,cpp_ns_)
+      , template_instruction_prototype_(0,nullptr,"","","",instructions_view_t(nullptr,0),0,nullptr,nullptr,cpp_ns_)
+      , group_field_instruction_prototype_(presence_mandatory,0,nullptr,"","",instructions_view_t(nullptr,0), "", "", cpp_ns_)
+      , sequence_field_instruction_prototype_(presence_mandatory,0,nullptr,"","",instructions_view_t(nullptr,0),nullptr,nullptr,&length_instruction_prototype, "", "", cpp_ns_)
+      , enum_field_instruction_prototype_(operator_none,presence_mandatory,0,nullptr,"",nullptr,0,nullptr,nullptr,0,nullptr,cpp_ns_)
     {
-      static const int32_field_instruction int32_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, int_value_storage<int32_t>());
+      static const int32_field_instruction int32_field_instruction_prototype(operator_none,presence_mandatory,0,nullptr,"",nullptr, int_value_storage<int32_t>());
       this->member["int32"] = &int32_field_instruction_prototype;
 
-      static const uint32_field_instruction uint32_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, int_value_storage<uint32_t>());
+      static const uint32_field_instruction uint32_field_instruction_prototype(operator_none,presence_mandatory,0,nullptr,"",nullptr, int_value_storage<uint32_t>());
       this->member["uInt32"] = &uint32_field_instruction_prototype;
 
-      static const int64_field_instruction int64_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, int_value_storage<int64_t>());
+      static const int64_field_instruction int64_field_instruction_prototype(operator_none,presence_mandatory,0,nullptr,"",nullptr, int_value_storage<int64_t>());
       this->member["int64"] = &int64_field_instruction_prototype;
 
-      static const uint64_field_instruction uint64_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, int_value_storage<uint64_t>());
+      static const uint64_field_instruction uint64_field_instruction_prototype(operator_none,presence_mandatory,0,nullptr,"",nullptr, int_value_storage<uint64_t>());
       this->member["uInt64"] = &uint64_field_instruction_prototype;
 
-      static const decimal_field_instruction decimal_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, decimal_value_storage());
+      static const decimal_field_instruction decimal_field_instruction_prototype(operator_none,presence_mandatory,0,nullptr,"",nullptr, decimal_value_storage());
       this->member["decimal"] = &decimal_field_instruction_prototype;
 
-      static const ascii_field_instruction ascii_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, string_value_storage());
+      static const ascii_field_instruction ascii_field_instruction_prototype(operator_none,presence_mandatory,0,nullptr,"",nullptr, string_value_storage());
       this->member["string"] = &ascii_field_instruction_prototype;
 
-      static const byte_vector_field_instruction byte_vector_field_instruction_prototype(operator_none,presence_mandatory,0,0,"",0, string_value_storage(), 0, "", "");
+      static const byte_vector_field_instruction byte_vector_field_instruction_prototype(operator_none,presence_mandatory,0,nullptr,"",nullptr, string_value_storage(), 0, "", "");
       this->member["byteVector"] = &byte_vector_field_instruction_prototype;
 
-      static const int32_vector_field_instruction int32_vector_field_instruction_prototype(presence_mandatory,0,0,"");
+      static const int32_vector_field_instruction int32_vector_field_instruction_prototype(presence_mandatory,0,nullptr,"");
       this->member["int32Vector"] = &int32_vector_field_instruction_prototype;
 
-      static const uint32_vector_field_instruction uint32_vector_field_instruction_prototype(presence_mandatory,0,0,"");
+      static const uint32_vector_field_instruction uint32_vector_field_instruction_prototype(presence_mandatory,0,nullptr,"");
       this->member["uInt32Vector"] = &uint32_vector_field_instruction_prototype;
 
-      static const int64_vector_field_instruction int64_vector_field_instruction_prototype(presence_mandatory,0,0,"");
+      static const int64_vector_field_instruction int64_vector_field_instruction_prototype(presence_mandatory,0,nullptr,"");
       this->member["int64Vector"] = &int64_vector_field_instruction_prototype;
 
-      static const uint64_vector_field_instruction uint64_vector_field_instruction_prototype(presence_mandatory,0,0,"");
+      static const uint64_vector_field_instruction uint64_vector_field_instruction_prototype(presence_mandatory,0,nullptr,"");
       this->member["uInt64Vector"] = &uint64_vector_field_instruction_prototype;
 
       this->member["group"] = &group_field_instruction_prototype_;
@@ -98,7 +98,7 @@ namespace mfast
         return true;
       }
       else if (strcmp(element_name, "define") == 0) {
-        const char* name =  get_optional_attr(element, "name", 0);
+        const char* name =  get_optional_attr(element, "name", nullptr);
         const XMLElement* elem = element.FirstChildElement();
         if (name && elem) {
           field_builder builder(this, *elem, name);
@@ -115,7 +115,7 @@ namespace mfast
                                                                                              get_optional_attr(element,"ns",        resolved_ns_),
                                                                                              get_optional_attr(element,"reference", "")));
 
-        if (inst == 0)
+        if (inst == nullptr)
           BOOST_THROW_EXCEPTION(fast_static_error("Invalid view specification"));
         definition_->view_infos_.push_back( builder.build(element, inst) );
       }
@@ -147,7 +147,7 @@ namespace mfast
       if (inst->field_type() >= field_type_sequence) {
         definition_->defined_type_instructions_.push_back(inst);
         const char* ns = inst->ns();
-        if (ns == 0 || ns[0] == '\0')
+        if (ns == nullptr || ns[0] == '\0')
           ns = resolved_ns_;
         registry()->add(ns, inst);
       }

@@ -41,7 +41,7 @@ namespace mfast {
     sequence_element_cref(const value_storage* storage,
                           instruction_cptr     instruction);
 
-    sequence_element_cref(const sequence_element_cref& other);
+    sequence_element_cref(const sequence_element_cref& other) = default;
     instruction_cptr instruction() const;
 
     bool element_unnamed() const
@@ -71,8 +71,8 @@ namespace mfast {
     {
     }
 
-    explicit sequence_iterator_base(const ElementRef& ref)
-      : element_(ref)
+    explicit sequence_iterator_base(ElementRef  ref)
+      : element_(std::move(ref))
     {
     }
 
@@ -107,8 +107,8 @@ namespace mfast {
     {
     }
 
-    explicit sequence_iterator_base(const ElementRef& ref)
-      : element_(ref)
+    explicit sequence_iterator_base(ElementRef  ref)
+      : element_(std::move(ref))
     {
     }
 
@@ -631,11 +631,6 @@ namespace mfast {
   {
   }
 
-  inline
-  sequence_element_cref::sequence_element_cref(const sequence_element_cref &other)
-    : aggregate_cref(other)
-  {
-  }
 
   inline sequence_element_cref::instruction_cptr
   sequence_element_cref::instruction() const

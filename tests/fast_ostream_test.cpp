@@ -85,7 +85,7 @@ boost::test_tools::predicate_result
 encode_string(const char* str,std::size_t len, bool nullable, const byte_stream& result)
 {
   char buffer[16];
-  ascii_field_instruction* instruction = 0;
+  ascii_field_instruction* instruction = nullptr;
 
   debug_allocator alloc;
   fast_ostreambuf sb(buffer);
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(ascii_string_test)
   BOOST_CHECK(encode_string("", 0, false, "\x80"));
   BOOST_CHECK(encode_string("\x0", 1, false, "\x00\x80"));
 
-  BOOST_CHECK(encode_string(0, 0, true, "\x80"));
+  BOOST_CHECK(encode_string(nullptr, 0, true, "\x80"));
   BOOST_CHECK(encode_string("", 0, true, "\x00\x80"));
   BOOST_CHECK(encode_string("\x0", 1, true, "\x00\x00\x80"));
 
@@ -128,7 +128,7 @@ encode_byte_vector(const char* bv,std::size_t len, bool nullable, const byte_str
   strm.rdbuf(&sb);
 
 
-  strm.encode(reinterpret_cast<const unsigned char*>(bv), static_cast<uint32_t>(len), 0, nullable);
+  strm.encode(reinterpret_cast<const unsigned char*>(bv), static_cast<uint32_t>(len), nullptr, nullable);
 
   if (byte_stream(sb) == result)
     return true;
@@ -140,7 +140,7 @@ encode_byte_vector(const char* bv,std::size_t len, bool nullable, const byte_str
 
 BOOST_AUTO_TEST_CASE(byte_vector_test)
 {
-  BOOST_CHECK(encode_byte_vector(0, 0, true, "\x80")); // null
+  BOOST_CHECK(encode_byte_vector(nullptr, 0, true, "\x80")); // null
   BOOST_CHECK(encode_byte_vector("", 0, false, "\x80")); // empty byte vector
   BOOST_CHECK(encode_byte_vector("", 0, true, "\x81")); // empty byte vector
 
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(inserter_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -194,7 +194,7 @@ BOOST_AUTO_TEST_CASE(inserter_test)
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    decimal_value_storage(INT64_MAX,64));
 
     inst.construct_value(storage, &alloc);
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     strm.encode("\x40\x41\x42\x43",
                 4,
-                static_cast<const ascii_field_instruction*>(0),
+                static_cast<const ascii_field_instruction*>(nullptr),
                 false);
 
     for (std::size_t i = 0; i < 70; ++i) {
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     strm.encode("\x40\x41\x42\x43",
                 4,
-                static_cast<const ascii_field_instruction*>(0),
+                static_cast<const ascii_field_instruction*>(nullptr),
                 false);
 
     for (std::size_t i = 0; i < 70; ++i) {
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     strm.encode("\x40\x41\x42\x43",
                 4,
-                static_cast<const ascii_field_instruction*>(0),
+                static_cast<const ascii_field_instruction*>(nullptr),
                 false);
 
     pmap.set_next_bit(true);

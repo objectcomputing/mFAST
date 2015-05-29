@@ -125,10 +125,7 @@ public:
   {
   }
 
-  enum_mref(const enum_mref& other)
-    : base_type(other)
-  {
-  }
+  enum_mref(const enum_mref&  other) = default;
 
   void as (const enum_cref& cref) const
   {

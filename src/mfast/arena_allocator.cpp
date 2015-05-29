@@ -40,10 +40,10 @@ namespace mfast {
   }
 
   arena_allocator::arena_allocator()
-    : free_list_head_(0)
+    : free_list_head_(nullptr)
   {
     void* block = malloc(default_chunk_size);
-    current_list_head_ = new (block) memory_chunk(default_chunk_size, 0);
+    current_list_head_ = new (block) memory_chunk(default_chunk_size, nullptr);
   }
 
   arena_allocator::~arena_allocator()
@@ -82,7 +82,7 @@ namespace mfast {
                                            default_chunk_size); // make the size multiple of default_chunk_size
 
         void* block = malloc(new_chunk_size);
-        if (block == 0)
+        if (block == nullptr)
           throw std::bad_alloc();
         current_list_head_ = new (block) memory_chunk(new_chunk_size, current_list_head_);
       }
@@ -107,7 +107,7 @@ namespace mfast {
   {
     // first, find the tail of current_list
     memory_chunk* tmp = current_list_head_;
-    while (tmp->next_ != 0) {
+    while (tmp->next_ != nullptr) {
       tmp = static_cast<memory_chunk*>(tmp->next_);
       tmp->start_ = reinterpret_cast<char*>(tmp->user_memory);
     }
@@ -117,7 +117,7 @@ namespace mfast {
     free_list_head_ = static_cast<memory_chunk*>(current_list_head_->next_);
 
     // only keeps the head of current_list_head_ list, the reset of the current_list moves to the free_list
-    current_list_head_->next_ = 0;
+    current_list_head_->next_ = nullptr;
     current_list_head_->start_ = reinterpret_cast<char*>(current_list_head_->user_memory);
     return true;
   }

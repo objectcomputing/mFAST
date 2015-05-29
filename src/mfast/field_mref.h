@@ -70,7 +70,7 @@ namespace mfast
     }
 
     field_mref(const exponent_mref& other)
-      : field_mref_base(static_cast<allocator_type*>(0),
+      : field_mref_base(static_cast<allocator_type*>(nullptr),
                         other.storage(),
                         other.instruction())
     {

@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(operator_none_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(operator_none_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(operator_constant_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -413,7 +413,7 @@ BOOST_AUTO_TEST_CASE(operator_default_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0, int_value_storage<uint64_t>());
+                                  nullptr, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
@@ -439,7 +439,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -458,7 +458,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -498,7 +498,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -518,7 +518,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE(operator_copy_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0, int_value_storage<uint64_t>());
+                                  nullptr, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
@@ -584,7 +584,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -603,7 +603,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -644,7 +644,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -664,7 +664,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(UINT64_MAX));
     inst.construct_value(storage, &allocator);
 
@@ -707,7 +707,7 @@ BOOST_AUTO_TEST_CASE(operator_increment_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0, int_value_storage<uint64_t>());
+                                  nullptr, int_value_storage<uint64_t>());
     inst.construct_value(storage, &allocator);
 
 
@@ -734,7 +734,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(5ULL));
     inst.construct_value(storage, &allocator);
 
@@ -758,7 +758,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
                                   presence_mandatory,
                                   1,
                                   "test_uint64","",
-                                  0, int_value_storage<uint64_t>()); // no initial value
+                                  nullptr, int_value_storage<uint64_t>()); // no initial value
     inst.construct_value(storage, &allocator);
 
 
@@ -782,7 +782,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(5ULL));
     inst.construct_value(storage, &allocator);
 
@@ -808,7 +808,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_integer_decode_test)
                                   presence_optional,
                                   1,
                                   "test_uint64","",
-                                  0,
+                                  nullptr,
                                   int_value_storage<uint64_t>(5ULL));
     inst.construct_value(storage, &allocator);
 
@@ -838,7 +838,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
                                    presence_mandatory,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    decimal_value_storage(12,1)); //  initial
 
     inst.construct_value(storage, &allocator);
@@ -859,7 +859,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
                                    presence_mandatory,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    decimal_value_storage()); // no initial value
 
     inst.construct_value(storage, &allocator);
@@ -880,7 +880,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_decimal_decode_test)
                                    presence_optional,
                                    1,
                                    "test_decimal","",
-                                   0,
+                                   nullptr,
                                    decimal_value_storage()); // no initial value
 
     inst.construct_value(storage, &allocator);
@@ -908,7 +908,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -933,7 +933,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0, string_value_storage());
+                                 nullptr, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -958,7 +958,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0, string_value_storage());
+                                 nullptr, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -985,7 +985,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -1009,7 +1009,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -1035,7 +1035,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_decode_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -1067,7 +1067,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
                                    presence_mandatory,
                                    1,
                                    "test_ascii","",
-                                   0,
+                                   nullptr,
                                    string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
@@ -1094,7 +1094,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
                                    presence_mandatory,
                                    1,
                                    "test_unicode","",
-                                   0,
+                                   nullptr,
                                    string_value_storage(), 0, "", "");
 
     inst.construct_value(storage, &alloc);
@@ -1121,7 +1121,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
                                    presence_optional,
                                    1,
                                    "test_unicode","",
-                                   0,
+                                   nullptr,
                                    string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
@@ -1149,7 +1149,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_decode_test)
                                    presence_optional,
                                    1,
                                    "test_unicode","",
-                                   0,
+                                   nullptr,
                                    string_value_storage(default_value), 0, "", "");
 
     inst.construct_value(storage, &alloc);
@@ -1181,7 +1181,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
     inst.construct_value(storage, &alloc);
 
@@ -1202,7 +1202,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -1235,7 +1235,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0, string_value_storage());
+                                 nullptr, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
@@ -1257,7 +1257,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_mandatory,
                                  1,
                                  "test_ascii","",
-                                 0, string_value_storage());
+                                 nullptr, string_value_storage());
 
     inst.construct_value(storage, &alloc);
     ascii_string_mref result(&alloc, &storage, &inst);
@@ -1284,7 +1284,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -1311,7 +1311,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -1338,7 +1338,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0,
+                                 nullptr,
                                  string_value_storage(default_value));
 
     inst.construct_value(storage, &alloc);
@@ -1384,7 +1384,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
                                  presence_optional,
                                  1,
                                  "test_ascii","",
-                                 0, string_value_storage());
+                                 nullptr, string_value_storage());
 
     inst.construct_value(storage, &alloc);
 
