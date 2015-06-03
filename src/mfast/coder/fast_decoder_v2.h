@@ -4,6 +4,29 @@
 
 #include "decoder_v2/fast_decoder_core.h"
 #include <type_traits>
+#include <tuple>
+
+
+template< typename ... CONDITIONS >
+struct all_true;
+
+template<>
+struct all_true<>
+  : std::true_type
+{
+};
+
+template< typename CONDITION, typename ... CONDITIONS >
+struct all_true< CONDITION, CONDITIONS ... >
+  : std::integral_constant<bool,CONDITION::value && all_true<CONDITIONS ...>::value>
+{
+};
+
+template< typename ... Ts >
+using CheckAllTemplatesDescription =
+        typename std::enable_if<
+          all_true< std::is_base_of<mfast::templates_description, Ts>... >::value, int
+          >::type;
 
 namespace mfast
 {
@@ -33,22 +56,29 @@ class fast_decoder_v2
   : coder::fast_decoder_core<NumTokens>
 {
 public:
-
-  template <typename DescriptionsTuple>
-  fast_decoder_v2(const DescriptionsTuple& tp,
-                  typename std::enable_if< !std::is_base_of< mfast::templates_description, DescriptionsTuple>::value, allocator*>::type alloc = malloc_allocator::instance())
+  /// Consturct a decoder using the specified memory allocator
+  template <typename Description1,
+            typename ... Descriptions>
+  fast_decoder_v2(mfast::allocator*      alloc,
+                  const Description1*    desc1,
+                  const Descriptions*... rest)
     : coder::fast_decoder_core<NumTokens>(alloc)
   {
-    this->init(tp);
+    this->init(desc1, rest ...);
   }
 
-  template <typename T>
-  fast_decoder_v2(const T* desc,
-                  typename std::enable_if< std::is_base_of< mfast::templates_description, T>::value, allocator*>::type alloc = malloc_allocator::instance())
-    : coder::fast_decoder_core<NumTokens>(alloc)
+  /// Consturct a decoder using the default memory allocator ( i.e. mfast::malloc_allocator::instance() )
+  template <typename Description1,
+            typename ... Descriptions,
+            typename std::enable_if< std::is_base_of<templates_description, Description1>::value, int>::type* Check=nullptr>
+  fast_decoder_v2(const Description1*    desc1,
+                  const Descriptions*... rest)
+    : coder::fast_decoder_core<NumTokens>(mfast::malloc_allocator::instance())
   {
-    this->init(std::make_tuple(desc));
+    this->init(desc1, rest ...);
   }
+
+  fast_decoder_v2(const fast_decoder_v2&) =  delete;
 
   /// Decode a  message.
   ///
@@ -73,23 +103,29 @@ class fast_decoder_v2<0>
   : coder::fast_decoder_core<0>
 {
 public:
-
-  template <typename DescriptionsTuple>
-  fast_decoder_v2(const DescriptionsTuple& tp,
-                  typename std::enable_if< !std::is_base_of< mfast::templates_description, DescriptionsTuple>::value, allocator*>::type alloc = malloc_allocator::instance())
+  /// Consturct a decoder using the specified memory allocator
+  template <typename Description1,
+            typename ... Descriptions>
+  fast_decoder_v2(mfast::allocator*      alloc,
+                  const Description1*    desc1,
+                  const Descriptions*... rest)
     : coder::fast_decoder_core<0>(alloc)
   {
-    this->init(tp);
+    this->init(desc1, rest ...);
   }
 
-  template <typename T>
-  fast_decoder_v2(const T* desc,
-                  typename std::enable_if< std::is_base_of< mfast::templates_description, T>::value, allocator*>::type alloc = malloc_allocator::instance())
-    : coder::fast_decoder_core<0>(alloc)
+  /// Consturct a decoder using the default memory allocator ( i.e. mfast::malloc_allocator::instance() )
+  template <typename Description1,
+            typename ... Descriptions,
+            typename std::enable_if< std::is_base_of<templates_description, Description1>::value, int>::type* Check=nullptr>
+  fast_decoder_v2(const Description1*    desc1,
+                  const Descriptions*... rest)
+    : coder::fast_decoder_core<0>(mfast::malloc_allocator::instance())
   {
-    this->init(std::make_tuple(desc));
+    this->init(desc1, rest ...);
   }
 
+  fast_decoder_v2(const fast_decoder_v2&) =  delete;
   /// Decode a  message.
   ///
   /// @param[in,out] first The initial position of the buffer to be decoded. After decoding

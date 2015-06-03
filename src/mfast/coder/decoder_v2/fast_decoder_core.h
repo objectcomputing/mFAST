@@ -190,10 +190,17 @@ struct fast_decoder_core
 {
   fast_decoder_core(allocator* alloc);
 
-  const static unsigned num_reserved_msgs= (NumTokens == 0 ? 1 : NumTokens);
+  template <typename... Desc>
+  void init(Desc... rest)
+  {
+    static_assert(sizeof...(rest) > 0, "There must exist at least one parameter of type const templates_description*");
 
-  template <typename DescriptionsTuple>
-  void init(const DescriptionsTuple& tp);
+    repo_.build(rest...);
+    active_message_info_ = repo_.unique_entry();
+  }
+
+
+  const static unsigned num_reserved_msgs= (NumTokens == 0 ? 1 : NumTokens);
 
   using fast_decoder_base::visit;
   virtual void visit(const nested_message_mref& mref);
@@ -713,14 +720,6 @@ fast_decoder_core<NumTokens>::fast_decoder_core(allocator* alloc)
 {
 }
 
-template <unsigned NumTokens>
-template <typename DescriptionsTuple>
-inline void
-fast_decoder_core<NumTokens>::init(const DescriptionsTuple& tp)
-{
-  repo_.build(tp);
-  active_message_info_ = repo_.unique_entry();
-}
 
 template <unsigned NumTokens>
 void

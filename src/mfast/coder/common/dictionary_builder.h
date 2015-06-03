@@ -35,147 +35,157 @@
 
 namespace mfast {
 
-  class template_repo_base;
-  class MFAST_CODER_EXPORT dictionary_builder
-    : private field_instruction_visitor
+template<typename ... Args> inline void pass(Args&& ...)
+{
+}
+
+template<class T, T ... Ints>
+struct integer_sequence
+{
+};
+
+template<class S>
+struct next_integer_sequence;
+
+template<class T, T ... Ints>
+struct next_integer_sequence<integer_sequence<T, Ints ...>>
+{
+  using type = integer_sequence<T, Ints ..., sizeof ... (Ints)>;
+};
+
+template<class T, T I, T N> struct make_int_seq_impl;
+
+template<class T, T N>
+using make_integer_sequence = typename make_int_seq_impl<T, 0, N>::type;
+
+template<class T, T I, T N>
+struct make_int_seq_impl
+{
+  using type = typename next_integer_sequence<
+          typename make_int_seq_impl<T, I+1, N>::type>::type;
+};
+
+template<class T, T N>
+struct make_int_seq_impl<T, N, N>
+{
+  using type = integer_sequence<T>;
+};
+
+template<std::size_t ... Ints>
+using index_sequence = integer_sequence<std::size_t, Ints ...>;
+
+template<std::size_t N>
+using make_index_sequence = make_integer_sequence<std::size_t, N>;
+
+
+class template_repo_base;
+class MFAST_CODER_EXPORT dictionary_builder
+  : private field_instruction_visitor
+{
+public:
+
+  dictionary_builder(template_repo_base& repo_base);
+
+  void build_by_description(const templates_description* def);
+
+  template <typename Operation>
+  void build(const templates_description* def, const Operation& op)
   {
-  public:
-
-    dictionary_builder(template_repo_base& repo_base);
-
-    void build_by_description(const templates_description* def);
-
-    template <typename Operation>
-    void build(const templates_description* def , const Operation& op)
-    {
-      current_ns_ = def->template_ns();
-      current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
-      for (auto & elem : *def) {
-        uint32_t id = elem->id();
-        if (id > 0) {
-          op(this->clone_instruction(elem));
-        }
+    current_ns_ = def->template_ns();
+    current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
+    for (auto & elem :* def) {
+      if (elem->id() > 0) {
+        op(this->clone_instruction(elem));
       }
     }
+  }
 
-    template <typename DescriptionTuple, typename Operation>
-    void build(const DescriptionTuple& tp, const Operation& op)
-    {
-      builder_helper<0,std::tuple_size<DescriptionTuple>::value, DescriptionTuple, Operation>::build(*this, tp, op);
-    }
+  template <typename Operation, typename ... T>
+  void build_from_descriptions(const Operation& op, T ... descs)
+  {
+    pass(build_from_description(op, descs) ...);
+  }
 
-  private:
+private:
 
+  template <typename Operation, typename Description>
+  int build_from_description(const Operation& op, const Description* desc)
+  {
+    this->current_ns_ = desc->template_ns();
+    this->current_dictionary_ = (desc->dictionary()[0] == 0) ?  "global" : desc->dictionary();
 
-    template <int BeginIndex, int EndIndex, typename DescriptionTuple, typename Operation>
-    struct builder_helper
-    {
-      static void build(dictionary_builder& builder, const DescriptionTuple& tp, const Operation& op)
-      {
-        builder.build_description(std::get<BeginIndex>(tp), op) ;
-        builder_helper<BeginIndex+1, EndIndex, DescriptionTuple, Operation>::build(builder, tp, op);
-      }
-    };
+    // using MessagePointers = mp_transform<typename Description::types, std::add_pointer_t>;
+    using Messages = typename Description::types;
+    this->build_message_infos<Messages>(op,  make_index_sequence<std::tuple_size<Messages>::value>{} );
+    return 0;
+  }
 
-    template <int EndIndex, typename DescriptionTuple, typename Operation>
-    struct builder_helper<EndIndex, EndIndex, DescriptionTuple, Operation>
-    {
-      static void build(dictionary_builder& , const DescriptionTuple& , const Operation& )
-      {
-      }
-    };
+  template <typename Tuple, typename Operation, std::size_t ... I>
+  void build_message_infos(const Operation& op, const index_sequence<I ...>&)
+  {
+    pass(this->build_message_info<typename std::tuple_element<I, Tuple>::type> (op) ...);
+  }
 
-    template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
-    struct message_info_helper
-    {
-      static void build(dictionary_builder& builder, const Operation& op)
-      {
-        using Message = typename std::tuple_element<BeginIndex, MessageTuple>::type;
-        if (Message::the_id == 0)
-          return;
-        op(builder.clone_instruction(Message::instruction()), static_cast<Message*>(nullptr));
+  template <typename Message, typename Operation>
+  int build_message_info(const Operation& op)
+  {
+    op(this->clone_instruction(Message::instruction()),
+       static_cast<Message*>(nullptr));
+    return 0;
+  }
 
-        message_info_helper<BeginIndex+1, EndIndex, MessageTuple, Operation>::build(builder, op);
-      }
-    };
+  virtual void visit(const int32_field_instruction*, void*) override;
+  virtual void visit(const uint32_field_instruction*, void*) override;
+  virtual void visit(const int64_field_instruction*, void*) override;
+  virtual void visit(const uint64_field_instruction*, void*) override;
+  virtual void visit(const decimal_field_instruction*, void*) override;
+  virtual void visit(const ascii_field_instruction*, void*) override;
+  virtual void visit(const unicode_field_instruction*, void*) override;
+  virtual void visit(const byte_vector_field_instruction*, void*) override;
+  virtual void visit(const int32_vector_field_instruction*, void*) override;
+  virtual void visit(const uint32_vector_field_instruction*, void*) override;
+  virtual void visit(const int64_vector_field_instruction*, void*) override;
+  virtual void visit(const uint64_vector_field_instruction*, void*) override;
+  virtual void visit(const group_field_instruction*, void*) override;
+  virtual void visit(const sequence_field_instruction*, void*) override;
+  virtual void visit(const template_instruction*, void*) override;
+  virtual void visit(const templateref_instruction*, void*) override;
 
-    template <int EndIndex, typename MessageTuple, typename Operation>
-    struct message_info_helper<EndIndex, EndIndex, MessageTuple, Operation>
-    {
-      static void build(dictionary_builder&, const Operation&)
-      {
-      }
-    };
+  virtual void visit(const enum_field_instruction*, void*) override;
 
+  template_instruction* clone_instruction(const template_instruction*);
 
-    template <typename Description, typename Operation>
-    void build_description(const Description* def, const Operation& op)
-    {
-      this->current_ns_ = def->template_ns();
-      this->current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
-      const int num_messages = std::tuple_size<typename Description::types>::value;
+  void build_group(const field_instruction*       fi,
+                   const group_field_instruction* src,
+                   group_field_instruction*       dest);
 
-      message_info_helper<0, num_messages, typename Description::types, Operation>::build ( *this, op);
-    }
+  value_storage*
+  get_dictionary_storage(const char*         key,
+                         const char*         ns,
+                         const op_context_t* op_context,
+                         field_type_enum_t   field_type,
+                         value_storage*      candidate_storage,
+                         field_instruction*  instruction);
 
-    // template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
-    // friend struct builder_helper;
-    //
-    // template <int BeginIndex, int EndIndex, typename MessageTuple, typename Operation>
-    // friend struct message_info_helper;
+  template_instruction* find_template(uint32_t template_id);
 
-    virtual void visit(const int32_field_instruction*, void*) override;
-    virtual void visit(const uint32_field_instruction*, void*) override;
-    virtual void visit(const int64_field_instruction*, void*) override;
-    virtual void visit(const uint64_field_instruction*, void*) override;
-    virtual void visit(const decimal_field_instruction*, void*) override;
-    virtual void visit(const ascii_field_instruction*, void*) override;
-    virtual void visit(const unicode_field_instruction*, void*) override;
-    virtual void visit(const byte_vector_field_instruction*, void*) override;
-    virtual void visit(const int32_vector_field_instruction*, void*) override;
-    virtual void visit(const uint32_vector_field_instruction*, void*) override;
-    virtual void visit(const int64_vector_field_instruction*, void*) override;
-    virtual void visit(const uint64_vector_field_instruction*, void*) override;
-    virtual void visit(const group_field_instruction*, void*) override;
-    virtual void visit(const sequence_field_instruction*, void*) override;
-    virtual void visit(const template_instruction*, void*) override;
-    virtual void visit(const templateref_instruction*, void*) override;
-
-    virtual void visit(const enum_field_instruction*, void*) override;
-
-    template_instruction* clone_instruction(const template_instruction*);
-
-    void build_group(const field_instruction*       fi,
-                     const group_field_instruction* src,
-                     group_field_instruction*       dest);
-
-    value_storage*
-    get_dictionary_storage(const char*         key,
-                           const char*         ns,
-                           const op_context_t* op_context,
-                           field_type_enum_t   field_type,
-                           value_storage*      candidate_storage,
-                           field_instruction* instruction);
-
-    template_instruction* find_template(uint32_t template_id);
-
-    struct indexer_value_type
-    {
-      field_type_enum_t field_type_;
-      field_instruction* instruction_;
-      value_storage*  storage_;
-    };
-
-    typedef std::map<std::string, indexer_value_type>  indexer_t;
-    indexer_t indexer_;
-    std::string current_template_;
-    std::string current_type_;
-    const char* current_ns_;
-    const char* current_dictionary_;
-
-    template_repo_base& repo_base_;
-    arena_allocator& alloc_;
+  struct indexer_value_type
+  {
+    field_type_enum_t field_type_;
+    field_instruction* instruction_;
+    value_storage*  storage_;
   };
+
+  typedef std::map<std::string, indexer_value_type>  indexer_t;
+  indexer_t indexer_;
+  std::string current_template_;
+  std::string current_type_;
+  const char* current_ns_;
+  const char* current_dictionary_;
+
+  template_repo_base& repo_base_;
+  arena_allocator& alloc_;
+};
 
 
 }

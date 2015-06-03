@@ -58,8 +58,14 @@ struct MFAST_CODER_EXPORT fast_encoder_core
   void register_message();
 
 
-  template <typename DescriptionsTuple>
-  void init(const DescriptionsTuple& tp);
+  template <typename... Desc>
+  void init( Desc... rest)
+  {
+    static_assert(sizeof...(rest) > 0, "There must exist at least one parameter of type const templates_description*");
+    repo_.build(rest...);
+    active_message_info_ = repo_.unique_entry();
+  }
+
 
   /// message encode functions
   void encode_segment(const message_cref cref, bool force_reset);
@@ -226,13 +232,6 @@ fast_encoder_core::fast_encoder_core(allocator* alloc)
 {
 }
 
-template <typename DescriptionsTuple>
-void
-fast_encoder_core::init(const DescriptionsTuple& tp)
-{
-  repo_.build(tp);
-  active_message_info_ = repo_.unique_entry();
-}
 
 template <typename Message>
 void fast_encoder_core::encode_message(const message_cref& cref)

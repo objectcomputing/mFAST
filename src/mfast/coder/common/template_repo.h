@@ -121,12 +121,13 @@ public:
   }
 
 
-  template <typename DescriptionTuple>
-  void build(const DescriptionTuple& tp)
+  template <typename... T>
+  void build(T... desc)
   {
     dictionary_builder builder(*this);
-    builder.build( tp, repo_entry_inserter(this) );
+    builder.build_from_descriptions(repo_entry_inserter(this), desc...);
   }
+
 
   repo_mapped_type* find(uint32_t id)
   {
@@ -156,9 +157,8 @@ public:
   template <typename Message>
   void add_template(template_instruction* inst, Message* msg)
   {
-    uint32_t id = inst->id();
     // assert(dynamic_cast<const typename Message::instruction_type*>(templates_map_[Message::the_id]) );
-    this->templates_map_.emplace(id, converter_.to_repo_entry(inst, msg));
+    this->templates_map_.emplace(inst->id(), converter_.to_repo_entry(inst, msg));
   }
 
 

@@ -20,6 +20,7 @@
 #define FAST_ENCODER_V2_H_7768AB85
 
 #include <vector>
+#include <tuple>
 #include "encoder_v2/fast_encoder_core.h"
 
 namespace mfast
@@ -30,21 +31,26 @@ class fast_encoder_v2
   : coder::fast_encoder_core
 {
 public:
-  /// Consturct a encoder using default memory allocator (i.e. malloc)
-  template <typename DescriptionsTuple>
-  fast_encoder_v2(const DescriptionsTuple& tp,
-                  typename std::enable_if<!boost::is_base_of< mfast::templates_description, DescriptionsTuple>::value, allocator*>::type alloc = malloc_allocator::instance())
+  /// Consturct an encoder using the specified memory allocator
+  template <typename Description1,
+            typename ... Descriptions>
+  fast_encoder_v2(mfast::allocator*      alloc,
+                  const Description1*    desc1,
+                  const Descriptions*... rest)
     : coder::fast_encoder_core(alloc)
   {
-    this->init(tp);
+    this->init(desc1, rest ...);
   }
 
-  template <typename T>
-  fast_encoder_v2(const T* desc,
-                  typename std::enable_if< std::is_base_of< mfast::templates_description, T>::value, allocator*>::type alloc = malloc_allocator::instance())
-    : coder::fast_encoder_core(alloc)
+  /// Consturct an encoder using the default memory allocator ( i.e. mfast::malloc_allocator::instance() )
+  template <typename Description1,
+            typename ... Descriptions,
+            typename std::enable_if< std::is_base_of<templates_description, Description1>::value, int>::type* Check=nullptr>
+  fast_encoder_v2(const Description1*    desc1,
+                  const Descriptions*... rest)
+    : coder::fast_encoder_core(mfast::malloc_allocator::instance())
   {
-    this->init(std::make_tuple(desc));
+    this->init(desc1, rest ...);
   }
 
   /// Encode a  message into FAST byte stream.

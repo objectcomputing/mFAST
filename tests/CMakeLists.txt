@@ -77,6 +77,7 @@ else()
                     composite_type_test.cpp
                     aggregate_view_test.cpp
                     simple_coder_test.cpp
+                    scp_reset_test.cpp
                 )
 
     target_link_libraries (mfast_test
