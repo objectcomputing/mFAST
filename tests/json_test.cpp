@@ -177,9 +177,10 @@ BOOST_AUTO_TEST_CASE(json_encode_person_test)
 
   std::stringstream strm;
   mfast::json::encode(strm, person_ref);
-  const char* result = "{\"firstName\":\"John\",\"lastName\":\"Smith\",\"age\":25,"
-                       "\"phoneNumbers\":[{\"type\":\"home\",\"number\":\"212 555-1234\"},{\"type\":\"fax\",\"number\":\"646 555-4567\"}],"
-                       "\"emails\":[],\"login\":{\"userName\":\"John\",\"password\":\"J0hnsm1th\"},\"bankAccounts\":[{\"number\":12345678,\"routingNumber\":87654321}]}";
+
+  auto result = R"({"firstName":"John","lastName":"Smith","age":25,)"
+                R"("phoneNumbers":[{"type":"home","number":"212 555-1234"},{"type":"fax","number":"646 555-4567"}],)"
+                R"("emails":[],"login":{"userName":"John","password":"J0hnsm1th"},"bankAccounts":[{"number":12345678,"routingNumber":87654321}]})";
 
   BOOST_CHECK_EQUAL(strm.str(),
                     std::string(result));
@@ -196,7 +197,7 @@ BOOST_AUTO_TEST_CASE(json_decode_null_test)
   try {
     LoginAccount account_holder;
 
-    const char result[] = "{\"userName\":\"test\",\"password\": null}";
+    auto& result = R"({"userName":"test","password": null})";
     std::stringstream strm(result);
 
     mfast::json::decode(strm, account_holder.mref());
@@ -247,7 +248,7 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
 
 
   {
-    const char data[] = "\"abcd\",";
+    const char data[] = R"("abcd",)";
     std::stringstream strm(data);
     BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
     BOOST_CHECK_EQUAL(str,           std::string("abcd"));
@@ -260,10 +261,10 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
   }
   {
     bv_ref.clear();
-    const char data[] = "\"abc\\\"d\",";
+    const char data[] = R"("abc\"d",)";
     std::stringstream strm(data);
     BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
-    BOOST_CHECK_EQUAL(str,           std::string("abc\"d"));
+    BOOST_CHECK_EQUAL(str,           std::string(R"(abc"d)") );
 
     BOOST_CHECK_EQUAL(bv_ref.size(), sizeof(data)-2 );
     BOOST_CHECK(memcmp(data, bv_ref.data(), sizeof(data)-2) == 0);
@@ -273,7 +274,7 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
   }
   {
     bv_ref.clear();
-    const char data[] = "\"\\u4e2d\\u83EF\\u6c11\\u570B\",";
+    const char data[] = R"("\u4e2d\u83EF\u6c11\u570B",)";
     std::stringstream strm(data);
     BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
     BOOST_CHECK_EQUAL(str,           std::string("中華民國"));
@@ -288,7 +289,7 @@ BOOST_AUTO_TEST_CASE(test_get_quoted_string)
   {
     bv_ref.clear();
     // U+10437 U+24B62
-    const char data[] = "\"\\uD801\\uDC37\\uD852\\uDF62\",";
+    const char data[] = R"("\uD801\uDC37\uD852\uDF62",)";
     std::stringstream strm(data);
     BOOST_CHECK(get_quoted_string(strm, &str, &bv_ref, false));
     BOOST_CHECK_EQUAL(str,           std::string("\xF0\x90\x90\xB7\xF0\xA4\xAD\xA2"));
@@ -366,21 +367,21 @@ BOOST_AUTO_TEST_CASE(test_skip_value)
     BOOST_CHECK(strm.eof());
   }
   {
-    std::stringstream strm(" [1, [ \"abc\" ], 3],");
+    std::stringstream strm(R"( [1, [ "abc" ], 3],)");
     BOOST_CHECK(skip_value(strm));
     strm >> str;
     BOOST_CHECK_EQUAL(str, std::string(","));
     BOOST_CHECK(strm.eof());
   }
   {
-    std::stringstream strm(" [1, { \"f1\":\"abc\" }, 3],");
+    std::stringstream strm(R"( [1, { "f1":"abc" }, 3],)");
     BOOST_CHECK(skip_value(strm));
     strm >> str;
     BOOST_CHECK_EQUAL(str, std::string(","));
     BOOST_CHECK(strm.eof());
   }
   {
-    std::stringstream strm(" {\"id\":1,\"name\":\"Foo\"},");
+    std::stringstream strm(R"( {"id":1,"name":"Foo"},)");
     BOOST_CHECK(skip_value(strm));
     strm >> str;
     BOOST_CHECK_EQUAL(str, std::string(","));

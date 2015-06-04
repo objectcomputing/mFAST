@@ -7,7 +7,7 @@
 #include <mfast/coder/fast_decoder_v2.h>
 #include <cstring>
 #include <stdexcept>
-
+#include <mfast/json/json.h>
 
 #include "simple6.h"
 #include "scp.h"
@@ -22,13 +22,20 @@ using namespace mfast;
 BOOST_AUTO_TEST_CASE(scp_reset_test)
 {
   fast_decoder_v2<0> decoder1(simple6::description(), scp::description());
-  byte_stream strm("\xB8\x81\x82\x82\x39\x45\xA3\x41\x42\xc3\x84\x41\x42\x43");
-  const char* start = strm.data();
+  auto& strm="\xF8\x81\x81\x82\x83\x80\xC0\xF8\xC0\x81";
+  const char* first = std::begin(strm);
+  const char* last = std::end(strm);
 
-  decoder1.decode(start, start+strm.size());
+  simple6::Test b1(R"({"field1":1, "field2":2, "field3":3})");
+  BOOST_CHECK( decoder1.decode(first, last) == b1.cref() );
+  BOOST_CHECK( decoder1.decode(first, last) == b1.cref() );
+  BOOST_CHECK( decoder1.decode(first, last).id() == 120 );
 
+  simple6::Test b2(R"({"field1":11, "field2":12, "field3":13})");
+  BOOST_CHECK( decoder1.decode(first, last) == b2.cref() );
 
   debug_allocator alloc;
   fast_decoder_v2<0> decoder2(&alloc, simple6::description(), scp::description());
-  decoder2.decode(start, start+strm.size());
+  first = std::begin(strm);
+  decoder2.decode(first, last);
 }

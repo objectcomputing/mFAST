@@ -1,5 +1,5 @@
-#ifndef JSON_H_H4Q7QTC4
-#define JSON_H_H4Q7QTC4
+#ifndef MFAST_JSON_H
+#define MFAST_JSON_H
 
 #include "mfast_json_export.h"
 #include "mfast.h"
@@ -30,4 +30,4 @@ namespace mfast
   } // namespace json
 } // namespace mfast
 
-#endif /* end of include guard: JSON_H_H4Q7QTC4 */
+#endif /* end of include guard: MFAST_JSON_H */
