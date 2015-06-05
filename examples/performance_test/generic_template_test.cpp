@@ -120,12 +120,11 @@ int main(int argc, const char** argv)
 
     mfast::fast_decoder coder(alloc);
 
-    const mfast::templates_description* descriptions[] = { &description };
-    coder.include(descriptions);
+    coder.include({&description});
 
 #ifdef WITH_ENCODE
     mfast::fast_encoder encoder(alloc);
-    encoder.include(descriptions);
+    encoder.include({&description});
     std::vector<char> buffer;
     buffer.resize(message_contents.size());
 #endif

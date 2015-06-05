@@ -99,14 +99,14 @@ public:
   {
   }
 
-  void build(const templates_description** descriptions,
-             std::size_t                   description_count)
+  void build(const templates_description* const * descriptions,
+             std::size_t                          description_count)
   {
     dictionary_builder builder(*this);
     repo_entry_inserter inserter(this);
 
     for (std::size_t i = 0; i < description_count; ++i)
-      builder.build(descriptions[i], inserter);
+      builder.build(inserter, descriptions[i]);
   }
 
   template <typename Iterator>
@@ -117,7 +117,7 @@ public:
     repo_entry_inserter inserter(this);
 
     for (Iterator i = first; i != last; ++i)
-      builder.build(static_cast<const templates_description*>(&(*i)), inserter);
+      builder.build(inserter, static_cast<const templates_description*>(&(*i)));
   }
 
 

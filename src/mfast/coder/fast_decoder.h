@@ -21,7 +21,7 @@
 #include "mfast_coder_export.h"
 #include "mfast/message_ref.h"
 #include "mfast/malloc_allocator.h"
-
+#include <initializer_list>
 
 namespace mfast
 {
@@ -48,12 +48,18 @@ class MFAST_CODER_EXPORT fast_decoder
     ///
     /// @param descriptions The array of templates_description pointers to be loaded.
     /// @param description_count Number of elements in @a descriptions array.
-    void include(const templates_description** descriptions, std::size_t description_count);
+    void include(const templates_description  * const * descriptions, std::size_t description_count);
 
     template<int N>
     void include(const templates_description* (&descriptions)[N])
     {
       include(descriptions, N);
+    }
+
+
+    void include(std::initializer_list<const templates_description*> descriptions)
+    {
+      include(descriptions.begin(), descriptions.size());
     }
 
     /// Decode a  message.

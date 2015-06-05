@@ -87,10 +87,10 @@ namespace mfast {
     memory_chunk* free_list_head_;
 
   public:
-    enum {
-      default_chunk_size=4096,
-      chunk_user_size = default_chunk_size - offsetof(struct memory_chunk_base, user_memory)
-    };
+    // enum {
+      static const int default_chunk_size=4096;
+      static constexpr auto chunk_user_size = default_chunk_size - offsetof(struct memory_chunk_base, user_memory);
+    // };
 
   };
 

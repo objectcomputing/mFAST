@@ -262,7 +262,7 @@ namespace mfast
 
 
   void
-  fast_encoder::include(const templates_description** descriptions, std::size_t description_count)
+  fast_encoder::include(const templates_description* const * descriptions, std::size_t description_count)
   {
     impl_->build(descriptions, description_count);
     template_instruction** entry = impl_->unique_entry();

@@ -86,14 +86,12 @@ public:
 
   dictionary_builder(template_repo_base& repo_base);
 
-  void build_by_description(const templates_description* def);
-
   template <typename Operation>
-  void build(const templates_description* def, const Operation& op)
+  void build(const Operation& op, const templates_description* def)
   {
     current_ns_ = def->template_ns();
     current_dictionary_ = (def->dictionary()[0] == 0) ?  "global" : def->dictionary();
-    for (auto & elem :* def) {
+    for (auto & elem : *def) {
       if (elem->id() > 0) {
         op(this->clone_instruction(elem));
       }
@@ -103,13 +101,13 @@ public:
   template <typename Operation, typename ... T>
   void build_from_descriptions(const Operation& op, T ... descs)
   {
-    pass(build_from_description(op, descs) ...);
+    pass(build(op, descs) ...);
   }
 
 private:
 
   template <typename Operation, typename Description>
-  int build_from_description(const Operation& op, const Description* desc)
+  int build(const Operation& op, const Description* desc)
   {
     this->current_ns_ = desc->template_ns();
     this->current_dictionary_ = (desc->dictionary()[0] == 0) ?  "global" : desc->dictionary();

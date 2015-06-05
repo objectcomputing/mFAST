@@ -51,12 +51,17 @@ class MFAST_CODER_EXPORT fast_encoder
     ///
     /// @param descriptions The array of templates_description pointers to be loaded.
     /// @param description_count Number of elements in @a descriptions array.
-    void include(const templates_description** descriptions, std::size_t description_count);
+    void include(const templates_description* const * descriptions, std::size_t description_count);
 
     template<int N>
     void include(const templates_description* (&descriptions)[N])
     {
       include(descriptions, N);
+    }
+
+    void include(std::initializer_list<const templates_description*> descriptions)
+    {
+      include(descriptions.begin(), descriptions.size());
     }
 
     const template_instruction* template_with_id(uint32_t id);

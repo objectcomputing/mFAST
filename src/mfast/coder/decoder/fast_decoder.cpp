@@ -355,7 +355,7 @@ fast_decoder::~fast_decoder()
 }
 
 void
-fast_decoder::include(const templates_description** descriptions, std::size_t description_count)
+fast_decoder::include(const templates_description  * const * descriptions, std::size_t description_count)
 {
   impl_->repo_.build(descriptions, description_count);
   impl_->active_message_ = impl_->repo_.unique_entry();

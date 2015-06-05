@@ -92,18 +92,6 @@ dictionary_builder::dictionary_builder(template_repo_base& repo_base)
 {
 }
 
-void dictionary_builder::build_by_description(const templates_description* def)
-{
-  current_ns_ = def->template_ns();
-  current_dictionary_ = is_empty_string(def->dictionary()) ?  "global" : def->dictionary();
-
-  for (auto & elem : *def) {
-    uint32_t id = elem->id();
-    if (id > 0) {
-      this->clone_instruction(elem);
-    }
-  }
-}
 
 void dictionary_builder::build_group(const field_instruction*       fi,
                                      const group_field_instruction* src,
