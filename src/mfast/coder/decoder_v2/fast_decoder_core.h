@@ -254,7 +254,7 @@ struct fast_decoder_core
       for (std::size_t i = 0; i < num_reserved_msgs; ++i)
         message_resources_.emplace_back(alloc_, inst, nullptr);
 
-	  return info_entry_init_t(message_resources_.begin() + index, &fast_decoder_base::decode_message<Message>);
+      return info_entry_init_t(message_resources_.begin() + index, &fast_decoder_base::decode_message<Message>);
     }
 
     mfast::allocator* alloc_;

@@ -68,8 +68,8 @@ namespace mfast {
     boost::io::ios_flags_saver ifs( os );
     os << std::hex << std::setfill('0');
 
-    for (std::size_t i = 0; i < cref.size(); ++i) {
-      os << std::setw(2) <<  static_cast<unsigned>(cref[i]);
+    for (auto&& elem : cref) {
+      os << std::setw(2) <<  static_cast<unsigned>(elem);
     }
 
     os << std::setfill(' ');

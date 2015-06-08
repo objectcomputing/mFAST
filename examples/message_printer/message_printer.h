@@ -89,8 +89,8 @@ class message_printer
       boost::io::ios_flags_saver  ifs( os_ );
       os_ << std::hex << std::setfill('0');
 
-      for (std::size_t i = 0 ; i < ref.size(); ++i){
-        os_ << std::setw(2) <<  static_cast<unsigned>(ref[i]);
+      for (auto&& elem : ref){
+        os_ << std::setw(2) <<  static_cast<unsigned>(elem);
       }
       os_ << std::setfill(' ');
 
@@ -103,9 +103,8 @@ class message_printer
 
       char sep[2]= { '\x0', '\x0'};
       os_ << "{";
-      for (std::size_t i = 0; i < ref.size(); ++i)
-      {
-        os_ << sep << ref[i];
+      for (auto&& elem : ref){
+        os_ << sep << elem;
         sep[0] = ',';
       }
       os_ << "}";

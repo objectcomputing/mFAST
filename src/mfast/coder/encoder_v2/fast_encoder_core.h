@@ -319,8 +319,8 @@ inline void fast_encoder_core::encode_field(const T& ext_ref, int_vector_type_ta
 
   this->strm_.encode(static_cast<uint32_t>(cref.size()), !cref.present(), cref.optional());
   if (cref.present()) {
-    for (std::size_t i = 0; i < cref.size(); ++i) {
-      this->strm_.encode(cref[i], false, false_type());
+    for (auto&& elem : cref) {
+      this->strm_.encode(elem, false, false_type());
     }
   }
 }
