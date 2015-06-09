@@ -133,7 +133,7 @@ namespace mfast
             this->bind_null();
           }
           else {
-            field.accept_accessor(*this);
+            apply_accessor(*this, field);
           }
         }
       }

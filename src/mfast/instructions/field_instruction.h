@@ -119,7 +119,7 @@ namespace mfast {
   class instruction_tag
   {
   public:
-    inline constexpr
+    inline
     instruction_tag(uint64_t v=0)
       : uint64_value_(v)
     {

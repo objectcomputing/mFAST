@@ -25,7 +25,7 @@ namespace mfast
       for (std::size_t i = 0; i < ref.num_fields(); ++i)
       {
         if (!core_.to_skip(ref[i]) && ref[i].present())
-          ref[i].accept_accessor(*this);
+          apply_accessor(*this, field);;
       }
 
     }

@@ -40,11 +40,6 @@ struct fast_decoder_impl;
 
 struct fast_decoder_impl
 {
-  enum {
-    visit_absent = 1
-  };
-
-
   fast_decoder_impl(mfast::allocator* alloc);
   ~fast_decoder_impl();
   decoder_presence_map& current_pmap();
@@ -81,15 +76,15 @@ struct fast_decoder_impl
   }
 
   template <typename SimpleMRef>
-  void visit(SimpleMRef &mref);
+  void visit(const SimpleMRef &mref);
 
   template <typename IntType>
-  void visit(int_vector_mref<IntType>& mref);
+  void visit(const int_vector_mref<IntType>& mref);
 
-  void visit(group_mref& mref, int);
-  void visit(sequence_mref& mref, int);
-  void visit(nested_message_mref& mref, int);
-  void visit(sequence_element_mref& mref, int);
+  void visit(const group_mref& mref, int);
+  void visit(const sequence_mref& mref, int);
+  void visit(const nested_message_mref& mref, int);
+  void visit(const sequence_element_mref& mref, int);
 
   message_type*  decode_segment(fast_istreambuf& sb);
 
@@ -152,7 +147,7 @@ fast_decoder_impl::current_pmap()
 
 template <typename SimpleMRef>
 inline void
-fast_decoder_impl::visit(SimpleMRef& mref)
+fast_decoder_impl::visit(const SimpleMRef& mref)
 {
   debug_ << "   decoding " << mref.name() << ": pmap -> " << current_pmap() << "\n"
          << "               stream -> " << strm_ << "\n";
@@ -170,7 +165,7 @@ fast_decoder_impl::visit(SimpleMRef& mref)
 }
 
 template <typename IntType>
-void fast_decoder_impl::visit(int_vector_mref<IntType> &mref)
+void fast_decoder_impl::visit(const int_vector_mref<IntType> &mref)
 {
   debug_ << "decoding int vector " << mref.name();
 
@@ -187,7 +182,7 @@ void fast_decoder_impl::visit(int_vector_mref<IntType> &mref)
 }
 
 inline void
-fast_decoder_impl::visit(group_mref& mref, int)
+fast_decoder_impl::visit(const group_mref& mref, int)
 {
   debug_ << "decoding group " << mref.name();
 
@@ -215,14 +210,14 @@ fast_decoder_impl::visit(group_mref& mref, int)
 
   for (auto&& field : aggregate_mref(mref))
   {
-    field.accept_mutator(*this);
+    apply_mutator(*this, field);
   }
 
   restore_pmap(state);
 }
 
 inline void
-fast_decoder_impl::visit(sequence_mref& mref, int)
+fast_decoder_impl::visit(const sequence_mref& mref, int)
 {
   debug_ << "decoding sequence " << mref.name()  << " ---\n";
 
@@ -252,7 +247,7 @@ fast_decoder_impl::visit(sequence_mref& mref, int)
 }
 
 inline void
-fast_decoder_impl::visit(sequence_element_mref& mref, int index)
+fast_decoder_impl::visit(const sequence_element_mref& mref, int index)
 {
   debug_ << "decoding  element[" << index << "] : segment pmap size = " <<  mref.instruction()->segment_pmap_size() << "\n";
 
@@ -263,17 +258,15 @@ fast_decoder_impl::visit(sequence_element_mref& mref, int index)
     debug_ << "    decoded pmap -> " <<  current_pmap() << "\n";
   }
 
-  // mref.accept_mutator(*this);
-
   for (auto&& field : mref) {
-    field.accept_mutator(*this);
+    apply_mutator(*this, field);
   }
 
   restore_pmap(state);
 }
 
 inline void
-fast_decoder_impl::visit(nested_message_mref& mref, int)
+fast_decoder_impl::visit(const nested_message_mref& mref, int)
 {
   pmap_state state;
   message_type* saved_active_message = active_message_;
@@ -307,7 +300,7 @@ fast_decoder_impl::visit(nested_message_mref& mref, int)
 
 
   for (auto&& field : mref.target()) {
-    field.accept_mutator(*this);
+    apply_mutator(*this, field);
   }
 
   restore_pmap(state);
@@ -357,7 +350,7 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
   // message->ref().accept_mutator(*this);
 
   for (auto&& field : message->ref()) {
-    field.accept_mutator(*this);
+    apply_mutator(*this, field);
   }
   return message;
 }

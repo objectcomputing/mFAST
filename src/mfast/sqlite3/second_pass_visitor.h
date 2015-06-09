@@ -61,7 +61,7 @@ namespace mfast
         {
           field_cref field(ref[i]);
           if (!core_.to_skip(field)) {
-            field.accept_accessor(*this);
+            apply_accessor(*this, field);
           }
         }
       }

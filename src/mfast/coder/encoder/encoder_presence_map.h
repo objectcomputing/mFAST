@@ -92,7 +92,7 @@ namespace mfast
     stream_->write_bytes_at(&value_, ++nbytes_, offset_, true);
   }
 
-  inline constexpr
+  inline BOOST_CONSTEXPR
   std::size_t get_next_bit_mask(std::size_t i)
   {
     return i==0 ? 0 : (get_next_bit_mask(i-1) << 8) | 0x01;

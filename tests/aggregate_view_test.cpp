@@ -90,10 +90,6 @@ struct simple_visitor
 {
   std::ostream& os_;
 
-  enum {
-    visit_absent=true
-  };
-
   simple_visitor(std::ostream& os)
     : os_(os)
   {

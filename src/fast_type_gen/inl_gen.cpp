@@ -1022,10 +1022,10 @@ void inl_gen::generate(const mfast::aggregate_view_info& info)
        << "template <typename FieldAccessor>\n"
        << "inline void  " << my_name << "::accept_accessor(FieldAccessor& accessor) const\n"
        << "{\n"
-       << "  for (mfast::field_cref f: *this)\n"
+       << "  for (auto&& f: *this)\n"
        << "  {\n"
-       << "    if (FieldAccessor::visit_absent || f.present())"
-       << "      f.accept_accessor(accessor);\n"
+       << "    if (f.present())"
+       << "      mfast::apply_accessor(accessor, f);\n"
        << "  }\n"
        << "}\n";
 }

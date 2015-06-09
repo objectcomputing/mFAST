@@ -50,11 +50,6 @@ class message_printer
 
   public:
 
-    // enum {
-   //    visit_absent = 0
-   //  };
-
-
     message_printer(std::ostream& os)
       : os_(os)
     {
@@ -116,7 +111,7 @@ class message_printer
       for (auto&& field : ref) {
         if (field.present()) {
           os_ << indent_ << field.name() << ": ";
-          field.accept_accessor(*this);
+          apply_accessor(*this, field);
           os_ << std::endl;
         }
       }
@@ -129,7 +124,7 @@ class message_printer
       ++indent_;
       for (auto&& element : ref) {
         os_ << indent_ << "[" << index++ << "]" << ":\n";
-        // we cannot use field.accept_accessor(*this) here, because that would only visit the
+        // we cannot use apply_accessor(*this, field) here, because that would only visit the
         // sub-fields of the elment instead of calling visit(const aggregate_cref& ref, int)
         this->visit(element, 0);
         os_ << "\n";

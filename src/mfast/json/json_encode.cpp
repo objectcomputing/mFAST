@@ -58,10 +58,6 @@ namespace mfast {
 
       public:
 
-        enum {
-          visit_absent = 0
-        };
-
         json_visitor(std::ostream& strm,
                      unsigned      json_object_tag_mask)
           : strm_(strm)
@@ -130,8 +126,8 @@ namespace mfast {
           strm_ << separator_  << "[";
           separator_[0] = '\0';
 
-          for (std::size_t i = 0; i < ref.size(); ++i) {
-            strm_ << separator_ << ref[i];
+          for (auto&& field : ref) {
+            strm_ << separator_ << field;
             separator_[0] = ',';
           }
           strm_ << "]";
@@ -151,11 +147,11 @@ namespace mfast {
           strm_ << separator_ <<  "{";
           separator_[0] = '\0';
 
-          for (std::size_t i = 0; i < ref.num_fields(); ++i) {
-            if (ref[i].present()) {
-              strm_ << separator_ << quoted_string(ref[i].name()) << ":";
+          for (auto&& field : ref) {
+            if (field.present()) {
+              strm_ << separator_ << quoted_string(field.name()) << ":";
               separator_[0] = '\0';
-              ref[i].accept_accessor(*this);
+              apply_accessor(*this, field);;
               separator_[0] = ',';
             }
           }
@@ -177,7 +173,7 @@ namespace mfast {
         void visit(const mfast::sequence_element_cref& ref, int)
         {
           if (ref.element_unnamed()) {
-            ref[0].accept_accessor(*this);
+            apply_accessor(*this, ref[0]);;
           }
           else {
             this->visit(mfast::aggregate_cref(ref), 0);
@@ -224,11 +220,11 @@ namespace mfast {
           strm_ << separator_ <<  "{";
           separator_[0] = '\0';
 
-          for (std::size_t i = 0; i < ref.num_fields(); ++i) {
-            if (ref[i].present() && 0 == (ref[i].instruction()->tag().to_uint64() & ignore_tag_mask_)) {
-              strm_ << separator_ << quoted_string(ref[i].name()) << ":";
+          for (auto&& field : ref) {
+            if (field.present() && 0 == (field.instruction()->tag().to_uint64() & ignore_tag_mask_)) {
+              strm_ << separator_ << quoted_string(field.name()) << ":";
               separator_[0] = '\0';
-              ref[i].accept_accessor(*this);
+              apply_accessor(*this, field);;
               separator_[0] = ',';
             }
           }

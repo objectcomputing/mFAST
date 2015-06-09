@@ -38,11 +38,6 @@ namespace mfast
   struct fast_encoder_impl
     : simple_template_repo_t
   {
-
-    enum {
-      visit_absent = 1
-    };
-
     fast_ostream strm_;
 
     int64_t active_message_id_;
@@ -82,23 +77,23 @@ namespace mfast
       }
     }
 
-    void visit(enum_cref &cref)
+    void visit(enum_cref cref)
     {
       this->visit(reinterpret_cast<uint64_cref&>(cref));
     }
 
     template <typename SimpleCRef>
-    void visit(SimpleCRef &cref);
+    void visit(SimpleCRef cref);
 
     template <typename IntType>
-    void visit(int_vector_cref<IntType> &cref);
+    void visit(int_vector_cref<IntType> cref);
 
-    void visit(group_cref& cref, int);
-    void visit(sequence_cref&, int);
-    void visit(sequence_element_cref& cref, int);
-    void visit(nested_message_cref&, int);
+    void visit(group_cref cref, int);
+    void visit(sequence_cref, int);
+    void visit(sequence_element_cref cref, int);
+    void visit(nested_message_cref, int);
 
-    void encode_segment(const message_cref cref, bool force_reset);
+    void visit(message_cref cref, bool force_reset);
   };
 
   inline
@@ -120,7 +115,7 @@ namespace mfast
 
   template <typename SimpleCRef>
   inline void
-  fast_encoder_impl::visit(SimpleCRef& cref)
+  fast_encoder_impl::visit(SimpleCRef cref)
   {
 
     const encoder_field_operator* field_operator
@@ -132,7 +127,7 @@ namespace mfast
   }
 
   template <typename IntType>
-  void fast_encoder_impl::visit(int_vector_cref<IntType> &cref)
+  void fast_encoder_impl::visit(int_vector_cref<IntType> cref)
   {
     strm_.encode(static_cast<uint32_t>(cref.size()), !cref.present(), cref.optional());
     if (cref.present()) {
@@ -143,7 +138,7 @@ namespace mfast
   }
 
   inline void
-  fast_encoder_impl::visit(group_cref& cref, int)
+  fast_encoder_impl::visit(group_cref cref, int)
   {
 
     // If a group field is optional, it will occupy a single bit in the presence map.
@@ -163,19 +158,19 @@ namespace mfast
       setup_pmap(state, cref.instruction()->segment_pmap_size() );
     }
 
-    // cref.accept_accessor(*this);
+    // apply_accessor(*this, field);;
 
     for (auto&& field : aggregate_cref(cref) )
     {
       if (field.present())
-        field.accept_accessor(*this);
+        apply_accessor(*this, field);
     }
 
     commit_pmap(state);
   }
 
   inline void
-  fast_encoder_impl::visit(sequence_cref& cref, int)
+  fast_encoder_impl::visit(sequence_cref cref, int)
   {
 
     value_storage storage;
@@ -190,7 +185,7 @@ namespace mfast
     this->visit(length_mref);
 
     if (length_mref.present() && length_mref.value() > 0) {
-      // cref.accept_accessor(*this);
+      // apply_accessor(*this, field);;
 
       for (auto&& elem : cref)
       {
@@ -200,7 +195,7 @@ namespace mfast
   }
 
   inline void
-  fast_encoder_impl::visit(sequence_element_cref& cref, int)
+  fast_encoder_impl::visit(sequence_element_cref cref, int)
   {
     pmap_state state;
     if (cref.instruction()->segment_pmap_size() > 0)
@@ -211,24 +206,24 @@ namespace mfast
     for (auto&& field : cref )
     {
       if (field.present())
-        field.accept_accessor(*this);
+        apply_accessor(*this, field);
     }
     commit_pmap(state);
   }
 
   inline void
-  fast_encoder_impl::visit(nested_message_cref& cref, int)
+  fast_encoder_impl::visit(nested_message_cref cref, int)
   {
     int64_t saved_message_id = active_message_id_;
     encoder_presence_map* prev_pmap = this->current_;
-    encode_segment(cref.target(), false);
+    visit(cref.target(), false);
     this->current_ = prev_pmap;
     active_message_id_ = saved_message_id;
   }
 
 
   void
-  fast_encoder_impl::encode_segment(const message_cref cref, bool force_reset)
+  fast_encoder_impl::visit(message_cref cref, bool force_reset)
   {
     encoder_presence_map pmap;
     this->current_ = &pmap;
@@ -262,7 +257,7 @@ namespace mfast
 
     for (auto&& field : message)
       if (field.present())
-        field.accept_accessor(*this);
+        apply_accessor(*this, field);
 
     pmap.commit();
   }
@@ -300,7 +295,7 @@ namespace mfast
 
     fast_ostreambuf sb(buffer, buffer_size);
     impl_->strm_.rdbuf(&sb);
-    impl_->encode_segment(message, force_reset);
+    impl_->visit(message, force_reset);
     return sb.length();
   }
 
@@ -311,7 +306,7 @@ namespace mfast
   {
     resizable_fast_ostreambuf sb(buffer);
     impl_->strm_.rdbuf(&sb);
-    impl_->encode_segment(message, force_reset);
+    impl_->visit(message, force_reset);
     buffer.resize(sb.length());
   }
 

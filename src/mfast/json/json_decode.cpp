@@ -330,10 +330,6 @@ namespace mfast {
       std::istream& strm_;
       unsigned json_object_tag_mask_;
 
-      enum {
-        visit_absent = true
-      };
-
       decode_visitor(std::istream& strm,
                      unsigned      json_object_tag_mask)
         : strm_(strm)
@@ -473,7 +469,7 @@ namespace mfast {
       void visit(const mfast::sequence_element_mref& ref, int)
       {
         for (auto&& field : ref) {
-          field.accept_mutator(*this);
+          apply_mutator(*this, field);
         }
       }
 
@@ -487,7 +483,6 @@ namespace mfast {
       {
         // unsupported;
       }
-
     };
 
 
@@ -495,9 +490,9 @@ namespace mfast {
     bool decode_visitor::visit_impl(const mfast::aggregate_mref& ref)
     {
 
-      for (std::size_t i = 0; i < ref.num_fields(); ++i)
+      for (auto&& field : ref)
       {
-        ref[i].omit();
+        field.omit();
       }
 
       char c;
@@ -536,7 +531,7 @@ namespace mfast {
               }
             }
             else
-              ref[index].accept_mutator(*this);
+              apply_mutator(*this, ref[index]);
           }
           else {
             // the field is unkown to us,
@@ -578,7 +573,7 @@ namespace mfast {
         ref.resize(i + 1);
         sequence_element_mref element = ref[i++];
         if (ref.element_unnamed())
-          element[0].accept_mutator(*this);
+          apply_mutator(*this, element[0]);
         else
           this->visit_impl(element);
 
