@@ -75,8 +75,6 @@ namespace mfast {
       return static_cast<const group_field_instruction*>(instruction_);
     }
 
-    template <typename FieldAccesor>
-    void accept_accessor(FieldAccesor&) const;
 
     const value_storage* field_storage(size_t index) const
     {
@@ -131,9 +129,6 @@ namespace mfast {
     field_mref operator[](size_t index) const;
 
     operator aggregate_mref() const;
-
-    template <typename FieldMutator>
-    void accept_mutator(FieldMutator&) const;
 
   private:
     make_group_mref& operator= (const make_group_mref&);

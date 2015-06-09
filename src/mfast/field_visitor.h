@@ -45,24 +45,6 @@ namespace mfast {
       {
       }
 
-      void visit(const aggregate_cref& ref)
-      {
-        for (field_cref r: ref)
-        {
-          if (r.present() || FieldAccessor::visit_absent ) {
-            r.instruction()->accept(*this, const_cast<value_storage*>(field_cref_core_access::storage_of(r)));
-          }
-        }
-      }
-
-      void visit(const sequence_cref& ref)
-      {
-        for (std::size_t j = 0; j < ref.size(); ++j) {
-          sequence_element_cref element(ref[j]);
-          accssor_.visit(element, static_cast<int>(j));
-        }
-      }
-
       virtual void visit(const int32_field_instruction* inst, void* storage) override
       {
         int32_cref ref(static_cast<value_storage*>(storage), inst);
@@ -181,23 +163,6 @@ namespace mfast {
       {
       }
 
-      void visit(const aggregate_mref& ref)
-      {
-        for (field_mref r: ref)
-        {
-          if (r.present() || FieldMutator::visit_absent ) {
-            r.instruction()->accept(*this, field_mref_core_access::storage_of(r));
-          }
-        }
-      }
-
-      void visit(const sequence_mref& ref)
-      {
-        for (std::size_t j = 0; j < ref.size(); ++j) {
-          sequence_element_mref element(ref[j]);
-          mutator_.visit(element, static_cast<int>(j));
-        }
-      }
 
       virtual void visit(const int32_field_instruction* inst, void* storage) override
       {
@@ -320,83 +285,5 @@ namespace mfast {
     detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
     this->instruction()->accept(adaptor, this->storage());
   }
-
-//////////////////////////////////////////////////////////
-
-
-  template <typename FieldAccessor>
-#if defined(_MSC_VER) && (_MSC_VER < 1700)
-// For Visual Studio 2010,  a wield bug would be triggered which
-// cuases the passed-in accessor object being destroyed prematurely
-// in Release build if the function is inlined.
-  _declspec(noinline)
-#else
-  inline
-#endif
-  void
-  aggregate_cref::accept_accessor(FieldAccessor& accessor) const
-  {
-    detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-    adaptor.visit(*this);
-  }
-
-  template <typename ConstRef>
-  template <typename FieldMutator>
-  inline void
-  make_aggregate_mref<ConstRef>::accept_mutator(FieldMutator& mutator) const
-  {
-    detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
-    adaptor.visit(*this);
-  }
-
-  template <typename FieldAccessor>
-  inline void
-  group_cref::accept_accessor(FieldAccessor& accessor) const
-  {
-    detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-    adaptor.visit(*this);
-  }
-
-  template <typename ConstFieldRef>
-  template <typename FieldMutator>
-  inline void
-  make_group_mref<ConstFieldRef>::accept_mutator(FieldMutator& mutator) const
-  {
-    detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
-    adaptor.visit(*this);
-  }
-
-  template <typename ElementType, typename SequenceTrait, typename SequenceInstructionType>
-  template <typename FieldAccessor>
-  inline void
-  make_sequence_cref<ElementType, SequenceTrait, SequenceInstructionType>::accept_accessor(FieldAccessor& accessor) const
-  {
-    detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-    adaptor.visit(sequence_cref(*this));
-  }
-
-  template <typename ElementType, typename SequenceTrait, typename SequenceInstructionType>
-  template <typename FieldMutator>
-  inline void
-  make_sequence_mref<ElementType, SequenceTrait, SequenceInstructionType>::accept_mutator(FieldMutator& mutator) const
-  {
-    detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
-    adaptor.visit(sequence_mref(*this));
-  }
-
-  template <typename FieldAccessor>
-  inline void nested_message_cref::accept_accessor(FieldAccessor& accessor) const
-  {
-    detail::field_accessor_adaptor<FieldAccessor> adaptor(accessor);
-    adaptor.visit(*this);
-  }
-
-  template <typename FieldMutator>
-  inline void nested_message_mref::accept_mutator(FieldMutator& mutator) const
-  {
-    detail::field_mutator_adaptor<FieldMutator> adaptor(mutator, this->alloc_);
-    adaptor.visit(*this);
-  }
-
 }
 #endif /* end of include guard: FIELD_VISITOR_H_84G4WWEY */

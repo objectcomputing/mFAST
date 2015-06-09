@@ -168,7 +168,8 @@ namespace mfast {
           strm_ << separator_  << "[";
           if (ref.size()) {
             separator_[0] = '\0';
-            ref.accept_accessor(*this);
+            for (auto && elem : ref)
+              this->visit(elem, 0);
           }
           strm_ << "]";
         }

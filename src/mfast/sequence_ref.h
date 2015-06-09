@@ -396,10 +396,6 @@ namespace mfast {
       return this->rbegin();
     }
 
-
-    template <typename FieldAccesor>
-    void accept_accessor(FieldAccesor&) const;
-
     /**
      * @returns true if the sequence contains only one sub-field and the field is unnamed.
      **/
@@ -529,10 +525,6 @@ namespace mfast {
 
     void resize(size_t n) const;
     void reserve(size_t n) const;
-
-
-    template <typename FieldMutator>
-    void accept_mutator(FieldMutator&) const;
 
     instruction_cptr instruction() const
     {

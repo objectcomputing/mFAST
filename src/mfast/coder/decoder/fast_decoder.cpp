@@ -213,7 +213,10 @@ fast_decoder_impl::visit(group_mref& mref, int)
     debug_ << "        " << mref.name() << " has group pmap -> " << current_pmap() << "\n";
   }
 
-  mref.accept_mutator(*this);
+  for (auto&& field : aggregate_mref(mref))
+  {
+    field.accept_mutator(*this);
+  }
 
   restore_pmap(state);
 }
@@ -241,7 +244,10 @@ fast_decoder_impl::visit(sequence_mref& mref, int)
   }
   if (length_mref.present() && length_mref.value() > 0)
   {
-    mref.accept_mutator(*this);
+    int i = 0;
+    for (auto&& elem : mref) {
+      this->visit(elem, i++);
+    }
   }
 }
 
@@ -257,7 +263,11 @@ fast_decoder_impl::visit(sequence_element_mref& mref, int index)
     debug_ << "    decoded pmap -> " <<  current_pmap() << "\n";
   }
 
-  mref.accept_mutator(*this);
+  // mref.accept_mutator(*this);
+
+  for (auto&& field : mref) {
+    field.accept_mutator(*this);
+  }
 
   restore_pmap(state);
 }
@@ -294,7 +304,11 @@ fast_decoder_impl::visit(nested_message_mref& mref, int)
     }
     mref.set_target_instruction(active_message_->instruction(), false);
   }
-  mref.accept_mutator(*this);
+
+
+  for (auto&& field : mref.target()) {
+    field.accept_mutator(*this);
+  }
 
   restore_pmap(state);
   active_message_ = saved_active_message;
@@ -340,7 +354,11 @@ fast_decoder_impl::decode_segment(fast_istreambuf& sb)
   // may change because of the decoding of dynamic template reference
   message_type* message = active_message_;
   // message->ensure_valid();
-  message->ref().accept_mutator(*this);
+  // message->ref().accept_mutator(*this);
+
+  for (auto&& field : message->ref()) {
+    field.accept_mutator(*this);
+  }
   return message;
 }
 

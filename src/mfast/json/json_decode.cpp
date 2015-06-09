@@ -472,7 +472,9 @@ namespace mfast {
 
       void visit(const mfast::sequence_element_mref& ref, int)
       {
-        ref.accept_mutator(*this);
+        for (auto&& field : ref) {
+          field.accept_mutator(*this);
+        }
       }
 
       void visit(const mfast::group_mref& ref, int)
@@ -576,7 +578,7 @@ namespace mfast {
         ref.resize(i + 1);
         sequence_element_mref element = ref[i++];
         if (ref.element_unnamed())
-          element.accept_mutator(*this);
+          element[0].accept_mutator(*this);
         else
           this->visit_impl(element);
 

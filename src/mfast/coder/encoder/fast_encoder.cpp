@@ -163,7 +163,13 @@ namespace mfast
       setup_pmap(state, cref.instruction()->segment_pmap_size() );
     }
 
-    cref.accept_accessor(*this);
+    // cref.accept_accessor(*this);
+
+    for (auto&& field : aggregate_cref(cref) )
+    {
+      if (field.present())
+        field.accept_accessor(*this);
+    }
 
     commit_pmap(state);
   }
@@ -183,9 +189,14 @@ namespace mfast
 
     this->visit(length_mref);
 
-    if (length_mref.present() && length_mref.value() > 0)
-      cref.accept_accessor(*this);
+    if (length_mref.present() && length_mref.value() > 0) {
+      // cref.accept_accessor(*this);
 
+      for (auto&& elem : cref)
+      {
+        this->visit(elem,0);
+      }
+    }
   }
 
   inline void
@@ -196,7 +207,12 @@ namespace mfast
     {
       setup_pmap(state, cref.instruction()->segment_pmap_size());
     }
-    cref.accept_accessor(*this);
+
+    for (auto&& field : cref )
+    {
+      if (field.present())
+        field.accept_accessor(*this);
+    }
     commit_pmap(state);
   }
 
@@ -243,7 +259,10 @@ namespace mfast
     }
 
     aggregate_cref message(cref.field_storage(0), instruction);
-    message.accept_accessor(*this);
+
+    for (auto&& field : message)
+      if (field.present())
+        field.accept_accessor(*this);
 
     pmap.commit();
   }

@@ -71,9 +71,6 @@ namespace mfast
       return aggregate_cref(this->storage()->of_templateref.content_, this->target_instruction());
     }
 
-    template <typename FieldAccessor>
-    void accept_accessor(FieldAccessor&) const;
-
     template <typename Visitor>
     void accept(Visitor& v) const
     {
@@ -114,9 +111,6 @@ namespace mfast
     {
       return aggregate_mref(alloc_, storage()->of_templateref.content_, this->target_instruction());
     }
-
-    template <typename FieldMutator>
-    void accept_mutator(FieldMutator&) const;
 
     template <typename Visitor>
     void accept(Visitor& v) const

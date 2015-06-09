@@ -74,9 +74,6 @@ namespace mfast
 
     const value_storage* field_storage(size_t index) const;
 
-    template <typename FieldAccesor>
-    void accept_accessor(FieldAccesor&) const;
-
 
     bool absent () const
     {
@@ -181,10 +178,6 @@ namespace mfast
     field_mref operator[](size_t index) const;
 
     mfast::allocator* allocator() const;
-
-
-    template <typename FieldMutator>
-    void accept_mutator(FieldMutator&) const;
 
 
     void as(const ConstRef& other) const;
