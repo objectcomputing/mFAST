@@ -19,7 +19,7 @@ before_install:
     - sudo add-apt-repository ppa:boost-latest/ppa --yes
     - sudo apt-get update -qq
     # Install GNU GCC 4.8 required by use of C++11
-    - if [ "$BUILD" = "g++" ]; then sudo apt-get install -qq g++-4.8 && export CXX="g++-4.8" CC="gcc-4.8";  fi
+    - if [ "$BUILD" = "g++" ] || [ "$BUILD" = "Emscripten" ]; then sudo apt-get install -qq g++-4.8 && export CXX="g++-4.8" CC="gcc-4.8";  fi
     - if [ "$BUILD" = "clang++" ]; then sudo apt-get install libstdc++-4.8-dev && export CXX="clang++" CC="clang"; fi
 
 install:
