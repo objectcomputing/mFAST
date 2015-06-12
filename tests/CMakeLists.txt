@@ -31,7 +31,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
                            mfast_static
                            mfast_coder_static)
 
-    add_test(mfast_test mfast_test)
+    add_test(mfast_test node mfast_test.js)
 
 else()
     FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
