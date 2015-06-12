@@ -1,24 +1,47 @@
 language:
     - cpp
 
-compiler:
-    - gcc
-    - clang
+# compiler:
+#     - gcc
+#     - clang
+
+
+env:
+    - CXX=g++-4.8 CC=gcc-4.8
+    - CXX=clang++ CC=clang
+    - CMAKE_SYSTEM_NAME=Emscripten
 
 before_install:
     # Add software package repositories with recent versions of gcc and boost
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
     - sudo add-apt-repository ppa:boost-latest/ppa --yes
     - sudo apt-get update -qq
-    # Install GNU GCC 4.8 required by use of C++11
-    - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
-    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
-    - if [ "$CXX" = "clang++" ]; then sudo apt-get install libstdc++-4.8-dev; fi
-install:
-    # Install mfast dependencies
     - sudo apt-get install -qq libboost1.55
-    # - sudo apt-get install libboost1.53-dev ibboost-filesystem1.53-dev libboost-system1.53-dev libboost-test1.53-dev
 
+    - if [ $CXX = g++-4.8 ]; then sudo apt-get install -qq g++-4.8; fi
+    - if [ $CXX = clang++ ]; then sudo apt-get install libstdc++-4.8-dev; fi
+     #
+    - if [ $CMAKE_SYSTEM_NAME == Emscripten ]; then
+        sudo apt-get install python2.7 nodejs default-jre
+
+        # install cmake 2.8.8
+        # * github.com/travis-ci-tester/travis-test-cmake
+        wget https://launchpad.net/ubuntu/+source/cmake/2.8.8-2ubuntu1/+build/3441442/+files/cmake_2.8.8-2ubuntu1_amd64.deb
+        wget https://launchpad.net/ubuntu/+archive/primary/+files/cmake-data_2.8.8-2ubuntu1_all.deb
+        sudo apt-get remove cmake-data cmake
+        sudo dpkg --install cmake-data_2.8.8-2ubuntu1_all.deb cmake_2.8.8-2ubuntu1_amd64.deb
+        # -- end
+
+        # install emscripten
+        wget https://s3.amazonaws.com/mozilla-games/emscripten/releases/emsdk-portable.tar.gz
+        tar zxvf emsdk-portable.tar.gz
+        cd emsdk-portable
+        ./emsdk update
+        ./emsdk install latest
+        ./emsdk activate latest
+        source ./emsdk_env.sh
+        # -- end
+      fi
 script:
     - mkdir _builds
     - cd _builds
