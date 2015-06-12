@@ -7,9 +7,9 @@ language:
 
 
 env:
-    - CXX=g++-4.8 CC=gcc-4.8
-    - CXX=clang++ CC=clang
-    - CMAKE_SYSTEM_NAME=Emscripten
+    - BUILD=g++
+    - BUILD=clang++
+    - BUILD=Emscripten
 
 before_install:
     # Add software package repositories with recent versions of gcc and boost
@@ -17,8 +17,8 @@ before_install:
     - sudo add-apt-repository ppa:boost-latest/ppa --yes
     - sudo apt-get update -qq
     # Install GNU GCC 4.8 required by use of C++11
-    - if [ "$CXX" = "g++-4.8" ]; then sudo apt-get install -qq g++-4.8; fi
-    - if [ "$CXX" = "clang++" ]; then sudo apt-get install libstdc++-4.8-dev; fi
+    - if [ "$BUILD" = "g++-4.8" ]; then sudo apt-get install -qq g++-4.8 && export CXX="g++-4.8" CC="gcc-4.8";  fi
+    - if [ "$BUILD" = "clang++" ]; then sudo apt-get install libstdc++-4.8-dev && export CXX="clang++" CC="clang"; fi
 
 install:
     # Install mfast dependencies
@@ -26,7 +26,7 @@ install:
     # - sudo apt-get install libboost1.53-dev ibboost-filesystem1.53-dev libboost-system1.53-dev libboost-test1.53-dev
 
 script:
-    - if [ $CMAKE_SYSTEM_NAME == Emscripten ]; then ./travis-install-emscripten.sh && cd emsdk-portable && source ./emsdk_env.sh && cd ..; fi
+    - if [ $BUILD == Emscripten ]; then ./travis-install-emscripten.sh && cd emsdk-portable && source ./emsdk_env.sh && cd ..; fi
     - mkdir _builds
     - cd _builds
     - cmake ..
