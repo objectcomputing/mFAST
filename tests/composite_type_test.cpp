@@ -114,6 +114,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   for (auto ref: emails.cref())
   {
+#pragma warning(suppress: 6385)
     BOOST_CHECK_EQUAL(ref.value(), values[--index] );
   }
 

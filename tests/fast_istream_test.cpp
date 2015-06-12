@@ -100,7 +100,7 @@ decode_string(const byte_stream& bs, bool nullable, const char* result, std::siz
 
   bool not_null = strm.decode(str, len, instruction, nullable);
 
-  if ((str == nullptr && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
+  if ((str == nullptr && not_null == false) || (str && len == result_len && memcmp(str, result, len) == 0) )
     return true;
 
   boost::test_tools::predicate_result res( false );
@@ -140,7 +140,7 @@ decode_byte_vector(const byte_stream& bs, bool nullable, const char* result, std
 
   bool not_null = strm.decode(str, len, nullptr, nullable);
 
-  if ((result == nullptr && not_null == false) || (len == result_len && memcmp(str, result, len) == 0) )
+  if ((result == nullptr && not_null == false) || (str && result && len == result_len && memcmp(str, result, len) == 0) )
     return true;
 
   boost::test_tools::predicate_result res( false );

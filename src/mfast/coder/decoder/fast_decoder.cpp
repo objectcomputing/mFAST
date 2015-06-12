@@ -292,8 +292,7 @@ fast_decoder_impl::visit(const nested_message_mref& mref, int)
     {
       using namespace coder;
 
-      BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id)
-                                                     << referenced_by_info(active_message_->name()));
+      BOOST_THROW_EXCEPTION(fast_dynamic_error("D9") << template_id_info(template_id));
     }
     mref.set_target_instruction(active_message_->instruction(), false);
   }

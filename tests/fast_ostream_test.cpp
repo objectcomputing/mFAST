@@ -60,6 +60,7 @@ BOOST_AUTO_TEST_CASE(int_test)
   BOOST_CHECK(encode_integer<int16_t>(2, true, "\x83") );
   BOOST_CHECK(encode_integer<int16_t>(-2, false, "\xFE") );
   BOOST_CHECK(encode_integer<int16_t>(-2, true, "\xFE") );
+  BOOST_CHECK(encode_integer<int16_t>(-1, true, "\xFF") );
 
   BOOST_CHECK(encode_integer(INT32_C(942755), true, "\x39\x45\xa4" ));
   BOOST_CHECK(encode_integer(INT32_C(942755), false, "\x39\x45\xa3"));

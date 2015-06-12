@@ -43,6 +43,8 @@ namespace mfast {
     : free_list_head_(nullptr)
   {
     void* block = malloc(default_chunk_size);
+    if (block == 0)
+      throw std::bad_alloc();
     current_list_head_ = new (block) memory_chunk(default_chunk_size, nullptr);
   }
 
@@ -87,6 +89,9 @@ namespace mfast {
         current_list_head_ = new (block) memory_chunk(new_chunk_size, current_list_head_);
       }
     }
+#ifdef _MSC_VER
+#pragma warning(suppress: 6011)
+#endif
     char* result = current_list_head_->start_;
     current_list_head_->start_ += n;
     return result;
