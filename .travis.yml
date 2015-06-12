@@ -11,6 +11,8 @@ env:
     - BUILD=clang++
     - BUILD=Emscripten
 
+# CXX and CC environment variables are always reset by travis after env section is executed. Don't set them here
+
 before_install:
     # Add software package repositories with recent versions of gcc and boost
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes

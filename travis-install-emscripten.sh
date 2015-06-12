@@ -4,10 +4,10 @@ sudo apt-get install python2.7 nodejs default-jre
 
 # install cmake 2.8.8
 # * github.com/travis-ci-tester/travis-test-cmake
-wget https://launchpad.net/ubuntu/+source/cmake/2.8.8-2ubuntu1/+build/3441442/+files/cmake_2.8.8-2ubuntu1_amd64.deb
-wget https://launchpad.net/ubuntu/+archive/primary/+files/cmake-data_2.8.8-2ubuntu1_all.deb
-sudo apt-get remove cmake-data cmake
-sudo dpkg --install cmake-data_2.8.8-2ubuntu1_all.deb cmake_2.8.8-2ubuntu1_amd64.deb
+wget http://www.cmake.org/files/v3.2/cmake-3.2.3-Linux-x86_64.tar.gz
+mkdir cmake-dist
+tar -xzf cmake-3.2.3-Linux-x86_64.tar.gz -C cmake-dist --strip-components=1
+export PATH=$PWD/cmake-dist/bin:$PATH
 # -- end
 
 # install emscripten
