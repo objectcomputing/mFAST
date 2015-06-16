@@ -114,7 +114,9 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   for (auto ref: emails.cref())
   {
+#ifdef _MSC_VER
 #pragma warning(suppress: 6385)
+#endif
     BOOST_CHECK_EQUAL(ref.value(), values[--index] );
   }
 

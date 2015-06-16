@@ -260,9 +260,11 @@ namespace mfast
       this->visit(inst, nullptr);
       aggregate_view_info result;
       result.max_depth_ = 0;
+      std::size_t sz = std::strlen(name)+1;
+      result.name_ = reinterpret_cast<const char*>(std::memcpy(new (alloc_) char[sz] , name, sz));
 
-      result.name_ = std::strcpy(new (alloc_) char[std::strlen(name) + 1],
-                                 name);
+      // result.name_ = std::strcpy(new (alloc_) char[std::strlen(name) + 1],
+      //                            name);
 
       std::deque<field_view_info> fields;
 

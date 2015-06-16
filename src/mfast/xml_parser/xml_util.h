@@ -43,10 +43,8 @@ namespace mfast
     {
       if (str == nullptr || str[0] == '\x0')
         return "";
-      std::size_t len = std::strlen(str);
-      char* result = static_cast<char*>( alloc.allocate(len+1) );
-      std::strcpy(result, str);
-      return result;
+      std::size_t len = std::strlen(str)+1;
+      return reinterpret_cast<const char*>( std::memcpy( alloc.allocate(len), str, len)); ;
     }
 
   } /* xml_parser */

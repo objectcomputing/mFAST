@@ -156,6 +156,7 @@ namespace mfast
           std::memmove(mref.data()+base_start_index, base_str, base_len);
         }
         if (delta_len > 0) {
+          assert(delta_str != nullptr);
           copy_string_raw(mref, delta_start_index, delta_str, delta_len);
         }
       }

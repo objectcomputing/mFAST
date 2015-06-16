@@ -109,7 +109,7 @@ namespace mfast {
     {
       std::streambuf* buf = strm.rdbuf();
 
-      char c;
+      char c=0;
       if (!first_quote_extracted) {
         // make sure the first non-whitespace character is a quote
 
@@ -189,7 +189,8 @@ namespace mfast {
                 strm.get();
 
                 const char* buf = "\\u";
-                pref->insert(pref->end(), buf, buf+2);
+                if (pref)
+                  pref->insert(pref->end(), buf, buf+2);
                 uint32_t val2 = read_4_hex_digits(strm, pref);
 
                 if ( is_low_surrogate(val2)) {
@@ -268,7 +269,7 @@ namespace mfast {
 
     bool skip_value (std::istream& strm)
     {
-      char c1;
+      char c1=0;
       char rest[5];
 
       strm >> std::skipws >> c1;
@@ -310,7 +311,7 @@ namespace mfast {
 
     bool parse_array_preamble(std::istream& strm)
     {
-      char c;
+      char c=0;
       strm >> std::skipws >> c;
       if (!strm.good() || c != '[') {
         strm.setstate(std::ios::failbit);
@@ -412,7 +413,7 @@ namespace mfast {
       {
         if (ref.instruction()->tag().to_uint64() & json_object_tag_mask_) {
           // if the json_object_tag_mask is on, that means the field shouldn't be unpakced
-          char c;
+          char c=0;
           strm_ >> std::skipws >> c;
           if (strm_.good() && c == '{') {
             ref.push_back(c);
@@ -442,7 +443,7 @@ namespace mfast {
           return;
 
         std::size_t i = 0;
-        char c;
+        char c=0;
 
         do {
           ref.resize(i + 1);
@@ -495,7 +496,7 @@ namespace mfast {
         field.omit();
       }
 
-      char c;
+      char c=0;
       strm_ >> std::skipws >> c;
       if (strm_.good() && c == '{') {
         // strm_ >> std::skipws >> c;
@@ -567,7 +568,7 @@ namespace mfast {
         return;
 
       std::size_t i = 0;
-      char c;
+      char c=0;
 
       do {
         ref.resize(i + 1);
