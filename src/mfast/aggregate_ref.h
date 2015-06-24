@@ -457,7 +457,7 @@ namespace mfast
   }
 
   template <typename ConstRef>
-  inline void
+  void
   make_aggregate_mref<ConstRef>::as(const ConstRef& other) const
   {
     // we can only do the assignment when other is present
