@@ -39,7 +39,7 @@ namespace mfast {
   }
 
 }
-#else
+#elif _MSC_VER
 // disable MSVC LNK4221
 namespace { char dummy; };
 #endif
