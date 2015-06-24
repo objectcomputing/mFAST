@@ -111,6 +111,7 @@ decode_mref(const byte_stream&       input_stream,
 
   instruction->destruct_value(old_prev_storage, alloc);
   instruction->destruct_value(storage, alloc);
+
   return res;
 }
 
@@ -1215,10 +1216,11 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_decode_test)
     //  undefined – the base value is the initial value if present in the instruction context. Otherwise a type dependant default base value is used.
     result.as("initial_string");
     BOOST_CHECK(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE) );
-
+    memset(const_cast<value_storage*>(&inst.prev_value()), 0, sizeof(value_storage));
     ascii_string_mref prev(&alloc, &inst.prev_value(), &inst);
 
     // change the previous value to "ABCDE" so we can verified the case with defined previous value
+    inst.prev_value().defined(true);
     prev = "ABCDE";
     // If the tail value is not present in the stream, the value of the field depends on the state of the previous value in the following way::
     //  assigned – the value of the field is the previous value.

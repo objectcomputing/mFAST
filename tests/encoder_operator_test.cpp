@@ -92,9 +92,9 @@ encode_mref(const byte_stream&       result_stream,
 
   res = res.has_empty_message();
 
-  instruction->destruct_value(prev_storage,alloc);
+  // instruction->destruct_value(prev_storage,alloc);
   instruction->destruct_value(old_prev_storage,alloc);
-  prev_storage.of_array.capacity_in_bytes_ = 0;
+  // prev_storage.of_array.capacity_in_bytes_ = 0;
 
   return res;
 }
@@ -157,9 +157,10 @@ encode_ext_cref(const byte_stream&       result_stream,
 
   res = res.has_empty_message();
 
-  instruction->destruct_value(prev_storage,alloc);
+  // instruction->destruct_value(prev_storage,alloc);
+  // memset(&prev_storage, 0, sizeof(prev_storage));
   instruction->destruct_value(old_prev_storage,alloc);
-  prev_storage.of_array.capacity_in_bytes_ = 0;
+  // prev_storage.of_array.capacity_in_bytes_ = 0;
 
   return res;
 }
@@ -964,6 +965,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_encode_test)
                                  ext_cref<ascii_string_cref, delta_operator_tag, mandatory_with_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 
   { // testing mandatory field with initial value
@@ -990,6 +992,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_encode_test)
                                  ext_cref<ascii_string_cref, delta_operator_tag, mandatory_with_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 
   { // testing mandatory field without initial value
@@ -1015,6 +1018,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_encode_test)
                                  ext_cref<ascii_string_cref, delta_operator_tag, mandatory_without_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 
   { // testing optional field with NULL substraction in the stream
@@ -1041,6 +1045,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_encode_test)
                                  ext_cref<ascii_string_cref, delta_operator_tag, optional_with_initial_value_tag>(result),
                                  PRESERVE_PREVIOUS_VALUE, &alloc ) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
@@ -1067,6 +1072,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_encode_test)
                                  ext_cref<ascii_string_cref, delta_operator_tag, optional_with_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 
   { // testing optional field with negative substraction in the stream
@@ -1094,6 +1100,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_ascii_encode_test)
                                  ext_cref<ascii_string_cref, delta_operator_tag, optional_with_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 }
 
@@ -1127,6 +1134,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_encode_test)
                                  ext_cref<unicode_string_cref, delta_operator_tag, mandatory_with_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 
 
@@ -1158,6 +1166,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_encode_test)
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
 
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 
   { // testing optional field with NULL substraction in the stream
@@ -1188,6 +1197,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_encode_test)
                                  PRESERVE_PREVIOUS_VALUE, &alloc ) );
 
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
   { // testing optional field with positive substraction in the stream
     const char* default_value = "initial_string";
@@ -1215,6 +1225,7 @@ BOOST_AUTO_TEST_CASE(operator_delta_unicode_encode_test)
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
 
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 }
 
@@ -1248,6 +1259,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_encode_test)
                                  CHANGE_PREVIOUS_VALUE, &alloc ) );
 
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
   { // testing mandatory field with initial value while tail value not in the stream
     const char* default_value = "initial_string";
@@ -1285,6 +1297,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_encode_test)
                                  ext_cref<ascii_string_cref, tail_operator_tag, mandatory_with_initial_value_tag>(result),
                                  PRESERVE_PREVIOUS_VALUE, &alloc ) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
 
   }
   { // testing mandatory field without initial value while tail value is in the stream
@@ -1312,6 +1325,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_encode_test)
                                  ext_cref<ascii_string_cref, tail_operator_tag, mandatory_without_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
 
   }
   { // testing optional field with initial value
@@ -1340,6 +1354,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_encode_test)
                                  ext_cref<ascii_string_cref, tail_operator_tag, optional_with_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 
   { // testing optional field with NULL tail value
@@ -1368,6 +1383,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_encode_test)
                                  ext_cref<ascii_string_cref, tail_operator_tag, optional_with_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
   }
 
   { // testing optional field with initial value while tail value not in the stream
@@ -1417,6 +1433,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_encode_test)
                                  ext_cref<ascii_string_cref, tail_operator_tag, optional_with_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
 
   }
   { // testing optional field without initial value while tail value not in the stream
@@ -1446,6 +1463,7 @@ BOOST_AUTO_TEST_CASE(operator_tail_ascii_encode_test)
                                  ext_cref<ascii_string_cref, tail_operator_tag, optional_without_initial_value_tag>(result),
                                  CHANGE_PREVIOUS_VALUE, &alloc) );
     inst.destruct_value(storage, &alloc);
+    inst.destruct_value(inst.prev_value(), &alloc);
 
   }
 }
