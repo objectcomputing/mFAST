@@ -139,20 +139,17 @@ int main(int argc, const char** argv)
         char* buf_beg = &buffer[0];
         char* buf_end = buf_beg + buffer.size();
 #endif
-        const char *first = &message_contents[0] + skip_header_bytes;
-        const char *last = &message_contents[0] + message_contents.size();
+        const char* first = &message_contents[0] + skip_header_bytes;
+        const char* last = &message_contents[0] + message_contents.size();
         bool first_message = true;
         while (first < last ) {
 #ifdef WITH_ENCODE
           mfast::message_cref msg =
 #endif
-            decoder.decode(first, last, force_reset || first_message );
+          decoder.decode(first, last, force_reset || first_message );
 
 #ifdef WITH_ENCODE
-         buf_beg += encoder.encode(msg, buf_beg, buf_end-buf_beg, force_reset || first_message);
-#endif
-#ifdef WITH_MESSAGE_COPY
-          msg_value = mfast::message_type(msg, &malloc_allc);
+          buf_beg += encoder.encode(msg, buf_beg, buf_end-buf_beg, force_reset || first_message);
 #endif
           first_message = false;
           first += skip_header_bytes;

@@ -9,8 +9,6 @@ add_executable (fast_type_gen
 
 
 target_link_libraries (fast_type_gen
-                       ${Boost_SYSTEM_LIBRARY}
-                       ${Boost_FILESYSTEM_LIBRARY}
                        mfast_xml_parser_static
                        mfast_static
                        mfast_coder_static)
