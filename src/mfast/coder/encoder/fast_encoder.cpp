@@ -98,7 +98,8 @@ namespace mfast
 
   inline
   fast_encoder_impl::fast_encoder_impl(allocator* alloc)
-    : strm_(alloc)
+    : simple_template_repo_t(alloc)
+    , strm_(alloc)
     , active_message_id_(-1)
   {
   }
