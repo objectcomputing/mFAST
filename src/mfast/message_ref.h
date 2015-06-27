@@ -160,16 +160,6 @@ namespace mfast {
   }
 
 
-  // template <typename AggregateCRef, typename TemplateType>
-  // template <typename T>
-  // inline
-  // make_message_cref(const make_message_cref<T, template_instruction>& other,
-  //                   typename boost::disable_if_c< boost::is_same<AggregateCRef, aggregate_cref>::value &&
-  //                                                 boost::is_same<T, aggregate_cref>::value >::type* = 0)
-  //   : AggregateCRef(other.field_storage(0), other.instruction())
-  // {
-  //   assert( dynamic_cast<const TemplateType*>(other.instruction()) );
-  // }
 
   template <typename AggregateCRef, typename TemplateType>
   inline
@@ -247,22 +237,6 @@ namespace mfast {
   {
   }
 
-  // template <typename AggregateMRef, typename TemplateType>
-  // inline
-  // make_message_mref<AggregateMRef,TemplateType>::make_message_mref(const make_message_mref<AggregateMRef,TemplateType>& mref)
-  //   : AggregateMRef(mref)
-  // {
-  // }
-
-  // template <typename AggregateMRef, typename TemplateType>
-  // inline
-  // make_message_mref<AggregateMRef,TemplateType>::make_message_mref(const make_message_mref<aggregate_mref, template_instruction>& mref)
-  //   : AggregateMRef(other.allocator(),
-  //                   const_cast<value_storage*>(other.field_storage(0)),
-  //                   other.instruction())
-  // {
-  //   assert( dynamic_cast<const TemplateType*>(other.instruction()) );
-  // }
 
   template <typename AggregateMRef, typename TemplateType>
   inline
