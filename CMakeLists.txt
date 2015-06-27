@@ -2,10 +2,14 @@
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
 
-cmake_minimum_required (VERSION 2.8.0)
+cmake_minimum_required(VERSION 2.8.8)
 
 
-project (mFAST)
+project (mFAST CXX)
+
+
+set(EXT_PROJECTS_DIR external_projects)
+
 
 if (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 	list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -24,7 +28,6 @@ include(CPack)
 
 
 
-set(BOOST_TEST_HEADER_ONLY OFF CACHE BOOL "including the Boost Unit Testing Framework sources directly into test project")
 # flag to enable building shared/dynamic library
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "build shared/dynamic library")
 # Offer the user the choice of overriding the installation directories
@@ -77,11 +80,8 @@ include_directories ("${PROJECT_BINARY_DIR}"
 ## Setting up Boost Library
 ################################
 
-if (BUILD_FAST_TYPE_GEN AND NOT BOOST_TEST_HEADER_ONLY)
-    find_package(Boost 1.55.0 REQUIRED unit_test_framework)
-else()
-    find_package(Boost 1.55.0 REQUIRED)
-endif()
+
+find_package(Boost 1.55.0 REQUIRED)
 
 
 if (NOT BUILD_FAST_TYPE_GEN)
@@ -91,7 +91,6 @@ if (NOT BUILD_FAST_TYPE_GEN)
     endif()
 endif(NOT BUILD_FAST_TYPE_GEN)
 
-link_directories(${Boost_LIBRARY_DIRS})
 include_directories(${Boost_INCLUDE_DIR})
 
 
@@ -137,11 +136,11 @@ link_directories (${PROJECT_BINARY_DIR}/src)
 # Install fast_type_gen batch file to set up the PATH environment
 # variable for using BOOST libraries
 
-if(MSVC_IDE)
-    configure_file(invoke.bat.in
-                   "${PROJECT_BINARY_DIR}/bin/invoke.bat"
-                   @ONLY)
-endif(MSVC_IDE)
+# if(MSVC_IDE)
+#     configure_file(invoke.bat.in
+#                    "${PROJECT_BINARY_DIR}/bin/invoke.bat"
+#                    @ONLY)
+# endif(MSVC_IDE)
 
 #============================================================
 # FASTTYPEGEN_TARGET (public macro)
@@ -202,10 +201,9 @@ endmacro()
 
 
 
-#============================================================
-# Recurse into the "src" and "unit-tests" subdirectories. This does not actually
-# cause another cmake executable to run. The same process will walk through
-# the project's entire directory structure.
+# Includes Catch in the project:
+add_subdirectory(${EXT_PROJECTS_DIR}/catch)
+include_directories(${CATCH_INCLUDE_DIR} ${COMMON_INCLUDES})
 enable_testing()
 
 add_subdirectory (tests)

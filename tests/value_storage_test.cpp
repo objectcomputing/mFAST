@@ -17,117 +17,112 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
+#include "catch.hpp"
 
 #include <mfast/value_storage.h>
 using namespace mfast;
 
-static const void* NULLPTR = nullptr;
-
-BOOST_AUTO_TEST_SUITE( test_value_storage )
 
 using namespace mfast;
 
-BOOST_AUTO_TEST_CASE(default_constructor_test)
+TEST_CASE("test the default construction of value_type", "[default_constructor_test]")
 {
   value_storage value;
 
-  BOOST_CHECK_EQUAL(value.of_uint64.present_,                                0U);
-  BOOST_CHECK_EQUAL(value.of_uint64.defined_bit_,                            0U);
-  BOOST_CHECK_EQUAL(value.of_uint64.content_,                              0ULL);
+  REQUIRE(value.of_uint64.present_ ==                                 0U);
+  REQUIRE(value.of_uint64.defined_bit_ ==                             0U);
+  REQUIRE(value.of_uint64.content_ ==                               0ULL);
 
-  BOOST_CHECK_EQUAL(value.of_decimal.present_,                             0U);
-  BOOST_CHECK_EQUAL(value.of_decimal.exponent_,                             0);
-  BOOST_CHECK_EQUAL(value.of_decimal.defined_bit_,                         0U);
-  BOOST_CHECK_EQUAL(value.of_decimal.mantissa_,                           0LL);
+  REQUIRE(value.of_decimal.present_ ==                              0U);
+  REQUIRE(value.of_decimal.exponent_ ==                              0);
+  REQUIRE(value.of_decimal.defined_bit_ ==                          0U);
+  REQUIRE(value.of_decimal.mantissa_ ==                            0LL);
 
-  BOOST_CHECK_EQUAL(value.of_group.present_,                               0U);
-  BOOST_CHECK_EQUAL(value.of_group.own_content_,                           0U);
-  BOOST_CHECK_EQUAL(value.of_group.defined_bit_,                           0U);
-  BOOST_CHECK_EQUAL(value.of_group.content_,                          NULLPTR);
+  REQUIRE(value.of_group.present_ ==                                0U);
+  REQUIRE(value.of_group.own_content_ ==                            0U);
+  REQUIRE(value.of_group.defined_bit_ ==                            0U);
+  REQUIRE(value.of_group.content_ ==                           nullptr);
 
-  BOOST_CHECK_EQUAL(value.of_array.len_,                                   0U);
-  BOOST_CHECK_EQUAL(value.of_array.capacity_in_bytes_,                     0U);
-  BOOST_CHECK_EQUAL(value.of_array.defined_bit_,                           0U);
-  BOOST_CHECK_EQUAL(value.of_array.content_,                          NULLPTR);
+  REQUIRE(value.of_array.len_ ==                                    0U);
+  REQUIRE(value.of_array.capacity_in_bytes_ ==                      0U);
+  REQUIRE(value.of_array.defined_bit_ ==                            0U);
+  REQUIRE(value.of_array.content_ ==                           nullptr);
 
-  BOOST_CHECK_EQUAL(value.of_templateref.of_instruction.instruction_, NULLPTR);
-  BOOST_CHECK_EQUAL(value.of_templateref.content_,                    NULLPTR);
+  REQUIRE(value.of_templateref.of_instruction.instruction_ ==  nullptr);
+  REQUIRE(value.of_templateref.content_ ==                     nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(non_empty_constructor_test)
+TEST_CASE("test the value_storage constructed with 1", "[non_empty_constructor_test]")
 {
   value_storage value(1);
 
-  BOOST_CHECK(value.of_uint64.present_ != 0);
-  BOOST_CHECK_EQUAL(value.of_uint64.defined_bit_, 1U);
-  BOOST_CHECK_EQUAL(value.of_uint64.content_,   0ULL);
+  REQUIRE(value.of_uint64.present_ != 0);
+  REQUIRE(value.of_uint64.defined_bit_ ==  1U);
+  REQUIRE(value.of_uint64.content_ ==    0ULL);
 
-  BOOST_CHECK(value.of_decimal.present_ != 0);
-  BOOST_CHECK_EQUAL(value.of_decimal.exponent_,     0);
-  BOOST_CHECK_EQUAL(value.of_decimal.defined_bit_, 1U);
-  BOOST_CHECK_EQUAL(value.of_decimal.mantissa_,   0LL);
+  REQUIRE(value.of_decimal.present_ != 0);
+  REQUIRE(value.of_decimal.exponent_ ==      0);
+  REQUIRE(value.of_decimal.defined_bit_ ==  1U);
+  REQUIRE(value.of_decimal.mantissa_ ==    0LL);
 
-  BOOST_CHECK(value.of_group.present_ != 0);
-  BOOST_CHECK_EQUAL(value.of_group.own_content_,  0U);
-  BOOST_CHECK_EQUAL(value.of_group.defined_bit_,  1U);
-  BOOST_CHECK_EQUAL(value.of_group.content_, NULLPTR);
+  REQUIRE(value.of_group.present_ != 0);
+  REQUIRE(value.of_group.own_content_ ==   0U);
+  REQUIRE(value.of_group.defined_bit_ ==   1U);
+  REQUIRE(value.of_group.content_ ==  nullptr);
 
-  BOOST_CHECK(value.of_array.len_ != 0);
-  BOOST_CHECK_EQUAL(value.of_array.capacity_in_bytes_, 0U);
-  BOOST_CHECK_EQUAL(value.of_array.defined_bit_,       1U);
-  BOOST_CHECK_EQUAL(value.of_array.content_,      NULLPTR);
+  REQUIRE(value.of_array.len_ != 0);
+  REQUIRE(value.of_array.capacity_in_bytes_ ==  0U);
+  REQUIRE(value.of_array.defined_bit_ ==        1U);
+  REQUIRE(value.of_array.content_ ==       nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(defined_test)
+TEST_CASE("test value_storage.defined()", "[defined_test]")
 {
   value_storage value;
   value.defined(true);
-  BOOST_CHECK_EQUAL(value.of_uint64.defined_bit_,    1U);
-  BOOST_CHECK_EQUAL(value.of_decimal.defined_bit_, 1U);
-  BOOST_CHECK_EQUAL(value.of_group.defined_bit_,   1U);
-  BOOST_CHECK_EQUAL(value.of_array.defined_bit_,   1U);
+  REQUIRE(value.of_uint64.defined_bit_ ==     1U);
+  REQUIRE(value.of_decimal.defined_bit_ ==  1U);
+  REQUIRE(value.of_group.defined_bit_ ==    1U);
+  REQUIRE(value.of_array.defined_bit_ ==    1U);
 
   value.defined(false);
-  BOOST_CHECK_EQUAL(value.of_uint64.defined_bit_,    0U);
-  BOOST_CHECK_EQUAL(value.of_decimal.defined_bit_, 0U);
-  BOOST_CHECK_EQUAL(value.of_group.defined_bit_,   0U);
-  BOOST_CHECK_EQUAL(value.of_array.defined_bit_,   0U);
+  REQUIRE(value.of_uint64.defined_bit_ ==     0U);
+  REQUIRE(value.of_decimal.defined_bit_ ==  0U);
+  REQUIRE(value.of_group.defined_bit_ ==    0U);
+  REQUIRE(value.of_array.defined_bit_ ==    0U);
 }
 
-BOOST_AUTO_TEST_CASE(empty_test)
+TEST_CASE("test value_storage.present()","[empty_test]")
 {
   value_storage value;
 
   value.present(true);
-  BOOST_CHECK_EQUAL(value.is_empty(), false);
-  BOOST_CHECK(value.of_uint64.present_ != 0);
-  BOOST_CHECK(value.of_decimal.present_ != 0);
-  BOOST_CHECK(value.of_group.present_ != 0);
-  BOOST_CHECK(value.of_array.len_ != 0);
+  REQUIRE(value.is_empty() ==  false);
+  REQUIRE(value.of_uint64.present_ != 0);
+  REQUIRE(value.of_decimal.present_ != 0);
+  REQUIRE(value.of_group.present_ != 0);
+  REQUIRE(value.of_array.len_ != 0);
 
   value.present(false);
-  BOOST_CHECK_EQUAL(value.is_empty(),        true);
-  BOOST_CHECK_EQUAL(value.of_uint64.present_,    0U);
-  BOOST_CHECK_EQUAL(value.of_decimal.present_, 0U);
-  BOOST_CHECK_EQUAL(value.of_group.present_,   0U);
-  BOOST_CHECK_EQUAL(value.of_array.len_,       0U);
+  REQUIRE(value.is_empty() ==         true);
+  REQUIRE(value.of_uint64.present_ ==     0U);
+  REQUIRE(value.of_decimal.present_ ==  0U);
+  REQUIRE(value.of_group.present_ ==    0U);
+  REQUIRE(value.of_array.len_ ==        0U);
 }
 
-BOOST_AUTO_TEST_CASE(array_length_test)
+TEST_CASE("test value_storage.array_length","[array_length_test]")
 {
   value_storage value;
   value.array_length(0);
-  BOOST_CHECK_EQUAL(value.is_empty(),  false);
-  BOOST_CHECK_EQUAL(value.array_length(), 0U);
+  REQUIRE(value.is_empty() ==   false);
+  REQUIRE(value.array_length() ==  0U);
 
   value.array_length(1);
-  BOOST_CHECK_EQUAL(value.is_empty(),  false);
-  BOOST_CHECK_EQUAL(value.array_length(), 1U);
+  REQUIRE(value.is_empty() ==   false);
+  REQUIRE(value.array_length() ==  1U);
 
   value.present(false);
-  BOOST_CHECK_EQUAL(value.is_empty(),   true);
+  REQUIRE(value.is_empty() ==    true);
 }
 
-BOOST_AUTO_TEST_SUITE_END()

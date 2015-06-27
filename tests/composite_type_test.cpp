@@ -17,8 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
+#include "catch.hpp"
 
 #include "test4.h"
 #include <mfast/field_comparator.h>
@@ -27,9 +26,8 @@
 #include <boost/assign/list_of.hpp> // for 'list_of()'
 using namespace boost::assign; // bring 'list_of()' into scope
 
-BOOST_AUTO_TEST_SUITE( composite_test_suite )
 
-BOOST_AUTO_TEST_CASE(test_group)
+TEST_CASE("test the operations of group_mref","[test_group]")
 {
   debug_allocator alloc;
   using namespace test4;
@@ -46,13 +44,10 @@ BOOST_AUTO_TEST_CASE(test_group)
 
   Address addr2(addr1.cref(), &alloc2);
 
-  BOOST_CHECK(addr1.cref() == addr2.cref());
-
-
-
+  REQUIRE(addr1.cref() == addr2.cref());
 }
 
-BOOST_AUTO_TEST_CASE(test_sequence)
+TEST_CASE("test the operations of sequence_mref","[test_sequence]")
 {
   debug_allocator alloc1;
   using namespace test4;
@@ -70,8 +65,8 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   debug_allocator alloc2;
   PhoneNumbers numbers_holder2(numbers_holder1.cref(), &alloc2);
 
-  BOOST_CHECK(numbers_holder1.cref() == numbers_holder2.cref());
-  BOOST_CHECK(numbers_holder1.mref() == numbers_holder2.mref());
+  REQUIRE(numbers_holder1.cref() == numbers_holder2.cref());
+  REQUIRE(numbers_holder1.mref() == numbers_holder2.mref());
 
   // Testing sequence of primitive types
 
@@ -85,27 +80,27 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   emails.mref().assign(values, values+3);
 
-  BOOST_REQUIRE_EQUAL(emails.cref().size(), 3U);
-  BOOST_CHECK(emails.cref()[0] == values[0]);
-  BOOST_CHECK(emails.cref()[1] == values[1]);
-  BOOST_CHECK(emails.cref()[2] == values[2]);
+  REQUIRE(emails.cref().size() ==  3U);
+  REQUIRE(emails.cref()[0] == values[0]);
+  REQUIRE(emails.cref()[1] == values[1]);
+  REQUIRE(emails.cref()[2] == values[2]);
 
   std::size_t index = 0;
 
   for (Emails_cref::iterator it = emails.cref().begin(); it != emails.cref().end(); ++it)
   {
-    BOOST_CHECK( it->value() == values[index++] );
+    REQUIRE( it->value() == values[index++] );
   }
 
   BOOST_REVERSE_FOREACH(mfast::ascii_string_cref ref, emails.cref())
   {
-    BOOST_CHECK_EQUAL(ref.value(), values[--index] );
+    REQUIRE(ref.value() ==  values[--index] );
   }
 
   emails.mref().as( list_of("test1")("test2") );
-  BOOST_REQUIRE_EQUAL(emails.cref().size(), 2U);
-  BOOST_CHECK(emails.cref()[0] == "test1");
-  BOOST_CHECK(emails.cref()[1] == "test2");
+  REQUIRE(emails.cref().size() ==  2U);
+  REQUIRE(emails.cref()[0] == "test1");
+  REQUIRE(emails.cref()[1] == "test2");
 
   BOOST_REVERSE_FOREACH(mfast::ascii_string_mref ref, emails.mref())
   {
@@ -117,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 #ifdef _MSC_VER
 #pragma warning(suppress: 6385)
 #endif
-    BOOST_CHECK_EQUAL(ref.value(), values[--index] );
+    REQUIRE(ref.value() ==  values[--index] );
   }
 
   // Testing sequence of aggregate types
@@ -130,8 +125,8 @@ BOOST_AUTO_TEST_CASE(test_sequence)
   }
 
   Addresses_mref::iterator it = addresses.mref().grow_by(2);
-  BOOST_CHECK_EQUAL(addresses.cref().size(), 2U);
-  BOOST_CHECK(it == addresses.mref().begin());
+  REQUIRE(addresses.cref().size() ==  2U);
+  REQUIRE(it == addresses.mref().begin());
   index = 0;
 
   for (Addresses_mref::iterator itr = addresses.mref().begin(); itr != addresses.mref().end(); ++itr)
@@ -153,12 +148,12 @@ BOOST_AUTO_TEST_CASE(test_sequence)
 
   for (auto addr: addresses.cref())
   {
-    BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
+    REQUIRE(addr.get_postalCode().value() ==  index+10000);
     ++index;
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_template)
+TEST_CASE("test the operations of message_mref", "[test_template]")
 {
   debug_allocator alloc;
   using namespace test4;
@@ -166,30 +161,30 @@ BOOST_AUTO_TEST_CASE(test_template)
   Person person1(&alloc);
 
   Person_mref person_mref(person1.mref());
-  BOOST_CHECK_EQUAL(person_mref.get_firstName().instruction()->field_type(), mfast::field_type_unicode_string);
+  REQUIRE(person_mref.get_firstName().instruction()->field_type() ==  mfast::field_type_unicode_string);
   person_mref.set_firstName().as("John");
   person_mref.set_lastName().as("Doe");
 
   // testing the default value
-  BOOST_CHECK(person_mref.get_gender().is_female());
+  REQUIRE(person_mref.get_gender().is_female());
 
   person_mref.set_bloodType().as_O();
-  BOOST_CHECK_EQUAL(person_mref.get_bloodType().value(), Person_cref::bloodType::O);
-  BOOST_CHECK(person_mref.get_bloodType().is_O());
-  BOOST_CHECK_EQUAL(strcmp(person_mref.get_bloodType().value_name(), "O"), 0);
+  REQUIRE(person_mref.get_bloodType().value() ==  Person_cref::bloodType::O);
+  REQUIRE(person_mref.get_bloodType().is_O());
+  REQUIRE(strcmp(person_mref.get_bloodType().value_name(), "O") == 0);
 
 
   person_mref.set_discrete().as_Five();
-  BOOST_CHECK_EQUAL(person_mref.get_discrete().value(), DiscreteEnum::Five);
-  BOOST_CHECK(person_mref.get_discrete().is_Five());
-  BOOST_CHECK_EQUAL(strcmp(person_mref.get_discrete().value_name(), "Five"), 0);
+  REQUIRE(person_mref.get_discrete().value() ==  DiscreteEnum::Five);
+  REQUIRE(person_mref.get_discrete().is_Five());
+  REQUIRE(strcmp(person_mref.get_discrete().value_name(), "Five") == 0);
 
   person_mref.set_salary().as(20.0);
-  BOOST_CHECK_EQUAL(person_mref.get_salary().exponent(),                    -2);
-  BOOST_CHECK_EQUAL(person_mref.get_salary().mantissa(),                  2000);
+  REQUIRE(person_mref.get_salary().exponent() ==                     -2);
+  REQUIRE(person_mref.get_salary().mantissa() ==                   2000);
 
 
-  BOOST_CHECK_EQUAL(person_mref.get_id().size(),                           16U);
+  REQUIRE(person_mref.get_id().size() ==                            16U);
 
 
   int num_addresses = 0;
@@ -200,7 +195,7 @@ BOOST_AUTO_TEST_CASE(test_template)
     addr.instruction(); // avoid unused variable warning
   }
 
-  BOOST_CHECK_EQUAL(num_addresses, 0);
+  REQUIRE(num_addresses ==  0);
 
   debug_allocator alloc2;
 
@@ -209,27 +204,27 @@ BOOST_AUTO_TEST_CASE(test_template)
 
   Person tmp_person(&alloc2);
 
-  BOOST_CHECK(!tmp_person.cref().get_education().present());
+  REQUIRE(!tmp_person.cref().get_education().present());
 
   tmp_person.mref().set_education().set_college().as("SLU");
   tmp_person.mref().set_education().set_high_school().as("Kirkwood");
 
-  BOOST_CHECK(tmp_person.cref().get_education().present());
+  REQUIRE(tmp_person.cref().get_education().present());
 
   person1.mref().set_education().as( tmp_person.cref().get_education() );
-  BOOST_CHECK(person1.cref().get_education() == tmp_person.cref().get_education());
+  REQUIRE(person1.cref().get_education() == tmp_person.cref().get_education());
 
 
   // testing group link
   person1.mref().set_education().set_college().as("UMSTL");
   // tmp_person.mref().link_education( person1.mref().set_education() );
-  // BOOST_CHECK_EQUAL( tmp_person.cref().get_education().get_college().value(),
+  // REQUIRE_EQUAL( tmp_person.cref().get_education().get_college().value(),
   //                    person1.cref().get_education().get_college().value());
 
 
   // testing sequence assignment
   person1.mref().set_addresses().resize(4);
-  BOOST_CHECK_EQUAL(person1.cref().get_addresses().size(), 4U);
+  REQUIRE(person1.cref().get_addresses().size() ==  4U);
 
 
   unsigned index = 0;
@@ -243,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_template)
 
   for (auto addr: person1.cref().get_addresses())
   {
-    BOOST_CHECK_EQUAL(addr.get_postalCode().value(), index+10000);
+    REQUIRE(addr.get_postalCode().value() ==  index+10000);
     ++index;
   }
 
@@ -252,24 +247,23 @@ BOOST_AUTO_TEST_CASE(test_template)
 
   Person person2(person1.cref(), &alloc2);
 
-  BOOST_CHECK(person1.cref() == person2.cref());
+  REQUIRE(person1.cref() == person2.cref());
 
   Person person3(&alloc);
 
   person3.mref().as(person1.cref());
 
-  BOOST_CHECK(person1.cref() == person3.cref());
+  REQUIRE(person1.cref() == person3.cref());
 
   Person person4(person1);
 
-  BOOST_CHECK(person1.cref() == person4.cref());
+  REQUIRE(person1.cref() == person4.cref());
 
 
   Person person5;
   person5 = person1;
-  BOOST_CHECK(person1.cref() == person5.cref());
+  REQUIRE(person1.cref() == person5.cref());
 
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()

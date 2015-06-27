@@ -16,9 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
 
+#include "catch.hpp"
 #include <mfast.h>
 #include <mfast/field_comparator.h>
 #include <mfast/coder/fast_encoder_v2.h>
@@ -50,7 +49,7 @@ class fast_coding_test_case
     {
     }
 
-    boost::test_tools::predicate_result
+    bool
     encoding(const message_cref& msg_ref, const byte_stream& result, bool reset=false)
     {
       const int buffer_size = 128;
@@ -64,12 +63,11 @@ class fast_coding_test_case
       if (result == byte_stream(buffer, encoded_size))
         return true;
 
-      boost::test_tools::predicate_result res( false );
-      res.message() << "Got \"" << byte_stream(buffer, encoded_size) << "\" instead.";
-      return res;
+      INFO("Got \"" << byte_stream(buffer, encoded_size) << "\" instead.");
+      return false;
     }
 
-    boost::test_tools::predicate_result
+    bool
     decoding(const byte_stream& bytes, const message_cref& result, bool reset=false)
     {
       const char* first = bytes.data();
@@ -78,8 +76,7 @@ class fast_coding_test_case
       if (msg == result)
         return true;
 
-      boost::test_tools::predicate_result res( false );
-      return res;
+      return false;
     }
 
   private:
@@ -88,10 +85,8 @@ class fast_coding_test_case
     mfast::fast_decoder_v2<0> decoder_;
 };
 
-BOOST_AUTO_TEST_SUITE( test_fast_coder2 )
 
-
-BOOST_AUTO_TEST_CASE(simple_coder_test)
+TEST_CASE("test fast coder v2 for a simple template","[simple_coder_test]")
 {
   fast_coding_test_case<simple1::templates_description> test_case;
 
@@ -105,11 +100,11 @@ BOOST_AUTO_TEST_CASE(simple_coder_test)
 
 
 
-  BOOST_CHECK(test_case.encoding(msg_ref,"\xB8\x81\x82\x83"));
-  BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
+  REQUIRE(test_case.encoding(msg_ref,"\xB8\x81\x82\x83"));
+  REQUIRE(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
 }
 
-BOOST_AUTO_TEST_CASE(group_coder_test)
+TEST_CASE("test fast coder v2 for a template with group","[group_coder_test]")
 {
   fast_coding_test_case<simple2::templates_description> test_case;
 
@@ -121,21 +116,21 @@ BOOST_AUTO_TEST_CASE(group_coder_test)
   msg_ref.set_group1().set_field2().as(2);
   msg_ref.set_group1().set_field3().as(3);
 
-  BOOST_CHECK(test_case.encoding(msg_ref, "\xB0\x81\xE0\x82\x83"));
-  BOOST_CHECK(test_case.decoding("\xB0\x81\xE0\x82\x83", msg_ref));
+  REQUIRE(test_case.encoding(msg_ref, "\xB0\x81\xE0\x82\x83"));
+  REQUIRE(test_case.decoding("\xB0\x81\xE0\x82\x83", msg_ref));
 
   // mfast::fast_decoder_v2< boost::mpl::vector<simple2::templates_description*> > decoder;
   // const char* strm = "\xB0\x81\xE0\x82\x83";
   //
   // simple2::Test_cref ref(decoder.decode(strm, strm +5));
-  // BOOST_CHECK_EQUAL(ref.get_field1().value(), 1);
-  // BOOST_CHECK(ref.get_group1().present());
-  // BOOST_CHECK_EQUAL(ref.get_group1().get_field2().value(), 2);
-  // BOOST_CHECK_EQUAL(ref.get_group1().get_field3().value(), 3);
+  // REQUIRE_EQUAL(ref.get_field1().value(), 1);
+  // REQUIRE(ref.get_group1().present());
+  // REQUIRE_EQUAL(ref.get_group1().get_field2().value(), 2);
+  // REQUIRE_EQUAL(ref.get_group1().get_field3().value(), 3);
 
 }
 
-BOOST_AUTO_TEST_CASE(sequence_coder_test)
+TEST_CASE("test fast coder v2 for a template with sequence","[sequence_coder_test]")
 {
   fast_coding_test_case<simple3::templates_description> test_case;
 
@@ -152,16 +147,16 @@ BOOST_AUTO_TEST_CASE(sequence_coder_test)
   seq[1].set_field2().as(0);
   seq[1].set_field3().as(1);
 
-  BOOST_CHECK(test_case.encoding(msg_ref,
+  REQUIRE(test_case.encoding(msg_ref,
                                  // pmap | f1 | s1 len| elem1 pmap | f2 | f3 | elem2 pmap |  f2 | f3 |
                                  //  A0    81    83        E0        82   83     E0          80   81
                                  "\xA0\x81\x83\xE0\x82\x83\xE0\x80\x81"
                                  ));
-  BOOST_CHECK(test_case.decoding("\xA0\x81\x83\xE0\x82\x83\xE0\x80\x81", msg_ref));
+  REQUIRE(test_case.decoding("\xA0\x81\x83\xE0\x82\x83\xE0\x80\x81", msg_ref));
 
 }
 
-BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
+TEST_CASE("test fast coder v2 for a template with static templateref","[static_templateref_coder_test]")
 {
   fast_coding_test_case<simple4::templates_description> test_case;
 
@@ -174,12 +169,12 @@ BOOST_AUTO_TEST_CASE(static_templateref_coder_test)
   msg_ref.set_field3().as(3);
                                  // pmap | template id | field1 | field2 | field 3 |
                                  //  F8         82        81        82       83
-  BOOST_CHECK(test_case.encoding(msg_ref,"\xF8\x82\x81\x82\x83"));
-  BOOST_CHECK(test_case.decoding("\xF8\x82\x81\x82\x83", msg_ref));
+  REQUIRE(test_case.encoding(msg_ref,"\xF8\x82\x81\x82\x83"));
+  REQUIRE(test_case.decoding("\xF8\x82\x81\x82\x83", msg_ref));
 }
 
 
-BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
+TEST_CASE("test fast coder v2 for a template with dynamic templateref","[dynamic_templateref_coder_test]")
 {
   fast_coding_test_case<simple5::templates_description> test_case;
 
@@ -197,11 +192,11 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_coder_test)
   target.set_field2().as(2);
   target.set_field3().as(3);
 
-  BOOST_CHECK(test_case.encoding(msg_ref,"\xE0\x82\x81\xF0\x81\x82\x83"));
-  BOOST_CHECK(test_case.decoding("\xE0\x82\x81\xF0\x81\x82\x83", msg_ref));
+  REQUIRE(test_case.encoding(msg_ref,"\xE0\x82\x81\xF0\x81\x82\x83"));
+  REQUIRE(test_case.decoding("\xE0\x82\x81\xF0\x81\x82\x83", msg_ref));
 }
 
-BOOST_AUTO_TEST_CASE(manual_reset_test)
+TEST_CASE("test fast coder v2 for a template with manual reset","[manual_reset_test]")
 {
   fast_coding_test_case<simple6::templates_description> test_case;
 
@@ -213,31 +208,31 @@ BOOST_AUTO_TEST_CASE(manual_reset_test)
   msg_ref.set_field2().as(2);
   msg_ref.set_field3().as(3);
 
-  BOOST_CHECK(test_case.encoding(msg_ref, "\xB8\x81\x82\x83", false));
-  BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref, false));
+  REQUIRE(test_case.encoding(msg_ref, "\xB8\x81\x82\x83", false));
+  REQUIRE(test_case.decoding("\xB8\x81\x82\x83", msg_ref, false));
 
 
   // message not changed
-  BOOST_CHECK(test_case.encoding(msg_ref, "\x80", false));
-  BOOST_CHECK(test_case.decoding("\x80", msg_ref, false));
+  REQUIRE(test_case.encoding(msg_ref, "\x80", false));
+  REQUIRE(test_case.decoding("\x80", msg_ref, false));
 
   msg_ref.set_field1().as(11);
   msg_ref.set_field2().as(12);
   msg_ref.set_field3().as(13);
 
-  BOOST_REQUIRE(!msg_ref.get_field1().absent());
+  REQUIRE(!msg_ref.get_field1().absent());
 
-  BOOST_REQUIRE(msg_ref.get_field1().is_initial_value());
-  BOOST_REQUIRE(msg_ref.get_field2().is_initial_value());
-  BOOST_REQUIRE(msg_ref.get_field3().is_initial_value());
+  REQUIRE(msg_ref.get_field1().is_initial_value());
+  REQUIRE(msg_ref.get_field2().is_initial_value());
+  REQUIRE(msg_ref.get_field3().is_initial_value());
 
   // encoding with reset, all values are initial
-  BOOST_CHECK(test_case.encoding(msg_ref, "\x80", true));
-  BOOST_CHECK(test_case.decoding("\x80", msg_ref, true));
+  REQUIRE(test_case.encoding(msg_ref, "\x80", true));
+  REQUIRE(test_case.decoding("\x80", msg_ref, true));
 
 }
 
-BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
+TEST_CASE("test fast coder v2 for a template with auto rest","[auto_reset_coder_test]")
 {
   fast_coding_test_case<simple7::templates_description> test_case;
 
@@ -249,21 +244,21 @@ BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
   msg_ref.set_field2().as(2);
   msg_ref.set_field3().as(3);
 
-  // BOOST_CHECK(test_case.encoding(msg_ref, "\xB8\x81\x82\x83"));
-  BOOST_CHECK(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
+  // REQUIRE(test_case.encoding(msg_ref, "\xB8\x81\x82\x83"));
+  REQUIRE(test_case.decoding("\xB8\x81\x82\x83", msg_ref));
 
   msg_ref.set_field1().as(11);
   msg_ref.set_field2().as(12);
   msg_ref.set_field3().as(13);
   // encoding with reset, all values are initial
-  BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
-  BOOST_CHECK(test_case.decoding("\x80", msg_ref));
+  REQUIRE(test_case.encoding(msg_ref, "\x80"));
+  REQUIRE(test_case.decoding("\x80", msg_ref));
 
-  BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
-  BOOST_CHECK(test_case.decoding("\x80", msg_ref));
+  REQUIRE(test_case.encoding(msg_ref, "\x80"));
+  REQUIRE(test_case.decoding("\x80", msg_ref));
 }
 
-BOOST_AUTO_TEST_CASE(segment_pmap_size_zero_coder_test)
+TEST_CASE("test fast coder v2 for a template with zero segment size", "[segment_pmap_size_zero_coder_test]")
 {
   fast_coding_test_case<simple8::templates_description> test_case;
 
@@ -275,9 +270,7 @@ BOOST_AUTO_TEST_CASE(segment_pmap_size_zero_coder_test)
   msg_ref.set_field2().as(2);
 
 
-  BOOST_CHECK(test_case.encoding(msg_ref,"\x80\x81\x82"));
-  BOOST_CHECK(test_case.decoding("\x80\x81\x82", msg_ref));
+  REQUIRE(test_case.encoding(msg_ref,"\x80\x81\x82"));
+  REQUIRE(test_case.decoding("\x80\x81\x82", msg_ref));
 }
 
-
-BOOST_AUTO_TEST_SUITE_END()

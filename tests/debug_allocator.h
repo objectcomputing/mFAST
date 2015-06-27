@@ -19,7 +19,7 @@
 #ifndef DEBUG_ALLOCATOR_H_PPV2L7KE
 #define DEBUG_ALLOCATOR_H_PPV2L7KE
 
-
+#include "catch.hpp"
 #include <mfast/malloc_allocator.h>
 #include <set>
 
@@ -34,7 +34,7 @@ class debug_allocator
 
     ~debug_allocator()
     {
-      BOOST_CHECK_EQUAL(leased_addresses_.size(), 0U);
+      CHECK(leased_addresses_.size() == 0U);
     }
 
     virtual void* allocate(std::size_t s) override
@@ -68,7 +68,7 @@ class debug_allocator
     virtual void deallocate(void* pointer, std::size_t) override
     {
 
-      BOOST_CHECK_EQUAL(leased_addresses_.count(pointer)!=0, true );
+      CHECK(leased_addresses_.count(pointer) !=0 );
       std::free(pointer);
       leased_addresses_.erase(pointer);
     }

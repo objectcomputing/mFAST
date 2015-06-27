@@ -16,8 +16,8 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
+
+#include "catch.hpp"
 
 #include <mfast/coder/encoder/fast_ostream.h>
 #include <mfast/coder/encoder/fast_ostream_inserter.h>
@@ -30,7 +30,7 @@
 using namespace mfast;
 
 template <typename T>
-boost::test_tools::predicate_result
+bool
 encode_integer(T value, bool nullable, const byte_stream& result)
 {
   char buffer[16];
@@ -44,45 +44,43 @@ encode_integer(T value, bool nullable, const byte_stream& result)
   if (byte_stream(sb) == result)
     return true;
 
-  boost::test_tools::predicate_result res( false );
-  res.message() << "Got \"" << byte_stream(sb) << "\" instead.";
-  return res;
+  INFO("Got \"" << byte_stream(sb) << "\" instead.");
+  return false;
 
 }
 
-BOOST_AUTO_TEST_SUITE( test_fast_ostream )
 
 
-BOOST_AUTO_TEST_CASE(int_test)
+TEST_CASE("test fast encoding for integers","[int_test]")
 {
 
-  BOOST_CHECK(encode_integer<int16_t>(2, false, "\x82") );
-  BOOST_CHECK(encode_integer<int16_t>(2, true, "\x83") );
-  BOOST_CHECK(encode_integer<int16_t>(-2, false, "\xFE") );
-  BOOST_CHECK(encode_integer<int16_t>(-2, true, "\xFE") );
-  BOOST_CHECK(encode_integer<int16_t>(-1, true, "\xFF") );
+  REQUIRE(encode_integer<int16_t>(2, false, "\x82") );
+  REQUIRE(encode_integer<int16_t>(2, true, "\x83") );
+  REQUIRE(encode_integer<int16_t>(-2, false, "\xFE") );
+  REQUIRE(encode_integer<int16_t>(-2, true, "\xFE") );
+  REQUIRE(encode_integer<int16_t>(-1, true, "\xFF") );
 
-  BOOST_CHECK(encode_integer(INT32_C(942755), true, "\x39\x45\xa4" ));
-  BOOST_CHECK(encode_integer(INT32_C(942755), false, "\x39\x45\xa3"));
-  BOOST_CHECK(encode_integer(INT32_C(-942755), true, "\x46\x3a\xdd"));
-  BOOST_CHECK(encode_integer(INT32_C(-7942755), false, "\x7c\x1b\x1b\x9d"));
-  BOOST_CHECK(encode_integer(INT32_C(8193), false, "\x00\x40\x81"));
-  BOOST_CHECK(encode_integer(INT32_C(-8193), false, "\x7F\x3f\xff"));
+  REQUIRE(encode_integer(INT32_C(942755), true, "\x39\x45\xa4" ));
+  REQUIRE(encode_integer(INT32_C(942755), false, "\x39\x45\xa3"));
+  REQUIRE(encode_integer(INT32_C(-942755), true, "\x46\x3a\xdd"));
+  REQUIRE(encode_integer(INT32_C(-7942755), false, "\x7c\x1b\x1b\x9d"));
+  REQUIRE(encode_integer(INT32_C(8193), false, "\x00\x40\x81"));
+  REQUIRE(encode_integer(INT32_C(-8193), false, "\x7F\x3f\xff"));
 
-  BOOST_CHECK(encode_integer(UINT32_C(0), true, "\x81"));
-  BOOST_CHECK(encode_integer(UINT32_C(1), true, "\x82"));
-  BOOST_CHECK(encode_integer(UINT32_C(942755), true, "\x39\x45\xa4"));
-  BOOST_CHECK(encode_integer(UINT32_C(0), false, "\x80"));
-  BOOST_CHECK(encode_integer(UINT32_C(1), false, "\x81"));
-  BOOST_CHECK(encode_integer(UINT32_C(942755), false, "\x39\x45\xa3"));
-  BOOST_CHECK(encode_integer((std::numeric_limits<uint32_t>::max)(), true,"\x10\x00\x00\x00\x80"));
+  REQUIRE(encode_integer(UINT32_C(0), true, "\x81"));
+  REQUIRE(encode_integer(UINT32_C(1), true, "\x82"));
+  REQUIRE(encode_integer(UINT32_C(942755), true, "\x39\x45\xa4"));
+  REQUIRE(encode_integer(UINT32_C(0), false, "\x80"));
+  REQUIRE(encode_integer(UINT32_C(1), false, "\x81"));
+  REQUIRE(encode_integer(UINT32_C(942755), false, "\x39\x45\xa3"));
+  REQUIRE(encode_integer((std::numeric_limits<uint32_t>::max)(), true,"\x10\x00\x00\x00\x80"));
 
-  BOOST_CHECK(encode_integer((std::numeric_limits<int64_t>::max)(), true, "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
-  BOOST_CHECK(encode_integer((std::numeric_limits<uint64_t>::max)(), true, "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
+  REQUIRE(encode_integer((std::numeric_limits<int64_t>::max)(), true, "\x01\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
+  REQUIRE(encode_integer((std::numeric_limits<uint64_t>::max)(), true, "\x02\x00\x00\x00\x00\x00\x00\x00\x00\x80"));
 }
 
 
-boost::test_tools::predicate_result
+bool
 encode_string(const char* str,std::size_t len, bool nullable, const byte_stream& result)
 {
   char buffer[16];
@@ -99,26 +97,25 @@ encode_string(const char* str,std::size_t len, bool nullable, const byte_stream&
   if (byte_stream(sb) == result)
     return true;
 
-  boost::test_tools::predicate_result res( false );
-  res.message() << "Got \"" << byte_stream(sb) << "\" instead.";
-  return res;
+  INFO( "Got \"" << byte_stream(sb) << "\" instead." );
+  return false;
 }
 
-BOOST_AUTO_TEST_CASE(ascii_string_test)
+TEST_CASE("test fast encoding for ascii strings","[ascii_string_test]")
 {
-  BOOST_CHECK(encode_string("", 0, false, "\x80"));
-  BOOST_CHECK(encode_string("\x0", 1, false, "\x00\x80"));
+  REQUIRE(encode_string("", 0, false, "\x80"));
+  REQUIRE(encode_string("\x0", 1, false, "\x00\x80"));
 
-  BOOST_CHECK(encode_string(nullptr, 0, true, "\x80"));
-  BOOST_CHECK(encode_string("", 0, true, "\x00\x80"));
-  BOOST_CHECK(encode_string("\x0", 1, true, "\x00\x00\x80"));
+  REQUIRE(encode_string(nullptr, 0, true, "\x80"));
+  REQUIRE(encode_string("", 0, true, "\x00\x80"));
+  REQUIRE(encode_string("\x0", 1, true, "\x00\x00\x80"));
 
-  BOOST_CHECK(encode_string("\x40\x40\xC0", 3, true, "\x40\x40\xC0"));
-  BOOST_CHECK(encode_string("\x40\x40\xC0", 3, false, "\x40\x40\xC0"));
+  REQUIRE(encode_string("\x40\x40\xC0", 3, true, "\x40\x40\xC0"));
+  REQUIRE(encode_string("\x40\x40\xC0", 3, false, "\x40\x40\xC0"));
 
 }
 
-boost::test_tools::predicate_result
+bool
 encode_byte_vector(const char* bv,std::size_t len, bool nullable, const byte_stream& result)
 {
   char buffer[16];
@@ -134,23 +131,22 @@ encode_byte_vector(const char* bv,std::size_t len, bool nullable, const byte_str
   if (byte_stream(sb) == result)
     return true;
 
-  boost::test_tools::predicate_result res( false );
-  res.message() << "Got \"" << byte_stream(sb) << "\" instead.";
-  return res;
+  INFO("Got \"" << byte_stream(sb) << "\" instead.");
+  return false;
 }
 
-BOOST_AUTO_TEST_CASE(byte_vector_test)
+TEST_CASE("test fast encoding for byteVector","[byte_vector_test]")
 {
-  BOOST_CHECK(encode_byte_vector(nullptr, 0, true, "\x80")); // null
-  BOOST_CHECK(encode_byte_vector("", 0, false, "\x80")); // empty byte vector
-  BOOST_CHECK(encode_byte_vector("", 0, true, "\x81")); // empty byte vector
+  REQUIRE(encode_byte_vector(nullptr, 0, true, "\x80")); // null
+  REQUIRE(encode_byte_vector("", 0, false, "\x80")); // empty byte vector
+  REQUIRE(encode_byte_vector("", 0, true, "\x81")); // empty byte vector
 
-  BOOST_CHECK(encode_byte_vector("\xC0", 1, false, "\x81\xC0"));
-  BOOST_CHECK(encode_byte_vector("\xC0", 1, true, "\x82\xC0"));
+  REQUIRE(encode_byte_vector("\xC0", 1, false, "\x81\xC0"));
+  REQUIRE(encode_byte_vector("\xC0", 1, true, "\x82\xC0"));
 }
 
 template <typename T>
-boost::test_tools::predicate_result
+bool
 insert_to_stream(const T& value, const byte_stream& result)
 {
   char buffer[16];
@@ -165,12 +161,11 @@ insert_to_stream(const T& value, const byte_stream& result)
   if (byte_stream(sb) == result)
     return true;
 
-  boost::test_tools::predicate_result res( false );
-  res.message() << "Insert " << value << " failure!\nGot \"" << byte_stream(sb) << "\" instead.";
-  return res;
+  INFO( "Insert " << value << " failure!\nGot \"" << byte_stream(sb) << "\" instead." );
+  return false;
 }
 
-BOOST_AUTO_TEST_CASE(inserter_test)
+TEST_CASE("test fast_ostream inserters","[inserter_test]")
 {
   debug_allocator alloc;
   value_storage storage;
@@ -187,7 +182,7 @@ BOOST_AUTO_TEST_CASE(inserter_test)
     ascii_string_mref mref(&alloc, &storage, &inst);
     mref.refers_to("AAA");
 
-    BOOST_CHECK(insert_to_stream(mref, "\x41\x41\xC1"));
+    REQUIRE(insert_to_stream(mref, "\x41\x41\xC1"));
   }
 
   {
@@ -203,17 +198,17 @@ BOOST_AUTO_TEST_CASE(inserter_test)
 
 
     mref.omit();
-    BOOST_CHECK(insert_to_stream(mref, "\x80"));
+    REQUIRE(insert_to_stream(mref, "\x80"));
 
     mref.as(1, 4);
-    BOOST_CHECK(insert_to_stream(mref, "\x85\x81"));
+    REQUIRE(insert_to_stream(mref, "\x85\x81"));
   }
 
 }
 
 
 
-boost::test_tools::predicate_result
+bool
 encode_pmap(const char* bits, std::size_t maxbits, const byte_stream& result)
 {
   char buffer[16];
@@ -242,19 +237,18 @@ encode_pmap(const char* bits, std::size_t maxbits, const byte_stream& result)
   pmap.commit();
   if (byte_stream(sb) == result)
     return true;
-  boost::test_tools::predicate_result res( false );
-  res.message() << "Got \"" << byte_stream(sb) << "\" instead.";
-  return res;
+  INFO ("Got \"" << byte_stream(sb) << "\" instead.");
+  return false;
 }
 
-BOOST_AUTO_TEST_CASE(encoder_presence_map_test)
+TEST_CASE("test the fast encoding of presence map","[encoder_presence_map_test]")
 {
-  BOOST_CHECK( encode_pmap("\x80", 7, "\xC0" ) );
-  BOOST_CHECK( encode_pmap("\x80\x04", 14, "\x40\x81" ) );
-  BOOST_CHECK( encode_pmap("\x81\x02\x04\x08\x10\x20\x40\x80", 63, "\x40\x40\x40\x40\x40\x40\x40\x40\xC0" ) );
+  REQUIRE( encode_pmap("\x80", 7, "\xC0" ) );
+  REQUIRE( encode_pmap("\x80\x04", 14, "\x40\x81" ) );
+  REQUIRE( encode_pmap("\x81\x02\x04\x08\x10\x20\x40\x80", 63, "\x40\x40\x40\x40\x40\x40\x40\x40\xC0" ) );
 }
 
-BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
+TEST_CASE("","[non_overlong_encoder_presence_map_test]")
 {
   char buffer[32];
 
@@ -281,7 +275,7 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     pmap.commit();
 
-    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\x40\x41\x42\xC3"));
+    REQUIRE (byte_stream(sb) == byte_stream("\x80\x40\x41\x42\xC3"));
   }
 
   {
@@ -306,7 +300,7 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     pmap.commit();
 
-    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\x80\x40\x41\x42\xC3"));
+    REQUIRE (byte_stream(sb) == byte_stream("\x80\x80\x40\x41\x42\xC3"));
   }
 
   {
@@ -332,10 +326,9 @@ BOOST_AUTO_TEST_CASE(non_overlong_encoder_presence_map_test)
 
     pmap.commit();
 
-    BOOST_CHECK (byte_stream(sb) == byte_stream("\x80\xC0\x40\x41\x42\xC3"));
+    REQUIRE (byte_stream(sb) == byte_stream("\x80\xC0\x40\x41\x42\xC3"));
   }
 }
 
 
 
-BOOST_AUTO_TEST_SUITE_END()

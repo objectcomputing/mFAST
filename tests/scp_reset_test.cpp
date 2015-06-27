@@ -1,6 +1,4 @@
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
-
+#include "catch.hpp"
 #include <mfast.h>
 #include <mfast/field_comparator.h>
 #include <mfast/coder/fast_encoder_v2.h>
@@ -19,7 +17,7 @@ using namespace mfast;
 
 
 
-BOOST_AUTO_TEST_CASE(scp_reset_test)
+TEST_CASE("test fast decoding of a template with scp reset", "[scp_reset_test]")
 {
   fast_decoder_v2<0> decoder1(simple6::description(), scp::description());
   auto& strm="\xF8\x81\x81\x82\x83\x80\xC0\xF8\xC0\x81";
@@ -27,12 +25,12 @@ BOOST_AUTO_TEST_CASE(scp_reset_test)
   const char* last = std::end(strm);
 
   simple6::Test b1(R"({"field1":1, "field2":2, "field3":3})");
-  BOOST_CHECK( decoder1.decode(first, last) == b1.cref() );
-  BOOST_CHECK( decoder1.decode(first, last) == b1.cref() );
-  BOOST_CHECK( decoder1.decode(first, last).id() == 120 );
+  REQUIRE( decoder1.decode(first, last) == b1.cref() );
+  REQUIRE( decoder1.decode(first, last) == b1.cref() );
+  REQUIRE( decoder1.decode(first, last).id() == 120 );
 
   simple6::Test b2(R"({"field1":11, "field2":12, "field3":13})");
-  BOOST_CHECK( decoder1.decode(first, last) == b2.cref() );
+  REQUIRE( decoder1.decode(first, last) == b2.cref() );
 
   debug_allocator alloc;
   fast_decoder_v2<0> decoder2(&alloc, simple6::description(), scp::description());

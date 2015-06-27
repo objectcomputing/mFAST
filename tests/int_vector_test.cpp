@@ -17,9 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
-#include <boost/test/test_case_template.hpp>
+#include "catch.hpp"
 
 #include <mfast.h>
 #include <mfast/coder/fast_encoder.h>
@@ -41,12 +39,11 @@ struct c_unique {
 } ;
 
 
-BOOST_AUTO_TEST_SUITE( test_int_vector )
 //____________________________________________________________________________//
 
-typedef boost::mpl::list<int32_t,uint32_t,int64_t, uint64_t> test_types;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE( test_int_vector, T, test_types )
+template <typename T>
+void test_int_vector()
 {
   debug_allocator alloc;
   value_storage storage;
@@ -55,12 +52,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_int_vector, T, test_types )
                                    "int_vector","");
 
   inst.construct_value(storage, &alloc);
-  BOOST_CHECK_EQUAL(storage.of_array.capacity_in_bytes_, 0UL);
-  BOOST_CHECK_EQUAL(storage.is_defined(),                true);
+  REQUIRE(storage.of_array.capacity_in_bytes_ ==  0UL);
+  REQUIRE(storage.is_defined() ==                 true);
 
   vector_mref<T> mref(&alloc, &storage, &inst);
 
-  BOOST_CHECK_EQUAL(mref.size(), 0UL);
+  REQUIRE(mref.size() ==  0UL);
 
   const unsigned SIZE=100;
   int array[SIZE];
@@ -68,16 +65,27 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( test_int_vector, T, test_types )
 
   mref.assign(array, array+SIZE);
 
-  BOOST_CHECK_EQUAL(mref.size(), SIZE);
+  REQUIRE(mref.size() ==  SIZE);
 
   for (unsigned i = 0; i < SIZE; ++i) {
-    BOOST_CHECK_EQUAL(mref[i], static_cast<T>(i+1));
+    REQUIRE(mref[i] ==  static_cast<T>(i+1));
   }
 
   inst.destruct_value(storage, &alloc);
 }
 
-BOOST_AUTO_TEST_CASE( test_int_vector_description)
+
+TEST_CASE("test the fast encoding of int vectors", "[test_int_vector]")
+{
+  test_int_vector<int32_t>() ;
+  test_int_vector<uint32_t>() ;
+  test_int_vector<int64_t>() ;
+  test_int_vector<uint64_t>() ;
+}
+
+
+
+TEST_CASE("test for template description with integer vectors","[test_int_vector_description]")
 {
   const char* xml_desc1 =
     "<?xml version=\" 1.0 \"?>\n"
@@ -92,15 +100,15 @@ BOOST_AUTO_TEST_CASE( test_int_vector_description)
 
   dynamic_templates_description desc1(xml_desc1);
 
-  BOOST_CHECK_EQUAL(desc1.size(), 1UL);
-  BOOST_CHECK_EQUAL(desc1[0]->subinstruction(0)->field_type(), field_type_uint32_vector);
-  BOOST_CHECK_EQUAL(strcmp(desc1[0]->subinstruction(0)->name(), "field1"), 0);
+  REQUIRE(desc1.size() ==  1UL);
+  REQUIRE(desc1[0]->subinstruction(0)->field_type() ==  field_type_uint32_vector);
+  REQUIRE(strcmp(desc1[0]->subinstruction(0)->name(),  "field1") == 0);
 
-  BOOST_CHECK_EQUAL(desc1[0]->subinstruction(1)->field_type(), field_type_int64_vector);
-  BOOST_CHECK_EQUAL(strcmp(desc1[0]->subinstruction(1)->name(), "field2"), 0);
+  REQUIRE(desc1[0]->subinstruction(1)->field_type() ==  field_type_int64_vector);
+  REQUIRE(strcmp(desc1[0]->subinstruction(1)->name(),  "field2") == 0);
 }
 
-BOOST_AUTO_TEST_CASE (test_fast_encoding)
+TEST_CASE ("test fast encoding with integer vectors","[test_fast_encoding]")
 {
   const char* xml_desc1 =
     "<?xml version=\" 1.0 \"?>\n"
@@ -177,9 +185,8 @@ BOOST_AUTO_TEST_CASE (test_fast_encoding)
       encoder.encode(message2.cref(), buffer2);
     }
 
-    BOOST_CHECK_EQUAL(buffer1.size(), buffer2.size());
+    REQUIRE(buffer1.size() ==  buffer2.size());
 
-    BOOST_CHECK(std::equal(buffer1.begin(), buffer1.end(), buffer2.begin()));
+    REQUIRE(std::equal(buffer1.begin(), buffer1.end(), buffer2.begin()));
 }
 
-BOOST_AUTO_TEST_SUITE_END()

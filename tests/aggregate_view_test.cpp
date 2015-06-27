@@ -17,8 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
+#include "catch.hpp"
 
 #include <sstream>
 #include "mfast.h"
@@ -117,60 +116,59 @@ struct simple_visitor
   }
 };
 
-BOOST_AUTO_TEST_SUITE( view_test_suite )
 
-BOOST_AUTO_TEST_CASE(parse_view_test)
+TEST_CASE("test view parsing capabilities", "[parse_view_test]")
 {
   try {
     dynamic_templates_description description(xml_content);
-    BOOST_REQUIRE_EQUAL(description.view_infos().size(), 1U);
+    REQUIRE(description.view_infos().size() == 1U);
 
     const mfast::aggregate_view_info& info = description.view_infos()[0];
-    BOOST_CHECK_EQUAL( boost::string_ref(info.name_) , boost::string_ref("PersonView") );
-    BOOST_CHECK_EQUAL( info.data_.size(), 8U);
+    REQUIRE( boost::string_ref(info.name_) == boost::string_ref("PersonView") );
+    REQUIRE( info.data_.size() == 8U);
 
-    BOOST_CHECK_EQUAL( info.data_[0].cont(),false);
-    BOOST_CHECK_EQUAL( info.data_[0].prefix_diff(), 1U);
-    BOOST_CHECK_EQUAL( info.data_[0].nest_indices[0], 1);
-    BOOST_CHECK_EQUAL( info.data_[0].nest_indices[1], -1);
+    REQUIRE( info.data_[0].cont() == false);
+    REQUIRE( info.data_[0].prefix_diff() == 1U);
+    REQUIRE( info.data_[0].nest_indices[0] == 1);
+    REQUIRE( info.data_[0].nest_indices[1] == -1);
 
-    BOOST_CHECK_EQUAL( info.data_[1].cont(),false);
-    BOOST_CHECK_EQUAL( info.data_[1].prefix_diff(), 1U);
-    BOOST_CHECK_EQUAL( info.data_[1].nest_indices[0], 0);
-    BOOST_CHECK_EQUAL( info.data_[1].nest_indices[1], -1);
+    REQUIRE( info.data_[1].cont() == false);
+    REQUIRE( info.data_[1].prefix_diff() == 1U);
+    REQUIRE( info.data_[1].nest_indices[0] == 0);
+    REQUIRE( info.data_[1].nest_indices[1] == -1);
 
-    BOOST_CHECK_EQUAL( info.data_[2].cont(),false);
-    BOOST_CHECK_EQUAL( info.data_[2].prefix_diff(), 1U);
-    BOOST_CHECK_EQUAL( info.data_[2].nest_indices[0], 3);
-    BOOST_CHECK_EQUAL( info.data_[2].nest_indices[1], 3);
-    BOOST_CHECK_EQUAL( info.data_[2].nest_indices[2], -1);
+    REQUIRE( info.data_[2].cont() == false);
+    REQUIRE( info.data_[2].prefix_diff() == 1U);
+    REQUIRE( info.data_[2].nest_indices[0] == 3);
+    REQUIRE( info.data_[2].nest_indices[1] == 3);
+    REQUIRE( info.data_[2].nest_indices[2] == -1);
 
-    BOOST_CHECK_EQUAL( info.data_[3].cont(),false);
-    BOOST_CHECK_EQUAL( info.data_[3].prefix_diff(), 2U);
-    BOOST_CHECK_EQUAL( info.data_[3].nest_indices[0], 3);
-    BOOST_CHECK_EQUAL( info.data_[3].nest_indices[1], 1);
-    BOOST_CHECK_EQUAL( info.data_[3].nest_indices[2], -1);
+    REQUIRE( info.data_[3].cont() == false);
+    REQUIRE( info.data_[3].prefix_diff() == 2U);
+    REQUIRE( info.data_[3].nest_indices[0] == 3);
+    REQUIRE( info.data_[3].nest_indices[1] ==  1);
+    REQUIRE( info.data_[3].nest_indices[2] ==  -1);
 
-    BOOST_CHECK_EQUAL( info.data_[4].cont(),false);
-    BOOST_CHECK_EQUAL( info.data_[4].prefix_diff(), 1U);
-    BOOST_CHECK_EQUAL( info.data_[4].nest_indices[0], 4);
-    BOOST_CHECK_EQUAL( info.data_[4].nest_indices[1], 0);
-    BOOST_CHECK_EQUAL( info.data_[4].nest_indices[2], 1);
-    BOOST_CHECK_EQUAL( info.data_[4].nest_indices[3], -1);
+    REQUIRE( info.data_[4].cont() == false);
+    REQUIRE( info.data_[4].prefix_diff() ==  1U);
+    REQUIRE( info.data_[4].nest_indices[0] ==  4);
+    REQUIRE( info.data_[4].nest_indices[1] ==  0);
+    REQUIRE( info.data_[4].nest_indices[2] ==  1);
+    REQUIRE( info.data_[4].nest_indices[3] ==  -1);
 
-    BOOST_CHECK_EQUAL( info.data_[5].cont(), true);
-    BOOST_CHECK_EQUAL( info.data_[5].prefix_diff(), 1U);
-    BOOST_CHECK_EQUAL( info.data_[5].nest_indices[0], 6);
-    BOOST_CHECK_EQUAL( info.data_[5].nest_indices[1], 0);
-    BOOST_CHECK_EQUAL( info.data_[5].nest_indices[2], -1);
+    REQUIRE( info.data_[5].cont() ==  true);
+    REQUIRE( info.data_[5].prefix_diff() ==  1U);
+    REQUIRE( info.data_[5].nest_indices[0] ==  6);
+    REQUIRE( info.data_[5].nest_indices[1] ==  0);
+    REQUIRE( info.data_[5].nest_indices[2] ==  -1);
 
-    BOOST_CHECK_EQUAL( info.data_[6].cont(), false);
-    BOOST_CHECK_EQUAL( info.data_[6].prefix_diff(), 1U);
-    BOOST_CHECK_EQUAL( info.data_[6].nest_indices[0], 0);
-    BOOST_CHECK_EQUAL( info.data_[6].nest_indices[1], -1);
+    REQUIRE( info.data_[6].cont() ==  false);
+    REQUIRE( info.data_[6].prefix_diff() ==  1U);
+    REQUIRE( info.data_[6].nest_indices[0] ==  0);
+    REQUIRE( info.data_[6].nest_indices[1] ==  -1);
 
-    BOOST_CHECK_EQUAL( info.data_[7].cont(), false);
-    BOOST_CHECK_EQUAL( info.data_[7].nest_indices, (void*) nullptr);
+    REQUIRE( info.data_[7].cont() ==  false);
+    REQUIRE( info.data_[7].nest_indices ==  nullptr);
   }
   catch(boost::exception& e)
   {
@@ -178,7 +176,7 @@ BOOST_AUTO_TEST_CASE(parse_view_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(codegen_view_test)
+TEST_CASE("test the code generation with view", "[codegen_view_test]")
 {
   using namespace test5;
 
@@ -204,8 +202,7 @@ BOOST_AUTO_TEST_CASE(codegen_view_test)
 
   view.accept_accessor(visitor);
 
-  BOOST_CHECK_EQUAL( strm.str(), std::string("Doe\tJohn\t63141\tSt. Louis\t1234567\tJohn123\t") );
+  REQUIRE( strm.str() ==  "Doe\tJohn\t63141\tSt. Louis\t1234567\tJohn123\t" );
 
 }
 
-BOOST_AUTO_TEST_SUITE_END()

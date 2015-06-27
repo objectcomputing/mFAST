@@ -16,8 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test.hpp>
+#include "catch.hpp"
 
 #include <mfast.h>
 #include <mfast/field_comparator.h>
@@ -29,10 +28,9 @@
 
 using namespace mfast;
 
-BOOST_AUTO_TEST_SUITE( test_comparator )
 
 
-BOOST_AUTO_TEST_CASE(simple_template_test)
+TEST_CASE("test the == operator of a simple message", "[simple_template_test]")
 {
   debug_allocator alloc;
 
@@ -65,19 +63,19 @@ BOOST_AUTO_TEST_CASE(simple_template_test)
   m2ref[2].as(2);
   m2ref[3].as("abcd");
 
-  BOOST_CHECK(m1ref[0] == m2ref[0]);
-  BOOST_CHECK(m1ref == m2ref);
+  REQUIRE(m1ref[0] == m2ref[0]);
+  REQUIRE(m1ref == m2ref);
 
   m2ref[2].as(3);
-  BOOST_CHECK(m1ref != m2ref);
+  REQUIRE_FALSE(m1ref == m2ref);
 
   debug_allocator alloc2;
 
   message_type m3(m1.cref(), &alloc2);
-  BOOST_CHECK(m3.cref() == m1ref);
+  REQUIRE(m3.cref() == m1ref);
 }
 
-BOOST_AUTO_TEST_CASE(group_compare_test)
+TEST_CASE("test the == operator of a group","[group_compare_test]")
 {
   debug_allocator alloc;
 
@@ -114,18 +112,18 @@ BOOST_AUTO_TEST_CASE(group_compare_test)
   m2group[1].as(2);
 
 
-  BOOST_CHECK(m1ref == m2ref);
+  REQUIRE(m1ref == m2ref);
 
   m2group[1].as(3);
-  BOOST_CHECK(m1ref != m2ref);
+  REQUIRE_FALSE(m1ref == m2ref);
 
   debug_allocator alloc2;
 
   message_type m3(m1.cref(), &alloc2);
-  BOOST_CHECK(m3.cref() == m1ref);
+  REQUIRE(m3.cref() == m1ref);
 }
 
-BOOST_AUTO_TEST_CASE(sequence_compare_test)
+TEST_CASE("test the == operator of sequence","[sequence_compare_test]")
 {
   debug_allocator alloc;
 
@@ -166,19 +164,19 @@ BOOST_AUTO_TEST_CASE(sequence_compare_test)
   m2seq[1][0].as(3);
   m2seq[1][1].as(4);
 
-  BOOST_CHECK(m1ref == m2ref);
+  REQUIRE(m1ref == m2ref);
 
   m2seq[1][1].as(10);
-  BOOST_CHECK(m1ref != m2ref);
+  REQUIRE_FALSE(m1ref == m2ref);
 
   debug_allocator alloc2;
 
   message_type m3(m1.cref(), &alloc2);
 
-  BOOST_CHECK(m3.cref() == m1ref);
+  REQUIRE(m3.cref() == m1ref);
 }
 
-BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
+TEST_CASE("test the == operator of static templateref","[static_templateref_compare_test]")
 {
   debug_allocator alloc;
 
@@ -213,15 +211,15 @@ BOOST_AUTO_TEST_CASE(static_templateref_compare_test)
   m2ref[1].as(2);
   m2ref[2].as(3);
 
-  BOOST_CHECK(m1ref == m2ref);
+  REQUIRE(m1ref == m2ref);
 
   debug_allocator alloc2;
 
   message_type m3(m1.cref(), &alloc2);
-  BOOST_CHECK(m3.cref() == m1ref);
+  REQUIRE(m3.cref() == m1ref);
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
+TEST_CASE("test the == operator of dynamic templateref","[dynamic_templateref_compare_test]")
 {
   debug_allocator alloc;
 
@@ -258,13 +256,13 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
 
   nested_message_cref nested1_cref(m1.cref()[1]);
 
-  BOOST_CHECK_EQUAL(nested1_cref.target_instruction(), description[0]);
+  REQUIRE(nested1_cref.target_instruction() ==  description[0]);
   const field_instruction* inst = nested1_cref.target().instruction();
-  BOOST_CHECK( dynamic_cast<const template_instruction*>(inst));
+  REQUIRE( dynamic_cast<const template_instruction*>(inst));
 
   message_cref the_nested1(nested1_cref.target());
-  BOOST_CHECK_EQUAL( static_cast<uint32_cref>(the_nested1[0]).value(), 2U);
-  BOOST_CHECK_EQUAL( static_cast<uint32_cref>(the_nested1[1]).value(), 3U);
+  REQUIRE( static_cast<uint32_cref>(the_nested1[0]).value() ==  2U);
+  REQUIRE( static_cast<uint32_cref>(the_nested1[1]).value() ==  3U);
 
 
   m2ref[0].as(1);
@@ -274,13 +272,12 @@ BOOST_AUTO_TEST_CASE(dynamic_templateref_compare_test)
   target2[0].as(2);
   target2[1].as(3);
 
-  BOOST_CHECK(m1ref == m2ref);
+  REQUIRE(m1ref == m2ref);
 
   debug_allocator alloc2;
 
   message_type m3(m1.cref(), &alloc2);
-  BOOST_CHECK(m3.cref() == m1ref);
+  REQUIRE(m3.cref() == m1ref);
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
