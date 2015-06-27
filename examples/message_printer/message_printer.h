@@ -84,7 +84,7 @@ class message_printer
       boost::io::ios_flags_saver  ifs( os_ );
       os_ << std::hex << std::setfill('0');
 
-      for (auto&& elem : ref){
+      for (auto elem : ref){
         os_ << std::setw(2) <<  static_cast<unsigned>(elem);
       }
       os_ << std::setfill(' ');
@@ -98,7 +98,7 @@ class message_printer
 
       char sep[2]= { '\x0', '\x0'};
       os_ << "{";
-      for (auto&& elem : ref){
+      for (auto elem : ref){
         os_ << sep << elem;
         sep[0] = ',';
       }
@@ -122,7 +122,7 @@ class message_printer
     {
       size_t index = 0;
       ++indent_;
-      for (auto&& element : ref) {
+      for (auto element : ref) {
         os_ << indent_ << "[" << index++ << "]" << ":\n";
         // we cannot use apply_accessor(*this, field) here, because that would only visit the
         // sub-fields of the elment instead of calling visit(const aggregate_cref& ref, int)
