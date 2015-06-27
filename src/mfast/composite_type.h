@@ -20,7 +20,6 @@
 #ifndef COMPOSITE_FIELD_H_EK32RZA0
 #define COMPOSITE_FIELD_H_EK32RZA0
 
-#include <boost/move/core.hpp>
 #include "mfast/message_ref.h"
 #include "mfast/group_ref.h"
 #include <stdlib.h>

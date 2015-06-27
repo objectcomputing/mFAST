@@ -22,7 +22,6 @@
 #include <cmath>
 #include <cfloat>
 #include <boost/utility/string_ref.hpp>
-#include <boost/array.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include "mfast_export.h"

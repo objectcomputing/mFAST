@@ -3,7 +3,6 @@
 
 #include "../mfast_coder_export.h"
 
-#include <boost/container/map.hpp>
 #include "mfast/sequence_ref.h"
 #include "mfast/nested_message_ref.h"
 #include "mfast/malloc_allocator.h"

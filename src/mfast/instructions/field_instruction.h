@@ -22,7 +22,6 @@
 
 #include <cstddef>
 #include <cassert>
-#include <boost/static_assert.hpp>
 #include "mfast/value_storage.h"
 #include "mfast/mfast_export.h"
 #include "mfast/arena_allocator.h"
