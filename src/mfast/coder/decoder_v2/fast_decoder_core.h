@@ -304,7 +304,7 @@ inline void
 fast_decoder_base::decode_field(const T& ext_ref, split_decimal_type_tag)
 {
 
-  typename T::exponent_type exponent_ref = ext_ref.set_exponent();
+  auto exponent_ref = ext_ref.set_exponent();
   this->visit(exponent_ref);
   if (exponent_ref.present())
   {
@@ -316,7 +316,7 @@ template <typename T>
 inline void
 fast_decoder_base::decode_field(const T& ext_ref, int_vector_type_tag)
 {
-  typename T::mref_type mref = ext_ref.set();
+  auto mref = ext_ref.set();
 
   uint32_t length=0;
   if (!this->strm_.decode(length, ext_ref.optional())) {
@@ -354,7 +354,7 @@ fast_decoder_base::decode_field(const T& ext_ref, sequence_type_tag)
 {
   value_storage storage;
 
-  typename T::length_type length = ext_ref.set_length(storage);
+  auto length = ext_ref.set_length(storage);
   this->visit(length);
 
   if (length.present()) {
@@ -405,7 +405,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
                                      TypeCategory)
 {
   decoder_presence_map& pmap= *this->current_;
-  typename T::mref_type mref = ext_ref.set();
+  auto mref = ext_ref.set();
 
   if (ext_ref.optional()) {
     // An optional field with the constant operator will occupy a single bit. If the bit is set, the value
@@ -433,7 +433,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
 {
   fast_istream& stream = this->strm_;
   decoder_presence_map& pmap= *this->current_;
-  typename T::mref_type mref = ext_ref.set ();
+  auto mref = ext_ref.set ();
 
   if (pmap.is_next_bit_set()) {
     stream >> ext_ref;
@@ -485,7 +485,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
 {
   fast_istream& stream = this->strm_;
   decoder_presence_map& pmap= *this->current_;
-  typename T::mref_type mref = ext_ref.set ();
+  auto mref = ext_ref.set ();
 
   if (pmap.is_next_bit_set()) {
     stream >> ext_ref;
@@ -539,7 +539,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
 {
   fast_istream& stream = this->strm_;
   decoder_presence_map& pmap= *this->current_;
-  typename T::mref_type mref = ext_ref.set ();
+  auto mref = ext_ref.set ();
 
   // Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
   // Optional integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream in a nullable representation.
@@ -569,7 +569,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
                                      integer_type_tag)
 {
   fast_istream& stream = this->strm_;
-  typename T::mref_type mref = ext_ref.set ();
+  auto mref = ext_ref.set ();
   typedef typename T::mref_type::value_type int_type;
 
   int64_t d;
@@ -595,7 +595,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
                                      string_type_tag)
 {
   fast_istream& stream = this->strm_;
-  typename T::mref_type mref = ext_ref.set();
+  auto mref = ext_ref.set();
   // The delta value is represented as a Signed Integer subtraction length followed by an ASCII String.
   // If the delta is nullable, the subtraction length is nullable. A NULL delta is represented as a
   // NULL subtraction length. The string part is present in the stream iff the subtraction length is not NULL.
@@ -655,7 +655,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
   fast_istream& stream = this->strm_;
   decoder_presence_map& pmap= *this->current_;
 
-  typename T::mref_type mref = ext_ref.set();
+  auto mref = ext_ref.set();
 
   if (pmap.is_next_bit_set()) {
 
@@ -679,7 +679,7 @@ void fast_decoder_base::decode_field(const T& ext_ref,
     // If the tail value is not present in the stream, the value of the field depends
     // on the state of the previous value in the following way:
 
-    value_storage& prev = previous_value_of(mref);
+    auto& prev = previous_value_of(mref);
 
     if (!prev.is_defined()) {
       //  * undefined – the value of the field is the initial value that also becomes the new previous value.
