@@ -29,6 +29,9 @@ namespace mfast
 {
   class template_instruction;
 
+  template <bool B, typename T=void>
+  using enable_if_t = typename std::enable_if<B, T>::type;
+
   union MFAST_EXPORT value_storage {
     struct {
       uint32_t present_;                ///< indicate if the value is present,
@@ -142,28 +145,28 @@ namespace mfast
 
 #if SIZEOF_VOID_P == 4
     template <typename T>
-    typename std::enable_if<!std::is_pointer<T>::value && sizeof(T)<=4, T>::type
+    enable_if_t<!std::is_pointer<T>::value && sizeof(T)<=4, T>
     get() const
     {
       return static_cast<T>(of_uint32.content_);
     }
 
     template <typename T>
-    typename std::enable_if<!std::is_pointer<T>::value && sizeof(T)==8, T>::type
+    enable_if_t<!std::is_pointer<T>::value && sizeof(T)==8, T>
     get() const
     {
       return static_cast<T>(of_uint64.content_);
     }
 #else
     template <typename T>
-    typename std::enable_if<!std::is_pointer<T>::value, T>::type
+    enable_if_t<!std::is_pointer<T>::value, T>
     get() const
     {
       return static_cast<T>(of_uint64.content_);
     }
 #endif
     template <typename T>
-    typename std::enable_if< std::is_pointer<T>::value, T>::type
+    enable_if_t< std::is_pointer<T>::value, T>
     get() const
     {
       return reinterpret_cast<T>(of_array.content_);
@@ -171,21 +174,21 @@ namespace mfast
 
 #if SIZEOF_VOID_P == 4
     template <typename T>
-    typename std::enable_if< std::is_integral<T>::value && (sizeof(T)<=4), void>::type
+    enable_if_t< std::is_integral<T>::value && (sizeof(T)<=4)>
     set(T v)
     {
       of_uint32.content_ = static_cast<uint32_t>(v);
     }
 
     template <typename T>
-    typename std::enable_if< std::is_integral<T>::value && (sizeof(T)>4), void>::type
+    enable_if_t< std::is_integral<T>::value && (sizeof(T)>4)>
     set(T v)
     {
       of_uint64.content_ = static_cast<uint64_t>(v);
     }
 #else
     template <typename T>
-    typename std::enable_if< !std::is_pointer<T>::value, void>::type
+    enable_if_t< !std::is_pointer<T>::value>
     set(T v)
     {
       of_uint64.content_ = static_cast<uint64_t>(v);
@@ -193,7 +196,7 @@ namespace mfast
 #endif
 
     template <typename T>
-    typename std::enable_if< std::is_pointer<T>::value, void>::type
+    enable_if_t< std::is_pointer<T>::value>
     set(void* v)
     {
       of_array.content_ = v;

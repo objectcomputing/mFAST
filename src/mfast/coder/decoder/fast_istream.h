@@ -37,7 +37,7 @@ namespace mfast
      * @return false if the decoded value is null
      **/
     template <typename T, typename Nullable>
-    typename std::enable_if< std::is_integral<T>::value,bool>::type
+    enable_if_t< std::is_integral<T>::value,bool>
     decode(T& result, Nullable nullable);
 
 
@@ -288,7 +288,7 @@ namespace mfast
   }
 
   template <typename T, typename Nullable>
-  typename std::enable_if< std::is_integral<T>::value,bool>::type
+  enable_if_t< std::is_integral<T>::value,bool>
   fast_istream::decode(T& result, Nullable nullable)
   {
     typename detail::int_trait<T>::temp_type tmp = 0;

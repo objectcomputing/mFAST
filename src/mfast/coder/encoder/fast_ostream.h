@@ -103,14 +103,14 @@ namespace mfast {
   namespace detail {
 
     template <typename T>
-    inline typename std::enable_if<std::is_signed<T>::value, bool>::type
+    inline enable_if_t<std::is_signed<T>::value, bool>
     is_positive(T v)
     {
       return v >= 0;
     }
 
     template <typename T>
-    inline typename std::enable_if<std::is_unsigned<T>::value, bool>::type
+    inline enable_if_t<std::is_unsigned<T>::value, bool>
     is_positive(T)
     {
       return true;

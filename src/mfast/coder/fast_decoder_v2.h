@@ -70,7 +70,7 @@ public:
   /// Consturct a decoder using the default memory allocator ( i.e. mfast::malloc_allocator::instance() )
   template <typename Description1,
             typename ... Descriptions,
-            typename std::enable_if< std::is_base_of<templates_description, Description1>::value, int>::type* Check=nullptr>
+            typename = enable_if_t< std::is_base_of<templates_description, Description1>::value>>
   fast_decoder_v2(const Description1*    desc1,
                   const Descriptions*... rest)
     : coder::fast_decoder_core<NumTokens>(mfast::malloc_allocator::instance())
@@ -117,7 +117,7 @@ public:
   /// Consturct a decoder using the default memory allocator ( i.e. mfast::malloc_allocator::instance() )
   template <typename Description1,
             typename ... Descriptions,
-            typename std::enable_if< std::is_base_of<templates_description, Description1>::value, int>::type* Check=nullptr>
+            typename = enable_if_t< std::is_base_of<templates_description, Description1>::value>>
   fast_decoder_v2(const Description1*    desc1,
                   const Descriptions*... rest)
     : coder::fast_decoder_core<0>(mfast::malloc_allocator::instance())

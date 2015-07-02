@@ -303,7 +303,7 @@ namespace mfast {
 
 
   template <typename T1, typename T2>
-  typename std::enable_if<! T1::is_mutable, T1>::type
+  enable_if_t<! T1::is_mutable, T1>
   dynamic_cast_as(const T2& ref)
   {
     typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());
@@ -313,7 +313,7 @@ namespace mfast {
   }
 
   template <typename T1, typename T2>
-  typename std::enable_if< T1::is_mutable, T1>::type
+  enable_if_t< T1::is_mutable, T1>
   dynamic_cast_as(const T2& ref)
   {
     typename T1::instruction_cptr instruction = dynamic_cast<typename T1::instruction_cptr>(ref.instruction());

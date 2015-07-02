@@ -44,10 +44,9 @@ namespace mfast {
     make_message_cref(const make_message_cref& )=default;
     //make_message_cref(make_message_cref&& ) = default;
 
-    template <typename T>
-    explicit make_message_cref(const make_message_cref<T, template_instruction>& other,
-                               typename std::enable_if< !std::is_same<AggregateCRef, aggregate_cref>::value ||
-                                                        !std::is_same<T, aggregate_cref>::value >::type* = 0)
+    template <typename T, typename = enable_if_t< !std::is_same<AggregateCRef, aggregate_cref>::value ||
+                                                        !std::is_same<T, aggregate_cref>::value >>
+    explicit make_message_cref(const make_message_cref<T, template_instruction>& other)
       : AggregateCRef(other.field_storage(0), static_cast<const TemplateType*>(other.instruction()))
     {
       // assert( dynamic_cast<const TemplateType*>(other.instruction()) );
@@ -81,9 +80,8 @@ namespace mfast {
     make_message_mref(const make_message_mref& ) = default;
     //make_message_mref(make_message_mref&& ) = default;
 
-    template <typename T>
-    explicit make_message_mref(const make_message_mref<T, template_instruction>& other,
-                               typename std::enable_if< !std::is_same<AggregateMRef, T>::value >::type* = 0)
+    template <typename T, typename = enable_if_t< !std::is_same<AggregateMRef, T>::value >>
+    explicit make_message_mref(const make_message_mref<T, template_instruction>& other)
       : AggregateMRef(other.allocator(),
                       aggregate_mref_core_access::storage_of(other),
                       static_cast<const TemplateType*>(other.instruction()))
