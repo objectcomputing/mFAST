@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -19,23 +20,20 @@
 
 #include "boolean_ref.h"
 
-namespace mfast
-{
+namespace mfast {
 
-  static const char* boolean_elements[] = {"false","true"};
+static const char *boolean_elements[] = {"false", "true"};
 
-  const boolean::instruction_type*
-  boolean::instruction()
-  {
-    static const boolean_cref::instruction_type
-      the_instruction(operator_none,presence_mandatory,0,"boolean","",nullptr,0,boolean_elements,nullptr, 2,nullptr,"mfast");
+const boolean::instruction_type *boolean::instruction() {
+  static const boolean_cref::instruction_type the_instruction(
+      operator_none, presence_mandatory, 0, "boolean", "", nullptr, 0,
+      boolean_elements, nullptr, 2, nullptr, "mfast");
 
-    return &the_instruction;
-  }
+  return &the_instruction;
+}
 
-  bool enum_cref::is_boolean() const
-  {
-    return this->instruction()->elements() == boolean_elements;
-  }
+bool enum_cref::is_boolean() const {
+  return this->instruction()->elements() == boolean_elements;
+}
 
 } /* mfast */

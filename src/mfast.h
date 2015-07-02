@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -16,8 +17,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef MFAST_H_4EMINVTV
-#define MFAST_H_4EMINVTV
+#pragma once
 #include <mfast/field_instructions.h>
 #include <mfast/decimal_ref.h>
 #include <mfast/int_ref.h>
@@ -35,4 +35,3 @@
 #include <mfast/boolean_ref.h>
 #include <mfast/view_iterator.h>
 #include <mfast/ext_ref.h>
-#endif /* end of include guard: MFAST_H_4EMINVTV */

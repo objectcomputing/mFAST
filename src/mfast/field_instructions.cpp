@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -20,58 +21,48 @@
 
 namespace mfast {
 
-  void decimal_field_instruction::accept(field_instruction_visitor& visitor,
-                                         void*                      context) const
-  {
-    visitor.visit(this, context);
-  }
+void decimal_field_instruction::accept(field_instruction_visitor &visitor,
+                                       void *context) const {
+  visitor.visit(this, context);
+}
 
-  void enum_field_instruction::accept(field_instruction_visitor& visitor,
-                                      void*                      context) const
-  {
-    return visitor.visit(this, context);
-  }
+void enum_field_instruction::accept(field_instruction_visitor &visitor,
+                                    void *context) const {
+  return visitor.visit(this, context);
+}
 
-  void ascii_field_instruction::accept(field_instruction_visitor& visitor,
-                                       void*                      context) const
-  {
-    visitor.visit(this, context);
-  }
+void ascii_field_instruction::accept(field_instruction_visitor &visitor,
+                                     void *context) const {
+  visitor.visit(this, context);
+}
 
-  void unicode_field_instruction::accept(field_instruction_visitor& visitor,
-                                         void*                      context) const
-  {
-    visitor.visit(this, context);
-  }
+void unicode_field_instruction::accept(field_instruction_visitor &visitor,
+                                       void *context) const {
+  visitor.visit(this, context);
+}
 
-  void byte_vector_field_instruction::accept(field_instruction_visitor& visitor,
-                                             void*                      context) const
-  {
-    visitor.visit(this, context);
-  }
+void byte_vector_field_instruction::accept(field_instruction_visitor &visitor,
+                                           void *context) const {
+  visitor.visit(this, context);
+}
 
-  void group_field_instruction::accept(field_instruction_visitor& visitor,
-                                       void*                      context) const
-  {
-    visitor.visit(this, context);
-  }
+void group_field_instruction::accept(field_instruction_visitor &visitor,
+                                     void *context) const {
+  visitor.visit(this, context);
+}
 
-  void sequence_field_instruction::accept(field_instruction_visitor& visitor,
-                                          void*                      context) const
-  {
-    visitor.visit(this, context);
-  }
+void sequence_field_instruction::accept(field_instruction_visitor &visitor,
+                                        void *context) const {
+  visitor.visit(this, context);
+}
 
-  void template_instruction::accept(field_instruction_visitor& visitor,
-                                    void*                      context) const
-  {
-    visitor.visit(this, context);
-  }
+void template_instruction::accept(field_instruction_visitor &visitor,
+                                  void *context) const {
+  visitor.visit(this, context);
+}
 
-  void templateref_instruction::accept(field_instruction_visitor& visitor,
-                                       void*                      context) const
-  {
-    visitor.visit(this, context);
-  }
-
+void templateref_instruction::accept(field_instruction_visitor &visitor,
+                                     void *context) const {
+  visitor.visit(this, context);
+}
 }

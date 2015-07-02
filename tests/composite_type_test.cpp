@@ -153,7 +153,8 @@ TEST_CASE("test the operations of sequence_mref","[test_sequence]")
   }
 }
 
-TEST_CASE("test the operations of message_mref", "[test_template]")
+
+TEST_CASE("test the operations of complex group_mref", "[test_complex_group]")
 {
   debug_allocator alloc;
   using namespace test4;
@@ -263,7 +264,6 @@ TEST_CASE("test the operations of message_mref", "[test_template]")
   Person person5;
   person5 = person1;
   REQUIRE(person1.cref() == person5.cref());
-
 }
 
 

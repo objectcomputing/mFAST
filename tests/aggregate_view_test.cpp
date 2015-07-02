@@ -26,9 +26,8 @@
 
 
 #include "debug_allocator.h"
-#define MULTILINE(...) #__VA_ARGS__
 
-const char* xml_content= MULTILINE(
+const char* xml_content= R"(
 <?xml version="1.0"?>
 <templates xmlns="http://www.fixprotocol.org/ns/template-definition" templateNs="view_test" ns="http://www.ociweb.com/ns/mfast">
     <template name="LoginAccount">
@@ -78,8 +77,7 @@ const char* xml_content= MULTILINE(
         <reference name="firstName" />
       </field>
     </view>
-</templates>
-);
+</templates>)";
 
 
 using namespace mfast;
@@ -175,6 +173,9 @@ TEST_CASE("test view parsing capabilities", "[parse_view_test]")
     std::cerr << diagnostic_information(e);
   }
 }
+
+void cref_func(mfast::message_cref) {}
+void mref_func(mfast::message_mref) {}
 
 TEST_CASE("test the code generation with view", "[codegen_view_test]")
 {

@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -22,27 +23,25 @@
 #include <boost/io/ios_state.hpp>
 
 namespace mfast {
-  std::ostream&
-  operator << (std::ostream& os, const fast_istream& istream)
-  {
-    const char* ptr = istream.gptr();
-    boost::io::ios_flags_saver ifs( os );
+std::ostream &operator<<(std::ostream &os, const fast_istream &istream) {
+  const char *ptr = istream.gptr();
+  boost::io::ios_flags_saver ifs(os);
 
-    for (int i = 0; i < 2; ++i) {
-      // Output at most 2 stop bit encoded entities
-      for (; ptr != istream.egptr(); ++ptr) {
-        os << std::hex << std::setw(2)<< std::setfill('0') << (static_cast<unsigned>(*ptr) & 0xFF) << " ";
-        if (*ptr & '\x80') {
-          ++ptr;
-          break;
-        }
+  for (int i = 0; i < 2; ++i) {
+    // Output at most 2 stop bit encoded entities
+    for (; ptr != istream.egptr(); ++ptr) {
+      os << std::hex << std::setw(2) << std::setfill('0')
+         << (static_cast<unsigned>(*ptr) & 0xFF) << " ";
+      if (*ptr & '\x80') {
+        ++ptr;
+        break;
       }
     }
-
-    if (ptr != istream.egptr()) {
-      os << " ....";
-    }
-    return os;
   }
 
+  if (ptr != istream.egptr()) {
+    os << " ....";
+  }
+  return os;
+}
 }

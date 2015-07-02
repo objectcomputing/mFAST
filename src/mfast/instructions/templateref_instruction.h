@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -16,46 +17,37 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef TEMPLATEREF_INSTRUCTION_H_54TZ9IPX
-#define TEMPLATEREF_INSTRUCTION_H_54TZ9IPX
+#pragma once
 
 #include "template_instruction.h"
 
-namespace mfast
-{
-  class MFAST_EXPORT templateref_instruction
-    : public field_instruction
-  {
-  public:
+namespace mfast {
+class MFAST_EXPORT templateref_instruction : public field_instruction {
+public:
+  templateref_instruction(instruction_tag tag = instruction_tag());
 
+  virtual void construct_value(value_storage &storage,
+                               allocator *alloc) const override;
+  virtual void destruct_value(value_storage &storage,
+                              allocator *alloc) const override;
 
-    templateref_instruction(instruction_tag tag = instruction_tag());
+  void construct_value(value_storage &storage, allocator *alloc,
+                       const template_instruction *from_inst,
+                       bool construct_subfields) const;
 
-    virtual void construct_value(value_storage& storage,
-                                 allocator*     alloc) const override;
-    virtual void destruct_value(value_storage& storage,
-                                allocator*     alloc) const override;
+  virtual std::size_t pmap_size() const override;
 
-    void  construct_value(value_storage&              storage,
-                          allocator*                  alloc,
-                          const template_instruction* from_inst,
-                          bool                        construct_subfields) const;
+  /// Perform deep copy
+  virtual void
+  copy_construct_value(const value_storage &src, value_storage &dest,
+                       allocator *alloc,
+                       value_storage *fields_storage = nullptr) const override;
 
-    virtual std::size_t pmap_size() const override;
+  virtual void accept(field_instruction_visitor &, void *) const override;
 
-    /// Perform deep copy
-    virtual void copy_construct_value(const value_storage& src,
-                                      value_storage&       dest,
-                                      allocator*           alloc,
-                                      value_storage*       fields_storage=nullptr) const override;
+  virtual templateref_instruction *clone(arena_allocator &alloc) const override;
 
-    virtual void accept(field_instruction_visitor&, void*) const override;
-
-    virtual templateref_instruction* clone(arena_allocator& alloc) const override;
-
-    static instructions_view_t default_instruction();
-  };
+  static instructions_view_t default_instruction();
+};
 
 } /* mfast */
-
-#endif /* end of include guard: TEMPLATEREF_INSTRUCTION_H_54TZ9IPX */

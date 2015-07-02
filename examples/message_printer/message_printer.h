@@ -1,5 +1,4 @@
-#ifndef MESSAGE_PRINTER_H_U3Q5YMCD
-#define MESSAGE_PRINTER_H_U3Q5YMCD
+#pragma once
 
 #include <mfast.h>
 #include <iostream>
@@ -132,4 +131,4 @@ class message_printer
       --indent_;
     }
 };
-#endif /* end of include guard: MESSAGE_PRINTER_H_U3Q5YMCD */
+

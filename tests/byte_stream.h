@@ -17,8 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef BYTE_STREAM_H_4KE09BNK
-#define BYTE_STREAM_H_4KE09BNK
+#pragma once
 
 #include "mfast/coder/encoder/fast_ostreambuf.h"
 #include <iostream>
@@ -88,4 +87,4 @@ inline std::ostream& operator << (std::ostream& os, const byte_stream& bs )
   return os;
 }
 
-#endif /* end of include guard: BYTE_STREAM_H_4KE09BNK */
+

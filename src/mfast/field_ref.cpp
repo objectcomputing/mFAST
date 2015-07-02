@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -19,15 +20,11 @@
 #include "mfast/field_ref.h"
 
 namespace mfast {
-  namespace detail {
-    const value_storage null_storage;
-  }
-
-  bad_optional_access::bad_optional_access()
-    : std::logic_error("Attempted to access the value of an uninitialized optional mfast object.")
-  {
-  }
+namespace detail {
+const value_storage null_storage;
 }
 
-
-
+bad_optional_access::bad_optional_access()
+    : std::logic_error("Attempted to access the value of an uninitialized "
+                       "optional mfast object.") {}
+}

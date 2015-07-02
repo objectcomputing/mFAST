@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -18,28 +19,26 @@
 //
 #include "decoder_presence_map.h"
 
-
 #ifndef NDEBUG
 
 namespace mfast {
-  std::ostream&
-  operator << (std::ostream& os, const decoder_presence_map& pmap)
-  {
-    size_t mask = pmap.mask_ >> 1;
-    if (mask == 0) {
-      os << "0";
-      return os;
-    }
-
-    os << (mask & pmap.cur_bitmap_ ? "J" : "Q");
-    while ((mask >>=1)) {
-      os << (mask & pmap.cur_bitmap_ ? "1" : "0");
-    }
+std::ostream &operator<<(std::ostream &os, const decoder_presence_map &pmap) {
+  size_t mask = pmap.mask_ >> 1;
+  if (mask == 0) {
+    os << "0";
     return os;
   }
 
+  os << (mask & pmap.cur_bitmap_ ? "J" : "Q");
+  while ((mask >>= 1)) {
+    os << (mask & pmap.cur_bitmap_ ? "1" : "0");
+  }
+  return os;
+}
 }
 #elif _MSC_VER
 // disable MSVC LNK4221
-namespace { char dummy; };
+namespace {
+char dummy;
+};
 #endif

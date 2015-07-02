@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -18,13 +19,11 @@
 
 #include "enum_instruction.h"
 
-namespace mfast
-{
+namespace mfast {
 
-  enum_field_instruction*
-  enum_field_instruction::clone(arena_allocator& alloc) const
-  {
-    return new (alloc) enum_field_instruction(*this);
-  }
+enum_field_instruction *
+enum_field_instruction::clone(arena_allocator &alloc) const {
+  return new (alloc) enum_field_instruction(*this);
+}
 
 } /* mfast */

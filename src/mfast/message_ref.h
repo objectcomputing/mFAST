@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -16,8 +17,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef MESSAGE_REF_H_CZBMHN6L
-#define MESSAGE_REF_H_CZBMHN6L
+#pragma once
 
 #include <cassert>
 #include "mfast/field_instructions.h"
@@ -26,285 +26,222 @@
 #include "mfast/group_ref.h"
 // #include "mfast/nested_message_ref.h"
 namespace mfast {
+struct fast_decoder_impl;
 
-  struct fast_decoder_impl;
+template <typename AggregateCRef, typename TemplateType>
+class make_message_cref : public AggregateCRef {
+public:
+  typedef const TemplateType *instruction_cptr;
 
+  make_message_cref(const value_storage *storage_array,
+                    instruction_cptr instruction);
 
-  template <typename AggregateCRef, typename TemplateType>
-  class make_message_cref
-    : public AggregateCRef
-  {
-  public:
+  make_message_cref(const make_message_cref &) = default;
+  // make_message_cref(make_message_cref&& ) = default;
 
-    typedef const TemplateType* instruction_cptr;
+  template <typename T,
+            typename = enable_if_t<
+                !std::is_same<AggregateCRef, aggregate_cref>::value ||
+                !std::is_same<T, aggregate_cref>::value>>
+  explicit make_message_cref(
+      const make_message_cref<T, template_instruction> &other)
+      : AggregateCRef(other.field_storage(0),
+                      static_cast<const TemplateType *>(other.instruction())) {
+    // assert( dynamic_cast<const TemplateType*>(other.instruction()) );
+  }
 
-    make_message_cref(const value_storage* storage_array,
-                      instruction_cptr     instruction);
+  explicit make_message_cref(const field_cref &cref);
 
-    make_message_cref(const make_message_cref& )=default;
-    //make_message_cref(make_message_cref&& ) = default;
+  uint32_t id() const;
+  const char *ns() const;
+  const char *template_ns() const;
+  const char *name() const;
 
-    template <typename T, typename = enable_if_t< !std::is_same<AggregateCRef, aggregate_cref>::value ||
-                                                        !std::is_same<T, aggregate_cref>::value >>
-    explicit make_message_cref(const make_message_cref<T, template_instruction>& other)
-      : AggregateCRef(other.field_storage(0), static_cast<const TemplateType*>(other.instruction()))
-    {
-      // assert( dynamic_cast<const TemplateType*>(other.instruction()) );
-    }
+  instruction_cptr instruction() const;
+};
 
-    explicit make_message_cref(const field_cref& cref);
+template <typename AggregateMRef, typename TemplateType>
+class make_message_mref : public AggregateMRef {
+public:
+  typedef make_message_cref<typename AggregateMRef::cref_type, TemplateType>
+      cref_type;
+  typedef const TemplateType *instruction_cptr;
 
-    uint32_t id() const;
-    const char* ns() const;
-    const char* template_ns() const;
-    const char* name() const;
+  make_message_mref(mfast::allocator *alloc, value_storage *storage_array,
+                    instruction_cptr instruction);
 
-    instruction_cptr instruction() const;
-  };
+  make_message_mref(const make_message_mref &) = default;
+  // make_message_mref(make_message_mref&& ) = default;
 
-
-
-  template <typename AggregateMRef, typename TemplateType>
-  class make_message_mref
-    : public AggregateMRef
-  {
-  public:
-    typedef make_message_cref<typename AggregateMRef::cref_type, TemplateType> cref_type;
-    typedef const TemplateType* instruction_cptr;
-
-    make_message_mref(mfast::allocator* alloc,
-                      value_storage*    storage_array,
-                      instruction_cptr  instruction);
-
-
-    make_message_mref(const make_message_mref& ) = default;
-    //make_message_mref(make_message_mref&& ) = default;
-
-    template <typename T, typename = enable_if_t< !std::is_same<AggregateMRef, T>::value >>
-    explicit make_message_mref(const make_message_mref<T, template_instruction>& other)
+  template <typename T,
+            typename = enable_if_t<!std::is_same<AggregateMRef, T>::value>>
+  explicit make_message_mref(
+      const make_message_mref<T, template_instruction> &other)
       : AggregateMRef(other.allocator(),
                       aggregate_mref_core_access::storage_of(other),
-                      static_cast<const TemplateType*>(other.instruction()))
-    {
-      // assert( dynamic_cast<const TemplateType*>(other.instruction()) );
-    }
+                      static_cast<const TemplateType *>(other.instruction())) {
+    // assert( dynamic_cast<const TemplateType*>(other.instruction()) );
+  }
 
-    explicit make_message_mref(const field_mref_base& mref);
+  explicit make_message_mref(const field_mref_base &mref);
 
-    operator cref_type () const
-    {
-      return cref_type(this->field_storage(0), this->instruction());
-    }
+  operator cref_type() const {
+    return cref_type(this->field_storage(0), this->instruction());
+  }
+  uint32_t id() const;
+  const char *ns() const;
+  const char *template_ns() const;
+  const char *name() const;
 
-    uint32_t id() const;
-    const char* ns() const;
-    const char* template_ns() const;
-    const char* name() const;
+  instruction_cptr instruction() const;
+};
 
-    instruction_cptr instruction() const;
-  };
+class message_cref
+    : public make_message_cref<aggregate_cref, template_instruction> {
+  typedef make_message_cref<aggregate_cref, template_instruction> base_type;
 
+public:
+  message_cref(const value_storage *storage_array = nullptr,
+               instruction_cptr instruction = nullptr);
 
-  class message_cref
-    : public make_message_cref<aggregate_cref, template_instruction>
-  {
-    typedef make_message_cref<aggregate_cref, template_instruction> base_type;
+  template <typename AggregateCRef, typename TemplateType>
+  message_cref(const make_message_cref<AggregateCRef, TemplateType> &other);
 
-  public:
-    message_cref(const value_storage* storage_array=nullptr,
-                 instruction_cptr     instruction=nullptr);
+  explicit message_cref(const field_cref &cref);
+};
 
-    template <typename AggregateCRef, typename TemplateType>
-    message_cref(const make_message_cref<AggregateCRef, TemplateType>& other);
+class message_mref
+    : public make_message_mref<aggregate_mref, template_instruction> {
+  typedef make_message_mref<aggregate_mref, template_instruction> base_type;
 
-    explicit message_cref(const field_cref& cref);
+public:
+  message_mref(mfast::allocator *alloc = nullptr,
+               value_storage *storage_array = nullptr,
+               instruction_cptr instruction = nullptr);
 
-  };
+  explicit message_mref(const field_mref_base &mref);
 
-  class message_mref
-    : public make_message_mref<aggregate_mref, template_instruction>
-  {
-    typedef make_message_mref<aggregate_mref, template_instruction> base_type;
+  template <typename AggregateMRef, typename TemplateType>
+  message_mref(const make_message_mref<AggregateMRef, TemplateType> &other);
 
-  public:
-    message_mref(mfast::allocator* alloc=nullptr,
-                 value_storage*    storage_array=nullptr,
-                 instruction_cptr  instruction=nullptr);
+  operator message_cref() const {
+    return message_cref(this->field_storage(0), this->instruction());
+  }
+};
 
-    explicit message_mref(const field_mref_base& mref);
-
-    template <typename AggregateMRef, typename TemplateType>
-    message_mref(const make_message_mref<AggregateMRef, TemplateType>& other);
-
-    operator message_cref () const
-    {
-      return message_cref(this->field_storage(0), this->instruction());
-    }
-  };
-
-  template <>
-  struct mref_of<message_cref>
-  {
-    typedef message_mref type;
-  };
+template <> struct mref_of<message_cref> { typedef message_mref type; };
 
 ////////////////////////////
-  template <typename AggregateCRef, typename TemplateType>
-  inline
-  make_message_cref<AggregateCRef,TemplateType>::make_message_cref(const value_storage* storage_array,
-                                                                   typename make_message_cref<AggregateCRef,TemplateType>::instruction_cptr instruction)
-    : AggregateCRef(storage_array, instruction)
-  {
-  }
+template <typename AggregateCRef, typename TemplateType>
+inline make_message_cref<AggregateCRef, TemplateType>::make_message_cref(
+    const value_storage *storage_array,
+    typename make_message_cref<AggregateCRef, TemplateType>::instruction_cptr
+        instruction)
+    : AggregateCRef(storage_array, instruction) {}
 
+template <typename AggregateCRef, typename TemplateType>
+inline make_message_cref<AggregateCRef, TemplateType>::make_message_cref(
+    const field_cref &cref)
+    : AggregateCRef(cref) {
+  // assert( dynamic_cast<const TemplateType*>(cref.instruction()) );
+}
 
+template <typename AggregateCRef, typename TemplateType>
+inline typename make_message_cref<AggregateCRef, TemplateType>::instruction_cptr
+make_message_cref<AggregateCRef, TemplateType>::instruction() const {
+  return static_cast<instruction_cptr>(AggregateCRef::instruction());
+}
 
-  template <typename AggregateCRef, typename TemplateType>
-  inline
-  make_message_cref<AggregateCRef,TemplateType>::make_message_cref(const field_cref &cref)
-    : AggregateCRef(cref)
-  {
-    // assert( dynamic_cast<const TemplateType*>(cref.instruction()) );
-  }
+template <typename AggregateCRef, typename TemplateType>
+inline uint32_t make_message_cref<AggregateCRef, TemplateType>::id() const {
+  return this->instruction()->id();
+}
 
-  template <typename AggregateCRef, typename TemplateType>
-  inline typename make_message_cref<AggregateCRef,TemplateType>::instruction_cptr
-  make_message_cref<AggregateCRef,TemplateType>::instruction() const
-  {
-    return static_cast<instruction_cptr>(AggregateCRef::instruction());
-  }
+template <typename AggregateCRef, typename TemplateType>
+inline const char *make_message_cref<AggregateCRef, TemplateType>::ns() const {
+  return this->instruction()->ns();
+}
 
-  template <typename AggregateCRef, typename TemplateType>
-  inline uint32_t
-  make_message_cref<AggregateCRef,TemplateType>::id() const
-  {
-    return this->instruction()->id();
-  }
+template <typename AggregateCRef, typename TemplateType>
+inline const char *
+make_message_cref<AggregateCRef, TemplateType>::template_ns() const {
+  return this->instruction()->template_ns();
+}
 
-  template <typename AggregateCRef, typename TemplateType>
-  inline const char*
-  make_message_cref<AggregateCRef,TemplateType>::ns() const
-  {
-    return this->instruction()->ns();
-  }
-
-  template <typename AggregateCRef, typename TemplateType>
-  inline const char*
-  make_message_cref<AggregateCRef,TemplateType>::template_ns() const
-  {
-    return this->instruction()->template_ns();
-  }
-
-  template <typename AggregateCRef, typename TemplateType>
-  inline const char*
-  make_message_cref<AggregateCRef,TemplateType>::name() const
-  {
-    return this->instruction()->name();
-  }
+template <typename AggregateCRef, typename TemplateType>
+inline const char *
+make_message_cref<AggregateCRef, TemplateType>::name() const {
+  return this->instruction()->name();
+}
 
 //////////////////////////////////////////////////////////////////
-  inline
-  message_cref::message_cref(const value_storage* storage_array,
-                             instruction_cptr     instruction)
-    : base_type(storage_array, instruction)
-  {
-  }
+inline message_cref::message_cref(const value_storage *storage_array,
+                                  instruction_cptr instruction)
+    : base_type(storage_array, instruction) {}
 
-  template <typename AggregateCRef, typename TemplateType>
-  inline
-  message_cref::message_cref(const make_message_cref<AggregateCRef, TemplateType>& other)
-    : base_type(other.field_storage(0), other.instruction())
-  {
-  }
+template <typename AggregateCRef, typename TemplateType>
+inline message_cref::message_cref(
+    const make_message_cref<AggregateCRef, TemplateType> &other)
+    : base_type(other.field_storage(0), other.instruction()) {}
 
-
-  inline
-  message_cref::message_cref(const field_cref& cref)
-    : base_type(cref)
-  {
-  }
-
+inline message_cref::message_cref(const field_cref &cref) : base_type(cref) {}
 //////////////////////////////////////////////////////////////////
 
-  template <typename AggregateMRef, typename TemplateType>
-  inline
-  make_message_mref<AggregateMRef,TemplateType>::make_message_mref(mfast::allocator* alloc,
-                                                                   value_storage* storage_array,
-                                                                   typename make_message_mref<AggregateMRef,TemplateType>::instruction_cptr instruction)
-    : AggregateMRef(alloc, storage_array, instruction)
-  {
-  }
+template <typename AggregateMRef, typename TemplateType>
+inline make_message_mref<AggregateMRef, TemplateType>::make_message_mref(
+    mfast::allocator *alloc, value_storage *storage_array,
+    typename make_message_mref<AggregateMRef, TemplateType>::instruction_cptr
+        instruction)
+    : AggregateMRef(alloc, storage_array, instruction) {}
 
+template <typename AggregateMRef, typename TemplateType>
+inline make_message_mref<AggregateMRef, TemplateType>::make_message_mref(
+    const field_mref_base &mref)
+    : AggregateMRef(mref) {
+  // assert( dynamic_cast<const TemplateType*>(mref.instruction()) );
+}
 
-  template <typename AggregateMRef, typename TemplateType>
-  inline
-  make_message_mref<AggregateMRef,TemplateType>::make_message_mref(const field_mref_base &mref)
-    : AggregateMRef(mref)
-  {
-    // assert( dynamic_cast<const TemplateType*>(mref.instruction()) );
-  }
+template <typename AggregateMRef, typename TemplateType>
+inline typename make_message_mref<AggregateMRef, TemplateType>::instruction_cptr
+make_message_mref<AggregateMRef, TemplateType>::instruction() const {
+  return static_cast<instruction_cptr>(AggregateMRef::instruction());
+}
 
-  template <typename AggregateMRef, typename TemplateType>
-  inline typename make_message_mref<AggregateMRef,TemplateType>::instruction_cptr
-  make_message_mref<AggregateMRef,TemplateType>::instruction() const
-  {
-    return static_cast<instruction_cptr>(AggregateMRef::instruction());
-  }
+template <typename AggregateMRef, typename TemplateType>
+inline uint32_t make_message_mref<AggregateMRef, TemplateType>::id() const {
+  return this->instruction()->id();
+}
 
-  template <typename AggregateMRef, typename TemplateType>
-  inline uint32_t
-  make_message_mref<AggregateMRef,TemplateType>::id() const
-  {
-    return this->instruction()->id();
-  }
+template <typename AggregateMRef, typename TemplateType>
+inline const char *make_message_mref<AggregateMRef, TemplateType>::ns() const {
+  return this->instruction()->ns();
+}
 
-  template <typename AggregateMRef, typename TemplateType>
-  inline const char*
-  make_message_mref<AggregateMRef,TemplateType>::ns() const
-  {
-    return this->instruction()->ns();
-  }
+template <typename AggregateMRef, typename TemplateType>
+inline const char *
+make_message_mref<AggregateMRef, TemplateType>::template_ns() const {
+  return this->instruction()->template_ns();
+}
 
-  template <typename AggregateMRef, typename TemplateType>
-  inline const char*
-  make_message_mref<AggregateMRef,TemplateType>::template_ns() const
-  {
-    return this->instruction()->template_ns();
-  }
-
-  template <typename AggregateMRef, typename TemplateType>
-  inline const char*
-  make_message_mref<AggregateMRef,TemplateType>::name() const
-  {
-    return this->instruction()->name();
-  }
+template <typename AggregateMRef, typename TemplateType>
+inline const char *
+make_message_mref<AggregateMRef, TemplateType>::name() const {
+  return this->instruction()->name();
+}
 
 /////////////////////////////////////////////////////////////////
 
-  inline
-  message_mref::message_mref(mfast::allocator* alloc,
-                             value_storage*    storage_array,
-                             instruction_cptr  instruction)
-    : base_type(alloc,
-                storage_array,
-                instruction)
-  {
-  }
+inline message_mref::message_mref(mfast::allocator *alloc,
+                                  value_storage *storage_array,
+                                  instruction_cptr instruction)
+    : base_type(alloc, storage_array, instruction) {}
 
-  inline
-  message_mref::message_mref(const field_mref_base& mref)
-    : base_type(mref)
-  {
-  }
-
-  template <typename AggregateMRef, typename TemplateType>
-  inline
-  message_mref::message_mref(const make_message_mref<AggregateMRef, TemplateType>& other)
+inline message_mref::message_mref(const field_mref_base &mref)
+    : base_type(mref) {}
+template <typename AggregateMRef, typename TemplateType>
+inline message_mref::message_mref(
+    const make_message_mref<AggregateMRef, TemplateType> &other)
     : base_type(other.allocator(),
                 aggregate_mref_core_access::storage_of(other),
-                other.instruction())
-  {
-  }
-
+                other.instruction()) {}
 }
-#endif /* end of include guard: MESSAGE_REF_H_CZBMHN6L */

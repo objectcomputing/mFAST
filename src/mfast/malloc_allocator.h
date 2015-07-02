@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -16,24 +17,19 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef MALLOC_ALLOCATOR_H_M03J5JS6
-#define MALLOC_ALLOCATOR_H_M03J5JS6
+#pragma once
 #include "allocator.h"
 #include <cstdlib>
 #include <new>
 
 namespace mfast {
-  class MFAST_EXPORT malloc_allocator
-    : public allocator
-  {
-  public:
-    static malloc_allocator* instance();
+class MFAST_EXPORT malloc_allocator : public allocator {
+public:
+  static malloc_allocator *instance();
 
-    virtual void* allocate(std::size_t s) override;
-    virtual std::size_t reallocate(void*& pointer, std::size_t old_size, std::size_t new_size) override;
-    virtual void deallocate(void* pointer,std::size_t) override;
-  };
-
+  virtual void *allocate(std::size_t s) override;
+  virtual std::size_t reallocate(void *&pointer, std::size_t old_size,
+                                 std::size_t new_size) override;
+  virtual void deallocate(void *pointer, std::size_t) override;
+};
 }
-
-#endif /* end of include guard: MALLOC_ALLOCATOR_H_M03J5JS6 */

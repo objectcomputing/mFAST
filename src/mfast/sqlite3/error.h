@@ -1,5 +1,4 @@
-#ifndef ERROR_H_CX6883YW
-#define ERROR_H_CX6883YW
+#pragma once
 
 #include "mfast_sqlite3_export.h"
 #include "../mfast_export.h"
@@ -14,62 +13,47 @@
 #include <boost/exception/info.hpp>
 #include <boost/throw_exception.hpp>
 
-namespace mfast
-{
-  namespace SQLite3
-  {
+namespace mfast {
+namespace SQLite3 {
+struct MFAST_SQLITE3_EXPORT error : virtual std::exception,
+                                    virtual boost::exception {};
 
-    struct MFAST_SQLITE3_EXPORT error
-      : virtual std::exception, virtual boost::exception
-    {
-    };
+struct tag_reason;
+struct tag_sqlite3_errmsg;
+struct tag_field_name;
+struct tag_column;
 
-
-
-    struct tag_reason;
-    struct tag_sqlite3_errmsg;
-    struct tag_field_name;
-    struct tag_column;
-
-  } /* SQLite3 */
+} /* SQLite3 */
 
 } /* mfast */
 
-
 #if !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
-namespace  boost {
-  // For Clang, we must use extern template and explicit template instantiation;
-  //     otherwise, we will have duplicated definition link error when building shared library.
-  // For GCC, we must nest the explicit instantiation statement inside their original namespace;
-  //     otherwise, the code won't compile.
-  extern template class error_info<mfast::SQLite3::tag_reason,std::string>;
-  extern template class error_info<mfast::SQLite3::tag_sqlite3_errmsg,std::string>;
-  extern template class error_info<mfast::SQLite3::tag_field_name,std::string>;
-  extern template class error_info<mfast::SQLite3::tag_column,unsigned>;
-
+namespace boost {
+// For Clang, we must use extern template and explicit template instantiation;
+//     otherwise, we will have duplicated definition link error when building
+//     shared library.
+// For GCC, we must nest the explicit instantiation statement inside their
+// original namespace;
+//     otherwise, the code won't compile.
+extern template class error_info<mfast::SQLite3::tag_reason, std::string>;
+extern template class error_info<mfast::SQLite3::tag_sqlite3_errmsg,
+                                 std::string>;
+extern template class error_info<mfast::SQLite3::tag_field_name, std::string>;
+extern template class error_info<mfast::SQLite3::tag_column, unsigned>;
 }
 #endif
 
-namespace mfast
-{
-  namespace SQLite3
-  {
-    typedef boost::error_info<tag_reason,std::string> reason_info;
-    typedef boost::error_info<tag_sqlite3_errmsg,std::string> sqlite3_errmsg_info;
-    typedef boost::error_info<tag_field_name,std::string> field_name_info;
-    typedef boost::error_info<tag_column,unsigned> table_column_info;
+namespace mfast {
+namespace SQLite3 {
+typedef boost::error_info<tag_reason, std::string> reason_info;
+typedef boost::error_info<tag_sqlite3_errmsg, std::string> sqlite3_errmsg_info;
+typedef boost::error_info<tag_field_name, std::string> field_name_info;
+typedef boost::error_info<tag_column, unsigned> table_column_info;
 
+struct MFAST_SQLITE3_EXPORT sqlite3_error : error {
+  sqlite3_error(sqlite3 *db, const char *api_name);
+};
 
-    struct MFAST_SQLITE3_EXPORT sqlite3_error
-      : error
-    {
-      sqlite3_error(sqlite3* db, const char* api_name);
-
-    };
-
-  } /* SQLite3 */
+} /* SQLite3 */
 
 } /* mfast */
-
-
-#endif /* end of include guard: ERROR_H_CX6883YW */

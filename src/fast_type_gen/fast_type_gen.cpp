@@ -4,7 +4,8 @@
 // This file is part of mFAST.
 //
 //     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published by
+//     it under the terms of the GNU Lesser General Public License as published
+//     by
 //     the Free Software Foundation, either version 3 of the License, or
 //     (at your option) any later version.
 //
@@ -32,26 +33,23 @@
 
 // using namespace boost::filesystem;
 
-int main(int argc, const char** argv)
-{
+int main(int argc, const char **argv) {
   mfast::template_registry registry;
 
   try {
     int i = 1;
-    const char* export_symbol = nullptr;
+    const char *export_symbol = nullptr;
 
     if (std::strcmp(argv[1], "-E") == 0) {
       export_symbol = argv[2];
       i = 3;
     }
 
-
     std::vector<mfast::dynamic_templates_description> descriptions;
 
     std::vector<std::string> filebases;
 
     mfast::simple_template_repo_t repo;
-
 
     for (int j = 0; i < argc; ++i, ++j) {
 
@@ -64,7 +62,9 @@ int main(int argc, const char** argv)
 
       std::string xml((std::istreambuf_iterator<char>(ifs)),
                       std::istreambuf_iterator<char>());
-      
+
+      //path f(path(argv[i]).stem());
+
 #ifdef _WINDOWS
       char filebase_buf[_MAX_FNAME];
       _splitpath(argv[i], NULL, NULL, filebase_buf, NULL);
@@ -76,18 +76,14 @@ int main(int argc, const char** argv)
 #endif
       filebases.push_back(codegen_base::cpp_name(filebase));
 
-      descriptions.emplace_back(xml.c_str(),
-                                filebases[j].c_str(),
-                                &registry);
+      descriptions.emplace_back(xml.c_str(), filebases[j].c_str(), &registry);
     }
 
     repo.build(descriptions.begin(), descriptions.end());
 
-
-    for (std::size_t j = 0; j < filebases.size(); ++j)
-    {
-      mfast::dynamic_templates_description& desc = descriptions[j];
-      const std::string& filebase = filebases[j];
+    for (std::size_t j = 0; j < filebases.size(); ++j) {
+      mfast::dynamic_templates_description &desc = descriptions[j];
+      const std::string &filebase = filebases[j];
 
       hpp_gen header_gen(filebase.c_str());
       if (export_symbol)
@@ -100,13 +96,10 @@ int main(int argc, const char** argv)
       cpp_gen source_gen(filebase.c_str());
       source_gen.generate(desc);
     }
-  }
-  catch( boost::exception & e ) {
+  } catch (boost::exception &e) {
     std::cerr << diagnostic_information(e);
     return -1;
-  }
-  catch (std::exception& e)
-  {
+  } catch (std::exception &e) {
     std::cerr << e.what() << "\n";
     return -1;
   }

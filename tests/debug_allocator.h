@@ -16,8 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef DEBUG_ALLOCATOR_H_PPV2L7KE
-#define DEBUG_ALLOCATOR_H_PPV2L7KE
+#pragma once
 
 #include "catch.hpp"
 #include <mfast/malloc_allocator.h>
@@ -89,4 +88,4 @@ class debug_allocator
 #define INT32_MIN (-2147483647L-1)
 #endif
 
-#endif /* end of include guard: DEBUG_ALLOCATOR_H_PPV2L7KE */
+
