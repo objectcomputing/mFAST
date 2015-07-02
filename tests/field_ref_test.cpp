@@ -70,6 +70,13 @@ BOOST_AUTO_TEST_CASE(integer_field_test)
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.value(), 5U);
 
+    ref.as(20150701121211999);
+    value_storage storage2;
+    inst.copy_construct_value(storage, storage2, &allocator);
+    uint64_cref copied_cref(&storage2, &inst);
+
+    BOOST_CHECK_EQUAL(ref.value(), copied_cref.value());
+
     ref.to_initial_value();
     BOOST_CHECK( ref.present() );
     BOOST_CHECK_EQUAL(ref.value(), UINT64_MAX);

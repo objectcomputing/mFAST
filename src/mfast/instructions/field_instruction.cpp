@@ -49,7 +49,7 @@ namespace mfast {
                                           allocator* /* alloc */,
                                           value_storage*) const
   {
-    dest.of_array.content_ = src.of_array.content_;
+    dest.of_uint64.content_ = src.of_uint64.content_;
     dest.of_array.len_ = src.of_array.len_;
     dest.of_array.capacity_in_bytes_ = 0;
   }
