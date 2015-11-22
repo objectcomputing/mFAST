@@ -28,8 +28,10 @@
 
 #include <boost/exception/diagnostic_information.hpp>
 
-#include <boost/date_time/microsec_time_clock.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+// #include <boost/date_time/microsec_time_clock.hpp>
+// #include <boost/date_time/posix_time/posix_time.hpp>
+
+#include <chrono>
 
 #if defined(_MSC_VER)
 #pragma warning(disable:4996)
@@ -129,7 +131,9 @@ int main(int argc, const char** argv)
     buffer.resize(message_contents.size());
 #endif
 
-    boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
+    // boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
+    typedef std::chrono::high_resolution_clock clock;
+    clock::time_point start=clock::now();
     {
 
       for (std::size_t j = 0; j < repeat_count; ++j) {
@@ -154,8 +158,11 @@ int main(int argc, const char** argv)
         }
       }
     }
-    boost::posix_time::ptime stop = boost::posix_time::microsec_clock::universal_time();
-    std::cout << "time spent " <<  static_cast<unsigned long>((stop - start).total_milliseconds()) << " msec\n";
+    // boost::posix_time::ptime stop = boost::posix_time::microsec_clock::universal_time();
+    // std::cout << "time spent " <<  static_cast<unsigned long>((stop - start).total_milliseconds()) << " msec\n";
+    
+    typedef std::chrono::milliseconds ms;
+    std::cout << "time spent " << std::chrono::duration_cast<ms>(clock::now() - start).count() << " ms\n";
   }
   catch (boost::exception& e) {
     std::cerr << boost::diagnostic_information(e);

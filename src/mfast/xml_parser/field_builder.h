@@ -19,7 +19,6 @@
 //
 #pragma once
 
-#include <boost/lexical_cast.hpp>
 #include "field_builder_base.h"
 #include "fast_xml_attributes.h"
 namespace mfast {
@@ -61,7 +60,7 @@ protected:
   template <typename Instruction>
   uint32_t get_length_id(const Instruction *inst,
                          const fast_xml_attributes &length_attrs) const {
-    return length_attrs.id_ ? boost::lexical_cast<uint32_t>(length_attrs.id_)
+    return length_attrs.id_ ? static_cast<uint32_t>(std::stoi(length_attrs.id_))
                             : inst->length_id();
   }
 

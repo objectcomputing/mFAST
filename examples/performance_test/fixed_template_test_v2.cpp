@@ -27,14 +27,8 @@
 #include "example.h"
 
 #include <boost/exception/diagnostic_information.hpp>
-// #include <boost/chrono/chrono.hpp>
+#include <chrono>
 
-// Although chrono is better for performance measurement in theory, I choose to sue
-// boost data_time because QuickFAST uses it and I want to compare the result with
-// QuickFAST PerformanceTest directly.
-
-#include <boost/date_time/microsec_time_clock.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 
 #if defined(_MSC_VER)
 #pragma warning(disable:4996)
@@ -123,10 +117,10 @@ int main(int argc, const char** argv)
 
     mfast::message_type msg_value;
 
-    boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
+    // boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
 
-    // typedef boost::chrono::high_resolution_clock clock;
-    // clock::time_point start=clock::now();
+    typedef std::chrono::high_resolution_clock clock;
+    clock::time_point start=clock::now();
     {
 
       for (std::size_t j = 0; j < repeat_count; ++j) {
@@ -155,11 +149,8 @@ int main(int argc, const char** argv)
       }
     }
 
-    boost::posix_time::ptime stop = boost::posix_time::microsec_clock::universal_time();
-    std::cout << "time spent " <<  static_cast<unsigned long>((stop - start).total_milliseconds()) << " msec\n";
-
-    // typedef boost::chrono::milliseconds ms;
-    // std::cout << "time spent " << boost::chrono::duration_cast<ms>(clock::now() - start).count() << " ms\n";
+    typedef std::chrono::milliseconds ms;
+    std::cout << "time spent " << std::chrono::duration_cast<ms>(clock::now() - start).count() << " ms\n";
   }
   catch (boost::exception& e) {
     std::cerr << boost::diagnostic_information(e);

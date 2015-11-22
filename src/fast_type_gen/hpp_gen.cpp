@@ -18,8 +18,14 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "hpp_gen.h"
+#if defined __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#endif
 #include <boost/algorithm/string.hpp>
-
+#if defined __GNUC__
+#pragma GCC diagnostic pop
+#endif
 indent_t indent;
 
 void hpp_gen::set_export_symbol(const char *symbol) {

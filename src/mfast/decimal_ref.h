@@ -22,15 +22,21 @@
 #include <cmath>
 #include <cfloat>
 #include <boost/utility/string_ref.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/array.hpp>
 #include "mfast_export.h"
 #include "mfast/field_ref.h"
 #include "mfast/int_ref.h"
 #include "mfast/type_category.h"
-
+#if defined __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedef"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/device/array.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
-
+#if defined __GNUC__
+#pragma GCC diagnostic pop
+#endif
 #if defined(MAST_NO_SHARED_LIBS) && !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
 namespace boost {
 namespace multiprecision {
