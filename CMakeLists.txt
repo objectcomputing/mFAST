@@ -2,7 +2,7 @@
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
 
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.0)
 
 
 project (mFAST CXX)
@@ -202,8 +202,8 @@ endmacro()
 
 
 # Includes Catch in the project:
-add_subdirectory(${EXT_PROJECTS_DIR}/catch)
-include_directories(${CATCH_INCLUDE_DIR} ${COMMON_INCLUDES})
+#add_subdirectory(${EXT_PROJECTS_DIR}/catch)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/catch/include ${COMMON_INCLUDES})
 enable_testing()
 
 add_subdirectory (tests)

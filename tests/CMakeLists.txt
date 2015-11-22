@@ -68,5 +68,6 @@ else()
     add_test(mfast_test mfast_test)
 endif()
 
-#add_dependencies(mfast_test catch)
+
+# add_dependencies(mfast_test catch)
 
