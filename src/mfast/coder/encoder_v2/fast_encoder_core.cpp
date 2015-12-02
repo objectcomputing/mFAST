@@ -25,7 +25,7 @@ namespace mfast
 
       encoder_presence_map pmap;
       this->current_ = &pmap;
-      pmap.init(&this->strm_, instruction->segment_pmap_size());
+      pmap.init(&this->strm_, std::max<std::size_t>(instruction->segment_pmap_size(),1));
       pmap.set_next_bit(need_encode_template_id);
 
       if (need_encode_template_id)

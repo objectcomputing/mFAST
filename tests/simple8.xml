@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+    <!-- Test -->
+    <template name="Test" id="1" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <uInt32 name="field1" id="34"></uInt32>
+        <uInt64 name="field2" id="52"></uInt64>
+    </template>
+</templates>

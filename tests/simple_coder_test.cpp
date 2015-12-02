@@ -33,6 +33,7 @@
 #include "simple5.h"
 #include "simple6.h"
 #include "simple7.h"
+#include "simple8.h"
 
 #include "byte_stream.h"
 #include "debug_allocator.h"
@@ -260,6 +261,22 @@ BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
 
   BOOST_CHECK(test_case.encoding(msg_ref, "\x80"));
   BOOST_CHECK(test_case.decoding("\x80", msg_ref));
+}
+
+BOOST_AUTO_TEST_CASE(segment_pmap_size_zero_coder_test)
+{
+  fast_coding_test_case<simple8::templates_description> test_case;
+
+  debug_allocator alloc;
+  simple8::Test msg(&alloc);
+  simple8::Test_mref msg_ref = msg.mref();
+
+  msg_ref.set_field1().as(1);
+  msg_ref.set_field2().as(2);
+
+
+  BOOST_CHECK(test_case.encoding(msg_ref,"\x80\x81\x82"));
+  BOOST_CHECK(test_case.decoding("\x80\x81\x82", msg_ref));
 }
 
 

@@ -13,7 +13,7 @@ FASTTYPEGEN_TARGET(simple_types4 simple4.xml)
 FASTTYPEGEN_TARGET(simple_types5 simple5.xml)
 FASTTYPEGEN_TARGET(simple_types6 simple6.xml)
 FASTTYPEGEN_TARGET(simple_types7 simple7.xml)
-
+FASTTYPEGEN_TARGET(simple_types8 simple8.xml)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     add_executable(mfast_test
@@ -25,6 +25,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
                    ${FASTTYPEGEN_simple_types5_OUTPUTS}
                    ${FASTTYPEGEN_simple_types6_OUTPUTS}
                    ${FASTTYPEGEN_simple_types7_OUTPUTS}
+                   ${FASTTYPEGEN_simple_types8_OUTPUTS}
                )
 
     target_link_libraries (mfast_test
@@ -70,6 +71,7 @@ else()
                     ${FASTTYPEGEN_simple_types5_OUTPUTS}
                     ${FASTTYPEGEN_simple_types6_OUTPUTS}
                     ${FASTTYPEGEN_simple_types7_OUTPUTS}
+                    ${FASTTYPEGEN_simple_types8_OUTPUTS}
                     fast_type_gen_test.cpp
                     dictionary_builder_test.cpp
                     json_test.cpp

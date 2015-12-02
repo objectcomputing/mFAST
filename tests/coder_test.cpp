@@ -348,5 +348,31 @@ BOOST_AUTO_TEST_CASE(auto_reset_coder_test)
   BOOST_CHECK(test_case.decoding("\x80", msg_ref));
 }
 
+BOOST_AUTO_TEST_CASE(segment_pmap_size_zero_coder_test)
+{
+  fast_coding_test_case test_case (R"(
+    <?xml version="1.0" encoding="UTF-8" ?>
+    <templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+        <template name="Test" id="1" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+            <uInt32 name="field1" id="34"></uInt32>
+            <uInt64 name="field2" id="52"></uInt64>
+        </template>
+    </templates>
+    )");
+  
+
+  debug_allocator alloc;
+  message_type msg(&alloc, test_case.template_with_id(1));
+  message_mref msg_ref = msg.mref();
+
+
+  msg_ref[0].as(1);
+  msg_ref[1].as(2);
+
+
+  BOOST_CHECK(test_case.encoding(msg_ref,"\x80\x81\x82"));
+  BOOST_CHECK(test_case.decoding("\x80\x81\x82", msg_ref));
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
