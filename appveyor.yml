@@ -12,8 +12,8 @@ platform:
 
 # specify custom environment variables
 environment:
-  BOOST_ROOT: c:\Libraries\boost
-  BOOST_LIBRARYDIR: c:\Libraries\boost\stage\lib
+  BOOST_ROOT: C:\Libraries\boost
+  BOOST_LIBRARYDIR: C:\Libraries\boost\lib32-msvc-12.0
 
 # build Configuration, i.e. Debug, Release, etc.
 configuration:
