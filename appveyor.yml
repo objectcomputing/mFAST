@@ -49,7 +49,7 @@ before_build:
   - cmd: cd build
   # We generate project files for Visual Studio 12 because the boost binaries installed on the test server are for Visual Studio 12.
   - cmd: if "%platform%"=="Win32" cmake -G "Visual Studio 12" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN32%" -DBoost_USE_STATIC_LIBS="ON" ..
-  - cmd: if "%platform%"=="x64" cmake -G "Visual Studio 12 Win64" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN64%" -DBOOST_TEST_HEADER_ONLY="ON" ..
+  - cmd: if "%platform%"=="x64" cmake -G "Visual Studio 12 Win64" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN64%" -DBoost_USE_STATIC_LIBS="ON" ..
 
 build:
   project: C:\projects\mfast\build\mfast.sln
