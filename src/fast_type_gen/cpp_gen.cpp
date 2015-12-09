@@ -573,10 +573,11 @@ void cpp_gen::visit(const mfast::templateref_instruction* inst, void* pIndex)
 
 void cpp_gen::generate(mfast::dynamic_templates_description& desc)
 {
+  std::string cpp_filebase = this->cpp_name(filebase_);
   out_<< "#include \"" << filebase_ << ".h\"\n"
       << "\n"
       << "using namespace mfast;\n\n"
-      << "namespace " << filebase_ << "\n{\n";
+      << "namespace " << cpp_filebase << "\n{\n";
 
   this->traverse(desc);
 
@@ -590,7 +591,7 @@ void cpp_gen::generate(mfast::dynamic_templates_description& desc)
   if (instructions.size()) {
     instructions.resize(instructions.size() - 2);
 
-    out_ << "const template_instruction* "<< filebase_ << "_templates_instructions[] ={\n"
+    out_ << "const template_instruction* "<< cpp_filebase << "_templates_instructions[] ={\n"
          << instructions
          << "};\n\n"
          << "templates_description::templates_description()\n"
@@ -598,7 +599,7 @@ void cpp_gen::generate(mfast::dynamic_templates_description& desc)
          << "    \"" << desc.ns()  << "\", // ns\n"
          << "    \"" << desc.template_ns()<< "\", // templateNs\n"
          << "    \"" << desc.dictionary() << "\", // dictionary\n"
-         << "    " << filebase_ << "_templates_instructions)\n"
+         << "    " << cpp_filebase << "_templates_instructions)\n"
          << "{\n"
          << "}\n\n"
          << "const templates_description* templates_description::instance()\n"
