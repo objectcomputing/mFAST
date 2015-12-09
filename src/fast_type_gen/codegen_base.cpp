@@ -80,6 +80,11 @@ codegen_base::cpp_name(const mfast::field_instruction* inst)
   return cpp_name( inst->name() );
 }
 
+std::string codegen_base::cpp_name(const std::string& str)
+{
+  return cpp_name(str.c_str());
+}
+
 std::string codegen_base::cpp_name(const char* name)
 {
   std::string result;
