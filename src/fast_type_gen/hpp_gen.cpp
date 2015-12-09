@@ -481,7 +481,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
 {
   codegen_base::traverse(desc);
 
-  std::string filebase_upper = boost::to_upper_copy(filebase_);
+  std::string filebase_upper = this->cpp_name(boost::to_upper_copy(filebase_));
 
   out_<< "#ifndef __" << filebase_upper << "_H__\n"
       << "#define __" << filebase_upper << "_H__\n"
@@ -499,7 +499,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description& desc)
     out_ << "#include \"" << export_symbol_ << ".h\"\n";
   }
 
-  out_ << "namespace " << filebase_ << "\n{\n"
+  out_ << "namespace " << this->cpp_name(filebase_) << "\n{\n"
        << content_.str()
        << "\n";
 
