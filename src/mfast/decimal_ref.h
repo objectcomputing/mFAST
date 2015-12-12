@@ -34,6 +34,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
+#include <boost/spirit/home/x3/support/numeric_utils/extract_real.hpp>
 #if defined __GNUC__
 #pragma GCC diagnostic pop
 #endif
@@ -140,7 +141,9 @@ public:
   }
   operator double() const {
     double x = static_cast<double>(mantissa());
-    return x * std::pow(10, exponent());
+    // return x * std::pow(10, exponent());
+    boost::spirit::x3::extension::scale(exponent(),x);
+    return x;
   }
 
   std::string to_string() const {
