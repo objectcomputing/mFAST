@@ -19,7 +19,7 @@ compiler:
 
 before_install:
     # Add software package repositories with recent versions of boost
-    - sudo add-apt-repository ppa:afrank/boost
+    - sudo add-apt-repository ppa:afrank/boost --yes
     - sudo apt-get update -qq
 
 install:
