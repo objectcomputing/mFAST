@@ -1,26 +1,26 @@
+sudo: required
+dist: trusty
+
+
 language:
     - cpp
 
-# compiler:
-#     - gcc
-#     - clang
+compiler:
+    - gcc
+    - clang
 
 
-env:
-    - BUILD=g++
-    - BUILD=clang++
+#env:
+#    - BUILD=g++
+#    - BUILD=clang++
 #   - BUILD=Emscripten
 
 # CXX and CC environment variables are always reset by travis after env section is executed. Don't set them here
 
 before_install:
-    # Add software package repositories with recent versions of gcc and boost
-    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test --yes
-    - sudo add-apt-repository ppa:afrank/boost --yes
+    # Add software package repositories with recent versions of boost
+    - sudo add-apt-repository ppa:afrank/boost
     - sudo apt-get update -qq
-    # Install GNU GCC 4.8 required by use of C++11
-    - if [ "$BUILD" = "g++" ] || [ "$BUILD" = "Emscripten" ]; then sudo apt-get install -qq g++-4.8 && export CXX="g++-4.8" CC="gcc-4.8";  fi
-    - if [ "$BUILD" = "clang++" ]; then sudo apt-get install libstdc++-4.8-dev && export CXX="clang++" CC="clang"; fi
 
 install:
     # Install mfast dependencies
