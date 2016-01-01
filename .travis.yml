@@ -24,7 +24,7 @@ before_install:
 
 install:
     # Install mfast dependencies
-    - sudo apt-get install -qq libboost1.57-all
+    - sudo apt-get install -qq libboost1.57-all-dev
 
 script:
     # - if [ $BUILD == Emscripten ]; then ./travis-install-emscripten.sh && cd emsdk_portable && source ./emsdk_env.sh && cd ..; fi
