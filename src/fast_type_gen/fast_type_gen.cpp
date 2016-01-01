@@ -64,33 +64,17 @@ int main(int argc, const char** argv)
 
       std::string xml((std::istreambuf_iterator<char>(ifs)),
                       std::istreambuf_iterator<char>());
-
-      //path f(path(argv[i]).stem());
-
+      
 #ifdef _WINDOWS
-     char filebase[_MAX_FNAME];
-     _splitpath(argv[i], NULL, NULL, filebase, NULL);
+      char filebase_buf[_MAX_FNAME];
+      _splitpath(argv[i], NULL, NULL, filebase_buf, NULL);
+      boost::string_ref filebase = static_cast<const char*>(filebase_buf);
 #else
-
-     const char* fullpath = argv[i];
-     auto last_slash_pos = strrchr(fullpath, '/');
-     const char* filebase_begin;
-     if (last_slash_pos == nullptr)
-       filebase_begin =fullpath;
-     else
-       filebase_begin = last_slash_pos+1;
-
-     const char* filebase_end = strrchr(filebase_begin, '.');
-
-     std::string filebase;
-
-     if (filebase_end == nullptr)
-       filebase = filebase_begin;
-     else
-       filebase.assign(filebase_begin,filebase_end);
+      boost::string_ref filebase(argv[i]);
+      filebase = filebase.substr(filebase.find_last_of('/') + 1);
+      filebase = filebase.substr(0, filebase.find_last_of('.'));
 #endif
-
-      filebases.push_back(filebase);
+      filebases.push_back(codegen_base::cpp_name(filebase));
 
       descriptions.emplace_back(xml.c_str(),
                                 filebases[j].c_str(),

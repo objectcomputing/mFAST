@@ -53,7 +53,7 @@ protected:
 public:
   codegen_base(const char* filebase, const char* fileext);
   static std::string cpp_name(const mfast::field_instruction* inst);
-  static std::string cpp_name(const char* n);
+  static std::string cpp_name(boost::string_ref n);
   static const  mfast::field_instruction* get_element_instruction(const mfast::sequence_field_instruction* inst);
 protected:
   void traverse(mfast::dynamic_templates_description& desc);

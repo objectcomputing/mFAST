@@ -80,18 +80,13 @@ codegen_base::cpp_name(const mfast::field_instruction* inst)
   return cpp_name( inst->name() );
 }
 
-std::string codegen_base::cpp_name(const char* name)
+std::string codegen_base::cpp_name(boost::string_ref name)
 {
   std::string result;
   if (!std::isalpha(name[0]))
     result = "_";
-  while (*name != '\x0') {
-    char c = *name++;
-    if (isalnum(c))
-      result += c;
-    else
-      result += '_';
-  }
+  std::transform(name.begin(), name.end(), std::back_inserter(result), 
+                 [] (char c) { return std::isalnum(c) ? c : '_'; });
   return result;
 }
 
