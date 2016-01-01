@@ -81,7 +81,7 @@ include_directories ("${PROJECT_BINARY_DIR}"
 ################################
 
 
-find_package(Boost 1.55.0 REQUIRED)
+find_package(Boost 1.56.0 REQUIRED)
 
 
 if (NOT BUILD_FAST_TYPE_GEN)
