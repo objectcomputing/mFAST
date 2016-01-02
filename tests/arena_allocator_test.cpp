@@ -19,7 +19,7 @@
 #include "catch.hpp"
 
 #include <mfast/arena_allocator.h>
-//#include <cstring>
+#include <cstring>
 #include <algorithm>
 
 using namespace mfast;
@@ -54,7 +54,6 @@ TEST_CASE("test arena_allocatore", "[arena_allocatore_test]")
   char* block7 = static_cast<char*>(alloc.allocate(3*arena_allocator::default_chunk_size));
 
   // if the returned memroy block is smaller than need, we should get a memory access error at this point.
-  // std::memset(block7, 0, 3*arena_allocator::default_chunk_size);
-  std::fill(block7, block7+3*arena_allocator::default_chunk_size, 0);
+  memset(block7, 0, 3*arena_allocator::default_chunk_size);
 }
 

@@ -21,6 +21,7 @@
 #include "catch.hpp"
 #include <mfast/malloc_allocator.h>
 #include <set>
+#include <cstring>
 
 class debug_allocator
   : public mfast::malloc_allocator
