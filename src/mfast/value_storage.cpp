@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cstdio>
+#include <iterator>
 
 namespace mfast {
 std::istream &operator>>(std::istream &strm, decimal_value_storage &storage) {
