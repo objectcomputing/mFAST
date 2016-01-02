@@ -19,6 +19,7 @@
 #include "catch.hpp"
 
 #include <mfast/arena_allocator.h>
+#include <cstring>
 
 using namespace mfast;
 
@@ -52,6 +53,6 @@ TEST_CASE("test arena_allocatore", "[arena_allocatore_test]")
   void* block7 = alloc.allocate(3*arena_allocator::default_chunk_size);
 
   // if the returned memroy block is smaller than need, we should get a memory access error at this poing.
-  memset(block7, 0, 3*arena_allocator::default_chunk_size);
+  std::memset(block7, 0, 3*arena_allocator::default_chunk_size);
 }
 

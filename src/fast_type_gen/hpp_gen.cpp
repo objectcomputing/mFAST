@@ -20,6 +20,7 @@
 #include "hpp_gen.h"
 #if defined __GNUC__
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunused-local-typedef"
 #endif
 #include <boost/algorithm/string.hpp>
