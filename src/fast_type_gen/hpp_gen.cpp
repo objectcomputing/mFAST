@@ -625,8 +625,8 @@ void hpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
                  << indent << "    typedef " << name
                  << "::instruction_type instruction_type;\n" << indent << "    "
                  << name << "_cref(\n" << indent
-                 << "      const mfast::value_storage* storage=0,\n" << indent
-                 << "      instruction_cptr            instruction=0);\n\n"
+                 << "      const mfast::value_storage* storage=nullptr,\n" << indent
+                 << "      instruction_cptr            instruction=nullptr);\n\n"
                  << indent << "    explicit " << name
                  << "_cref(const field_cref& other);\n\n" << indent
                  << "    element_type value() const;\n\n";
@@ -646,9 +646,9 @@ void hpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
                  << name << "_cref> base_type;\n" << indent << "    typedef "
                  << name << "::element element_type;\n" << indent << "    "
                  << name << "_mref(\n" << indent
-                 << "      mfast::allocator*     alloc=0,\n" << indent
-                 << "      mfast::value_storage* storage=0,\n" << indent
-                 << "      instruction_cptr      instruction=0);\n"
+                 << "      mfast::allocator*     alloc=nullptr,\n" << indent
+                 << "      mfast::value_storage* storage=nullptr,\n" << indent
+                 << "      instruction_cptr      instruction=nullptr);\n"
 
                  << indent << "    explicit " << name
                  << "_mref(const mfast::field_mref_base& other);\n\n";

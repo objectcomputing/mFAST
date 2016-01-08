@@ -60,7 +60,7 @@ const char *get_presence(const mfast::field_instruction *inst) {
 std::string cpp_gen::gen_op_context(const char *name,
                                     const mfast::op_context_t *context) {
   if (context == nullptr)
-    return "0";
+    return "nullptr";
 
   out_ << "const static "
        << "op_context_t " << prefix_string() << name << "_opContext ={\n"
@@ -454,7 +454,7 @@ void cpp_gen::visit(const mfast::sequence_field_instruction *inst,
     subinstruction_arg << "  " << cpp_type_of(inst->element_instruction())
                        << "::instruction(), // element_instruction\n";
   } else {
-    subinstruction_arg << "  0, // element_instruction\n";
+    subinstruction_arg << "  nullptr, // element_instruction\n";
   }
 
   if (inst->ref_instruction()) {
@@ -589,7 +589,7 @@ void cpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
   std::stringstream elements_variable_name;
   std::stringstream num_elements_name;
   std::stringstream instruction_type;
-  std::string values_variable_name = "0";
+  std::string values_variable_name = "nullptr";
 
   if (inst->ref_instruction()) {
     qualified_name = cpp_type_of(inst);
@@ -655,8 +655,8 @@ void cpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
        << "  " << elements_variable_name.str() << ", // element names\n"
        << "  " << values_variable_name << ", // element values\n"
        << "  " << num_elements_name.str() << ",// num elements\n"
-       << "  0, // ref_instruction\n"
-       << "  0, // cpp_ns\n"
+       << "  nullptr, // ref_instruction\n"
+       << "  nullptr, // cpp_ns\n"
        << "  " << inst->tag() << "); //tag \n\n";
 
   if (pIndex == nullptr) {
