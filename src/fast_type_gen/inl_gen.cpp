@@ -413,8 +413,8 @@ void inl_gen::visit(const mfast::group_field_instruction *inst, void *pIndex) {
     if (inst->optional())
       out_ << "  if ("
            << "(*this)[" << index << "].absent())\n"
-           << "    return " << cref_type_name << "(0, " << cref_type_name
-           << "::instruction_cptr(0));\n";
+           << "    return " << cref_type_name << "(nullptr, " << cref_type_name
+           << "::instruction_cptr(nullptr));\n";
     out_ << "  return static_cast<" << cref_type_name << ">(" << cref_strm.str()
          << ");\n"
          << "}\n\n"
@@ -461,7 +461,7 @@ void inl_gen::visit(const mfast::group_field_instruction *inst, void *pIndex) {
   if (inst->ref_instruction() == nullptr && !embed_only_dyn_tempateref) {
 
     out_ << "inline\n" << cref_type_name << "::" << name << "_cref()\n"
-         << "  : base_type(0, 0)\n"
+         << "  : base_type(nullptr, nullptr)\n"
          << "{\n"
          << "}\n\n"
          << "template <typename T>"
@@ -495,7 +495,7 @@ void inl_gen::visit(const mfast::group_field_instruction *inst, void *pIndex) {
     out_ << "}\n\n";
 
     out_ << "inline\n" << mref_type_name << "::" << name << "_mref()\n"
-         << "  : base_type(0, 0, 0)\n"
+         << "  : base_type(nullptr, nullptr, nullptr)\n"
          << "{\n"
          << "}\n\n"
          << "template <typename T>"
@@ -704,7 +704,7 @@ void inl_gen::visit(const mfast::sequence_field_instruction *inst,
   if (pIndex == nullptr) {
     out_ << "inline\n" << name << "::" << name << "(\n"
          << "  mfast::allocator* alloc)\n"
-         << "  : base_type(alloc, instruction(), 0)\n"
+         << "  : base_type(alloc, instruction(), nullptr)\n"
          << "{\n"
          << "}\n\n"
          << "inline\n" << name << "::" << name << "(\n"
@@ -764,7 +764,7 @@ void inl_gen::visit(const mfast::template_instruction *inst, void *) {
   std::string name(cpp_name(inst));
 
   out_ << "inline\n" << name << "_cref::" << name << "_cref()\n"
-       << "  : base_type(0, 0)\n"
+       << "  : base_type(nullptr, nullptr)\n"
        << "{\n"
        << "}\n\n"
        << "template <typename T>"
@@ -813,7 +813,7 @@ void inl_gen::visit(const mfast::template_instruction *inst, void *) {
   out_ << "}\n\n";
 
   out_ << "inline\n" << name << "_mref::" << name << "_mref()\n"
-       << "  : base_type(0, 0, 0)\n"
+       << "  : base_type(nullptr, nullptr, nullptr)\n"
        << "{\n"
        << "}\n\n"
        << "template <typename T>"
