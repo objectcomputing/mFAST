@@ -217,11 +217,11 @@ fast_istream::decode(T &result, Nullable nullable) {
     tmp = c & 0x7F;
   } else {
     if (c & 0x40) {
-      // this is a negtive integer
+      // this is a negative integer
       decrement_value = 0;
-      tmp = (static_cast<T>(-1) << 7) | (c & 0x7F);
+      tmp = (static_cast<T>(-1) ^ 0x7F ) | (c & 0x7F);
     } else {
-      // positive integer, mask the most significat two bits
+      // positive integer, mask the most significant two bits
       tmp = c & 0x3F;
     }
   }
