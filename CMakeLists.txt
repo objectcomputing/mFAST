@@ -33,10 +33,8 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "build shared/dynamic library")
 # Offer the user the choice of overriding the installation directories
 set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
 set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
-set(INSTALL_INCLUDE_DIR include CACHE PATH
-"Installation directory for header files")
-set(INSTALL_DATA_DIR share CACHE PATH
-"Installation directory for data files")
+set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header files")
+set(INSTALL_DATA_DIR share CACHE PATH "Installation directory for data files")
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -61,16 +59,12 @@ set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
 "Installation directory for CMake files")
 
 # Make relative paths absolute (needed later on)
-foreach(p LIB BIN DATA CMAKE)
-set(var INSTALL_${p}_DIR)
-if(NOT IS_ABSOLUTE "${${var}}")
- set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-endif()
-endforeach()
-
-if(NOT IS_ABSOLUTE "${INSTALL_INCLUDE_DIR}")
- set(INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
-endif()
+foreach (p IN ITEMS LIB BIN INCLUDE DATA CMAKE)
+  set (var "INSTALL_${p}_DIR")
+  if (NOT IS_ABSOLUTE "${${var}}")
+    set("${var}" "${CMAKE_INSTALL_PREFIX}/${${var}}")
+  endif ()
+endforeach (p)
 
 
 include_directories ("${PROJECT_BINARY_DIR}"
