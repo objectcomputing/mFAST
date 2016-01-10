@@ -13,6 +13,8 @@ target_link_libraries (fast_type_gen
                        mfast_static
                        mfast_coder_static)
 
+set_target_properties(fast_type_gen PROPERTIES VERSION "${MFAST_VERSION}")
+
 install(TARGETS fast_type_gen
         EXPORT  mFASTTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin)

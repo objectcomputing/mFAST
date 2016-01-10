@@ -34,6 +34,9 @@ if (BUILD_SHARED_LIBS)
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
 	set_target_properties(mfast PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
+  set_target_properties(mfast PROPERTIES
+                        VERSION "${MFAST_VERSION}"
+                        SOVERSION "${MFAST_SOVERSION}")
 
   install(TARGETS mfast
           EXPORT  mFASTTargets
