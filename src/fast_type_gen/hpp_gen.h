@@ -25,8 +25,10 @@
 
 class hpp_gen : public codegen_base {
 public:
-  hpp_gen(const char *filebase) : codegen_base(filebase, ".h") {}
+  hpp_gen(const char *filebase, const char *fileext = ".h")
+      : codegen_base(filebase, fileext), inl_fileext_(".inl"), hpp_fileext_(fileext) {}
   void set_export_symbol(const char *symbol);
+  void set_inl_fileext(const char *inl_fileext) { inl_fileext_ = inl_fileext; }
   void generate(mfast::dynamic_templates_description &desc);
 
   virtual void visit(const mfast::int32_field_instruction *, void *) override;
@@ -63,6 +65,8 @@ private:
                             const std::string &name);
 
   typedef indented_stringstream ind_stream;
+  std::string hpp_fileext_;
+  std::string inl_fileext_;
   std::set<std::string> dependency_;
   ind_stream header_cref_;
   ind_stream header_mref_;

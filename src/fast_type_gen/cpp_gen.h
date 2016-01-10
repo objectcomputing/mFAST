@@ -24,7 +24,9 @@
 
 class cpp_gen : public codegen_base {
 public:
-  cpp_gen(const char *filebase) : codegen_base(filebase, ".cpp") {}
+  cpp_gen(const char *filebase, const char *fileext = ".cpp")
+      : codegen_base(filebase, fileext), hpp_fileext_(".h") {}
+  void set_hpp_fileext(const char *hpp_fileext) { hpp_fileext_ = hpp_fileext; }
   void generate(mfast::dynamic_templates_description &desc);
 
   virtual void visit(const mfast::int32_field_instruction *, void *) override;
@@ -77,6 +79,7 @@ private:
   bool
   need_generate_subinstructions(const mfast::group_field_instruction *inst);
 
+  std::string hpp_fileext_;
   std::vector<std::string> subinstructions_list_;
   std::stringstream template_instructions_;
   std::vector<std::string> prefixes_;

@@ -538,7 +538,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description &desc) {
 
   for (const std::string &dep : dependency_) {
     if (dep != "mfast")
-      out_ << "#include \"" << dep << ".h\"\n";
+      out_ << "#include \"" << dep << hpp_fileext_ << "\"\n";
   }
 
   if (export_symbol_.size()) {
@@ -581,7 +581,7 @@ void hpp_gen::generate(mfast::dynamic_templates_description &desc) {
          << "}\n\n";
   }
 
-  out_ << "#include \"" << filebase_ << ".inl\"\n"
+  out_ << "#include \"" << filebase_ << inl_fileext_ << "\"\n"
        << "}\n\n";
 }
 

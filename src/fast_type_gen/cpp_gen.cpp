@@ -548,7 +548,7 @@ void cpp_gen::visit(const mfast::templateref_instruction *inst, void *pIndex) {
 }
 
 void cpp_gen::generate(mfast::dynamic_templates_description &desc) {
-  out_ << "#include \"" << filebase_ << ".h\"\n"
+  out_ << "#include \"" << filebase_ << hpp_fileext_ << "\"\n"
        << "\n"
        << "using namespace mfast;\n\n"
        << "namespace " << filebase_ << "\n{\n";
