@@ -12,7 +12,7 @@ namespace SQLite3 {
 
 std::string format_binding(const bindings_t &binding) {
   std::stringstream strm;
-  for (auto &&entry, binding) {
+  for (auto &&entry : binding) {
     strm << "?" << entry.first << "=" << entry.second << "\t";
   }
   return strm.str();

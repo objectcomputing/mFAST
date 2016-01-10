@@ -10,7 +10,7 @@ void third_pass_visitor::visit(const aggregate_cref &ref, int rowid) {
   if (primary_key_.absent()) {
     // the table has no primary key, use the last rowid instead
     static const int64_field_instruction rowid_instruction(
-        0, operator_none, presence_optional, 0, "", "", 0,
+        operator_none, presence_optional, 0, "", "", nullptr,
         int_value_storage<int64_t>());
 
     field_cref rowid_cref(&this->key_storage_, &rowid_instruction);
@@ -21,9 +21,10 @@ void third_pass_visitor::visit(const aggregate_cref &ref, int rowid) {
   }
 
   for (std::size_t i = 0; i < ref.num_fields(); ++i) {
-    if (!core_.to_skip(ref[i]) && ref[i].present())
+    field_cref field(ref[i]);
+    if (!core_.to_skip(field) && field.present()) {
       apply_accessor(*this, field);
-    ;
+    }
   }
 }
 
