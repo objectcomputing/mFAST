@@ -7,7 +7,7 @@ namespace SQLite3 {
 typedef std::map<unsigned, std::string> bindings_t;
 struct template_info {
   template_info()
-      : insert_stmt_(0), find_key_stmt_(0), primary_key_index_(-1) {}
+      : insert_stmt_(nullptr), find_key_stmt_(nullptr), primary_key_index_(-1) {}
   sqlite3_stmt *insert_stmt_;
   sqlite3_stmt *find_key_stmt_;
   int primary_key_index_;

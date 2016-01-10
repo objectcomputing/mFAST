@@ -36,13 +36,13 @@ public:
     for (unsigned i = 0; i < inst->subinstructions().size(); ++i) {
       const field_instruction *subinst = inst->subinstruction(i);
       if (!core_.to_skip(subinst)) {
-        subinst->accept(*this, 0);
+        subinst->accept(*this, nullptr);
       }
     }
   }
 
   void visit(const group_field_instruction *inst, void *) {
-    if (inst->ref_instruction() == 0) {
+    if (inst->ref_instruction() == nullptr) {
       traverse_aggregate(inst);
     }
   }
@@ -79,13 +79,13 @@ void first_pass_visitor::visit(const sequence_cref &ref, int) {
   const template_instruction *element_instruction =
       dynamic_cast<const template_instruction *>(inst->element_instruction());
 
-  if (ref_instruction == 0 && element_instruction == 0) {
+  if (ref_instruction == nullptr && element_instruction == nullptr) {
     null_binder_visitor binder(core_, info_, current_column_);
     binder.bind(inst);
   } else {
     nested_group_pass_needed_ = true;
   }
-  nested_sequence_pass_needed_ = (ref_instruction == 0);
+  nested_sequence_pass_needed_ = (ref_instruction == nullptr);
 }
 
 void first_pass_visitor::visit(const aggregate_cref &ref, int) {

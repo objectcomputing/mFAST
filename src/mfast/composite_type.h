@@ -35,7 +35,7 @@ public:
   typedef typename mref_of<cref_type>::type mref_type;
 
   composite_type(mfast::allocator *alloc = nullptr,
-                 instruction_cptr instruction = 0,
+                 instruction_cptr instruction = nullptr,
                  value_storage *fields_storage = nullptr);
 
   // a special constructor to facilitate puting a message_type instance in an
@@ -68,7 +68,7 @@ public:
     instruction_ = other.instruction_;
     my_storage_ = other.my_storage_;
 
-    other.instruction_ = 0;
+    other.instruction_ = nullptr;
     return *this;
   }
 

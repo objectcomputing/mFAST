@@ -29,7 +29,7 @@ void third_pass_visitor::visit(const aggregate_cref &ref, int rowid) {
 }
 
 void third_pass_visitor::visit(const group_cref &ref, int) {
-  if (ref.instruction()->ref_instruction() != 0) {
+  if (ref.instruction()->ref_instruction() != nullptr) {
     // output the content of ref to another table represent ref.
     // the first column of the new table is the current primary_key
     aggregate_inserter inserter(core_);

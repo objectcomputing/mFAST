@@ -30,7 +30,7 @@ struct binding_info : public boost::error_info<tag_binding, std::string> {
 converter_core::converter_core(const char *dbfile, const field_masks &mask)
     : field_masks(mask) {
   if (sqlite3_open_v2(dbfile, &db_, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE,
-                      0)) {
+                      nullptr)) {
     BOOST_THROW_EXCEPTION(sqlite3_error(db_, "sqlite3_open")
                           << boost::errinfo_file_name(dbfile));
   }
@@ -42,12 +42,12 @@ void converter_core::add(const template_instruction *inst,
                          bool to_create_tables) {
   tables_creator::insert_map_t the_map;
   tables_creator creator(the_map, *this);
-  creator.visit(inst, 0);
+  creator.visit(inst, nullptr);
 #if 0
       std::cout << "create statement : " << "\n" << creator.create_statements() << "\n";
 #endif
   if (to_create_tables) {
-    if (sqlite3_exec(db_, creator.create_statements().c_str(), 0, 0, 0) !=
+    if (sqlite3_exec(db_, creator.create_statements().c_str(), nullptr, nullptr, nullptr) !=
         SQLITE_OK) {
       BOOST_THROW_EXCEPTION(sqlite3_error(db_, "sqlite3_exec"));
     }
@@ -60,7 +60,7 @@ void converter_core::add(const template_instruction *inst,
     template_info &info = infos_[v.first];
     if (sqlite3_prepare_v2(db_, v.second.insert_item_stmt.c_str(),
                            v.second.insert_item_stmt.size(), &info.insert_stmt_,
-                           0) != SQLITE_OK) {
+                           nullptr) != SQLITE_OK) {
       BOOST_THROW_EXCEPTION(
           sqlite3_error(db_, "sqlite3_prepare_v2")
           << statement_info(v.second.insert_item_stmt.c_str()));
@@ -72,7 +72,7 @@ void converter_core::add(const template_instruction *inst,
 #endif
       if (sqlite3_prepare_v2(db_, v.second.find_key_stmt.c_str(),
                              v.second.find_key_stmt.size(),
-                             &info.find_key_stmt_, 0) != SQLITE_OK) {
+                             &info.find_key_stmt_, nullptr) != SQLITE_OK) {
         BOOST_THROW_EXCEPTION(
             sqlite3_error(db_, "sqlite3_prepare_v2")
             << statement_info(v.second.find_key_stmt.c_str()));
@@ -88,7 +88,7 @@ struct unsupported_group_error : error {};
 
 const template_info &
 converter_core::info(const group_field_instruction *inst) const {
-  unsigned id = (inst->ref_instruction() != 0) ? inst->ref_instruction()->id()
+  unsigned id = (inst->ref_instruction() != nullptr) ? inst->ref_instruction()->id()
                                                : inst->id();
   template_infos_t::const_iterator itr = infos_.find(id);
   if (itr == infos_.end())

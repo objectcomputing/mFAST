@@ -64,7 +64,7 @@ const char *tables_creator::extra(const field_instruction *inst,
     primary_key_name_ = inst->name();
     primary_key_type_ = type;
     primary_key_index_ =
-        (pIndex == 0) ? 0 : *static_cast<std::size_t *>(pIndex);
+        (pIndex == nullptr) ? 0 : *static_cast<std::size_t *>(pIndex);
     return " PRIMARY KEY,";
   }
   return ",";
@@ -145,7 +145,7 @@ void tables_creator::visit(const byte_vector_field_instruction *inst,
 }
 
 void tables_creator::visit(const group_field_instruction *inst, void *) {
-  if (inst->ref_instruction() == 0) {
+  if (inst->ref_instruction() == nullptr) {
     traverse_subinstructions(inst);
   } else {
     const template_instruction *ref =
@@ -160,7 +160,7 @@ void tables_creator::visit(const group_field_instruction *inst, void *) {
       tables_creator nested_builder(
           insert_statements_, masks_, table_name_.c_str(),
           primary_key_name_.c_str(), primary_key_type_.c_str());
-      nested_builder.visit(ref, 0);
+      nested_builder.visit(ref, nullptr);
       create_postfix_ << nested_builder.create_statements();
     } else {
       std::stringstream err_msg;
@@ -179,7 +179,7 @@ void tables_creator::visit(const sequence_field_instruction *inst, void *) {
 
   bool is_ordered = masks_.is_ordered(inst);
 
-  if (ref_instruction == 0 && element_instruction == 0) {
+  if (ref_instruction == nullptr && element_instruction == nullptr) {
     traverse_subinstructions(inst);
     if (is_ordered) {
       create_current_ << "  ordering INT,\n";
@@ -196,7 +196,7 @@ void tables_creator::visit(const sequence_field_instruction *inst, void *) {
 
   if (element_instruction) {
     tables_creator nested_builder(insert_statements_, masks_, true);
-    nested_builder.visit(element_instruction, 0);
+    nested_builder.visit(element_instruction, nullptr);
     create_prefix_ << nested_builder.create_statements();
 
     if (strcmp(nested_builder.primary_key_name(), "rowid") == 0)
@@ -245,7 +245,7 @@ void tables_creator::visit(const sequence_field_instruction *inst, void *) {
     tables_creator nested_builder(insert_statements_, masks_,
                                   this->table_name(), this->primary_key_name(),
                                   this->primary_key_type());
-    nested_builder.visit(ref_instruction, 0);
+    nested_builder.visit(ref_instruction, nullptr);
     create_postfix_ << nested_builder.create_statements();
   }
 }
