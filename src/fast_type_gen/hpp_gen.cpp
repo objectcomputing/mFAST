@@ -545,6 +545,8 @@ void hpp_gen::generate(mfast::dynamic_templates_description &desc) {
     out_ << "#include \"" << export_symbol_ << ".h\"\n";
   }
 
+  for (auto &&ns : outer_ns_)
+    out_ << "namespace " << ns << "\n{\n";
   out_ << "namespace " << filebase_ << "\n{\n" << content_.str() << "\n";
 
   for (const mfast::aggregate_view_info &info : desc.view_infos()) {
@@ -582,7 +584,9 @@ void hpp_gen::generate(mfast::dynamic_templates_description &desc) {
   }
 
   out_ << "#include \"" << filebase_ << inl_fileext_ << "\"\n"
-       << "}\n\n";
+       << "}\n";
+  for (auto it = outer_ns_.begin(); it != outer_ns_.end(); ++it)
+    out_ << "}\n";
 }
 
 void hpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {

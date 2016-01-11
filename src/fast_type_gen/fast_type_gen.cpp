@@ -82,6 +82,7 @@ int main(int argc, const char **argv) {
     std::string command_name = "fast_type_gen";
 
     const char *export_symbol = nullptr;
+    const char *outer_namespace = nullptr;
     const char *header_extension = ".h";
     const char *inline_extension = ".inl";
     const char *source_extension = ".cpp";
@@ -96,6 +97,7 @@ int main(int argc, const char **argv) {
         if (std::strcmp(flag, "help") == 0) {
           show_usage = true;
         } else if (check_long_option(command_name, argc, argv, i, "--export-symbol", export_symbol, bad_arguments)) {
+        } else if (check_long_option(command_name, argc, argv, i, "--namespace", outer_namespace, bad_arguments)) {
         } else if (check_long_option(command_name, argc, argv, i, "--header-extension", header_extension, bad_arguments)) {
         } else if (check_long_option(command_name, argc, argv, i, "--inline-extension", inline_extension, bad_arguments)) {
         } else if (check_long_option(command_name, argc, argv, i, "--source-extension", source_extension, bad_arguments)) {
@@ -109,6 +111,7 @@ int main(int argc, const char **argv) {
             show_usage = true;
             ++flag;
           } else if (check_short_option(command_name, argc, argv, i, flag, 'E', export_symbol, bad_arguments)) {
+          } else if (check_short_option(command_name, argc, argv, i, flag, 'n', outer_namespace, bad_arguments)) {
           } else if (check_short_option(command_name, argc, argv, i, flag, 'H', header_extension, bad_arguments)) {
           } else if (check_short_option(command_name, argc, argv, i, flag, 'I', inline_extension, bad_arguments)) {
           } else if (check_short_option(command_name, argc, argv, i, flag, 'C', source_extension, bad_arguments)) {
@@ -131,6 +134,7 @@ int main(int argc, const char **argv) {
                   "Options and arguments:\n"
                   "  -h, --help                  show usage and exit\n"
                   "  -E, --export-symbol=SYM     qualifier for generated types\n"
+                  "  -n, --namespace=NS          namespace for generated code\n"
                   "  -C, --source-extension=EXT  source filename extension (default .cpp)\n"
                   "  -H, --header-extension=EXT  header filename extension (default .h)\n"
                   "  -I, --inline-extension=EXT  inline function filename extension (default .inl)\n"
@@ -180,15 +184,21 @@ int main(int argc, const char **argv) {
       const std::string &filebase = filebases[j];
 
       hpp_gen header_gen(filebase.c_str(), header_extension);
+      if (outer_namespace)
+        header_gen.set_outer_ns(outer_namespace);
       if (export_symbol)
         header_gen.set_export_symbol(export_symbol);
       header_gen.set_inl_fileext(inline_extension);
       header_gen.generate(desc);
 
       inl_gen inline_gen(filebase.c_str(), inline_extension);
+      if (outer_namespace)
+        inline_gen.set_outer_ns(outer_namespace);
       inline_gen.generate(desc);
 
       cpp_gen source_gen(filebase.c_str(), source_extension);
+      if (outer_namespace)
+        source_gen.set_outer_ns(outer_namespace);
       source_gen.set_hpp_fileext(header_extension);
       source_gen.generate(desc);
     }

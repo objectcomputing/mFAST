@@ -25,6 +25,7 @@
 #include <mfast/xml_parser/dynamic_templates_description.h>
 #include <fstream>
 #include <set>
+#include <vector>
 
 class file_open_error : public virtual boost::exception,
                         public virtual std::exception {
@@ -38,12 +39,14 @@ public:
 class codegen_base : public mfast::field_instruction_visitor {
 protected:
   std::string filebase_;
+  std::vector<std::string> outer_ns_;
   std::string cpp_ns_;
   std::ofstream out_;
   std::stringstream cref_scope_;
 
 public:
   codegen_base(const char* filebase, const char* fileext);
+  void set_outer_ns(const char *outer_ns);
   static std::string cpp_name(const mfast::field_instruction* inst);
   static std::string cpp_name(boost::string_ref n);
   static const  mfast::field_instruction* get_element_instruction(const mfast::sequence_field_instruction* inst);
