@@ -235,7 +235,7 @@ else()
 endif()
 
 # Create the mFASTConfig.cmake for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src" "${PROJECT_BINARY_DIR}")
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
 configure_file(mFASTConfig.cmake.in
                "${PROJECT_BINARY_DIR}/mFASTConfig.cmake"
                @ONLY)
