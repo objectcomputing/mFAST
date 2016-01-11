@@ -143,61 +143,46 @@ link_directories (${PROJECT_BINARY_DIR}/src)
 # endif(MSVC_IDE)
 
 #============================================================
-# FASTTYPEGEN_TARGET (public macro)
+# FASTTYPEGEN_TARGET (public function)
 #============================================================
 #
 
-macro(FASTTYPEGEN_TARGET Name)
-set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]")
-set(INPUTS)
-foreach (input ${ARGN})
-    get_filename_component(noext_name ${input} NAME_WE)
-    set(FASTTYPEGEN_${Name}_INPUTS_NOEXT ${FASTTYPEGEN_${Name}_INPUTS_NOEXT} ${noext_name})
-endforeach(input)
+function (FASTTYPEGEN_TARGET Name)
+  set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]" PARENT_SCOPE)
 
-foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
-    set(FASTTYPEGEN_${Name}_OUTPUTS
-        ${FASTTYPEGEN_${Name}_OUTPUTS}
-        ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/${var}.h
-        ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
-endforeach(var)
+  set("FASTTYPEGEN_${Name}_OUTPUTS")
+  set(INPUTS)
 
-foreach (input ${ARGN})
-    set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
-endforeach(input)
+  foreach (input IN LISTS ARGN)
+    get_filename_component(noext_name "${input}" NAME_WE)
+    list(APPEND "FASTTYPEGEN_${Name}_OUTPUTS"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.cpp"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.h"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.inl")
+    list(APPEND INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
+  endforeach (input)
 
-
-#if ( NOT ((${CMAKE_MAJOR_VERSION} LESS 2) OR (${CMAKE_MINOR_VERSION} LESS 8) OR (${CMAKE_PATCH_VERSION} LESS 4)))
-#   set(CMAKE_SUPPORT_GENERATOR_EXPRESSION 1)
-#endif()
-## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated.
-## Not at the time when "make" is called.
-# file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-
-if (${BUILD_FAST_TYPE_GEN})
-    if (POLICY CMP0026)
-        cmake_policy(SET CMP0026 OLD)
-    endif()
-    get_property(FAST_TYPE_GEN TARGET fast_type_gen PROPERTY LOCATION)
+  if (BUILD_FAST_TYPE_GEN)
+    set(FAST_TYPE_GEN fast_type_gen)
     set(FAST_TYPE_GEN_TARGET fast_type_gen)
-endif()
+  else (BUILD_FAST_TYPE_GEN)
+    set(FAST_TYPE_GEN_TARGET)
+  endif (BUILD_FAST_TYPE_GEN)
 
+  add_custom_command(
+      OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+      COMMAND "${FAST_TYPE_GEN}" ${INPUTS}
+      DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
+      COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+      VERBATIM)
 
-add_custom_command(
-  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-  COMMAND "${FAST_TYPE_GEN}"
-  ARGS ${INPUTS}
-  DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
-  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
 
-
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-set(FASTTYPEGEN_${Name}_DEFINED TRUE)
-set(FASTTYPEGEN_${Name}_INPUTS ${ARGN})
-endmacro()
+  set("FASTTYPEGEN_${Name}_OUTPUTS" "${FASTTYPEGEN_${Name}_OUTPUTS}" PARENT_SCOPE)
+  set("FASTTYPEGEN_${Name}_DEFINED" TRUE PARENT_SCOPE)
+  set("FASTTYPEGEN_${Name}_INPUTS" "${ARGN}" PARENT_SCOPE)
+endfunction ()
 
 
 
