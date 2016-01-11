@@ -30,14 +30,9 @@ set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} xml_parser_static CACHE I
 
 if (BUILD_SHARED_LIBS)
   add_library(mfast_xml_parser SHARED ${mfast_xml_parser_SRCS})
-  # the add_dependencies is necessary for CMake 2.6.4. Otherwise, the shared
-  # library would be built before the static library, and the shared library
-  # would be deleted when the static library is built. For CMake 2.8.x, there
-  # is no such problem.
-  add_dependencies(mfast_xml_parser mfast_xml_parser_static)
 
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-	set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
+    set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   target_link_libraries(mfast_xml_parser mfast)
   set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)

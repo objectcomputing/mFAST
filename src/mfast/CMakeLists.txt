@@ -27,11 +27,6 @@ set(MFAST_STATIC_LIBRARIES ${MFAST_STATIC_LIBRARIES} mfast_static CACHE INTERNAL
 
 if (BUILD_SHARED_LIBS)
   add_library(mfast SHARED ${mfast_SRCS})
-  # the add_dependencies is necessary for CMake 2.6.4. Otherwise, the shared
-  # library would be built before the static library, and the shared library
-  # would be deleted when the static library is built. For CMake 2.8.x, there
-  # is no such problem.
-  add_dependencies(mfast mfast_static)
 
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     set_target_properties(mfast PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
