@@ -11,6 +11,7 @@ include_directories("${CMAKE_SOURCE_DIR}/tinyxml2")
 set(mfast_xml_parser_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../../../tinyxml2/tinyxml2.cpp ${sources} ${headers})
 
 add_library(mfast_xml_parser_static STATIC ${mfast_xml_parser_SRCS})
+target_link_libraries(mfast_xml_parser_static mfast_static)
 
 if (UNIX)
 	set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
@@ -21,7 +22,10 @@ set_target_properties(mfast_xml_parser_static PROPERTIES LINKER_LANGUAGE CXX)
 install(TARGETS mfast_xml_parser_static
         EXPORT  mFASTTargets
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-		ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+
+set(MFAST_STATIC_LIBRARIES ${MFAST_STATIC_LIBRARIES} mfast_xml_parser_static CACHE INTERNAL "")
+set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} xml_parser_static CACHE INTERNAL "")
 
 
 if (BUILD_SHARED_LIBS)
@@ -43,12 +47,11 @@ if (BUILD_SHARED_LIBS)
   install(TARGETS mfast_xml_parser
           EXPORT  mFASTTargets
           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-  	      LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
+          LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
 
+  set(MFAST_SHARED_LIBRARIES ${MFAST_SHARED_LIBRARIES} mfast_xml_parser CACHE INTERNAL "")
   set(MFAST_DYNAMIC_COMPONENTS ${MFAST_DYNAMIC_COMPONENTS} xml_parser CACHE INTERNAL "")
-endif()
-
-set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} xml_parser_static CACHE INTERNAL "")
+endif (BUILD_SHARED_LIBS)
 
 install(FILES mfast_xml_parser_export.h dynamic_templates_description.h
         DESTINATION "${INSTALL_INCLUDE_DIR}/mfast/xml_parser")
