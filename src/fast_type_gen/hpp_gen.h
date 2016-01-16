@@ -26,7 +26,7 @@
 class hpp_gen : public codegen_base {
 public:
   hpp_gen(const char *filebase, const char *fileext = ".h")
-      : codegen_base(filebase, fileext), inl_fileext_(".inl"), hpp_fileext_(fileext) {}
+      : codegen_base(filebase, fileext), hpp_fileext_(fileext), inl_fileext_(".inl") {}
   void set_export_symbol(const char *symbol);
   void set_inl_fileext(const char *inl_fileext) { inl_fileext_ = inl_fileext; }
   void generate(mfast::dynamic_templates_description &desc);

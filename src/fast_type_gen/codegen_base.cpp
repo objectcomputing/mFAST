@@ -40,7 +40,6 @@ codegen_base::dont_generate(const mfast::field_instruction * /*inst*/) const {
 
 void codegen_base::set_outer_ns(const char *outer_ns) {
   outer_ns_.clear();
-  const char *dlt;
   while (outer_ns) {
     const char *dlt = std::strstr(outer_ns, "::");
     std::string comp;
@@ -58,7 +57,7 @@ void codegen_base::set_outer_ns(const char *outer_ns) {
 
 void codegen_base::traverse(mfast::dynamic_templates_description &desc) {
   for (auto inst : desc.defined_type_instructions()) {
-    // we use the second parameter to identify wether the instruction is nested.
+    // we use the second parameter to identify whether the instruction is nested.
     // If the
     // second parameter is not 0, it is nested inside another composite types.
     if (!dont_generate(inst))
