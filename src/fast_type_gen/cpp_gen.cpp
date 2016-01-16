@@ -548,10 +548,12 @@ void cpp_gen::visit(const mfast::templateref_instruction *inst, void *pIndex) {
 }
 
 void cpp_gen::generate(mfast::dynamic_templates_description &desc) {
-  out_ << "#include \"" << filebase_ << ".h\"\n"
+  out_ << "#include \"" << filebase_ << hpp_fileext_ << "\"\n"
        << "\n"
-       << "using namespace mfast;\n\n"
-       << "namespace " << filebase_ << "\n{\n";
+       << "using namespace mfast;\n\n";
+  for (auto &&ns : outer_ns_)
+    out_ << "namespace " << ns << "\n{\n";
+  out_ << "namespace " << filebase_ << "\n{\n";
 
   this->traverse(desc);
 
@@ -580,6 +582,8 @@ void cpp_gen::generate(mfast::dynamic_templates_description &desc) {
          << "}\n";
   }
   out_ << "\n}\n";
+  for (auto it = outer_ns_.begin(); it != outer_ns_.end(); ++it)
+    out_ << "}\n";
 }
 
 void cpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {

@@ -21,6 +21,7 @@ set(MFAST_MAJOR_VERSION 1)
 set(MFAST_MINOR_VERSION 3)
 set(MFAST_PATCH_VERSION 0)
 set(MFAST_VERSION ${MFAST_MAJOR_VERSION}.${MFAST_MINOR_VERSION}.${MFAST_PATCH_VERSION})
+set(MFAST_SOVERSION ${MFAST_MAJOR_VERSION}.${MFAST_MINOR_VERSION})
 
 set(CPACK_PACKAGE_VERSION ${MFAST_VERSION})
 set(CPACK_PACKAGE_NAME "mfast")
@@ -33,10 +34,8 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "build shared/dynamic library")
 # Offer the user the choice of overriding the installation directories
 set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
 set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
-set(INSTALL_INCLUDE_DIR include CACHE PATH
-"Installation directory for header files")
-set(INSTALL_DATA_DIR share CACHE PATH
-"Installation directory for data files")
+set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header files")
+set(INSTALL_DATA_DIR share CACHE PATH "Installation directory for data files")
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -61,16 +60,12 @@ set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
 "Installation directory for CMake files")
 
 # Make relative paths absolute (needed later on)
-foreach(p LIB BIN DATA CMAKE)
-set(var INSTALL_${p}_DIR)
-if(NOT IS_ABSOLUTE "${${var}}")
- set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-endif()
-endforeach()
-
-if(NOT IS_ABSOLUTE "${INSTALL_INCLUDE_DIR}")
- set(INSTALL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
-endif()
+foreach (p IN ITEMS LIB BIN INCLUDE DATA CMAKE)
+  set (var "INSTALL_${p}_DIR")
+  if (NOT IS_ABSOLUTE "${${var}}")
+    set("${var}" "${CMAKE_INSTALL_PREFIX}/${${var}}")
+  endif ()
+endforeach (p)
 
 
 include_directories ("${PROJECT_BINARY_DIR}"
@@ -112,9 +107,10 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-warn-absolute-paths -s AGGRESSIVE_VARIABLE_ELIMINATION=1 -s OUTLINING_LIMIT=20000")
 endif()
 # variables to be used later
+set(MFAST_SHARED_LIBRARIES CACHE INTERNAL "")
+set(MFAST_STATIC_LIBRARIES CACHE INTERNAL "")
 set(MFAST_DYNAMIC_COMPONENTS CACHE INTERNAL "")
 set(MFAST_STATIC_COMPONENTS CACHE INTERNAL "")
-set(MFAST_LIBRARY CACHE INTERNAL "")
 
 ############################################################################
 # Setting up RPATH
@@ -130,7 +126,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_subdirectory (src)
 
-link_directories (${PROJECT_BINARY_DIR}/src)
+link_directories ("${PROJECT_BINARY_DIR}/src")
 
 #============================================================
 # Install fast_type_gen batch file to set up the PATH environment
@@ -143,61 +139,46 @@ link_directories (${PROJECT_BINARY_DIR}/src)
 # endif(MSVC_IDE)
 
 #============================================================
-# FASTTYPEGEN_TARGET (public macro)
+# FASTTYPEGEN_TARGET (public function)
 #============================================================
 #
 
-macro(FASTTYPEGEN_TARGET Name)
-set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]")
-set(INPUTS)
-foreach (input ${ARGN})
-    get_filename_component(noext_name ${input} NAME_WE)
-    set(FASTTYPEGEN_${Name}_INPUTS_NOEXT ${FASTTYPEGEN_${Name}_INPUTS_NOEXT} ${noext_name})
-endforeach(input)
+function (FASTTYPEGEN_TARGET Name)
+  set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]" PARENT_SCOPE)
 
-foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
-    set(FASTTYPEGEN_${Name}_OUTPUTS
-        ${FASTTYPEGEN_${Name}_OUTPUTS}
-        ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/${var}.h
-        ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
-endforeach(var)
+  set("FASTTYPEGEN_${Name}_OUTPUTS")
+  set(INPUTS)
 
-foreach (input ${ARGN})
-    set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
-endforeach(input)
+  foreach (input IN LISTS ARGN)
+    get_filename_component(noext_name "${input}" NAME_WE)
+    list(APPEND "FASTTYPEGEN_${Name}_OUTPUTS"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.cpp"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.h"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.inl")
+    list(APPEND INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
+  endforeach (input)
 
-
-#if ( NOT ((${CMAKE_MAJOR_VERSION} LESS 2) OR (${CMAKE_MINOR_VERSION} LESS 8) OR (${CMAKE_PATCH_VERSION} LESS 4)))
-#   set(CMAKE_SUPPORT_GENERATOR_EXPRESSION 1)
-#endif()
-## Notice that the file copy operator is performed at the time when "cmake" is called and "Makefiles" are generated.
-## Not at the time when "make" is called.
-# file(COPY ${ARGN} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-
-if (${BUILD_FAST_TYPE_GEN})
-    if (POLICY CMP0026)
-        cmake_policy(SET CMP0026 OLD)
-    endif()
-    get_property(FAST_TYPE_GEN TARGET fast_type_gen PROPERTY LOCATION)
+  if (BUILD_FAST_TYPE_GEN)
+    set(FAST_TYPE_GEN fast_type_gen)
     set(FAST_TYPE_GEN_TARGET fast_type_gen)
-endif()
+  else (BUILD_FAST_TYPE_GEN)
+    set(FAST_TYPE_GEN_TARGET)
+  endif (BUILD_FAST_TYPE_GEN)
 
+  add_custom_command(
+      OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+      COMMAND "${FAST_TYPE_GEN}" ${INPUTS}
+      DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
+      COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+      VERBATIM)
 
-add_custom_command(
-  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-  COMMAND "${FAST_TYPE_GEN}"
-  ARGS ${INPUTS}
-  DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
-  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
 
-
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-set(FASTTYPEGEN_${Name}_DEFINED TRUE)
-set(FASTTYPEGEN_${Name}_INPUTS ${ARGN})
-endmacro()
+  set("FASTTYPEGEN_${Name}_OUTPUTS" "${FASTTYPEGEN_${Name}_OUTPUTS}" PARENT_SCOPE)
+  set("FASTTYPEGEN_${Name}_DEFINED" TRUE PARENT_SCOPE)
+  set("FASTTYPEGEN_${Name}_INPUTS" "${ARGN}" PARENT_SCOPE)
+endfunction (FASTTYPEGEN_TARGET)
 
 
 
@@ -209,11 +190,11 @@ enable_testing()
 add_subdirectory (tests)
 
 if (BUILD_SHARED_LIBS)
-  set(MFAST_LIBRARIES mfast_coder mfast_xml_parser mfast)
-  add_definitions( -DMFAST_DYN_LINK )
-else()
-  set(MFAST_LIBRARIES mfast_coder_static mfast_xml_parser_static mfast_static)
-endif()
+  set(MFAST_LIBRARIES "${MFAST_SHARED_LIBRARIES}")
+  add_definitions(-DMFAST_DYN_LINK)
+else (BUILD_SHARED_LIBS)
+  set(MFAST_LIBRARIES "${MFAST_STATIC_LIBRARIES}")
+endif (BUILD_SHARED_LIBS)
 
 add_subdirectory (examples)
 
@@ -230,18 +211,19 @@ add_custom_target(dist
 # Provide mfast-config.cmake and mfast-config.version to be used by other applications
 # ===============================
 
-if (NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
-  export(PACKAGE ${CMAKE_PROJECT_NAME})
-endif(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
+export(PACKAGE ${CMAKE_PROJECT_NAME})
 
 if (BUILD_FAST_TYPE_GEN)
-  export(TARGETS fast_type_gen ${MFAST_LIBRARIES} FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
-else()
+  export(TARGETS fast_type_gen ${MFAST_SHARED_LIBRARIES} ${MFAST_STATIC_LIBRARIES}
+         FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
+ else (BUILD_FAST_TYPE_GEN)
+  export(TARGETS ${MFAST_SHARED_LIBRARIES} ${MFAST_STATIC_LIBRARIES}
+         FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
   set(FAST_TYPE_GEN_INSTALL_LOCATION ${FAST_TYPE_GEN})
-endif()
+endif (BUILD_FAST_TYPE_GEN)
 
 # Create the mFASTConfig.cmake for the build tree
-set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src" "${PROJECT_BINARY_DIR}")
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
 configure_file(mFASTConfig.cmake.in
                "${PROJECT_BINARY_DIR}/mFASTConfig.cmake"
                @ONLY)

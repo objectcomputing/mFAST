@@ -32,7 +32,7 @@ field_cref aggregate_inserter::insert(const aggregate_cref &ref,
     return primary_key;
   else {
     static const int64_field_instruction rowid_instruction(
-        0, operator_none, presence_optional, 0, "", "", 0,
+        operator_none, presence_optional, 0, "", "", nullptr,
         int_value_storage<int64_t>());
     field_cref rowid_cref(&this->storage_, &rowid_instruction);
     this->storage_.set(rowid);

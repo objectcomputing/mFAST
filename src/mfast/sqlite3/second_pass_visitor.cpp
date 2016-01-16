@@ -14,7 +14,7 @@ void second_pass_visitor::visit(const sequence_cref &ref, int) {
 
   bool is_ordered = core_.is_ordered(inst);
 
-  if (ref_instruction == 0) {
+  if (ref_instruction == nullptr) {
     if (ref.size()) {
 
       if (element_instruction) {

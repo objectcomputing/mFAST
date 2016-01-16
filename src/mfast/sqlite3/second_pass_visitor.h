@@ -22,7 +22,7 @@ public:
   }
 
   void visit(const group_cref &ref, int) {
-    if (ref.instruction()->ref_instruction() == 0) {
+    if (ref.instruction()->ref_instruction() == nullptr) {
       // keep traversing
       traverse(ref);
     } else {
