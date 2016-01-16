@@ -80,11 +80,11 @@ find_package(Boost 1.56.0 REQUIRED)
 
 
 if (NOT BUILD_FAST_TYPE_GEN)
-    find_program(FAST_TYPE_GEN NAMES fast_type_gen)
-    if (${FAST_TYPE_GEN} STREQUAL "FAST_TYPE_GEN-NOTFOUND")
-         message( FATAL_ERROR "Unable to find the required program fast_type_gen." )
-    endif()
-endif(NOT BUILD_FAST_TYPE_GEN)
+  find_program(FAST_TYPE_GEN NAMES fast_type_gen)
+  if ("${FAST_TYPE_GEN}" STREQUAL "FAST_TYPE_GEN-NOTFOUND")
+    message(SEND_ERROR "Unable to find the required program fast_type_gen.")
+  endif ()
+endif (NOT BUILD_FAST_TYPE_GEN)
 
 include_directories(${Boost_INCLUDE_DIR})
 
@@ -167,7 +167,7 @@ function (FASTTYPEGEN_TARGET Name)
 
   add_custom_command(
       OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-      COMMAND "${FAST_TYPE_GEN}" ${INPUTS}
+      COMMAND "${FAST_TYPE_GEN}" -- ${INPUTS}
       DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
       COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
@@ -191,7 +191,9 @@ add_subdirectory (tests)
 
 if (BUILD_SHARED_LIBS)
   set(MFAST_LIBRARIES "${MFAST_SHARED_LIBRARIES}")
-  add_definitions(-DMFAST_DYN_LINK)
+  if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    add_definitions(-DMFAST_DYN_LINK)
+  endif ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
 else (BUILD_SHARED_LIBS)
   set(MFAST_LIBRARIES "${MFAST_STATIC_LIBRARIES}")
 endif (BUILD_SHARED_LIBS)
