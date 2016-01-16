@@ -33,7 +33,10 @@ if (BUILD_SHARED_LIBS)
 	set_target_properties(mfast_json PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   target_link_libraries(mfast_json mfast)
-  set_target_properties(mfast_json PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+  set_target_properties(mfast_json PROPERTIES
+                        COMPILE_FLAGS -DMFAST_DYN_LINK
+                        VERSION "${MFAST_VERSION}"
+                        SOVERSION "${MFAST_SOVERSION}")
 
   install(TARGETS mfast_json
           EXPORT  mFASTTargets

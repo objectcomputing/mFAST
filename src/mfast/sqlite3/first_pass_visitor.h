@@ -22,7 +22,7 @@ public:
   }
 
   void visit(const group_cref &ref, int) {
-    if (ref.instruction()->ref_instruction() == 0) {
+    if (ref.instruction()->ref_instruction() == nullptr) {
       this->traverse(ref);
     } else {
       nested_group_pass_needed_ = true;

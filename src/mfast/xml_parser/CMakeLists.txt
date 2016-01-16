@@ -36,8 +36,11 @@ if (BUILD_SHARED_LIBS)
 	set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   target_link_libraries(mfast_xml_parser mfast)
-  set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
-  set_target_properties(mfast_xml_parser PROPERTIES LINKER_LANGUAGE CXX)
+  set_target_properties(mfast_xml_parser PROPERTIES
+                        COMPILE_FLAGS -DMFAST_DYN_LINK
+                        LINKER_LANGUAGE CXX
+                        VERSION "${MFAST_VERSION}"
+                        SOVERSION "${MFAST_SOVERSION}")
 
 
   install(TARGETS mfast_xml_parser

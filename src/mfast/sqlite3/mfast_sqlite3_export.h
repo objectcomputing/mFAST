@@ -18,4 +18,3 @@
 #endif
 #endif
 
-#endif // MFAST_SQLITE3_EXPORT_H
