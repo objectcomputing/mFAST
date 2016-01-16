@@ -14,7 +14,7 @@ RUN="docker run --rm \
                 -v $MFAST_ROOT:/mfast \
                 -v $PWD/_emscripten_build:/em_build/mfast \
                 -v $NATIVE_BUILD_ROOT:/native_build/mfast \
-                -v $BOOST_ROOT:/usr/src/boost \
+                -v $BOOST_ROOT/boost:/usr/src/boost/boost \
                 -w /em_build/mfast
                 -t thewtex/cross-compiler-browser-asmjs "
 
