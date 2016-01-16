@@ -18,7 +18,10 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "codegen_base.h"
+#include <boost/algorithm/string/trim.hpp>
 #include <cctype>
+#include <cstring>
+#include <utility>
 
 codegen_base::codegen_base(const char *filebase, const char *fileext)
     : filebase_(filebase), cpp_ns_(filebase),
@@ -33,6 +36,24 @@ inline bool
 codegen_base::dont_generate(const mfast::field_instruction * /*inst*/) const {
   // return std::strncmp("mfast:", inst->name(), 6) == 0;
   return false;
+}
+
+void codegen_base::set_outer_ns(const char *outer_ns) {
+  outer_ns_.clear();
+  const char *dlt;
+  while (outer_ns) {
+    const char *dlt = std::strstr(outer_ns, "::");
+    std::string comp;
+    if (dlt) {
+        comp.assign(outer_ns, dlt);
+        outer_ns = dlt + 2;
+    } else {
+      comp.assign(outer_ns);
+      outer_ns = nullptr;
+    }
+    boost::algorithm::trim(comp);
+    outer_ns_.push_back(std::move(comp));
+  }
 }
 
 void codegen_base::traverse(mfast::dynamic_templates_description &desc) {

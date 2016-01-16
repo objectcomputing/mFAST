@@ -23,7 +23,7 @@
 
 class inl_gen : public codegen_base {
 public:
-  inl_gen(const char *filebase) : codegen_base(filebase, ".inl") {}
+  inl_gen(const char *filebase, const char *fileext = ".inl") : codegen_base(filebase, fileext) {}
   void generate(mfast::dynamic_templates_description &desc);
 
   virtual void visit(const mfast::int32_field_instruction *, void *) override;
