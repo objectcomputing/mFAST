@@ -11,9 +11,8 @@ set(mfast_SRCS  ${sources} ${instruction_sources} ${headers} ${instruction_heade
 
 add_library(mfast_static STATIC ${mfast_SRCS})
 
-
 if (UNIX)
-	set_target_properties(mfast_static PROPERTIES OUTPUT_NAME mfast)
+  set_target_properties(mfast_static PROPERTIES OUTPUT_NAME mfast)
 endif()
 set_target_properties(mfast_static PROPERTIES COMPILE_FLAGS -DMFAST_STATIC_DEFINE)
 

@@ -12,7 +12,7 @@ add_library(mfast_json_static STATIC ${mfast_json_SRCS})
 target_link_libraries(mfast_json_static mfast_static)
 
 if (UNIX)
-	set_target_properties(mfast_json_static PROPERTIES OUTPUT_NAME mfast_json)
+  set_target_properties(mfast_json_static PROPERTIES OUTPUT_NAME mfast_json)
 endif()
 set_target_properties(mfast_json_static PROPERTIES COMPILE_FLAGS -DMFAST_JSON_STATIC_DEFINE)
 

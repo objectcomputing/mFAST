@@ -80,11 +80,11 @@ find_package(Boost 1.56.0 REQUIRED)
 
 
 if (NOT BUILD_FAST_TYPE_GEN)
-    find_program(FAST_TYPE_GEN NAMES fast_type_gen)
-    if (${FAST_TYPE_GEN} STREQUAL "FAST_TYPE_GEN-NOTFOUND")
-         message( FATAL_ERROR "Unable to find the required program fast_type_gen." )
-    endif()
-endif(NOT BUILD_FAST_TYPE_GEN)
+  find_program(FAST_TYPE_GEN NAMES fast_type_gen)
+  if ("${FAST_TYPE_GEN}" STREQUAL "FAST_TYPE_GEN-NOTFOUND")
+    message(SEND_ERROR "Unable to find the required program fast_type_gen.")
+  endif ()
+endif (NOT BUILD_FAST_TYPE_GEN)
 
 include_directories(${Boost_INCLUDE_DIR})
 
