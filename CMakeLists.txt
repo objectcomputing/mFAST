@@ -107,9 +107,10 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-warn-absolute-paths -s AGGRESSIVE_VARIABLE_ELIMINATION=1 -s OUTLINING_LIMIT=20000")
 endif()
 # variables to be used later
+set(MFAST_SHARED_LIBRARIES CACHE INTERNAL "")
+set(MFAST_STATIC_LIBRARIES CACHE INTERNAL "")
 set(MFAST_DYNAMIC_COMPONENTS CACHE INTERNAL "")
 set(MFAST_STATIC_COMPONENTS CACHE INTERNAL "")
-set(MFAST_LIBRARY CACHE INTERNAL "")
 
 ############################################################################
 # Setting up RPATH
@@ -125,7 +126,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_subdirectory (src)
 
-link_directories (${PROJECT_BINARY_DIR}/src)
+link_directories ("${PROJECT_BINARY_DIR}/src")
 
 #============================================================
 # Install fast_type_gen batch file to set up the PATH environment
@@ -204,11 +205,11 @@ enable_testing()
 add_subdirectory (tests)
 
 if (BUILD_SHARED_LIBS)
-  set(MFAST_LIBRARIES mfast_coder mfast_xml_parser mfast)
-  add_definitions( -DMFAST_DYN_LINK )
-else()
-  set(MFAST_LIBRARIES mfast_coder_static mfast_xml_parser_static mfast_static)
-endif()
+  set(MFAST_LIBRARIES "${MFAST_SHARED_LIBRARIES}")
+  add_definitions(-DMFAST_DYN_LINK)
+else (BUILD_SHARED_LIBS)
+  set(MFAST_LIBRARIES "${MFAST_STATIC_LIBRARIES}")
+endif (BUILD_SHARED_LIBS)
 
 add_subdirectory (examples)
 
@@ -225,15 +226,16 @@ add_custom_target(dist
 # Provide mfast-config.cmake and mfast-config.version to be used by other applications
 # ===============================
 
-if (NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
-  export(PACKAGE ${CMAKE_PROJECT_NAME})
-endif(NOT ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} LESS 2.8)
+export(PACKAGE ${CMAKE_PROJECT_NAME})
 
 if (BUILD_FAST_TYPE_GEN)
-  export(TARGETS fast_type_gen ${MFAST_LIBRARIES} FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
-else()
+  export(TARGETS fast_type_gen ${MFAST_SHARED_LIBRARIES} ${MFAST_STATIC_LIBRARIES}
+         FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
+ else (BUILD_FAST_TYPE_GEN)
+  export(TARGETS ${MFAST_SHARED_LIBRARIES} ${MFAST_STATIC_LIBRARIES}
+         FILE "${PROJECT_BINARY_DIR}/mFASTTargets.cmake")
   set(FAST_TYPE_GEN_INSTALL_LOCATION ${FAST_TYPE_GEN})
-endif()
+endif (BUILD_FAST_TYPE_GEN)
 
 # Create the mFASTConfig.cmake for the build tree
 set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src")
