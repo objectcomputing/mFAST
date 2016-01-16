@@ -104,10 +104,13 @@ TEST_CASE("test the operations of interger_field","[integer_field_test]")
       REQUIRE( base_cref.present() );
       REQUIRE(base_cref.value() ==  UINT64_MAX);
     }
+
+#ifndef EMSCRIPTEN
     {
       helper.save_previous_value(ref);
       REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), mfast::fast_error);
     }
+#endif
     {
       ref.as(4);
       helper.save_previous_value(ref);
@@ -300,11 +303,13 @@ TEST_CASE("test the operations of decimal_field without mantissa instruction","[
       REQUIRE(base_cref.exponent() ==  64);
 
     }
+#ifndef EMSCRIPTEN
     {
       ref.omit();
       helper.save_previous_value(ref);
       REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), mfast::fast_error);
     }
+#endif
     {
       ref.set_mantissa(4);
       ref.set_exponent(0);
@@ -580,10 +585,12 @@ TEST_CASE("test the operations of string_field","[string_field_test]")
       REQUIRE( base_cref.present() );
       REQUIRE( base_cref == "initial_string" );
     }
+#ifndef EMSCRIPTEN
     {
       helper.save_previous_value(ref);
       REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), mfast::fast_error);
     }
+#endif
     {
       ref.as("4");
       helper.save_previous_value(ref);
