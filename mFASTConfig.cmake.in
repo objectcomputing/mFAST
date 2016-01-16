@@ -12,7 +12,11 @@ get_filename_component(MFAST_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include("${MFAST_CMAKE_DIR}/mFASTTargets.cmake")
 
 find_package( Boost 1.55.0 )
-set(MFAST_INCLUDE_DIR ${Boost_INCLUDE_DIR} "@CONF_INCLUDE_DIRS@")
+set(MFAST_INCLUDE_DIR "${Boost_INCLUDE_DIR}")
+foreach (directory @CONF_INCLUDE_DIRS@)
+  get_filename_component(directory "${directory}" ABSOLUTE)
+  list(APPEND MFAST_INCLUDE_DIR "${directory}")
+endforeach (directory)
 set(MFAST_LIBRARY_DIRS "@CONF_LIBRARY_DIRS@")
 
 list(REMOVE_DUPLICATES MFAST_INCLUDE_DIR)
