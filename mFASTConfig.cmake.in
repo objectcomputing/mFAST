@@ -42,11 +42,11 @@ foreach(entry ${mFAST_FIND_COMPONENTS})
   endforeach()
 
   if (MFAST_${entry}_FOUND)
-      list(REMOVE_ITEM mFAST_FIND_COMPONENTS ${entry})
-      list(APPEND MFAST_LIBRARIES mfast_${entry}${STATIC_SUFFIX})
+    list(REMOVE_ITEM mFAST_FIND_COMPONENTS ${entry})
+    list(APPEND MFAST_LIBRARIES mfast_${entry}${STATIC_SUFFIX})
 
-      set(MFAST_USED_COMPONENTS "${MFAST_USED_COMPONENTS} ${entry}")
-      set(MFAST_${entry}_LIBRARY mfast_${entry}${STATIC_SUFFIX})
+    set(MFAST_USED_COMPONENTS "${MFAST_USED_COMPONENTS} ${entry}")
+    set(MFAST_${entry}_LIBRARY mfast_${entry}${STATIC_SUFFIX})
   else()
     message( SEND_ERROR "mFAST component ${entry} NOT FOUND! Available components: ${components}" )
   endif()
@@ -57,43 +57,50 @@ list(APPEND MFAST_LIBRARIES "mfast${STATIC_SUFFIX}")
 
 
 #============================================================
-# FASTTYPEGEN_TARGET (public macro)
+# FASTTYPEGEN_TARGET (public function)
 #============================================================
 #
 
-macro(FASTTYPEGEN_TARGET Name)
-set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]")
+function (FASTTYPEGEN_TARGET Name)
+  set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]" PARENT_SCOPE)
 
-foreach (input ${ARGN})
-	get_filename_component(noext_name ${input} NAME_WE)
-	set(FASTTYPEGEN_${Name}_INPUTS_NOEXT ${FASTTYPEGEN_${Name}_INPUTS_NOEXT} ${noext_name})
-endforeach(input)
+  set("FASTTYPEGEN_${Name}_OUTPUTS")
+  set(INPUTS)
 
-foreach(var ${FASTTYPEGEN_${Name}_INPUTS_NOEXT})
-	set(FASTTYPEGEN_${Name}_OUTPUTS ${FASTTYPEGEN_${Name}_OUTPUTS} ${CMAKE_CURRENT_BINARY_DIR}/${var}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${var}.h ${CMAKE_CURRENT_BINARY_DIR}/${var}.inl)
-endforeach(var)
+  foreach (input IN LISTS ARGN)
+    get_filename_component(noext_name "${input}" NAME_WE)
+    list(APPEND "FASTTYPEGEN_${Name}_OUTPUTS"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.cpp"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.h"
+         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.inl")
+    list(APPEND INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
+  endforeach (input)
 
-foreach (input ${ARGN})
-	set(INPUTS ${INPUTS} ${CMAKE_CURRENT_SOURCE_DIR}/${input})
-endforeach(input)
+  if (TARGET fast_type_gen)
+    set(FAST_TYPE_GEN fast_type_gen)
+  else (TARGET fast_type_gen)
+    set(FAST_TYPE_GEN "${MFAST_EXECUTABLE}")
+  endif (TARGET fast_type_gen)
 
-add_custom_command(
-  OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-  COMMAND ${MFAST_EXECUTABLE}
-  ARGS ${INPUTS}
-  DEPENDS ${ARGN}
-  COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  add_custom_command(
+      OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
+      COMMAND "${FAST_TYPE_GEN}" ${INPUTS}
+      DEPENDS ${ARGN}
+      COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+      VERBATIM)
 
-include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
-set(FASTTYPEGEN_${Name}_DEFINED TRUE)
-set(FASTTYPEGEN_${Name}_INPUTS ${ARGN})
-endmacro()
+  include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
+
+  set("FASTTYPEGEN_${Name}_OUTPUTS" "${FASTTYPEGEN_${Name}_OUTPUTS}" PARENT_SCOPE)
+  set("FASTTYPEGEN_${Name}_DEFINED" TRUE PARENT_SCOPE)
+  set("FASTTYPEGEN_${Name}_INPUTS" "${ARGN}" PARENT_SCOPE)
+endfunction (FASTTYPEGEN_TARGET)
 #============================================================
 
 message("mFAST Found! Used components:${MFAST_USED_COMPONENTS}")
 message("Used libraries: ${MFAST_LIBRARIES}")
 
 if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"))
-    add_definitions(-std=c++11)
+  add_definitions(-std=c++11)
 endif()
