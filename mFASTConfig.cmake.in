@@ -26,11 +26,18 @@ set(MFAST_EXECUTABLE @FAST_TYPE_GEN_INSTALL_LOCATION@)
 set(MFAST_FOUND "TRUE")
 
 
+# Make dependent targets automatically pick up include directory and definitions for CMake 2.8.12 and later
+set_property(TARGET @MFAST_SHARED_LIBRARIES@ @MFAST_STATIC_LIBRARIES@
+             APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${MFAST_INCLUDE_DIR})
+
+
 if (NOT DEFINED MFAST_USE_STATIC_LIBS OR MFAST_USE_STATIC_LIBS)
   set(STATIC_SUFFIX "_static")
   set(components @MFAST_STATIC_COMPONENTS@)
 else ()
-  add_definitions(-DMFAST_DYN_LINK)
+  if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    add_definitions(-DMFAST_DYN_LINK)
+  endif ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
   set(components @MFAST_DYNAMIC_COMPONENTS@)
 endif ()
 

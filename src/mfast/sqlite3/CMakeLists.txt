@@ -26,15 +26,20 @@ set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} sqlite3_static CACHE INTE
 if (BUILD_SHARED_LIBS)
   add_library(mfast_sqlite3 SHARED ${mfast_sqlite3_SRCS})
 
+  if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    target_compile_definitions(mfast_sqlite3 INTERFACE "-DMFAST_DYN_LINK")
+  endif (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     set_target_properties(mfast_sqlite3 PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   target_link_libraries(mfast_sqlite3 mfast sqlite3)
   set_target_properties(mfast_sqlite3 PROPERTIES
-                        COMPILE_FLAGS -DMFAST_DYN_LINK
                         VERSION "${MFAST_VERSION}"
                         SOVERSION "${MFAST_SOVERSION}")
-
+  if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    set_target_properties(mfast_sqlite3 PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+  endif ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
 
   install(TARGETS mfast_sqlite3
           EXPORT  mFASTTargets

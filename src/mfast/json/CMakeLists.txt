@@ -28,14 +28,20 @@ set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} json_static CACHE INTERNA
 if (BUILD_SHARED_LIBS)
   add_library(mfast_json SHARED ${mfast_json_SRCS})
 
+  if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    target_compile_definitions(mfast_json INTERFACE "-DMFAST_DYN_LINK")
+  endif (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     set_target_properties(mfast_json PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   target_link_libraries(mfast_json mfast)
   set_target_properties(mfast_json PROPERTIES
-                        COMPILE_FLAGS -DMFAST_DYN_LINK
                         VERSION "${MFAST_VERSION}"
                         SOVERSION "${MFAST_SOVERSION}")
+  if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+    set_target_properties(mfast_json PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
+  endif ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
 
   install(TARGETS mfast_json
           EXPORT  mFASTTargets
