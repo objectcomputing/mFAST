@@ -167,7 +167,7 @@ function (FASTTYPEGEN_TARGET Name)
 
   add_custom_command(
       OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-      COMMAND "${FAST_TYPE_GEN}" ${INPUTS}
+      COMMAND "${FAST_TYPE_GEN}" -- ${INPUTS}
       DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
       COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
