@@ -1,4 +1,8 @@
-
+// Copyright (c) 2016, Huang-Ming Huang,  Object Computing, Inc.
+// All rights reserved.
+//
+// This file is part of mFAST.
+// See the file license.txt for licensing information.
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4244)

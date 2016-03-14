@@ -1,3 +1,8 @@
+// Copyright (c) 2016, Huang-Ming Huang,  Object Computing, Inc.
+// All rights reserved.
+//
+// This file is part of mFAST.
+// See the file license.txt for licensing information.
 #include "value_storage.h"
 #include <iostream>
 #include <algorithm>

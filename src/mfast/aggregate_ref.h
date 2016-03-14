@@ -1,22 +1,8 @@
-// Copyright (c) 2013, 2014, Huang-Ming Huang,  Object Computing, Inc.
+// Copyright (c) 2016, Huang-Ming Huang,  Object Computing, Inc.
 // All rights reserved.
 //
 // This file is part of mFAST.
-//
-//     mFAST is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU Lesser General Public License as published
-//     by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
-//
-//     mFAST is distributed in the hope that it will be useful,
-//     but WITHOUT ANY WARRANTY; without even the implied warranty of
-//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//     GNU General Public License for more details.
-//
-//     You should have received a copy of the GNU Lesser General Public License
-//     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
-//
+// See the file license.txt for licensing information.
 #pragma once
 
 #include "mfast/field_instructions.h"
@@ -367,7 +353,7 @@ void make_aggregate_mref<ConstRef>::as(const ConstRef &other) const {
   char *buf = static_cast<char *>(alloca(2 * sz));
   value_storage *orig_content = reinterpret_cast<value_storage *>(buf);
   value_storage *new_content = reinterpret_cast<value_storage *>(buf + sz);
-  // the first chuck for storing the orignal content
+  // the first chuck for storing the original content
   std::memcpy(orig_content, this->storage_array_, sz);
   value_storage tmp_storage;
 
@@ -384,7 +370,7 @@ void make_aggregate_mref<ConstRef>::as(const ConstRef &other) const {
   // copy the newly construct aggregate value to the old memory chunk
   std::memcpy(const_cast<value_storage *>(this->storage_array_), new_content,
               sz);
-  // destruct the subfiels on first memory chunk which contains the original
+  // destruct the subfields on first memory chunk which contains the original
   // value
   this->instruction()->destruct_group_subfields(orig_content, alloc_);
 }

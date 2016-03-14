@@ -1,3 +1,8 @@
+// Copyright (c) 2016, Huang-Ming Huang,  Object Computing, Inc.
+// All rights reserved.
+//
+// This file is part of mFAST.
+// See the file license.txt for licensing information.
 #include "json.h"
 #include <boost/io/ios_state.hpp>
 #include <cstdio>
