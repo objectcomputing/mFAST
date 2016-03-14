@@ -687,7 +687,7 @@ void cpp_gen::generate(const mfast::aggregate_view_info &info) {
     out_ << "    {" << info.data_[i].prop << "ULL, __" << my_name
          << "__indeces__ + " << indeces_sizes[i] << "},\n";
   }
-  out_ << "    {0, 0}\n"
+  out_ << "    {0, nullptr}\n"
        << "  };\n\n"
        << "}//namespace\n\n";
 
