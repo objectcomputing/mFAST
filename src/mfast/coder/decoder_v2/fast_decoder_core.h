@@ -107,7 +107,7 @@ public:
 template <bool MoreThanOneToken> struct token_base {
   unsigned current_token_;
 
-  void get_token() const { return current_token_; }
+  unsigned get_token() const { return current_token_; }
   void set_token(unsigned token) { current_token_ = token; }
 };
 
