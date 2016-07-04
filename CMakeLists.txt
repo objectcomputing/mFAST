@@ -36,6 +36,9 @@ set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
 set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
 set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header files")
 set(INSTALL_DATA_DIR share CACHE PATH "Installation directory for data files")
+# flag to enable/disable building examples and/or tests
+set(BUILD_EXAMPLES ON CACHE BOOL "build mFAST examples" )
+set(BUILD_TESTS ON CACHE BOOL "build mFAST unit tests" )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")
     if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -88,6 +91,12 @@ endif (NOT BUILD_FAST_TYPE_GEN)
 
 include_directories(${Boost_INCLUDE_DIR})
 
+
+################################################################################
+## Setting up tinyxml2 Library
+################################
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2)
 
 ################################################################################
 
@@ -185,9 +194,11 @@ endfunction (FASTTYPEGEN_TARGET)
 # Includes Catch in the project:
 #add_subdirectory(${EXT_PROJECTS_DIR}/catch)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/catch/include ${COMMON_INCLUDES})
-enable_testing()
 
-add_subdirectory (tests)
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory (tests)
+endif (BUILD_TESTS)
 
 if (BUILD_SHARED_LIBS)
   set(MFAST_LIBRARIES "${MFAST_SHARED_LIBRARIES}")
@@ -198,7 +209,9 @@ else (BUILD_SHARED_LIBS)
   set(MFAST_LIBRARIES "${MFAST_STATIC_LIBRARIES}")
 endif (BUILD_SHARED_LIBS)
 
-add_subdirectory (examples)
+if (BUILD_EXAMPLES)
+    add_subdirectory (examples)
+endif (BUILD_EXAMPLES)
 
 
 # Setting up dist target
