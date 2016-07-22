@@ -529,6 +529,8 @@ void fast_encoder_core::encode_field(const T &ext_ref, delta_operator_tag,
     delta_storage.of_decimal.mantissa_ =
         cref.mantissa() - bv.of_decimal.mantissa_;
 
+    delta_storage.present(true);
+
     decimal_cref delta(&delta_storage, cref.instruction());
     strm_ << T(delta);
 
