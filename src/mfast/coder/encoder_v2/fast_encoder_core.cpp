@@ -17,7 +17,10 @@ void fast_encoder_core::encode_segment(const message_cref cref,
   template_instruction *instruction = std::get<0>(*info);
 
   if (force_reset || instruction->has_reset_attribute())
+  {
     repo_.reset_dictionary();
+    active_message_info_ = nullptr;
+  }
 
   bool need_encode_template_id = (active_message_info_ != info);
 
