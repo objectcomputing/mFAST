@@ -75,7 +75,14 @@ public:
   template <typename T>
   void encode_impl(const T &cref, fast_ostream &stream,
                    encoder_presence_map & /* pmap */) const {
-    stream << cref;
+      if (cref.absent()) 
+      {
+          stream.encode_null();
+      }
+      else
+      {
+          stream << cref;
+      }
 
     // Fast Specification 1.1, page 22
     //

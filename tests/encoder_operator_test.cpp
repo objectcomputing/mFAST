@@ -206,6 +206,43 @@ TEST_CASE("test the encoding of fast operator none","[operator_none_test]")
                                  ext_cref<uint64_cref, none_operator_tag, optional_with_initial_value_tag >(result),
                                  CHANGE_PREVIOUS_VALUE, &allocator ) );
 
+
+
+    
+
+  }
+  {
+      //Test of Appendix 3.1.2- Optonal uint64 none operator values. 
+      uint64_field_instruction inst(operator_none,
+          presence_optional,
+          1,
+          "test_uint64", "",
+          nullptr,
+          int_value_storage<uint64_t>(UINT64_MAX));
+      inst.construct_value(storage, &allocator);
+
+     
+      uint64_mref result(&allocator, &storage, &inst);
+      result.as(0);
+
+      REQUIRE(encode_mref("\x80\x81", result, CHANGE_PREVIOUS_VALUE));
+      inst.prev_value().defined(false); // reset the previous value to undefined again
+
+      result.as(1);
+
+      REQUIRE(encode_mref("\x80\x82", result, CHANGE_PREVIOUS_VALUE));
+
+      REQUIRE(encode_ext_cref("\x80\x82",
+          ext_cref<uint64_cref, none_operator_tag, optional_with_initial_value_tag >(result),
+          CHANGE_PREVIOUS_VALUE, &allocator));
+
+
+
+
+
+  
+
+
   }
   {
     uint64_field_instruction inst(operator_none,
@@ -940,6 +977,66 @@ TEST_CASE("test the encoding of fast operator delta for decimal","[operator_delt
   }
 }
 
+TEST_CASE("test the encoding of fast no operator for ascii string", "[operator_none_ascii_encode_test]")
+{
+    debug_allocator alloc;
+    value_storage storage;
+
+    { // testing Option assci field with no operator
+        const char* default_value = "initial_string";
+        ascii_field_instruction inst(operator_none,
+            presence_optional,
+            1,
+            "test_ascii", "",
+            nullptr,
+            string_value_storage());
+
+        inst.construct_value(storage, &alloc);
+
+        ascii_string_mref result(&alloc, &storage, &inst);
+
+        // If a field is optional and has no field operator, it is encoded with a
+        // nullable representation and the NULL is used to represent absence of a
+        // value. It will not occupy any bits in the presence map.'
+
+            
+        result.absent();
+        REQUIRE(encode_mref("\x80\x80", result, CHANGE_PREVIOUS_VALUE));
+        inst.prev_value().defined(false);
+        REQUIRE(encode_ext_cref("\x80\x80",
+            ext_cref<ascii_string_cref, none_operator_tag, mandatory_with_initial_value_tag>(result),
+            CHANGE_PREVIOUS_VALUE, &alloc));
+        inst.destruct_value(storage, &alloc);
+        inst.destruct_value(inst.prev_value(), &alloc);
+    }
+    
+  { // testing mandatory field with initial value
+      const char* default_value = "initial_string";
+      ascii_field_instruction inst(operator_none,
+          presence_mandatory,
+          1,
+          "test_ascii", "",
+          nullptr,
+          string_value_storage(default_value));
+
+      inst.construct_value(storage, &alloc);
+
+      ascii_string_mref result(&alloc, &storage, &inst);
+
+      //If a field is mandatory and has no field operator, it will not occupy any bit in the presence map and its value must always appear in the stream.
+
+      result.as("initial_value");
+      REQUIRE(encode_mref("\x80\x69\x6e\x69\x74\x69\x61\x6c\x5f\x76\x61\x6c\x75\xe5", result, CHANGE_PREVIOUS_VALUE));
+      inst.prev_value().defined(false);
+      REQUIRE(encode_ext_cref("\x80\x69\x6e\x69\x74\x69\x61\x6c\x5f\x76\x61\x6c\x75\xe5",
+          ext_cref<ascii_string_cref, none_operator_tag, mandatory_with_initial_value_tag>(result),
+          CHANGE_PREVIOUS_VALUE, &alloc));
+      inst.destruct_value(storage, &alloc);
+      inst.destruct_value(inst.prev_value(), &alloc);
+  }
+  
+  
+}
 TEST_CASE("test the encoding of fast operator delta for ascii string","[operator_delta_ascii_encode_test]")
 {
   debug_allocator alloc;
