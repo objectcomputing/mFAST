@@ -35,9 +35,6 @@ if (NOT DEFINED MFAST_USE_STATIC_LIBS OR MFAST_USE_STATIC_LIBS)
   set(STATIC_SUFFIX "_static")
   set(components @MFAST_STATIC_COMPONENTS@)
 else ()
-  if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-    add_definitions(-DMFAST_DYN_LINK)
-  endif ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
   set(components @MFAST_DYNAMIC_COMPONENTS@)
 endif ()
 
@@ -61,52 +58,8 @@ endforeach (entry)
 
 list(APPEND MFAST_LIBRARIES "mfast${STATIC_SUFFIX}")
 
-
-#============================================================
-# FASTTYPEGEN_TARGET (public function)
-#============================================================
-#
-
-function (FASTTYPEGEN_TARGET Name)
-  set(FASTTYPEGEN_TARGET_usage "FASTTYPEGEN_TARGET(<Name> Input1 Input2 ...]" PARENT_SCOPE)
-
-  set("FASTTYPEGEN_${Name}_OUTPUTS")
-  set(INPUTS)
-
-  foreach (input IN LISTS ARGN)
-    get_filename_component(noext_name "${input}" NAME_WE)
-    list(APPEND "FASTTYPEGEN_${Name}_OUTPUTS"
-         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.cpp"
-         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.h"
-         "${CMAKE_CURRENT_BINARY_DIR}/${noext_name}.inl")
-    list(APPEND INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
-  endforeach (input)
-
-  if (TARGET fast_type_gen)
-    set(FAST_TYPE_GEN fast_type_gen)
-  else (TARGET fast_type_gen)
-    set(FAST_TYPE_GEN "${MFAST_EXECUTABLE}")
-  endif (TARGET fast_type_gen)
-
-  add_custom_command(
-      OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-      COMMAND "${FAST_TYPE_GEN}" -- ${INPUTS}
-      DEPENDS ${ARGN}
-      COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
-      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-      VERBATIM)
-
-  include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}")
-
-  set("FASTTYPEGEN_${Name}_OUTPUTS" "${FASTTYPEGEN_${Name}_OUTPUTS}" PARENT_SCOPE)
-  set("FASTTYPEGEN_${Name}_DEFINED" TRUE PARENT_SCOPE)
-  set("FASTTYPEGEN_${Name}_INPUTS" "${ARGN}" PARENT_SCOPE)
-endfunction (FASTTYPEGEN_TARGET)
-#============================================================
-
 message(STATUS "mFAST Found! Used components:${MFAST_USED_COMPONENTS}")
 message(STATUS "Used libraries: ${MFAST_LIBRARIES}")
 
-if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"))
-  add_definitions(-std=c++11)
-endif()
+include("${MFAST_CMAKE_DIR}/FastTypeGenTarget.cmake")
+include("${MFAST_CMAKE_DIR}/SetCXXStandard.cmake")

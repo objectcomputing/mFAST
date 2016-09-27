@@ -4,6 +4,9 @@
 #   add_executable (${executable_name} ${executable_name}.cpp)
 #   target_link_libraries (${executable_name} mfast_static  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 # endfunction(add_test_executable)
+# Includes Catch in the project:
+#add_subdirectory(${EXT_PROJECTS_DIR}/catch)
+include_directories(${PROJECT_SOURCE_DIR}/catch/include)
 
 
 FASTTYPEGEN_TARGET(simple_types1 simple1.xml)

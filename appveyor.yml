@@ -31,11 +31,12 @@ clone_folder: C:\projects\mfast
 # branches to build
 branches:
   #whitelist
-  only:
-    - master
+  # only:
+  #  - master
   # blacklist
-  # except:
-  #   - gh-pages
+  except:
+    - gh-pages
+    - emdi
 
 # scripts that run after cloning repository
 install:

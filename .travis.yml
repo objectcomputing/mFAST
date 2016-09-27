@@ -30,5 +30,6 @@ script:
 
 # whitelist
 branches:
-  only:
-    - master
+  except:
+    - gh-pages
+    - emdi
