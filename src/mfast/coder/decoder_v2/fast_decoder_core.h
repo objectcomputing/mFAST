@@ -7,11 +7,11 @@
 
 #include "../mfast_coder_export.h"
 
-#include "mfast/sequence_ref.h"
-#include "mfast/nested_message_ref.h"
-#include "mfast/malloc_allocator.h"
-#include "mfast/output.h"
-#include "mfast/composite_type.h"
+#include "../../sequence_ref.h"
+#include "../../nested_message_ref.h"
+#include "../../malloc_allocator.h"
+#include "../../output.h"
+#include "../../composite_type.h"
 #include "../common/exceptions.h"
 #include "../common/debug_stream.h"
 #include "../common/template_repo.h"

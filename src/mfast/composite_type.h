@@ -5,8 +5,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "mfast/message_ref.h"
-#include "mfast/group_ref.h"
+#include "message_ref.h"
+#include "group_ref.h"
 #include <stdlib.h>
 
 namespace mfast {

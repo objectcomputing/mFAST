@@ -8,7 +8,7 @@
 #define MFAST_JSON_H
 
 #include "mfast_json_export.h"
-#include "mfast.h"
+#include "../../mfast.h"
 #include <iostream>
 
 namespace mfast {

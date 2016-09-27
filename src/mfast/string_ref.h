@@ -6,8 +6,8 @@
 #pragma once
 
 #include <string>
-#include "mfast/field_ref.h"
-#include "mfast/vector_ref.h"
+#include "field_ref.h"
+#include "vector_ref.h"
 #include <boost/utility/string_ref.hpp>
 
 namespace mfast {

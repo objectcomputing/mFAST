@@ -6,7 +6,7 @@
 #pragma once
 
 #include "tinyxml2.h"
-#include "mfast/instructions/field_instruction.h"
+#include "../instructions/field_instruction.h"
 #include <cstring>
 #include <boost/lexical_cast.hpp>
 

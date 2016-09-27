@@ -4,9 +4,9 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include "templates_builder.h"
-#include "mfast/boolean_ref.h"
+#include "../boolean_ref.h"
 #include "view_info_builder.h"
-#include "mfast/exceptions.h"
+#include "../exceptions.h"
 
 using namespace tinyxml2;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "mfast/field_instructions.h"
+#include "../field_instructions.h"
 #include "tinyxml2.h"
 #include "field_builder.h"
 #include "dynamic_templates_description.h"

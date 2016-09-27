@@ -1,7 +1,7 @@
 #include <cstring>
 #include <string.h>
 #include "view_info_builder.h"
-#include "mfast/exceptions.h"
+#include "../exceptions.h"
 #include <algorithm>
 namespace mfast {
 namespace xml_parser {

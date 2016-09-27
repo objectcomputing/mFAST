@@ -6,9 +6,9 @@
 #pragma once
 
 #include "mfast_xml_parser_export.h"
-#include "mfast/field_instructions.h"
-#include "mfast/arena_allocator.h"
-#include "mfast/view_iterator.h"
+#include "../field_instructions.h"
+#include "../arena_allocator.h"
+#include "../view_iterator.h"
 #include <deque>
 namespace mfast {
 namespace xml_parser {

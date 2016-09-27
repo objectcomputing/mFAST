@@ -5,8 +5,8 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "mfast/string_ref.h"
-#include "mfast/exceptions.h"
+#include "../../string_ref.h"
+#include "../../exceptions.h"
 #include <stdexcept>
 
 namespace mfast {

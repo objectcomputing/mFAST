@@ -3,7 +3,7 @@
 //
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
-#include "mfast/field_ref.h"
+#include "field_ref.h"
 
 namespace mfast {
 namespace detail {

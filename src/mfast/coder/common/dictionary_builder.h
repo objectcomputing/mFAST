@@ -7,9 +7,8 @@
 
 #include <tuple>
 #include "../mfast_coder_export.h"
-#include "mfast/field_instructions.h"
-#include "mfast/arena_allocator.h"
-#include "mfast/coder/mfast_coder_export.h"
+#include "../../field_instructions.h"
+#include "../../arena_allocator.h"
 #include <vector>
 #include <map>
 #include <string>

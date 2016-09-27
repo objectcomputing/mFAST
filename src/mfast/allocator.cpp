@@ -3,7 +3,7 @@
 //
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
-#include "mfast/allocator.h"
+#include "allocator.h"
 #include <new>
 #include <cstring>
 

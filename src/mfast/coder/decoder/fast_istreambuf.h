@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-#include "mfast/exceptions.h"
+#include "../../exceptions.h"
 #include <iostream>
 
 namespace mfast {

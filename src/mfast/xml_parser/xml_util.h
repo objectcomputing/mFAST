@@ -6,7 +6,7 @@
 #pragma once
 
 #include "tinyxml2.h"
-#include "mfast/arena_allocator.h"
+#include "../arena_allocator.h"
 
 namespace mfast {
 namespace xml_parser {

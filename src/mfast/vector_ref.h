@@ -9,9 +9,9 @@
 #include <cstring>
 #include <vector>
 #include <limits>
-#include "mfast/field_ref.h"
-#include "mfast/allocator.h"
-#include "mfast/type_category.h"
+#include "field_ref.h"
+#include "allocator.h"
+#include "type_category.h"
 
 namespace mfast {
 namespace detail {

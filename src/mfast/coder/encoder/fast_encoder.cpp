@@ -4,13 +4,13 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include "../mfast_coder_export.h"
-#include "mfast/field_visitor.h"
-#include "mfast/sequence_ref.h"
-#include "mfast/malloc_allocator.h"
+#include "../../field_visitor.h"
+#include "../../sequence_ref.h"
+#include "../../malloc_allocator.h"
 #include "../fast_encoder.h"
 #include "../common/template_repo.h"
 #include "../common/exceptions.h"
-#include "mfast/output.h"
+#include "../../output.h"
 #include "encoder_presence_map.h"
 #include "encoder_field_operator.h"
 #include "fast_ostream.h"

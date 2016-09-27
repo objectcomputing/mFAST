@@ -5,10 +5,10 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "mfast/int_ref.h"
-#include "mfast/string_ref.h"
-#include "mfast/decimal_ref.h"
-#include "mfast/ext_ref.h"
+#include "../../int_ref.h"
+#include "../../string_ref.h"
+#include "../../decimal_ref.h"
+#include "../../ext_ref.h"
 #include "../decoder/fast_istream.h"
 
 namespace mfast {

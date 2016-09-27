@@ -6,8 +6,8 @@
 #pragma once
 
 #include <stdexcept>
-#include "mfast/coder/mfast_coder_export.h"
-#include "mfast/exceptions.h"
+#include "../mfast_coder_export.h"
+#include "../../exceptions.h"
 
 namespace mfast {
 class buffer_overflow_error : public virtual boost::exception,

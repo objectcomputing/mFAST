@@ -5,7 +5,7 @@
 // See the file license.txt for licensing information.
 #include "field_builder.h"
 #include "field_op.h"
-#include "mfast/exceptions.h"
+#include "../exceptions.h"
 #include <boost/tokenizer.hpp>
 #include "mfast/field_instructions.h"
 

@@ -7,8 +7,8 @@
 
 #include <limits>
 
-#include "mfast/instructions/string_instructions.h"
-#include "mfast/instructions/byte_vector_instruction.h"
+#include "../../instructions/string_instructions.h"
+#include "../../instructions/byte_vector_instruction.h"
 #include "fast_istreambuf.h"
 #include "decoder_presence_map.h"
 

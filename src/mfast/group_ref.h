@@ -5,10 +5,10 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "mfast/field_instructions.h"
-#include "mfast/field_ref.h"
-#include "mfast/field_mref.h"
-#include "mfast/aggregate_ref.h"
+#include "field_instructions.h"
+#include "field_ref.h"
+#include "field_mref.h"
+#include "aggregate_ref.h"
 #include <cassert>
 
 namespace mfast {

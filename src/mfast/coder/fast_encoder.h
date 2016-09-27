@@ -6,8 +6,8 @@
 #pragma once
 
 #include "mfast_coder_export.h"
-#include "mfast/message_ref.h"
-#include "mfast/malloc_allocator.h"
+#include "../message_ref.h"
+#include "../malloc_allocator.h"
 
 #include <vector>
 

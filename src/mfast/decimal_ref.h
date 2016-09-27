@@ -9,9 +9,9 @@
 #include <cfloat>
 #include <boost/utility/string_ref.hpp>
 #include "mfast_export.h"
-#include "mfast/field_ref.h"
-#include "mfast/int_ref.h"
-#include "mfast/type_category.h"
+#include "field_ref.h"
+#include "int_ref.h"
+#include "type_category.h"
 #if defined __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"

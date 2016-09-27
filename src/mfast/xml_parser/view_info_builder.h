@@ -4,7 +4,7 @@
 #include <deque>
 #include <mfast.h>
 #include "tinyxml2.h"
-#include "mfast/view_iterator.h"
+#include "../view_iterator.h"
 
 namespace mfast {
 namespace xml_parser {

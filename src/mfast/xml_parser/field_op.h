@@ -7,10 +7,10 @@
 #include <cstring>
 #include <map>
 #include <boost/lexical_cast.hpp>
-#include "mfast/arena_allocator.h"
-#include "mfast/instructions/field_instruction.h"
+#include "../arena_allocator.h"
+#include "../instructions/field_instruction.h"
 #include "xml_util.h"
-#include "mfast/exceptions.h"
+#include "../exceptions.h"
 
 namespace mfast {
 class decimal_field_instruction;

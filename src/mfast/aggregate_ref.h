@@ -5,9 +5,9 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "mfast/field_instructions.h"
-#include "mfast/field_mref.h"
-#include "mfast/type_category.h"
+#include "field_instructions.h"
+#include "field_mref.h"
+#include "type_category.h"
 
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/range.hpp>

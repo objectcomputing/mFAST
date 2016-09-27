@@ -5,7 +5,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "mfast/mfast_export.h"
+#include "mfast_export.h"
 #include <stdint.h>
 #include <cstring>
 #include <array>

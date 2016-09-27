@@ -6,7 +6,7 @@
 #pragma once
 
 #include <iostream>
-#include <mfast/output.h>
+#include "../../output.h"
 #ifdef NDEBUG
 
 struct debug_stream {

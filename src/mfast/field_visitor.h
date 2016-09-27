@@ -5,14 +5,14 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "mfast/int_ref.h"
-#include "mfast/enum_ref.h"
-#include "mfast/decimal_ref.h"
-#include "mfast/string_ref.h"
-#include "mfast/group_ref.h"
-#include "mfast/sequence_ref.h"
-#include "mfast/message_ref.h"
-#include "mfast/nested_message_ref.h"
+#include "int_ref.h"
+#include "enum_ref.h"
+#include "decimal_ref.h"
+#include "string_ref.h"
+#include "group_ref.h"
+#include "sequence_ref.h"
+#include "message_ref.h"
+#include "nested_message_ref.h"
 namespace mfast {
 namespace detail {
 template <typename Result> struct result_holder {

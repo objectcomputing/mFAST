@@ -1,15 +1,15 @@
 #pragma once
 
 #include "../mfast_coder_export.h"
-#include "mfast/sequence_ref.h"
-#include "mfast/nested_message_ref.h"
-#include "mfast/malloc_allocator.h"
+#include "../../sequence_ref.h"
+#include "../../nested_message_ref.h"
+#include "../../malloc_allocator.h"
 #include "../common/template_repo.h"
 #include "../common/exceptions.h"
 #include "../encoder/fast_ostream.h"
 #include "../encoder/resizable_fast_ostreambuf.h"
 #include "../encoder/encoder_presence_map.h"
-#include "mfast/ext_ref.h"
+#include "../../ext_ref.h"
 #include "fast_ostream_inserter.h"
 #include <tuple>
 
