@@ -18,14 +18,10 @@ function (FASTTYPEGEN_TARGET Name)
     list(APPEND INPUTS "${CMAKE_CURRENT_SOURCE_DIR}/${input}")
   endforeach (input)
 
-  if (CMAKE_CROSSCOMPILING)
-    set(FAST_TYPE_GEN_TARGET)
-  endif (CMAKE_CROSSCOMPILING)
-
   add_custom_command(
       OUTPUT ${FASTTYPEGEN_${Name}_OUTPUTS}
-      COMMAND fast_type_gen -- ${INPUTS}
-      DEPENDS ${ARGN} ${FAST_TYPE_GEN_TARGET}
+      COMMAND $<TARGET_FILE:fast_type_gen> -- ${INPUTS}
+      DEPENDS ${ARGN} fast_type_gen
       COMMENT "[FASTTYPEGEN][${Name}] Building Fast Application Types"
       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
       VERBATIM)
@@ -36,3 +32,6 @@ function (FASTTYPEGEN_TARGET Name)
   set("FASTTYPEGEN_${Name}_DEFINED" TRUE PARENT_SCOPE)
   set("FASTTYPEGEN_${Name}_INPUTS" "${ARGN}" PARENT_SCOPE)
 endfunction (FASTTYPEGEN_TARGET)
+
+get_target_property(mfast_cxx mfast_static CXX_STANDARD)
+message("mfast CXX_STANDARD = ${mfast_cxx}")

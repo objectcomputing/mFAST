@@ -1,15 +1,7 @@
 # add_subdirectory (fastxml)
 add_subdirectory (mfast)
 
-if (NOT CMAKE_CROSSCOMPILING)
-    add_subdirectory (fast_type_gen)
-    set(FAST_TYPE_GEN_INSTALL_LOCATION "${FAST_TYPE_GEN_INSTALL_LOCATION}" PARENT_SCOPE)
-else()
-  find_program(FAST_TYPE_GEN NAMES fast_type_gen)
-  if ("${FAST_TYPE_GEN}" STREQUAL "FAST_TYPE_GEN-NOTFOUND")
-    message(SEND_ERROR "Unable to find the required program fast_type_gen.")
-    set(FAST_TYPE_GEN_INSTALL_LOCATION ${FAST_TYPE_GEN} PARENT_SCOPE)
-  endif ()
-endif()
+add_subdirectory (fast_type_gen)
+set(FAST_TYPE_GEN_INSTALL_LOCATION "${FAST_TYPE_GEN_INSTALL_LOCATION}" PARENT_SCOPE)
 
 install(FILES "mfast.h" DESTINATION "${INSTALL_INCLUDE_DIR}")
