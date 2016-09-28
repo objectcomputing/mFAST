@@ -32,6 +32,3 @@ function (FASTTYPEGEN_TARGET Name)
   set("FASTTYPEGEN_${Name}_DEFINED" TRUE PARENT_SCOPE)
   set("FASTTYPEGEN_${Name}_INPUTS" "${ARGN}" PARENT_SCOPE)
 endfunction (FASTTYPEGEN_TARGET)
-
-get_target_property(mfast_cxx mfast_static CXX_STANDARD)
-message("mfast CXX_STANDARD = ${mfast_cxx}")
