@@ -50,7 +50,9 @@ struct fast_encoder_impl : simple_template_repo_t {
   }
 
   void visit(enum_cref cref) {
-    this->visit(reinterpret_cast<uint64_cref &>(cref));
+    uint64_cref tmp;
+    std::memcpy(&tmp, &cref, sizeof(cref));
+    this->visit(tmp);
   }
 
   template <typename SimpleCRef> void visit(SimpleCRef cref);
