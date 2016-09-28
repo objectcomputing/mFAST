@@ -39,7 +39,7 @@ bool check_long_option(const std::string &command, int argc, const char **argv, 
   }
 }
 
-bool check_short_option(const std::string &command, int argc, const char **argv, int &i, const char *&arg, char flag, const char *&output, bool bad)
+bool check_short_option(const std::string &command, int argc, const char **argv, int &i, const char *&arg, char flag, const char *&output, bool &bad)
 {
   if (*arg == flag) {
     if (*++arg != '\0') {

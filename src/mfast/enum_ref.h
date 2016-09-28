@@ -68,7 +68,7 @@ public:
             instruction_cptr instruction)
       : base_type(alloc, storage, instruction) {}
 
-  enum_mref(const enum_mref &other) = default;
+  enum_mref(const enum_mref &) = default;
 
   void as(const enum_cref &cref) const {
     if (cref.absent()) {

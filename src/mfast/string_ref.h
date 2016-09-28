@@ -190,7 +190,7 @@ public:
               instruction_cptr instruction)
       : base_type(alloc, storage, instruction) {}
 
-  vector_mref(const vector_mref<char> &other) = default;
+  vector_mref(const vector_mref<char> &) = default;
 
   explicit vector_mref(const field_mref_base &other) : base_type(other) {}
   vector_mref &operator=(const boost::string_ref &s) {

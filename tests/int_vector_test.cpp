@@ -52,12 +52,12 @@ void test_int_vector()
                                    "int_vector","");
 
   inst.construct_value(storage, &alloc);
-  REQUIRE(storage.of_array.capacity_in_bytes_ ==  0UL);
-  REQUIRE(storage.is_defined() ==                 true);
+  REQUIRE((storage.of_array.capacity_in_bytes_ ==  0UL));
+  REQUIRE((storage.is_defined() ==                 true));
 
   vector_mref<T> mref(&alloc, &storage, &inst);
 
-  REQUIRE(mref.size() ==  0UL);
+  REQUIRE((mref.size() ==  0UL));
 
   const unsigned SIZE=100;
   int array[SIZE];
@@ -65,10 +65,10 @@ void test_int_vector()
 
   mref.assign(array, array+SIZE);
 
-  REQUIRE(mref.size() ==  SIZE);
+  REQUIRE((mref.size() ==  SIZE));
 
   for (unsigned i = 0; i < SIZE; ++i) {
-    REQUIRE(mref[i] ==  static_cast<T>(i+1));
+    REQUIRE((mref[i] ==  static_cast<T>(i+1)));
   }
 
   inst.destruct_value(storage, &alloc);

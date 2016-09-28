@@ -23,7 +23,7 @@ public:
   sequence_element_cref(const value_storage *storage,
                         instruction_cptr instruction);
 
-  sequence_element_cref(const sequence_element_cref &other) = default;
+  sequence_element_cref(const sequence_element_cref &) = default;
   instruction_cptr instruction() const;
 
   bool element_unnamed() const {

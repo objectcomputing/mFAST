@@ -262,7 +262,7 @@ public:
                instruction_cptr instruction)
       : base_type(alloc, storage, instruction) {}
 
-  decimal_mref(const decimal_mref &other) = default;
+  decimal_mref(const decimal_mref &) = default;
 
   explicit decimal_mref(const field_mref_base &other) : base_type(other) {}
   int64_t mantissa() const { return this->storage()->of_decimal.mantissa_; }

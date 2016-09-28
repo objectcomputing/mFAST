@@ -175,7 +175,7 @@ public:
                    instruction_cptr instruction)
       : base_type(alloc, storage, instruction) {}
 
-  vector_mref_base(const vector_mref_base &other) = default;
+  vector_mref_base(const vector_mref_base &) = default;
 
   explicit vector_mref_base(const field_mref_base &other) : base_type(other) {}
   void to_initial_value() const {

@@ -82,7 +82,7 @@ public:
            instruction_cptr instruction)
       : base_type(alloc, storage, instruction) {}
 
-  int_mref(const int_mref &other) = default;
+  int_mref(const int_mref &) = default;
 
   explicit int_mref(const field_mref_base &other) : base_type(other) {}
   void as(const int_cref<T> &cref) const {
