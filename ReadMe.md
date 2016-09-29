@@ -8,7 +8,19 @@ mFAST is a high performance C++ encoding/decoding library for FAST (FIX Adapted 
 
 For more information, please read the [article](http://objectcomputing.github.io/mFAST/).
 
-For build instructions, please read the [wiki page](https://github.com/objectcomputing/mFAST/wiki/Installation).
+### Download and Build Intructions
+
+For Unix or macOS with boost library installed on the system paths.
+
+```bash
+git clone --recursive https://github.com/objectcomputing/mFAST.git
+mkdir mFAST/build
+cd mFAST/build
+cmake ..
+make
+```
+
+For detailed build instructions for systems without existing boost library installation or on Windows, please read the [wiki page](https://github.com/objectcomputing/mFAST/wiki/Installation).
 
 ### Important Notice
 
