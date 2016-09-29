@@ -1,32 +1,70 @@
-sudo: required
 dist: trusty
+language: cpp
 
-services:
-  - docker
-
-language:
-    - cpp
-
-compiler:
-    - gcc
-    - clang
-
-before_install:
-    # Add software package repositories with recent versions of boost
-    - sudo add-apt-repository ppa:afrank/boost --yes
-    - sudo apt-get update -qq
-
-install:
-    # Install mfast dependencies
-    - sudo apt-get install -qq libboost1.57-all-dev
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env: COMPILER=g++-4.9
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: COMPILER=g++-5
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env: COMPILER=g++-6
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-3.6
+          packages:
+            - clang-3.6
+      env: COMPILER=clang++-3.6
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-3.9
+          packages:
+            - clang-3.9
+      env: COMPILER=clang++-3.9
+    - language: generic
+      sudo: required
+      services:
+        - docker
+      env: COMPILER=Emscripten
+      
+addons:
+  apt:
+    sources:
+      - kzemek/boost
+    packages:
+      - libboost1.58-dev
 
 script:
-    - mkdir _build
-    - cd _build
-    - cmake ..
-    - make
-    - make test
-    - if [ $CC == "clang" ]; then cd .. && ./emscripten_build.sh; fi
+    - source .travis/setenv.sh
+    - mkdir build
+    - cd build
+    - $RUN cmake $CONFIG_ARGS .. 
+    - $RUN make
+    - $RUN make test
 
 # whitelist
 branches:
