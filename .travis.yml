@@ -1,5 +1,5 @@
 dist: trusty
-
+sudo: required
 language: cpp
 
 matrix:
@@ -42,12 +42,11 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-3.9
+            - llvm-toolchain-trusty-3.8
           packages:
-            - clang-3.9
-      env: COMPILER=clang++-3.9
+            - clang-3.8
+      env: COMPILER=clang++-3.8
     - language: generic
-      sudo: required
       services:
         - docker
       env: COMPILER=Emscripten

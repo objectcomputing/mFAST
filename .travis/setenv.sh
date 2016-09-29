@@ -8,6 +8,7 @@ if [[ "$COMPILER" == "Emscripten" ]]; then
                   -v /usr/include/boost:/usr/local/include/boost \
                   -e "AR="
                   -e "CXX="
+                  -w "/mfast"
                   -t thewtex/cross-compiler-browser-asmjs "
 else
   CONFIG_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER"
