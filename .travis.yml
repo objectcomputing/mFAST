@@ -1,4 +1,5 @@
 dist: trusty
+
 language: cpp
 
 matrix:
@@ -50,13 +51,15 @@ matrix:
       services:
         - docker
       env: COMPILER=Emscripten
-      
-addons:
-  apt:
-    sources:
-      - kzemek/boost
-    packages:
-      - libboost1.58-dev
+
+before_install:
+    # Add software package repositories with recent versions of boost
+    - sudo add-apt-repository ppa:afrank/boost --yes
+    - sudo apt-get update -qq
+
+install:
+    # Install mfast dependencies
+    - sudo apt-get install -qq libboost1.57-all-dev
 
 script:
     - source .travis/setenv.sh
