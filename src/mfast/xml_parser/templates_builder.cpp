@@ -143,7 +143,7 @@ bool templates_builder::VisitExit(const XMLElement &element) {
     typedef const template_instruction *const_template_instruction_ptr_t;
 
     definition_->instructions_ = new (alloc())
-        const_template_instruction_ptr_t[this->num_instructions()];
+        const_template_instruction_ptr_t[templates_.size()];
     std::copy(templates_.begin(), templates_.end(), definition_->instructions_);
     definition_->instructions_count_ = static_cast<uint32_t>(templates_.size());
   }
