@@ -8,6 +8,7 @@
 #ifdef _MSC_VER
 #pragma warning(disable : 4275) // non dll-interface class used as base for
                                 // dll-interface class
+#pragma warning(disable : 4996) // Microsoft deprecates C++ standard library.
 #endif                          //_MSC_VER
 
 #include "instructions/int_instructions.h"
