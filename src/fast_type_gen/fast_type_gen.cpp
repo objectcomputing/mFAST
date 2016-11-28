@@ -12,12 +12,9 @@
 #include "mfast/coder/common/dictionary_builder.h"
 #include "mfast/coder/common/template_repo.h"
 
-// #include <boost/filesystem.hpp>
 #include <stdlib.h>
 #include <fstream>
 #include <iterator>
-
-// using namespace boost::filesystem;
 
 bool check_long_option(const std::string &command, int argc, const char **argv, int &i, const char *name, const char *&output, bool &bad) {
   const auto len = std::strlen(name);
