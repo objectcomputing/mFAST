@@ -28,6 +28,29 @@ public:
   }
 };
 
+#ifndef NDEBUG
+
+void print_node(const XMLElement *element, int indent)
+{
+  for (int i = 0; i < indent; ++i)
+    std::cout << " ";
+  std::cout << "node " << element->Name() ;
+  const XMLAttribute *attr = element->FirstAttribute();
+  while (attr) {
+    std::cout << " " << attr->Name() << "=" << attr->Value();
+    attr = attr->Next();
+  }
+  std::cout << "\n";
+
+  const XMLElement *elem = element->FirstChildElement();
+  while (elem){
+    print_node(elem, indent+4);
+    elem = elem->NextSiblingElement();
+  }
+}
+
+#endif
+
 const char *field_builder::name() const { return name_; }
 
 std::size_t field_builder::num_instructions() const {
@@ -525,7 +548,11 @@ struct tag_value;
 typedef boost::error_info<tag_value, std::string> value_info;
 
 void field_builder::visit(const enum_field_instruction *inst, void *) {
-  field_op fop(inst, content_element_, alloc());
+
+  const XMLElement *element = &this->element_;
+  if (!field_op::find_field_op_element(*element))
+    element = content_element_;
+  field_op fop(inst, element, alloc());
 
   const char **enum_element_names = inst->elements();
   uint64_t num_elements = inst->num_elements();

@@ -50,7 +50,6 @@
       <element name="One" value="1"/>
       <element name="Three" value="3"/>
       <element name="Five" value="5"/>
-      <copy/>
     </enum>
   </define>
   <define name="Salary">
@@ -105,6 +104,7 @@
     <boolean name="married"/>
     <field name="discrete">
       <type name="DiscreteEnum"/>
+      <copy/>
     </field>
     <field name="salary">
       <type name="Salary"/>

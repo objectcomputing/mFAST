@@ -166,6 +166,9 @@ TEST_CASE("test the operations of complex group_mref", "[test_complex_group]")
   person_mref.set_firstName().as("John");
   person_mref.set_lastName().as("Doe");
 
+  // testing enum field operator
+  REQUIRE(person_mref.get_discrete().instruction()->field_operator() == mfast::operator_copy);
+
   // testing the default value
   REQUIRE(person_mref.get_gender().is_female());
 

@@ -105,7 +105,7 @@ void field_op::set_init_value(const char *init_value_str,
 }
 
 const XMLElement *
-field_op::find_field_op_element(const XMLElement &element) const {
+field_op::find_field_op_element(const XMLElement &element) {
   static const char *field_op_names[] = {"constant",  "default", "copy",
                                          "increment", "delta",   "tail"};
 

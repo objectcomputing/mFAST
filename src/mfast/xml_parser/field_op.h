@@ -61,6 +61,8 @@ public:
 
   arena_allocator &alloc() { return *alloc_; }
 
+  static const XMLElement *find_field_op_element(const XMLElement &element);
+
 private:
   void set_init_value(const char *init_value_str,
                       const int32_field_instruction *) {
@@ -118,7 +120,6 @@ private:
   void set_init_value(const char *init_value_str,
                       const byte_vector_field_instruction *);
 
-  const XMLElement *find_field_op_element(const XMLElement &element) const;
 
   void parse_field_op(const XMLElement &field_op_element,
                       arena_allocator &alloc);
