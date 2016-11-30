@@ -942,6 +942,9 @@ void inl_gen::visit(const mfast::templateref_instruction *, void *pIndex) {
 }
 
 void inl_gen::generate(mfast::dynamic_templates_description &desc) {
+
+  generate_comment();
+
   codegen_base::traverse(desc);
   for (auto &&info : desc.view_infos()) {
     this->generate(info);
