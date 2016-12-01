@@ -73,7 +73,15 @@ int main(int argc, const char **argv) {
     bool show_usage = false;
     bool bad_arguments = false;
 
-    while ((i < argc) && (std::strlen(argv[i]) > 1) && (argv[i][0] == '-') && (std::strcmp(argv[i], "--") != 0) && !bad_arguments) {
+    // handle all options: 
+    // valid option formats:
+    // -h or -help
+    // -Xparam where X is a single character option
+    // -X param where X is a single character option
+    // -OPT=param where OPT is long option
+    // -OPT param  where OPT is long option
+    // --  Stops the scan for options.
+    while (i < argc && argv[i][0] == '-' && std::strcmp(argv[i], "--") != 0 && !bad_arguments) {
       const char *flag = &argv[i][1];
       if (*flag == '-') {
         ++flag;
@@ -106,11 +114,21 @@ int main(int argc, const char **argv) {
       }
       ++i;
     }
-    if ((i < argc) && (std::strcmp(argv[i], "--") == 0))
+
+    // If a "--" stopped the scan, skip it.
+    if(i < argc && std::strcmp(argv[i], "--") == 0){
       ++i;
-    if (show_usage || bad_arguments || (i >= argc)) {
+    }
+
+    if(i >= argc){
+        std::cerr << "No template file(s) on command line." << std::endl;
+        bad_arguments = true;
+    }
+
+    // Handle errors and help requests then exit
+    if (show_usage || bad_arguments) {
       std::ostream &output = show_usage ? std::cout : std::cerr;
-      output << "usage: " << command_name << " [-E symbol] [-H extension] [-I extension] [-C extension] file ...\n"
+      output << "usage: " << command_name << " [-E symbol] [-H extension] [-I extension] [-C extension] template_file ...\n"
                 "       generate C++ bindings for FAST types\n";
       if (show_usage) {
         output << "\n"
@@ -121,18 +139,16 @@ int main(int argc, const char **argv) {
                   "  -C, --source-extension=EXT  source filename extension (default .cpp)\n"
                   "  -H, --header-extension=EXT  header filename extension (default .h)\n"
                   "  -I, --inline-extension=EXT  inline function filename extension (default .inl)\n"
-                  "  file ...                    XML FAST message template inputs\n";
+                  "  template_file ...           One or more XML FAST message template inputs\n";
       }
-      return (bad_arguments || (!show_usage && (i >= argc))) ? -1 : 0;
+      return bad_arguments ? -1 : 0;
     }
 
-    std::vector<mfast::dynamic_templates_description> descriptions;
-
+    // remaining arguments must be template file names
     std::vector<std::string> filebases;
 
-    mfast::simple_template_repo_t repo;
-
-    for (int j = 0; i < argc; ++i, ++j) {
+    std::vector<mfast::dynamic_templates_description> descriptions;
+    for (; i < argc; ++i) {
 
       std::ifstream ifs(argv[i]);
 
@@ -143,8 +159,6 @@ int main(int argc, const char **argv) {
 
       std::string xml((std::istreambuf_iterator<char>(ifs)),
                       std::istreambuf_iterator<char>());
-
-      //path f(path(argv[i]).stem());
 
 #ifdef _WINDOWS
       char filebase_buf[_MAX_FNAME];
@@ -157,9 +171,10 @@ int main(int argc, const char **argv) {
 #endif
       filebases.push_back(codegen_base::cpp_name(filebase));
 
-      descriptions.emplace_back(xml.c_str(), filebases[j].c_str(), &registry);
+      descriptions.emplace_back(xml.c_str(), filebases.back().c_str(), &registry);
     }
 
+    mfast::simple_template_repo_t repo;
     repo.build(descriptions.begin(), descriptions.end());
 
     for (std::size_t j = 0; j < filebases.size(); ++j) {

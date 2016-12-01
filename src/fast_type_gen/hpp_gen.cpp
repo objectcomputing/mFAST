@@ -517,6 +517,8 @@ void hpp_gen::generate(mfast::dynamic_templates_description &desc) {
 
   std::string filebase_upper = boost::to_upper_copy(filebase_);
 
+  generate_comment();
+
   out_ << "#pragma once\n"
        << "\n"
        << "#include <mfast.h>\n";
