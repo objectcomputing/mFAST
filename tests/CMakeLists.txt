@@ -17,6 +17,8 @@ FASTTYPEGEN_TARGET(simple_types5 simple5.xml)
 FASTTYPEGEN_TARGET(simple_types6 simple6.xml)
 FASTTYPEGEN_TARGET(simple_types7 simple7.xml)
 FASTTYPEGEN_TARGET(simple_types8 simple8.xml)
+FASTTYPEGEN_TARGET(simple_types9 simple9.xml)
+
 
 FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
 FASTTYPEGEN_TARGET(test_types3 test3.xml)
@@ -48,6 +50,7 @@ add_executable (mfast_test
                 ${FASTTYPEGEN_simple_types6_OUTPUTS}
                 ${FASTTYPEGEN_simple_types7_OUTPUTS}
                 ${FASTTYPEGEN_simple_types8_OUTPUTS}
+                ${FASTTYPEGEN_simple_types9_OUTPUTS}
                 fast_type_gen_test.cpp
                 dictionary_builder_test.cpp
                 json_test.cpp
