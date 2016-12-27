@@ -117,7 +117,6 @@ inline void fast_encoder_impl::visit(group_cref cref, int) {
   // apply_accessor(*this, field);;
 
   for (auto &&field : aggregate_cref(cref)) {
-    if (field.present())
       apply_accessor(*this, field);
   }
 
@@ -154,7 +153,6 @@ inline void fast_encoder_impl::visit(sequence_element_cref cref, int) {
   }
 
   for (auto &&field : cref) {
-    if (field.present())
       apply_accessor(*this, field);
   }
   commit_pmap(state);

@@ -179,6 +179,42 @@ TEST_CASE("test fast coder without code generation for a simple template with se
 
 }
 
+TEST_CASE("test fast coder without code generation for a simple template with absent optiona fields in a sequence","[absent_optional_fields_coder_test]")
+{
+  fast_coding_test_case test_case (
+    "<?xml version=\" 1.0 \"?>\n"
+    "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
+    "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
+    "<template name=\"Test\" id=\"1\">\n"
+    "<uInt32 name=\"field1\" id=\"11\"><copy/></uInt32>\n"
+    "<sequence name=\"sequence1\" presence=\"optional\">"
+    "<uInt32 name=\"field2\" id=\"12\" presence=\"optional\"></uInt32>\n"
+    "<uInt32 name=\"field3\" id=\"13\" presence=\"optional\"></uInt32>\n"
+    "</sequence>"
+    "</template>\n"
+    "</templates>\n");
+
+  debug_allocator alloc;
+  message_type msg(&alloc, test_case.template_with_id(1));
+  message_mref msg_ref = msg.mref();
+
+  msg_ref[0].as(1);
+  sequence_mref seq(msg_ref[1]);
+  seq.resize(2);
+
+  seq[0][1].as(3);
+
+  seq[1][0].as(1);
+
+  REQUIRE(test_case.encoding(msg_ref,
+                                 // pmap | f1 | s1 len| f2 | f3 | f2 | f3 |
+                                 //  A0    81    83     80   84   82   80
+                                 "\xA0\x81\x83\x80\x84\x82\x80"
+                                 ));
+  REQUIRE(test_case.decoding("\xA0\x81\x83\x80\x84\x82\x80", msg_ref));
+
+}
+
 TEST_CASE("test fast coder without code generation for a simple template with static templateref","[static_templateref_coder_test]")
 {
   fast_coding_test_case test_case (
