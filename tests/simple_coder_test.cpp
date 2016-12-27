@@ -33,6 +33,7 @@
 #include "simple6.h"
 #include "simple7.h"
 #include "simple8.h"
+#include "simple9.h"
 
 #include "byte_stream.h"
 #include "debug_allocator.h"
@@ -272,5 +273,24 @@ TEST_CASE("test fast coder v2 for a template with zero segment size", "[segment_
 
   REQUIRE(test_case.encoding(msg_ref,"\x80\x81\x82"));
   REQUIRE(test_case.decoding("\x80\x81\x82", msg_ref));
+}
+
+TEST_CASE("test fast coder v2 for a simple template with absent optional fields in a sequence", "[absent_optional_fields_coder_test]")
+{
+  fast_coding_test_case<simple9::templates_description> test_case;
+
+  debug_allocator alloc;
+  simple9::Test msg(&alloc);
+  simple9::Test_mref msg_ref = msg.mref();
+	
+	msg_ref.set_field1().as(1);
+
+  auto sequence1 = msg_ref.set_sequence1();
+  sequence1.resize(2);
+	sequence1[0].set_field3().as(3);
+	sequence1[1].set_field2().as(1);
+
+  REQUIRE(test_case.encoding(msg_ref,"\xA0\x81\x83\x80\x84\x82\x80"));
+  REQUIRE(test_case.decoding("\xA0\x81\x83\x80\x84\x82\x80", msg_ref));
 }
 
