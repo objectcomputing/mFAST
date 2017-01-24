@@ -10,6 +10,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(mfast_SRCS  ${sources} ${instruction_sources} ${headers} ${instruction_headers})
 
 add_library(mfast_static STATIC ${mfast_SRCS})
+target_include_directories(mfast_static PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
 
 if (UNIX)
   set_target_properties(mfast_static PROPERTIES OUTPUT_NAME mfast)
