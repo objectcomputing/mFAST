@@ -1,9 +1,6 @@
 # Specify version format
 version: "{build}"
 
-# Operating system (build VM template)
-os: Windows Server 2012 R2
-#os: unstable
 
 # build platform, i.e. Win32 (instead of x86), x64, Any CPU. This setting is optional.
 platform:
@@ -12,9 +9,14 @@ platform:
 
 # specify custom environment variables
 environment:
-  BOOST_ROOT: C:\Libraries\boost
-  BOOST_LIBRARYDIR_WIN32: C:\Libraries\boost\lib32-msvc-12.0
-  BOOST_LIBRARYDIR_WIN64: C:\Libraries\boost\lib64-msvc-12.0
+  MSVC_DEFAULT_OPTIONS: ON
+  BOOST_ROOT: C:\Libraries\boost_1_63_0
+  matrix:
+    - GENERATOR: "Visual Studio 12 2013"
+      os: Visual Studio 2015
+    - GENERATOR: "Visual Studio 14 2015"
+      os: Visual Studio 2015
+
 # build Configuration, i.e. Debug, Release, etc.
 configuration:
   - Debug
@@ -30,10 +32,6 @@ clone_folder: C:\projects\mfast
 
 # branches to build
 branches:
-  #whitelist
-  # only:
-  #  - master
-  # blacklist
   except:
     - gh-pages
     - emdi
@@ -48,9 +46,8 @@ before_build:
   - cmd: cd C:\projects\mfast
   - cmd: md build
   - cmd: cd build
-  # We generate project files for Visual Studio 12 because the boost binaries installed on the test server are for Visual Studio 12.
-  - cmd: if "%platform%"=="Win32" cmake -G "Visual Studio 12" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN32%" -DBoost_USE_STATIC_LIBS="ON" ..
-  - cmd: if "%platform%"=="x64" cmake -G "Visual Studio 12 Win64" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR_WIN64%" -DBoost_USE_STATIC_LIBS="ON" ..
+  - cmd: if "%platform%"=="Win32" cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" ..
+  - cmd: if "%platform%"=="x64" cmake -G "%GENERATOR% Win64" -DCMAKE_BUILD_TYPE=%configuration% -DBOOST_ROOT="%BOOST_ROOT%" ..
 
 build:
   project: C:\projects\mfast\build\mfast.sln
