@@ -14,6 +14,6 @@
 #else
 /* We are either using or building static libs */
 #define MFAST_XML_PARSER_EXPORT
-#define MAST_XML_PARSER_NO_SHARED_LIBS
+#define MFAST_XML_PARSER_NO_SHARED_LIBS
 #endif
 #endif

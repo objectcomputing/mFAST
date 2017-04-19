@@ -22,7 +22,7 @@
 
 /* We are either using or building static libs */
 #define MFAST_EXPORT
-#define MAST_NO_SHARED_LIBS
+#define MFAST_NO_SHARED_LIBS
 #endif
 #endif
 

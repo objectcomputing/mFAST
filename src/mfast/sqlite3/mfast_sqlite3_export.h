@@ -14,7 +14,7 @@
 #else
 /* We are either using or building static libs */
 #define MFAST_SQLITE3_EXPORT
-#define MAST_SQLITE3_NO_SHARED_LIBS
+#define MFAST_SQLITE3_NO_SHARED_LIBS
 #endif
 #endif
 

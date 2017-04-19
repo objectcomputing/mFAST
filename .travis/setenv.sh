@@ -12,5 +12,5 @@ if [[ "$COMPILER" == "Emscripten" ]]; then
                   -w /mfast/build \
                   -t thewtex/cross-compiler-browser-asmjs "
 else
-  export CONFIG_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER"
+  export CONFIG_ARGS="-DCMAKE_CXX_COMPILER=$COMPILER -DBUILD_SHARED_LIBS=ON"
 fi                  

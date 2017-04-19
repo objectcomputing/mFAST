@@ -25,7 +25,7 @@
 #if defined __GNUC__
 #pragma GCC diagnostic pop
 #endif
-#if defined(MAST_NO_SHARED_LIBS) && !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
+#if defined(MFAST_NO_SHARED_LIBS) && !defined(BOOST_NO_CXX11_EXTERN_TEMPLATE)
 namespace boost {
 namespace multiprecision {
 namespace backends {

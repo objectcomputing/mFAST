@@ -14,6 +14,6 @@
 #else
 /* We are either using or building static libs */
 #define MFAST_CODER_EXPORT
-#define MAST_CODER_NO_SHARED_LIBS
+#define MFAST_CODER_NO_SHARED_LIBS
 #endif
 #endif

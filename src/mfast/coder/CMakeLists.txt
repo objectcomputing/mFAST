@@ -1,7 +1,16 @@
 
 file (GLOB_RECURSE headers "*.h") ## retrieve all header files in current directory
-file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current directory
 
+set(sources common/dictionary_builder.cpp
+            decoder/decoder_field_operator.cpp
+            decoder/decoder_presence_map.cpp
+            decoder/fast_decoder.cpp
+            decoder/fast_istream.cpp
+            encoder/encoder_field_operator.cpp
+            encoder/fast_encoder.cpp
+            encoder/fast_ostreambuf.cpp
+            encoder_v2/fast_encoder_core.cpp
+)
 
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
@@ -26,7 +35,7 @@ set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} coder_static CACHE INTERN
 
 
 if (BUILD_SHARED_LIBS)
-  add_library(mfast_coder SHARED ${mfast_coder_SRCS})
+  add_library(mfast_coder SHARED ${mfast_coder_SRCS} decoder_v2/fast_decoder_core.cpp)
 
   if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
     target_compile_definitions(mfast_coder INTERFACE "-DMFAST_DYN_LINK")

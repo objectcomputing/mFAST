@@ -19,6 +19,6 @@
 #else
 /* We are either using or building static libs */
 #define MFAST_JSON_EXPORT
-#define MAST_JSON_NO_SHARED_LIBS
+#define MFAST_JSON_NO_SHARED_LIBS
 #endif
 #endif
