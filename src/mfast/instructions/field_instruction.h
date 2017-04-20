@@ -81,7 +81,7 @@ template <> struct field_type_trait<uint64_t> {
 
 class field_instruction_visitor;
 
-class instruction_tag {
+class MFAST_EXPORT instruction_tag {
 public:
   inline instruction_tag(uint64_t v = 0) : uint64_value_(v) {}
   uint64_t to_uint64() const { return uint64_value_; }
