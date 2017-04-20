@@ -46,8 +46,8 @@ before_build:
   - cmd: cd C:\projects\mfast
   - cmd: md build
   - cmd: cd build
-  - cmd: if "%platform%"=="Win32" cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%configuration% -DBUILD_SHARED_LIB=ON -DBOOST_ROOT="%BOOST_ROOT%" ..
-  - cmd: if "%platform%"=="x64" cmake -G "%GENERATOR% Win64" -DCMAKE_BUILD_TYPE=%configuration% -DBUILD_SHARED_LIB=ON -DBOOST_ROOT="%BOOST_ROOT%" ..
+  - cmd: if "%platform%"=="Win32" cmake -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%configuration% -DBUILD_SHARED_LIBS=ON -DBOOST_ROOT="%BOOST_ROOT%" ..
+  - cmd: if "%platform%"=="x64" cmake -G "%GENERATOR% Win64" -DCMAKE_BUILD_TYPE=%configuration% -DBUILD_SHARED_LIBS=ON -DBOOST_ROOT="%BOOST_ROOT%" ..
 
 build:
   project: C:\projects\mfast\build\mfast.sln
