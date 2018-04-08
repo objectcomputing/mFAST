@@ -196,7 +196,7 @@ void fast_encoder_impl::visit(message_cref cref, bool force_reset) {
   aggregate_cref message(cref.field_storage(0), instruction);
 
   for (auto &&field : message)
-    if (field.present() || field.instruction()->field_operator() == operator_none)
+    if (field.present() || field.instruction()->field_operator() != operator_none)
       apply_accessor(*this, field);
 
   pmap.commit();
