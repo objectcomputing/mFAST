@@ -55,7 +55,7 @@ private:
 };
 
 inline fast_ostream::fast_ostream(allocator *alloc)
-    : alloc_(alloc), allow_overlong_pmap_(true) {}
+    : alloc_(alloc), allow_overlong_pmap_(false) {}
 inline fast_ostreambuf *fast_ostream::rdbuf() const { return buf_; }
 inline fast_ostreambuf *fast_ostream::rdbuf(fast_ostreambuf *sb) {
   buf_ = sb;
