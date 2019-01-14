@@ -90,6 +90,9 @@ struct MFAST_CODER_EXPORT fast_encoder_core : mfast::detail::codec_helper {
   template <typename T, typename TypeCategory>
   void encode_field(const T &ext_ref, constant_operator_tag, TypeCategory);
 
+  template <typename T>
+  void encode_field(const T &ext_ref, copy_operator_tag, number_type_tag);
+
   template <typename T, typename TypeCategory>
   void encode_field(const T &ext_ref, copy_operator_tag, TypeCategory);
 
@@ -306,9 +309,9 @@ void fast_encoder_core::encode_field(const T &ext_ref, constant_operator_tag,
     strm_.save_previous_value(cref);
 }
 
-template <typename T, typename TypeCategory>
+template <typename T>
 void fast_encoder_core::encode_field(const T &ext_ref, copy_operator_tag,
-                                     TypeCategory) {
+                                     number_type_tag) {
   encoder_presence_map &pmap = *current_;
   typename T::cref_type cref = ext_ref.get();
 
@@ -345,6 +348,52 @@ void fast_encoder_core::encode_field(const T &ext_ref, copy_operator_tag,
     return;
   }
 
+  pmap.set_next_bit(true);
+  strm_ << ext_ref;
+}
+
+template <typename T, typename TypeCategory>
+void fast_encoder_core::encode_field(const T &ext_ref, copy_operator_tag,
+                                     TypeCategory) {
+  encoder_presence_map &pmap = *current_;
+  typename T::cref_type cref = ext_ref.get();
+
+  value_storage previous = previous_value_of(cref);
+  
+  if (!previous.is_defined()) {
+    // if the previous value is undefined – the value of the field is the
+    // initial value
+    // that also becomes the new previous value.
+    // If the field has optional presence and no initial value, the field is
+    // considered
+    // absent and the state of the previous value is changed to empty.
+    if (cref.is_initial_value()) {
+      strm_.save_previous_value(cref);
+      pmap.set_next_bit(false);
+      return;
+    }
+  } else if (previous.is_empty()) {
+    // if the previous value is empty – the value of the field is empty.
+    // If the field is optional the value is considered absent.
+    if (!ext_ref.present()) {
+      strm_.save_previous_value(cref);
+      pmap.set_next_bit(false);
+      return;
+    } else if (!ext_ref.optional()) {
+      // It is a dynamic error [ERR D6] if the field is mandatory.
+      BOOST_THROW_EXCEPTION(fast_dynamic_error("D6"));
+
+      // We need to handle this case because the previous value may have been
+      // modified by another instruction with the same key and that intruction
+      // has optional presence.
+    }
+  } else if (equivalent(cref, previous)) {
+    strm_.save_previous_value(cref);
+    pmap.set_next_bit(false);
+    return;
+  }
+
+  strm_.save_previous_value(cref);
   pmap.set_next_bit(true);
   strm_ << ext_ref;
 }

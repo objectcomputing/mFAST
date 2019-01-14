@@ -1034,8 +1034,44 @@ TEST_CASE("test the encoding of fast no operator for ascii string", "[operator_n
       inst.destruct_value(storage, &alloc);
       inst.destruct_value(inst.prev_value(), &alloc);
   }
-  
-  
+}
+
+TEST_CASE("test the encoding of fast operator copy for ascii string", "[operator_copy_ascii_encode_test]")
+{
+    debug_allocator alloc;
+    value_storage storage;
+
+    { // testing Option assci field with copy operator
+        ascii_field_instruction inst(operator_copy,
+            presence_optional,
+            1,
+            "test_ascii", "",
+            nullptr,
+            string_value_storage());
+
+        inst.construct_value(storage, &alloc);
+
+        ascii_string_mref result(&alloc, &storage, &inst);
+
+        result.as("0");
+        REQUIRE(encode_mref("\xc0\xb0", result, CHANGE_PREVIOUS_VALUE));
+        result.as("1");
+        REQUIRE(encode_mref("\xc0\xb1", result, CHANGE_PREVIOUS_VALUE));
+
+        inst.prev_value().defined(false);
+        result.as("0");
+        REQUIRE(encode_ext_cref("\xc0\xb0",
+            ext_cref<ascii_string_cref, copy_operator_tag, optional_without_initial_value_tag>(result),
+            CHANGE_PREVIOUS_VALUE, &alloc));
+        result.as("1");
+        REQUIRE(encode_ext_cref("\xc0\xb1",
+            ext_cref<ascii_string_cref, copy_operator_tag, optional_without_initial_value_tag>(result),
+            CHANGE_PREVIOUS_VALUE, &alloc));
+
+        inst.destruct_value(storage, &alloc);
+        inst.destruct_value(inst.prev_value(), &alloc);
+    }
+    
 }
 TEST_CASE("test the encoding of fast operator delta for ascii string","[operator_delta_ascii_encode_test]")
 {
@@ -1205,7 +1241,7 @@ TEST_CASE("test the encoding of fast operator delta for ascii string","[operator
   }
 }
 
-TEST_CASE("test the encoding of fast operator unicode string","[operator_delta_unicode_encode_test]")
+TEST_CASE("test the encoding of fast operator delta for unicode string","[operator_delta_unicode_encode_test]")
 {
   debug_allocator alloc;
   value_storage storage;

@@ -208,9 +208,9 @@ public:
   template <typename T>
   void encode_impl(const T &cref, fast_ostream &stream,
                    encoder_presence_map &pmap) const {
-
+    
     value_storage previous = previous_value_of(cref);
-    stream.save_previous_value(cref);
+    
 
     if (!previous.is_defined()) {
       // if the previous value is undefined – the value of the field is the
@@ -220,14 +220,16 @@ public:
       // considered
       // absent and the state of the previous value is changed to empty.
       if (cref.is_initial_value()) {
-
+        stream.save_previous_value(cref);
         pmap.set_next_bit(false);
         return;
       }
     } else if (previous.is_empty()) {
+      
       // if the previous value is empty – the value of the field is empty.
       // If the field is optional the value is considered absent.
       if (cref.absent()) {
+        stream.save_previous_value(cref);
         pmap.set_next_bit(false);
         return;
       } else if (!cref.optional()) {
@@ -239,10 +241,11 @@ public:
         // has optional presence.
       }
     } else if (Operation()(cref, previous)) {
+      stream.save_previous_value(cref);
       pmap.set_next_bit(false);
       return;
-    }
-
+    } 
+    stream.save_previous_value(cref);
     pmap.set_next_bit(true);
     stream << cref;
   }
