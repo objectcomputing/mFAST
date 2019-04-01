@@ -68,7 +68,7 @@ namespace mfast {
 /// the dictionary values essential to decoding subsequent messages. On the
 /// other hand, the decoder
 /// would
-/// always duplicate the dictionay values when NumTokens>0 and thus modifying
+/// always duplicate the dictionary values when NumTokens>0 and thus modifying
 /// the returned messages
 /// is allowed.
 
