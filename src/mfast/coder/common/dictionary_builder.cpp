@@ -104,7 +104,7 @@ dictionary_builder::clone_instruction(const template_instruction *src_inst) {
                           << template_name_info(src_inst->name()));
   }
 
-  auto dest = new (alloc_) template_instruction(*src_inst);
+  auto dest = src_inst->clone(alloc_);
 
   const char *ns = src_inst->ns();
   if (is_empty_string(ns)) {
@@ -127,13 +127,13 @@ void dictionary_builder::visit(const template_instruction *src_inst,
   }
 }
 
-void dictionary_builder::visit(const templateref_instruction * /*src_inst*/,
+void dictionary_builder::visit(const templateref_instruction * src_inst,
                                void *dest_inst) {
   templateref_instruction *&dest =
       *static_cast<templateref_instruction **>(dest_inst);
 
   // this is dynamic templateRef, it can only be binded at decoding time
-  dest = new (alloc_) templateref_instruction;
+  dest = src_inst->clone(alloc_);
 }
 
 void dictionary_builder::visit(const group_field_instruction *src_inst,
@@ -141,7 +141,7 @@ void dictionary_builder::visit(const group_field_instruction *src_inst,
   group_field_instruction *&dest =
       *static_cast<group_field_instruction **>(dest_inst);
 
-  dest = new (alloc_) group_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
 
   this->build_group(src_inst, src_inst, dest);
 }
@@ -150,7 +150,7 @@ void dictionary_builder::visit(const sequence_field_instruction *src_inst,
                                void *dest_inst) {
   sequence_field_instruction *&dest =
       *static_cast<sequence_field_instruction **>(dest_inst);
-  dest = new (alloc_) sequence_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
 
   this->build_group(src_inst, src_inst, dest);
 
@@ -248,7 +248,7 @@ void dictionary_builder::visit(const int32_field_instruction *src_inst,
                                void *dest_inst) {
   int32_field_instruction *&dest =
       *static_cast<int32_field_instruction **>(dest_inst);
-  dest = new (alloc_) int32_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
   dest->prev_value_ =
       get_dictionary_storage(dest->name(), dest->ns(), dest->op_context_,
                              field_type_int32, &dest->prev_storage_, dest);
@@ -258,7 +258,7 @@ void dictionary_builder::visit(const uint32_field_instruction *src_inst,
                                void *dest_inst) {
   uint32_field_instruction *&dest =
       *static_cast<uint32_field_instruction **>(dest_inst);
-  dest = new (alloc_) uint32_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
   dest->prev_value_ =
       get_dictionary_storage(dest->name(), dest->ns(), dest->op_context_,
                              field_type_uint32, &dest->prev_storage_, dest);
@@ -268,7 +268,7 @@ void dictionary_builder::visit(const int64_field_instruction *src_inst,
                                void *dest_inst) {
   int64_field_instruction *&dest =
       *static_cast<int64_field_instruction **>(dest_inst);
-  dest = new (alloc_) int64_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
   dest->prev_value_ =
       get_dictionary_storage(dest->name(), dest->ns(), dest->op_context_,
                              field_type_int64, &dest->prev_storage_, dest);
@@ -278,7 +278,7 @@ void dictionary_builder::visit(const uint64_field_instruction *src_inst,
                                void *dest_inst) {
   uint64_field_instruction *&dest =
       *static_cast<uint64_field_instruction **>(dest_inst);
-  dest = new (alloc_) uint64_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
   dest->prev_value_ =
       get_dictionary_storage(dest->name(), dest->ns(), dest->op_context_,
                              field_type_uint64, &dest->prev_storage_, dest);
@@ -288,7 +288,7 @@ void dictionary_builder::visit(const ascii_field_instruction *src_inst,
                                void *dest_inst) {
   ascii_field_instruction *&dest =
       *static_cast<ascii_field_instruction **>(dest_inst);
-  dest = new (alloc_) ascii_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
   dest->prev_value_ = get_dictionary_storage(
       dest->name(), dest->ns(), dest->op_context_, field_type_ascii_string,
       &dest->prev_storage_, dest);
@@ -299,7 +299,7 @@ void dictionary_builder::visit(const unicode_field_instruction *src_inst,
                                void *dest_inst) {
   unicode_field_instruction *&dest =
       *static_cast<unicode_field_instruction **>(dest_inst);
-  dest = new (alloc_) unicode_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
   dest->prev_value_ = get_dictionary_storage(
       dest->name(), dest->ns(), dest->op_context_, field_type_unicode_string,
       &dest->prev_storage_, dest);
@@ -311,7 +311,7 @@ void dictionary_builder::visit(const decimal_field_instruction *src_inst,
                                void *dest_inst) {
   decimal_field_instruction *&dest =
       *static_cast<decimal_field_instruction **>(dest_inst);
-  dest = new (alloc_) decimal_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
 
   if (src_inst->field_type() == field_type_decimal) {
     dest->prev_value_ =
@@ -341,7 +341,7 @@ void dictionary_builder::visit(const byte_vector_field_instruction *src_inst,
                                void *dest_inst) {
   byte_vector_field_instruction *&dest =
       *static_cast<byte_vector_field_instruction **>(dest_inst);
-  dest = new (alloc_) byte_vector_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
   dest->prev_value_ = get_dictionary_storage(
       dest->name(), dest->ns(), dest->op_context(), field_type_byte_vector,
       &dest->prev_storage_, dest);
@@ -352,35 +352,35 @@ void dictionary_builder::visit(const int32_vector_field_instruction *src_inst,
                                void *dest_inst) {
   int32_vector_field_instruction *&dest =
       *static_cast<int32_vector_field_instruction **>(dest_inst);
-  dest = new (alloc_) int32_vector_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
 }
 
 void dictionary_builder::visit(const uint32_vector_field_instruction *src_inst,
                                void *dest_inst) {
   uint32_vector_field_instruction *&dest =
       *static_cast<uint32_vector_field_instruction **>(dest_inst);
-  dest = new (alloc_) uint32_vector_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
 }
 
 void dictionary_builder::visit(const int64_vector_field_instruction *src_inst,
                                void *dest_inst) {
   int64_vector_field_instruction *&dest =
       *static_cast<int64_vector_field_instruction **>(dest_inst);
-  dest = new (alloc_) int64_vector_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
 }
 
 void dictionary_builder::visit(const uint64_vector_field_instruction *src_inst,
                                void *dest_inst) {
   uint64_vector_field_instruction *&dest =
       *static_cast<uint64_vector_field_instruction **>(dest_inst);
-  dest = new (alloc_) uint64_vector_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
 }
 
 void dictionary_builder::visit(const enum_field_instruction *src_inst,
                                void *dest_inst) {
   enum_field_instruction *&dest =
       *static_cast<enum_field_instruction **>(dest_inst);
-  dest = new (alloc_) enum_field_instruction(*src_inst);
+  dest = src_inst->clone(alloc_);
   dest->prev_value_ =
       get_dictionary_storage(dest->name(), dest->ns(), dest->op_context_,
                              field_type_uint64, &dest->prev_storage_, dest);
