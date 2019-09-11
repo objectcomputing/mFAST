@@ -138,11 +138,11 @@ public:
   }
 
   virtual void visit(const int64_field_instruction *, void *) override {
-    name_ = "mfast::uint64";
+    name_ = "mfast::int64";
   }
 
   virtual void visit(const uint64_field_instruction *, void *) override {
-    name_ = "mfast::int64";
+    name_ = "mfast::uint64";
   }
 
   virtual void visit(const decimal_field_instruction *, void *) override {
