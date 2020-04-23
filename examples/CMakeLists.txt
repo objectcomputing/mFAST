@@ -1,4 +1,5 @@
 add_subdirectory (performance_test)
 add_subdirectory (message_printer)
 add_subdirectory (hello_world)
+add_subdirectory (b3_decode)
 # add_subdirectory (Model)
