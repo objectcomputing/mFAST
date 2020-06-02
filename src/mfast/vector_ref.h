@@ -40,6 +40,7 @@ public:
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
   vector_cref_base() {}
+  explicit vector_cref_base (const vector_cref_base&) = default;
   vector_cref_base(const value_storage *storage, instruction_cptr instruction)
       : field_cref(storage, instruction) {}
 

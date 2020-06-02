@@ -125,6 +125,7 @@ public:
                       instruction_cptr instruction);
 
   explicit make_aggregate_mref(const field_mref_base &other);
+  explicit make_aggregate_mref(const make_aggregate_mref &other) = default;
 
   field_mref operator[](size_t index) const;
 
