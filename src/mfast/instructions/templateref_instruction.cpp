@@ -29,8 +29,8 @@ void templateref_instruction::construct_value(
       from_inst->construct_group_subfields(storage.of_templateref.content_,
                                            alloc);
     else
-      memset(storage.of_templateref.content_, 0,
-             from_inst->group_content_byte_count());
+       memset(reinterpret_cast<char*>(storage.of_templateref.content_), 0,
+              from_inst->group_content_byte_count());
   } else {
     storage.of_templateref.content_ = nullptr;
   }

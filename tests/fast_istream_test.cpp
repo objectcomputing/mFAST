@@ -25,6 +25,10 @@
 #include <stdexcept>
 #include "byte_stream.h"
 
+template <typename T, size_t N>
+char (&array_size_helper(const T (&)[N]))[N];
+#define ARRAY_SIZE(a)  sizeof(array_size_helper(a))
+
 using namespace mfast;
 
 template <typename T>
@@ -76,7 +80,7 @@ TEST_CASE("test the fast decoding of integers","[int32_test]")
 
   { // check decoding null
     char data[] = "\x80";
-    fast_istreambuf sb(data, 3);
+    fast_istreambuf sb(data, ARRAY_SIZE(data));
     fast_istream strm(&sb);
 
     uint32_t value;
@@ -122,9 +126,9 @@ TEST_CASE("test the fast decoding of ascii string","[ascii_string_test]")
   REQUIRE(decode_string( "\x40\x40\xC0", true, "\x40\x40\xC0",  3));
   REQUIRE(decode_string( "\x40\x40\xC0", false, "\x40\x40\xC0",  3));
 
-  REQUIRE_THROWS_AS(decode_string("\x00\xC0", false, nullptr, 0),    mfast::fast_error );
-  REQUIRE_THROWS_AS(decode_string("\x00\xC0", true, nullptr, 0),     mfast::fast_error );
-  REQUIRE_THROWS_AS(decode_string("\x00\x00\xC0", true, nullptr, 0), mfast::fast_error );
+  REQUIRE_THROWS_AS(decode_string("\x00\xC0", false, nullptr, 0),    const mfast::fast_error& );
+  REQUIRE_THROWS_AS(decode_string("\x00\xC0", true, nullptr, 0),     const mfast::fast_error& );
+  REQUIRE_THROWS_AS(decode_string("\x00\x00\xC0", true, nullptr, 0), const mfast::fast_error& );
 }
 
 bool

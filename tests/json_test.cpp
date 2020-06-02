@@ -128,7 +128,7 @@ TEST_CASE("test json_encode with product type","[json_encode_product_test]")
 
   product_ref.omit_stock();
   REQUIRE(product_ref.get_stock().absent());
-  REQUIRE_THROWS_AS(product_ref.try_get_stock(), mfast::bad_optional_access);
+  REQUIRE_THROWS_AS(product_ref.try_get_stock(), const mfast::bad_optional_access&);
 }
 
 TEST_CASE("test json_encode with person type","[json_encode_person_test]")

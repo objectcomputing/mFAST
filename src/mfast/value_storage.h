@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <cstring>
 #include <array>
+#include <istream>
 
 namespace mfast {
 class template_instruction;

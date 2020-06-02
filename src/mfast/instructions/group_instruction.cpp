@@ -86,7 +86,7 @@ void group_field_instruction::construct_value(value_storage &storage,
   if (construct_subfields)
     construct_group_subfields(storage.of_group.content_, alloc);
   else
-    memset(storage.of_group.content_, 0, this->group_content_byte_count());
+    memset(reinterpret_cast<char*>(storage.of_group.content_), 0, this->group_content_byte_count());
 }
 
 void group_field_instruction::copy_construct_value(
