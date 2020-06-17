@@ -29,14 +29,20 @@ int parse_one_packet(const char *fast_message, int msg_len, std::ofstream &out_f
 
   const char *start = fast_message;  // .c_str();
   const char *end = start + msg_len; //fast_message.length();
+  bool is_first = true;
 
-  message_cref msg = decoder.decode(start, end, true);
-  out_file << "Template id: " << msg.id() << " Size: " << msg_len << endl;
+  while(start < end) {
+    message_cref msg = decoder.decode(start, end, is_first);
+    if (is_first) {
+      is_first = false;
+    }
+    out_file << "Template id: " << msg.id() << " Size: " << msg_len << endl;
 
-  ostringstream json_message;
-  bool result = encode(json_message, msg, 0);
-  if (result)
-    out_file << json_message.str() << endl;
+    ostringstream json_message;
+    bool result = encode(json_message, msg, 0);
+    if (result)
+      out_file << json_message.str() << endl;
+  }
 
   return 0;
 }
