@@ -1,0 +1,27 @@
+name: main
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: install Boost on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install libboost-all-dev
+      - name: Set Boost on Windows
+        if: matrix.os == 'windows-latest' 
+        run:  echo "::set-env name=BOOST_ROOT::$env:BOOST_ROOT_1_72_0"
+      - name: install Boost on MacOS
+        if: matrix.os == 'macos-latest'
+        run: brew install boost
+      - name: configure
+        run: cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+      - name: build
+        run: cmake --build build
+      - name: test
+        run: cd build && ctest -VV
