@@ -5,11 +5,11 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <boost/detail/endian.hpp>
+#include <boost/predef/other/endian.h>
 #include "fast_ostream.h"
 
 namespace mfast {
-#ifdef BOOST_BIG_ENDIAN
+#if BOOST_ENDIAN_BIG_BYTE
 const int SMALLEST_ADDRESS_BYTE = sizeof(std::size_t) - 1;
 #else
 const int SMALLEST_ADDRESS_BYTE = 0;
