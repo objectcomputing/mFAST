@@ -1,5 +1,5 @@
 
-find_package(Boost 1.56.0 REQUIRED)
+find_package(Boost 1.59.0 REQUIRED)
 if(Boost_VERSION VERSION_LESS "1.72.0")
 	set(CMAKE_CXX_STANDARD 11 CACHE INTERNAL "specifies the C++ standard whose features are requested to build this target")
 else()
