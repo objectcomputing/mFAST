@@ -33,7 +33,7 @@ target_link_libraries (mf_generic_decode
                        ${TEST_LIBS})
 
 add_executable (mf_generic_decode_encode generic_template_test.cpp)
-set_target_properties(mf_generic_decode_encode PROPERTIES COMPILE_FLAGS -DWITH_ENCODE)
+# set_target_properties(mf_generic_decode_encode PROPERTIES COMPILE_FLAGS -DWITH_ENCODE)
 target_link_libraries (mf_generic_decode_encode
                       ${TEST_LIBS})
 
@@ -43,7 +43,7 @@ target_link_libraries (mf_fixed_decode
                        ${TEST_LIBS} )
 
 add_executable (mf_fixed_decode_encode ${FASTTYPEGEN_example_OUTPUTS} fixed_template_test.cpp)
-set_target_properties(mf_fixed_decode_encode PROPERTIES COMPILE_FLAGS -DWITH_ENCODE)
+# set_target_properties(mf_fixed_decode_encode PROPERTIES COMPILE_FLAGS -DWITH_ENCODE)
 add_dependencies(mf_fixed_decode_encode mf_fixed_decode)
 
 target_link_libraries (mf_fixed_decode_encode
@@ -56,7 +56,7 @@ target_link_libraries (mf_fixed_decode_v2
                        ${TEST_LIBS} )
 
 add_executable (mf_fixed_decode_encode_v2 ${FASTTYPEGEN_example_OUTPUTS} fixed_template_test_v2.cpp)
-set_target_properties(mf_fixed_decode_encode_v2 PROPERTIES COMPILE_FLAGS -DWITH_ENCODE)
+# set_target_properties(mf_fixed_decode_encode_v2 PROPERTIES COMPILE_FLAGS -DWITH_ENCODE)
 add_dependencies(mf_fixed_decode_encode_v2 mf_fixed_decode_v2)
 target_link_libraries (mf_fixed_decode_encode_v2
                       ${TEST_LIBS} )
