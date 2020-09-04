@@ -34,7 +34,7 @@ In addition, the generated sequence types support iterators now. However, there 
 If you have used mFAST 1.1 version, please notice there are some backward-incompatible changes. First, to make a existing field absent, please use `msg_mref.omit_fieldName()` instead of `msg_mref.set_fieldName().as_absent()`. Second, if you have developed your own visitor for mFAST cref/mref types, the visitor has to be able to visit the new enum cref/mref types.
 
 #### Using mFAST across the web
-* OCI has successfully translated the mF AST source code into asm.js (an efficient subset of JavaScript).
+* OCI has successfully translated the mFAST source code into asm.js (an efficient subset of JavaScript).
 * The asm.js version of mFAST when used with Socket.io enables high volume data exchanges between browsers and servers.
 * This is an ideal data format for streaming graphs and feeds to web and mobile clients.
   * It can also go the other direction to stream from web and mobile clients.
