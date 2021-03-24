@@ -33,7 +33,7 @@ include(SetCXXStandard)
 include(SetCompilerWarnings)
 include(SetupCoverage)
 
-set(CMAKE_CXX_STANDARD 14)
+# set(CMAKE_CXX_STANDARD 14)
 
 # flag to enable building shared/dynamic library
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "build shared/dynamic library")
