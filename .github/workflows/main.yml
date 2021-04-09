@@ -15,7 +15,7 @@ jobs:
         run: curl -L https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz | tar zx && echo "BOOST_ROOT=$PWD/boost_1_72_0" > $GITHUB_ENV
       - name: Set Boost Environment
         if: ${{ matrix.os == 'windows-latest' }}
-        run:  echo ("BOOST_ROOT=" + boost_1_72_0) >> $env:GITHUB_ENV
+        run:  echo ("BOOST_ROOT=" + $env:BOOST_ROOT_1_72_0) >> $env:GITHUB_ENV
       - name: configure
         run: cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
       - name: build
