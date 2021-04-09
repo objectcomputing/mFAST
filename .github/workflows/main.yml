@@ -6,16 +6,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      BOOST_ROOT: ${{github.workspace}}/boost_1_72_0
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
       - name: Install Boost
-        if: ${{ matrix.os != 'windows-latest' }}
-        run: curl -L https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz | tar zx && echo "BOOST_ROOT=$PWD/boost_1_72_0" > $GITHUB_ENV
-      - name: Set Boost Environment
-        if: ${{ matrix.os == 'windows-latest' }}
-        run:  echo ("BOOST_ROOT=" + $env:BOOST_ROOT_1_72_0) >> $env:GITHUB_ENV
+        run: curl -L https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz | tar zx 
+        shell: bash
       - name: configure
         run: cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
       - name: build
