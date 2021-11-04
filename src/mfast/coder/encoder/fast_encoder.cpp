@@ -195,8 +195,11 @@ void fast_encoder_impl::visit(message_cref cref, bool force_reset) {
   aggregate_cref message(cref.field_storage(0), instruction);
 
   for (auto &&field : message)
-    if (field.present() || field.instruction()->field_operator() == operator_none)
+  {
+    const operator_enum_t op = field.instruction()->field_operator();
+    if (field.present() || op == operator_none || op == operator_default || (op == operator_constant && field.instruction()->pmap_size() > 0))
       apply_accessor(*this, field);
+  }
 
   pmap.commit();
 }
