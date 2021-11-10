@@ -68,7 +68,6 @@ field_op::field_op(const decimal_field_instruction *inst,
           get_optional_attr(*field_op_element, "value", nullptr);
 
       if (init_value_str) {
-        initial_value_.present(true);   // Set as preset
         if (strcmp(element->Name(), "exponent") != 0)
           initial_value_.set(boost::lexical_cast<int64_t>(init_value_str));
         else {

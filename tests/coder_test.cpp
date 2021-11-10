@@ -425,3 +425,26 @@ TEST_CASE("test fast coder without code generation for a simple template with co
   REQUIRE(test_case.encoding(msg_ref, "\xa0\x80"));
   REQUIRE(test_case.decoding("\xa0\x80", msg_ref));
 }
+
+TEST_CASE("test fast coder without code generation for a simple template with default decimal","[manual_reset_test]")
+{
+  fast_coding_test_case test_case (
+    "<?xml version=\" 1.0 \"?>\n"
+    "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
+    "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
+    "<template name=\"Test\" id=\"1\">\n"
+    "<decimal name=\"field1\" id=\"11\" presence=\"optional\"><default value=\"0\"/></decimal>\n"
+    "<uInt64 name=\"field2\" id=\"52\"></uInt64>\n"
+    "</template>\n"
+    "</templates>\n");
+
+  debug_allocator alloc;
+  message_type msg(&alloc, test_case.template_with_id(1));
+  message_mref msg_ref = msg.mref();
+
+  //msg_ref[0].as(8);
+  msg_ref[1].as(2);
+
+  REQUIRE(test_case.encoding(msg_ref, "\xa0\x80\x88\x82"));
+  REQUIRE(test_case.decoding("\xa0\x80\x88\x82", msg_ref));
+}
