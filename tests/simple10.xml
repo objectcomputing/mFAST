@@ -1,0 +1,14 @@
+<?xml version=" 1.0 "?>
+<templates xmlns="http://www.fixprotocol.org/ns/template-definition"
+ templateNs="http://www.fixprotocol.org/ns/templates/sample" ns="http://www.fixprotocol.org/ns/fix">
+<template name="Test" id="1">
+  <sequence name="sequence1">
+    <length id="110">
+      <constant value="1"/>
+    </length>
+    <int64 name="field1" id="111">
+      <copy/>
+    </int64>
+  </sequence>
+</template>
+</templates>
