@@ -310,8 +310,12 @@ public:
   cref_type get() const { return base_; }
   is_optional_type optional() const { return is_optional_type(); }
   length_type set_length(value_storage &storage) const {
+    auto* length_inst = base_.instruction()->length_instruction();
     field_mref_base length_mref(nullptr, &storage,
-                                base_.instruction()->length_instruction());
+                                length_inst);
+    // a temporary storage is used for sequence length field
+    // and we must initialize it properly to support constant operators
+    length_inst->construct_value(storage, nullptr);
     return length_type(length_mref);
   }
 
