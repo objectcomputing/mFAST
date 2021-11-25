@@ -12,7 +12,6 @@
 
 #include <cassert>
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/range.hpp>
 
 namespace mfast {
 class sequence_element_cref : public aggregate_cref {

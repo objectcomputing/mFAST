@@ -10,7 +10,6 @@
 #include "type_category.h"
 
 #include <boost/iterator/iterator_facade.hpp>
-#include <boost/range.hpp>
 
 namespace mfast {
 class unbouned_templateref_error : public virtual boost::exception,
