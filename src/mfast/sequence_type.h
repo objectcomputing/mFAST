@@ -4,13 +4,10 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #pragma once
-#include <boost/move/core.hpp>
 #include "sequence_ref.h"
 namespace mfast {
 template <typename CRef> class squence_type_base {
-#ifdef BOOST_NO_RVALUE_REFERENCES
-  BOOST_MOVABLE_BUT_NOT_COPYABLE(squence_type_base)
-#endif
+
 public:
   typedef typename CRef::instruction_cptr instruction_cptr;
   typedef CRef cref_type;
@@ -29,7 +26,7 @@ public:
 
   squence_type_base(const cref_type &other, mfast::allocator *alloc);
 
-  squence_type_base(BOOST_RV_REF(squence_type_base) other)
+  squence_type_base(squence_type_base&& other)
       : alloc_(other.alloc_), instruction_(other.instruction_) {
     // g++ 4.7.1 doesn't allow this member function to defined out of class
     // declaration
@@ -37,7 +34,7 @@ public:
     other.instruction_ = 0;
   }
 
-  squence_type_base &operator=(BOOST_RV_REF(squence_type_base) other) {
+  squence_type_base &operator=(squence_type_base&& other) {
     // g++ 4.7.1 doesn't allow this member function to defined out of class
     // declaration
     if (this->instruction())

@@ -3,7 +3,7 @@
 #include <map>
 #include <deque>
 #include <mfast.h>
-#include "tinyxml2.h"
+#include <tinyxml2.h>
 #include "../view_iterator.h"
 
 namespace mfast {

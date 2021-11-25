@@ -40,9 +40,7 @@ typedef boost::multiprecision::backends::cpp_dec_float<18> decimal_backend;
 typedef boost::multiprecision::number<decimal_backend> decimal;
 
 inline decimal make_decimal(int64_t mantissa, int16_t exponent) {
-  decimal r(mantissa);
-  r *= decimal_backend(1.0, exponent);
-  return r;
+  return decimal(mantissa) * decimal(decimal_backend(1.0, exponent));
 }
 
 class allocator;
@@ -118,9 +116,7 @@ public:
   bool is_initial_value() const;
 
   decimal value() const {
-    decimal r(mantissa());
-    r *= decimal_backend(1.0, exponent());
-    return r;
+    return make_decimal(mantissa(), exponent());
   }
 
   instruction_cptr instruction() const {
