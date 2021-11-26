@@ -7,12 +7,12 @@ mFAST is a high performance C++ encoding/decoding library for FAST (FIX Adapted 
 
 For more information, please read the [article](http://objectcomputing.github.io/mFAST/).
 
-### Download and Build Intructions
+### Download and Build Instructions
 
-For Unix or macOS with boost library installed on the system paths.
+For Unix or macOS with boost library and cmake version 3.11 above installed on the system paths.
 
 ```bash
-git clone --recursive https://github.com/objectcomputing/mFAST.git
+git clone https://github.com/objectcomputing/mFAST.git
 mkdir mFAST/build
 cd mFAST/build
 cmake ..
@@ -23,7 +23,7 @@ For detailed build instructions for systems without existing boost library insta
 
 ### Important Notice
 
-[03/13/2016] mFAST has changed the licence from the LGPL v3 to the BSD 3-clause “New” or “Revised” license.
+[03/13/2016] mFAST has changed the license from the LGPL v3 to the BSD 3-clause “New” or “Revised” license.
 
 From now on, mFAST require C++ 11 to compile. You can check out the version with tag name "v1.2.1" if you need a C++ 03 only solution.
 

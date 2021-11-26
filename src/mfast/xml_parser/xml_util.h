@@ -5,7 +5,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "tinyxml2.h"
+#include <tinyxml2.h>
 #include "../arena_allocator.h"
 
 namespace mfast {

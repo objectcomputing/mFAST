@@ -6,8 +6,6 @@
 # endfunction(add_test_executable)
 # Includes Catch in the project:
 #add_subdirectory(${EXT_PROJECTS_DIR}/catch)
-include_directories(${PROJECT_SOURCE_DIR}/catch/include)
-
 
 FASTTYPEGEN_TARGET(simple_types1 simple1.xml)
 FASTTYPEGEN_TARGET(simple_types2 simple2.xml)
@@ -67,7 +65,8 @@ target_link_libraries (mfast_test
                        mfast_static
                        mfast_coder_static
                        mfast_json_static
-                       mfast_xml_parser_static)
+                       mfast_xml_parser_static
+                       Catch2::Catch2)
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")

@@ -1,0 +1,16 @@
+{
+   "name": "example",
+   "version-string": "1.3",
+   "dependencies": [
+     "boost-io",
+     "boost-iterator",
+     "boost-regex",
+     "boost-mpl",
+     "boost-assign",
+     "boost-foreach",
+     "boost-multiprecision",
+     "boost-iostreams",
+     "tinyxml2",
+     "catch2"
+   ]
+ }

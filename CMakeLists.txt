@@ -2,7 +2,7 @@
 # refer to the root source directory of the project as ${MFAST_SOURCE_DIR} and
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.11)
 project (mFAST CXX)
 
 # options to build tests, examples and packages
@@ -14,10 +14,6 @@ option(BUILD_PACKAGES "Build packages" ON)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
-
-if(POLICY CMP0054)
-    cmake_policy(SET CMP0054 OLD)
-endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -32,6 +28,7 @@ include(Emscripten)
 include(SetCXXStandard)
 include(SetCompilerWarnings)
 include(SetupCoverage)
+include(FetchDependencies)
 
 # flag to enable building shared/dynamic library
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "build shared/dynamic library")
@@ -61,11 +58,6 @@ if(BUILD_PACKAGES)
 endif(BUILD_PACKAGES)
 
 find_package(Boost 1.56.0 REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2)
-include_directories ("${PROJECT_SOURCE_DIR}/src")
-
-add_definitions(-DSIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
 
 # variables to be used later
 set(MFAST_SHARED_LIBRARIES CACHE INTERNAL "")

@@ -1,6 +1,0 @@
-[submodule "tinyxml2"]
-	path = tinyxml2
-	url = https://github.com/leethomason/tinyxml2.git
-[submodule "catch"]
-	path = catch
-	url = https://github.com/philsquared/Catch.git

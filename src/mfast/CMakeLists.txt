@@ -1,16 +1,15 @@
 
-file (GLOB headers "*.h") ## retrieve all header files in current directory
 file (GLOB sources "*.cpp")     ## retrieve all source files in current directory
 
-file (GLOB instruction_headers "instructions/*.h") ## retrieve all header files in instructions directory
 file (GLOB instruction_sources "instructions/*.cpp")     ## retrieve all source files in instructions directory
 
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-set(mfast_SRCS  ${sources} ${instruction_sources} ${headers} ${instruction_headers})
+set(mfast_SRCS  ${sources} ${instruction_sources})
 
 add_library(mfast_static STATIC ${mfast_SRCS})
 target_include_directories(mfast_static PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
+target_link_libraries(mfast_static PUBLIC Boost::boost)
 
 if (UNIX)
   set_target_properties(mfast_static PROPERTIES OUTPUT_NAME mfast)
@@ -28,9 +27,10 @@ set(MFAST_STATIC_LIBRARIES ${MFAST_STATIC_LIBRARIES} mfast_static CACHE INTERNAL
 if (BUILD_SHARED_LIBS)
   add_library(mfast SHARED ${mfast_SRCS})
 
-  if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-    target_compile_definitions(mfast INTERFACE "-DMFAST_DYN_LINK")
-  endif (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+  target_include_directories(mfast PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
+  target_compile_definitions(mfast INTERFACE "-DMFAST_DYN_LINK")
+  target_link_libraries(mfast PUBLIC Boost::boost)
+
 
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     set_target_properties(mfast PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
