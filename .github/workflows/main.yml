@@ -7,13 +7,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     env:
-      BOOST_ROOT: ${{github.workspace}}/boost_1_72_0
+      BOOST_ROOT: ${{github.workspace}}/boost_1_77_0
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
       - name: Install Boost
-        run: curl -L https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.gz | tar zx
+        run: curl -L https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz | tar zx
         shell: bash
       - name: configure
         run: cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
