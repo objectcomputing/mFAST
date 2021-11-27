@@ -30,9 +30,7 @@ if (BUILD_SHARED_LIBS)
   target_include_directories(mfast PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
   target_link_libraries(mfast PUBLIC Boost::boost)
 
-  if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-    target_compile_definitions(mfast INTERFACE "-DMFAST_DYN_LINK")
-  endif (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+  target_compile_definitions(mfast INTERFACE "MFAST_DYN_LINK")
 
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     set_target_properties(mfast PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
