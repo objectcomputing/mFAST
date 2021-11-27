@@ -15,7 +15,7 @@ target_include_directories(mfast_xml_parser_static PRIVATE "${CMAKE_SOURCE_DIR}/
 if (UNIX)
   set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
 endif()
-set_target_properties(mfast_xml_parser_static PROPERTIES COMPILE_FLAGS -DMFAST_CODER_STATIC_DEFINE)
+target_compile_definitions(mfast_xml_parser_static PRIVATE MFAST_CODER_STATIC_DEFINE)
 set_target_properties(mfast_xml_parser_static PROPERTIES LINKER_LANGUAGE CXX)
 
 install(TARGETS mfast_xml_parser_static

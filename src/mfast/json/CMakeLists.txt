@@ -14,7 +14,7 @@ target_link_libraries(mfast_json_static mfast_static)
 if (UNIX)
   set_target_properties(mfast_json_static PROPERTIES OUTPUT_NAME mfast_json)
 endif()
-set_target_properties(mfast_json_static PROPERTIES COMPILE_FLAGS -DMFAST_JSON_STATIC_DEFINE)
+target_compile_definitions(mfast_json_static PRIVATE MFAST_JSON_STATIC_DEFINE)
 
 install(TARGETS mfast_json_static
         EXPORT  mFASTTargets

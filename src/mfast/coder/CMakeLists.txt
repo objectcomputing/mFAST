@@ -23,7 +23,7 @@ target_link_libraries(mfast_coder_static mfast_static)
 if (UNIX)
   set_target_properties(mfast_coder_static PROPERTIES OUTPUT_NAME mfast_coder)
 endif()
-set_target_properties(mfast_coder_static PROPERTIES COMPILE_FLAGS -DMFAST_CODER_STATIC_DEFINE)
+target_compile_definitions(mfast_coder_static PRIVATE MFAST_CODER_STATIC_DEFINE)
 
 install(TARGETS mfast_coder_static
         EXPORT  mFASTTargets

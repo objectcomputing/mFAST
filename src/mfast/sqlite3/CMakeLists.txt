@@ -11,7 +11,7 @@ target_link_libraries(mfast_sqlite3_static mfast_static)
 if (UNIX)
   set_target_properties(mfast_sqlite3_static PROPERTIES OUTPUT_NAME mfast_sqlite3)
 endif()
-set_target_properties(mfast_sqlite3_static PROPERTIES COMPILE_FLAGS -DMFAST_SQLITE3_STATIC_DEFINE)
+target_compile_definitions(mfast_sqlite3_static PRIVATE MFAST_SQLITE3_STATIC_DEFINE)
 
 install(TARGETS mfast_sqlite3_static
         EXPORT  mFASTTargets

@@ -15,7 +15,7 @@ target_link_libraries(mfast_static PUBLIC Boost::boost)
 if (UNIX)
   set_target_properties(mfast_static PROPERTIES OUTPUT_NAME mfast)
 endif()
-set_target_properties(mfast_static PROPERTIES COMPILE_FLAGS -DMFAST_STATIC_DEFINE)
+target_compile_definitions(mfast_static PRIVATE MFAST_STATIC_DEFINE)
 
 install(TARGETS mfast_static
         EXPORT  mFASTTargets
