@@ -15,6 +15,7 @@ jobs:
       - name: Install Boost
         run: curl -L https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz | tar zx
         shell: bash
+      - uses: lukka/get-cmake@latest
       - name: configure
         run: cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
       - name: build
