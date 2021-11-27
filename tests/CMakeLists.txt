@@ -54,13 +54,12 @@ add_executable (mfast_test
                 scp_reset_test.cpp
             )
 
-target_include_directories(mfast_test PRIVATE ${PROJECT_SOURCE_DIR}/catch2/single_include)
-
 target_link_libraries (mfast_test
                        mfast_static
                        mfast_coder_static
                        mfast_json_static
-                       mfast_xml_parser_static)
+                       mfast_xml_parser_static
+                       Catch2::Catch2)
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")

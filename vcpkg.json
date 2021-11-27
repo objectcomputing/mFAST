@@ -1,0 +1,17 @@
+{
+   "name": "mfast",
+   "version-string": "1.3",
+   "builtin-baseline": "a2fcb03749ff5897b5985092934dc6057680c789",
+   "dependencies": [
+     "boost-io",
+     "boost-iterator",
+     "boost-regex",
+     "boost-mpl",
+     "boost-assign",
+     "boost-foreach",
+     "boost-multiprecision",
+     "boost-iostreams",
+     "tinyxml2",
+     "catch2"
+   ]
+ }

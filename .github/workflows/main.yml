@@ -10,29 +10,28 @@ jobs:
       BOOST_ROOT: ${{github.workspace}}/boost_1_77_0
     steps:
       - uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Install Boost
-        run: curl -L https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.gz | tar zx
-        shell: bash
       - uses: lukka/get-cmake@latest
+      - name: Restore artifacts, or setup vcpkg (do not install any package)
+        uses: lukka/run-vcpkg@v10
+        with:
+          vcpkgGitCommitId: a2fcb03749ff5897b5985092934dc6057680c789
       - name: Run CMake (Un*x)
         if: "!contains( matrix.os, 'windows')"
         uses: lukka/run-cmake@v3
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          useVcpkgToolchainFile: false
-          cmakeAppendedArgs: '-DBUILD_SHARED_LIBS=ON'
+          useVcpkgToolchainFile: true
+          cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON'
           buildDirectory: ${{github.workspace}}/build
+          cmakeGenerator: "Ninja"
       - name: Run CMake+VS
         if: contains( matrix.os, 'windows')
         uses: lukka/run-cmake@v3
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          useVcpkgToolchainFile: false
-          cmakeAppendedArgs: '-DBUILD_SHARED_LIBS=ON'
+          useVcpkgToolchainFile: true
+          cmakeAppendedArgs: '-DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON'
           buildDirectory: ${{github.workspace}}/build
           cmakeGenerator: "Visual Studio 16 2019"
-
       - name: test
         run: cd build && ctest -VV

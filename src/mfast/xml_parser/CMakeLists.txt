@@ -2,15 +2,13 @@
 file (GLOB_RECURSE headers "*.h") ## retrieve all header files in current directory
 file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current directory
 
-
-
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-set(mfast_xml_parser_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../../../tinyxml2/tinyxml2.cpp ${sources} ${headers})
+set(mfast_xml_parser_SRCS ${TINYXML2_SRC} ${sources} ${headers})
 
 add_library(mfast_xml_parser_static STATIC ${mfast_xml_parser_SRCS})
-target_link_libraries(mfast_xml_parser_static mfast_static)
-target_include_directories(mfast_xml_parser_static PRIVATE "${CMAKE_SOURCE_DIR}/tinyxml2")
+target_link_libraries(mfast_xml_parser_static mfast_static ${TINYXML2_LIB})
+target_include_directories(mfast_xml_parser_static PRIVATE ${tinyxml2_SOURCE_DIR})
 
 if (UNIX)
   set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
@@ -29,14 +27,14 @@ set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} xml_parser_static CACHE I
 
 if (BUILD_SHARED_LIBS)
   add_library(mfast_xml_parser SHARED ${mfast_xml_parser_SRCS})
-  target_include_directories(mfast_xml_parser PRIVATE "${CMAKE_SOURCE_DIR}/tinyxml2")
+  target_include_directories(mfast_xml_parser PRIVATE ${tinyxml2_SOURCE_DIR})
   target_compile_definitions(mfast_xml_parser INTERFACE "MFAST_DYN_LINK")
 
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
 
-  target_link_libraries(mfast_xml_parser mfast)
+  target_link_libraries(mfast_xml_parser mfast ${TINYXML2_LIB})
   set_target_properties(mfast_xml_parser PROPERTIES
                         LINKER_LANGUAGE CXX
                         VERSION "${MFAST_VERSION}"

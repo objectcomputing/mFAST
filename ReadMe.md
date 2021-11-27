@@ -7,23 +7,35 @@ mFAST is a high performance C++ encoding/decoding library for FAST (FIX Adapted 
 
 For more information, please read the [article](http://objectcomputing.github.io/mFAST/).
 
-### Download and Build Intructions
+### Prerequisite
+- cmake version 3.11.0 or above
+- C++ 14 or above compiler
+- Boost library or vcpkg installed
+### Download and Build Instructions
 
-For Unix or macOS with boost library installed on the system paths.
+#### For Unix or macOS with boost library installed on the system paths.
 
 ```bash
-git clone --recursive https://github.com/objectcomputing/mFAST.git
-mkdir mFAST/build
-cd mFAST/build
-cmake ..
-make
+git clone https://github.com/objectcomputing/mFAST.git
+cd mFAST
+cmake -DCMAKE_BUILD_TYPE=Release -Bbuild
+cmake --build build
 ```
 
-For detailed build instructions for systems without existing boost library installation or on Windows, please read the [wiki page](https://github.com/objectcomputing/mFAST/wiki/Installation).
+#### Use VCPKG
+
+```bash
+git clone https://github.com/microsoft/vcpkg
+export VCPKG_PATH=$PWD/vcpkg
+git clone https://github.com/objectcomputing/mFAST.git
+cd mFAST
+cmake -DCMAKE_BUILD_TYPE=Release -Bbuild -DCMAKE_TOOLCHAIN_FILE=$VCPKG_PATH/scripts/buildsystems/vcpkg.cmake
+cmake --build build
+```
 
 ### Important Notice
 
-[03/13/2016] mFAST has changed the licence from the LGPL v3 to the BSD 3-clause “New” or “Revised” license.
+[03/13/2016] mFAST has changed the license from the LGPL v3 to the BSD 3-clause “New” or “Revised” license.
 
 From now on, mFAST require C++ 11 to compile. You can check out the version with tag name "v1.2.1" if you need a C++ 03 only solution.
 

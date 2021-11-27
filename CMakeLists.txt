@@ -28,6 +28,7 @@ include(Emscripten)
 include(SetCXXStandard)
 include(SetCompilerWarnings)
 include(SetupCoverage)
+include(FetchDependencies)
 
 # flag to enable building shared/dynamic library
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "build shared/dynamic library")
