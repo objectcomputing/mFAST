@@ -30,10 +30,7 @@ set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} xml_parser_static CACHE I
 if (BUILD_SHARED_LIBS)
   add_library(mfast_xml_parser SHARED ${mfast_xml_parser_SRCS})
   target_include_directories(mfast_xml_parser PRIVATE "${CMAKE_SOURCE_DIR}/tinyxml2")
-
-  if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-    target_compile_definitions(mfast_xml_parser INTERFACE "-DMFAST_DYN_LINK")
-  endif (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+  target_compile_definitions(mfast_xml_parser INTERFACE "MFAST_DYN_LINK")
 
   if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
     set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
@@ -44,9 +41,6 @@ if (BUILD_SHARED_LIBS)
                         LINKER_LANGUAGE CXX
                         VERSION "${MFAST_VERSION}"
                         SOVERSION "${MFAST_SOVERSION}")
-  if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-    set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
-  endif ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
 
   install(TARGETS mfast_xml_parser
           EXPORT  mFASTTargets
