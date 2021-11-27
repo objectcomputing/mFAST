@@ -18,7 +18,7 @@
 //
 
 
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 
 #include <mfast/int_ref.h>
 #include <mfast/string_ref.h>
@@ -108,7 +108,7 @@ TEST_CASE("test the operations of interger_field","[integer_field_test]")
 #ifndef EMSCRIPTEN
     {
       helper.save_previous_value(ref);
-      REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), const mfast::fast_error&);
+      REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), mfast::fast_error);
     }
 #endif
     {
@@ -307,7 +307,7 @@ TEST_CASE("test the operations of decimal_field without mantissa instruction","[
     {
       ref.omit();
       helper.save_previous_value(ref);
-      REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), const mfast::fast_error&);
+      REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), mfast::fast_error);
     }
 #endif
     {
@@ -588,7 +588,7 @@ TEST_CASE("test the operations of string_field","[string_field_test]")
 #ifndef EMSCRIPTEN
     {
       helper.save_previous_value(ref);
-      REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), const mfast::fast_error&);
+      REQUIRE_THROWS_AS(helper.delta_base_value_of(ref), mfast::fast_error);
     }
 #endif
     {

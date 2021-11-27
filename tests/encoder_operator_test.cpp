@@ -17,7 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include <mfast/int_ref.h>
 #include <mfast/coder/common/codec_helper.h>
 #include <mfast/coder/encoder/fast_ostream.h>
@@ -528,12 +528,12 @@ TEST_CASE("test the encoding of fast operator copy","[operator_copy_encode_test]
     inst.prev_value().present(false);    // // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
 
-    REQUIRE_THROWS_AS( encode_mref("\x80", result, CHANGE_PREVIOUS_VALUE), const mfast::fast_error& );
+    REQUIRE_THROWS_AS( encode_mref("\x80", result, CHANGE_PREVIOUS_VALUE), mfast::fast_error );
     inst.prev_value().present(false);    // // When the value is not present in the stream there are three cases depending on the state of the previous value:
     REQUIRE_THROWS_AS( encode_ext_cref("\x80",
                                        ext_cref<uint64_cref, copy_operator_tag, mandatory_with_initial_value_tag>(result),
                                        CHANGE_PREVIOUS_VALUE, &allocator )
-                       , const mfast::fast_error& );
+                       , mfast::fast_error );
   }
 
   {
@@ -687,12 +687,12 @@ TEST_CASE("test the encoding of fast operator increment","[operator_increment_en
     inst.prev_value().present(false);
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
-    REQUIRE_THROWS_AS( encode_mref("\x80\x80", result, CHANGE_PREVIOUS_VALUE), const mfast::fast_error&);
+    REQUIRE_THROWS_AS( encode_mref("\x80\x80", result, CHANGE_PREVIOUS_VALUE), mfast::fast_error);
     inst.prev_value().present(false);
     REQUIRE_THROWS_AS( encode_ext_cref("\x80\x80",
                                        ext_cref<uint64_cref, increment_operator_tag, mandatory_with_initial_value_tag>(result),
                                        CHANGE_PREVIOUS_VALUE, &allocator ),
-                       const mfast::fast_error&);
+                       mfast::fast_error);
   }
 
   {

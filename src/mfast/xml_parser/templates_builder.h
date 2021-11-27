@@ -2,7 +2,7 @@
 
 #include <string>
 #include "../field_instructions.h"
-#include "tinyxml2.h"
+#include <tinyxml2.h>
 #include "field_builder.h"
 #include "dynamic_templates_description.h"
 #include <boost/utility.hpp>

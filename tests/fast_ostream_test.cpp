@@ -17,7 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 
 #include <mfast/coder/encoder/fast_ostream.h>
 #include <mfast/coder/encoder/fast_ostream_inserter.h>

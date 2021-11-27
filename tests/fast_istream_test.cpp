@@ -17,7 +17,7 @@
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include <mfast/coder/decoder/fast_istream.h>
 #include <mfast/coder/decoder/fast_istream_extractor.h>
 #include <mfast/output.h>
@@ -126,9 +126,9 @@ TEST_CASE("test the fast decoding of ascii string","[ascii_string_test]")
   REQUIRE(decode_string( "\x40\x40\xC0", true, "\x40\x40\xC0",  3));
   REQUIRE(decode_string( "\x40\x40\xC0", false, "\x40\x40\xC0",  3));
 
-  REQUIRE_THROWS_AS(decode_string("\x00\xC0", false, nullptr, 0),    const mfast::fast_error& );
-  REQUIRE_THROWS_AS(decode_string("\x00\xC0", true, nullptr, 0),     const mfast::fast_error& );
-  REQUIRE_THROWS_AS(decode_string("\x00\x00\xC0", true, nullptr, 0), const mfast::fast_error& );
+  REQUIRE_THROWS_AS(decode_string("\x00\xC0", false, nullptr, 0),    mfast::fast_error );
+  REQUIRE_THROWS_AS(decode_string("\x00\xC0", true, nullptr, 0),     mfast::fast_error );
+  REQUIRE_THROWS_AS(decode_string("\x00\x00\xC0", true, nullptr, 0), mfast::fast_error );
 }
 
 bool

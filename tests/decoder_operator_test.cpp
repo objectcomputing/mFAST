@@ -16,7 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 
 #include <mfast/int_ref.h>
 #include <mfast/coder/common/codec_helper.h>
@@ -497,9 +497,9 @@ TEST_CASE("test the decoding of fast operator copy","[operator_copy_decode_test]
     inst.prev_value().present(false);    // // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
 
-    REQUIRE_THROWS_AS(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE),                                                                                  const mfast::fast_error& );
+    REQUIRE_THROWS_AS(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE),                                                                                  mfast::fast_error );
     inst.prev_value().present(false);
-    REQUIRE_THROWS_AS(decode_ext_mref("\x80\x80", HAS_PMAP_BIT, ext_mref<uint64_mref, copy_operator_tag, mandatory_with_initial_value_tag >(result), CHANGE_PREVIOUS_VALUE), const mfast::fast_error& );
+    REQUIRE_THROWS_AS(decode_ext_mref("\x80\x80", HAS_PMAP_BIT, ext_mref<uint64_mref, copy_operator_tag, mandatory_with_initial_value_tag >(result), CHANGE_PREVIOUS_VALUE), mfast::fast_error );
   }
 
   {
@@ -644,8 +644,8 @@ TEST_CASE("test the decoding of fast operator increment","[operator_increment_de
     inst.prev_value().present(false);
     // When the value is not present in the stream there are three cases depending on the state of the previous value:
     // * empty – the value of the field is empty. If the field is optional the value is considered absent. It is a dynamic error [ERR D6] if the field is mandatory.
-    REQUIRE_THROWS_AS(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE),                                                                                       const mfast::fast_error&);
-    REQUIRE_THROWS_AS(decode_ext_mref("\x80\x80", HAS_PMAP_BIT, ext_mref<uint64_mref, increment_operator_tag, mandatory_with_initial_value_tag >(result), CHANGE_PREVIOUS_VALUE), const mfast::fast_error&);
+    REQUIRE_THROWS_AS(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE),                                                                                       mfast::fast_error);
+    REQUIRE_THROWS_AS(decode_ext_mref("\x80\x80", HAS_PMAP_BIT, ext_mref<uint64_mref, increment_operator_tag, mandatory_with_initial_value_tag >(result), CHANGE_PREVIOUS_VALUE), mfast::fast_error);
   }
 
   {
@@ -980,10 +980,10 @@ TEST_CASE("test the decoding of fast operator delta for ascii string","[operator
     REQUIRE_THROWS_AS(decode_mref("\xC0\x86\x76\x61\x6C\x75\xE5",
                                   NO_PMAP_BIT,
                                   result,
-                                  CHANGE_PREVIOUS_VALUE),                const mfast::fast_error&);
+                                  CHANGE_PREVIOUS_VALUE),                mfast::fast_error);
     inst.prev_value().defined(false); // reset the previous value to undefined again
     REQUIRE_THROWS_AS(decode_ext_mref("\xC0\x86\x76\x61\x6C\x75\xE5", NO_PMAP_BIT, ext_mref<ascii_string_mref, delta_operator_tag, mandatory_without_initial_value_tag >(
-                                        result), CHANGE_PREVIOUS_VALUE), const mfast::fast_error&);
+                                        result), CHANGE_PREVIOUS_VALUE), mfast::fast_error);
 
     inst.destruct_value(storage, &alloc);
   }
@@ -1117,10 +1117,10 @@ TEST_CASE("test the decoding of fast operator delta for unicode string","[operat
 
     // result.as("initial_value");
     REQUIRE_THROWS_AS(decode_mref("\xC0\x86\x85\x76\x61\x6C\x75\x65", NO_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE),
-                      const mfast::fast_error& );
+                      mfast::fast_error );
     REQUIRE_THROWS_AS(decode_ext_mref("\xC0\x86\x85\x76\x61\x6C\x75\x65", NO_PMAP_BIT,
                                       ext_mref<unicode_string_mref, delta_operator_tag, mandatory_without_initial_value_tag >(result), CHANGE_PREVIOUS_VALUE),
-                      const mfast::fast_error& );
+                      mfast::fast_error );
     inst.destruct_value(storage, &alloc);
   }
 
@@ -1256,7 +1256,7 @@ TEST_CASE("test the decoding of fast operator tail for ascii string","[operator_
     //  undefined – the value of the field is the initial value that also becomes the new previous value.
     // It is a dynamic error [ERR D6] if the instruction context has no initial value.
 
-    REQUIRE_THROWS_AS(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), const mfast::fast_error& );
+    REQUIRE_THROWS_AS(decode_mref("\x80\x80", HAS_PMAP_BIT, result, CHANGE_PREVIOUS_VALUE), mfast::fast_error );
 
     inst.destruct_value(storage, &alloc);
   }

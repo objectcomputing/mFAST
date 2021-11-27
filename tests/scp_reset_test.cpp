@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 #include <mfast.h>
 #include <mfast/field_comparator.h>
 #include <mfast/coder/fast_encoder_v2.h>
