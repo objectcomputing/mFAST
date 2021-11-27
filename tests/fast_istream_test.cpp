@@ -104,7 +104,6 @@ decode_string(const byte_stream& bs, bool nullable, const char* result, std::siz
   if ((str == nullptr && not_null == false) || (str && len == result_len && memcmp(str, result, len) == 0) )
     return true;
 
-  bool res( false );
   if (not_null) {
     INFO(  "Got \"" << byte_stream(str, len) << "\" instead." );
   }

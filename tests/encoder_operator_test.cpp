@@ -983,7 +983,6 @@ TEST_CASE("test the encoding of fast no operator for ascii string", "[operator_n
     value_storage storage;
 
     { // testing Option assci field with no operator
-        const char* default_value = "initial_string";
         ascii_field_instruction inst(operator_none,
             presence_optional,
             1,

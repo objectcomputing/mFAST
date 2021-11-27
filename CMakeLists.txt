@@ -57,11 +57,7 @@ if(BUILD_PACKAGES)
 endif(BUILD_PACKAGES)
 
 find_package(Boost 1.56.0 REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2)
 include_directories ("${PROJECT_SOURCE_DIR}/src")
-
-add_definitions(-DSIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})
 
 # variables to be used later
 set(MFAST_SHARED_LIBRARIES CACHE INTERNAL "")
