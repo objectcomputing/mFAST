@@ -32,8 +32,8 @@ if (BUILD_SHARED_LIBS)
   endif()
   target_link_libraries(mfast_sqlite3 mfast sqlite3)
   set_target_properties(mfast_sqlite3 PROPERTIES
-                        VERSION "${MFAST_VERSION}"
-                        SOVERSION "${MFAST_SOVERSION}")
+                        VERSION "${mFAST_VERSION}"
+                        SOVERSION "${mFAST_VERSION}")
 
   install(TARGETS mfast_sqlite3
           EXPORT  mFASTTargets

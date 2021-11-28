@@ -13,7 +13,7 @@ if (NOT CMAKE_CROSSCOMPILING)
                          mfast_static
                          mfast_coder_static)
 
-  set_target_properties(fast_type_gen PROPERTIES VERSION "${MFAST_VERSION}")
+  set_target_properties(fast_type_gen PROPERTIES VERSION "${mFAST_VERSION}")
 
   install(TARGETS fast_type_gen
           EXPORT  mFASTTargets

@@ -43,8 +43,8 @@ if (BUILD_SHARED_LIBS)
   endif()
   target_link_libraries(mfast_coder mfast)
   set_target_properties(mfast_coder PROPERTIES
-                        VERSION "${MFAST_VERSION}"
-                        SOVERSION "${MFAST_SOVERSION}")
+                        VERSION "${mFAST_VERSION}"
+                        SOVERSION "${mFAST_VERSION}")
 
   install(TARGETS mfast_coder
           EXPORT  mFASTTargets

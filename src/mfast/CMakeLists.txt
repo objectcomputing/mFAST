@@ -36,8 +36,8 @@ if (BUILD_SHARED_LIBS)
     set_target_properties(mfast PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
   endif()
   set_target_properties(mfast PROPERTIES
-                        VERSION "${MFAST_VERSION}"
-                        SOVERSION "${MFAST_SOVERSION}")
+                        VERSION "${mFAST_VERSION}"
+                        SOVERSION "${mFAST_VERSION}")
 
   install(TARGETS mfast
           EXPORT  mFASTTargets

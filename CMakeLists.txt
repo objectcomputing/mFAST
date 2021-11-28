@@ -3,7 +3,7 @@
 # to the root binary directory of the project as ${MFAST_BINARY_DIR}.
 
 cmake_minimum_required(VERSION 3.11.0)
-project (mFAST CXX)
+project (mFAST VERSION 1.3.0 LANGUAGES CXX)
 
 # options to build tests, examples and packages
 option(BUILD_TESTS "Build tests" ON)
@@ -16,12 +16,6 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-set(MFAST_MAJOR_VERSION 1)
-set(MFAST_MINOR_VERSION 3)
-set(MFAST_PATCH_VERSION 0)
-set(MFAST_VERSION ${MFAST_MAJOR_VERSION}.${MFAST_MINOR_VERSION}.${MFAST_PATCH_VERSION})
-set(MFAST_SOVERSION ${MFAST_MAJOR_VERSION}.${MFAST_MINOR_VERSION}.${MFAST_PATCH_VERSION})
 
 include(SetInstallPaths)
 include(Emscripten)
@@ -47,7 +41,7 @@ if(BUILD_PACKAGES)
 
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A FAST (FIX Adapted for STreaming) encoder/decoder")
   set(CPACK_PACKAGE_NAME "mfast")
-  set(CPACK_PACKAGE_VERSION ${MFAST_VERSION})
+  set(CPACK_PACKAGE_VERSION ${mFAST_VERSION})
   set(CPACK_PACKAGE_VENDOR "Object Computing, Inc.")
   set(CPACK_PACKAGE_CONTACT "info@ociweb.com")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Huang-Ming Huang")
@@ -87,7 +81,7 @@ if(BUILD_EXAMPLES)
 endif(BUILD_EXAMPLES)
 
 # Setting up dist target
-set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${MFAST_VERSION})
+set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${mFAST_VERSION})
 add_custom_target(dist
     COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD
         | bzip2 > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar.bz2

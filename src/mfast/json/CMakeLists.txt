@@ -34,8 +34,8 @@ if (BUILD_SHARED_LIBS)
   endif()
   target_link_libraries(mfast_json mfast)
   set_target_properties(mfast_json PROPERTIES
-                        VERSION "${MFAST_VERSION}"
-                        SOVERSION "${MFAST_SOVERSION}")
+                        VERSION "${mFAST_VERSION}"
+                        SOVERSION "${mFAST_VERSION}")
   install(TARGETS mfast_json
           EXPORT  mFASTTargets
           RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin

@@ -37,8 +37,8 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries(mfast_xml_parser mfast ${TINYXML2_LIB})
   set_target_properties(mfast_xml_parser PROPERTIES
                         LINKER_LANGUAGE CXX
-                        VERSION "${MFAST_VERSION}"
-                        SOVERSION "${MFAST_SOVERSION}")
+                        VERSION "${mFAST_VERSION}"
+                        SOVERSION "${mFAST_VERSION}")
 
   install(TARGETS mfast_xml_parser
           EXPORT  mFASTTargets
