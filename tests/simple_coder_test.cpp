@@ -34,6 +34,7 @@
 #include "simple7.h"
 #include "simple8.h"
 #include "simple9.h"
+#include "simple10.h"
 
 #include "byte_stream.h"
 #include "debug_allocator.h"
@@ -292,5 +293,33 @@ TEST_CASE("test fast coder v2 for a simple template with absent optional fields 
 
   REQUIRE(test_case.encoding(msg_ref,"\xA0\x81\x83\x80\x84\x82\x80"));
   REQUIRE(test_case.decoding("\xA0\x81\x83\x80\x84\x82\x80", msg_ref));
+}
+
+
+TEST_CASE("test fast decoder for a simple template with constant len in a sequence", "[constant_sequence_length_test]")
+{
+  fast_coding_test_case<simple10::templates_description> test_case;
+
+  debug_allocator alloc;
+  simple10::Test msg(&alloc);
+  simple10::Test_mref msg_ref = msg.mref();
+
+  simple10::Test_mref::sequence1_mref seq(msg_ref.set_sequence1());
+  seq.resize(1);
+  seq[0].set_field1().as(10);
+
+  // The value of a constant field is never transferred.
+  // ...
+  // A field will not occupy any bit in the presence map if it is mandatory and has the constant operator.
+  // ...
+  // The default, copy, and increment operators have the following presence map and NULL utilization:
+  //    - Mandatory integer, decimal, string and byte vector fields – one bit. If set, the value appears in the stream.
+  REQUIRE(test_case.encoding(msg_ref,
+                                 // pmap | elem1 pmap | f1 |
+                                 //  80       C0        8A
+                                 "\x80\xC0\x8A"
+                                 ));
+
+  REQUIRE(test_case.decoding("\x80\xC0\x8A", msg_ref, true));
 }
 

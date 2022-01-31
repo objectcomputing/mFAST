@@ -313,7 +313,7 @@ void fast_decoder_base::decode_field(const T &ext_ref, constant_operator_tag,
     // A field will not occupy any bit in the presence map if it is mandatory
     // and has the
     // constant operator.
-    // mref.to_initial_value();
+    mref.to_initial_value();
   }
   if (ext_ref.previous_value_shared())
     save_previous_value(mref);

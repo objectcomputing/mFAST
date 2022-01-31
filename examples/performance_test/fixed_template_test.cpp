@@ -49,15 +49,15 @@ const char usage[] =
 
 int read_file(const char* filename, std::vector<char>& contents)
 {
-  std::FILE* fp = std::fopen(filename, "rb");
+  std::unique_ptr<FILE, decltype(&std::fclose)> fp{std::fopen(filename, "rb"), &std::fclose};
   if (fp)
   {
-    std::fseek(fp, 0, SEEK_END);
-    contents.resize(std::ftell(fp));
-    std::rewind(fp);
-    std::fread(&contents[0], 1, contents.size(), fp);
-    std::fclose(fp);
-    return 0;
+    std::fseek(fp.get(), 0, SEEK_END);
+    contents.resize(std::ftell(fp.get()));
+    std::rewind(fp.get());
+    if (std::fread(&contents[0], 1, contents.size(), fp.get()) == contents.size()) {
+      return 0;
+    }
   }
   std::cerr << "File read error : " << filename << "\n";
   return -1;
