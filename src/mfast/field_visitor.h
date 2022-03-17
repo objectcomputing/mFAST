@@ -44,7 +44,7 @@ template <> struct result_holder<void> {
 
 template <class FieldAccessor,
           class Result = decltype(
-              static_cast<FieldAccessor *>(nullptr)->visit(int32_cref()))>
+              std::declval<FieldAccessor *>()->visit(int32_cref()))>
 class field_accessor_adaptor : public field_instruction_visitor,
                                private result_holder<Result> {
   FieldAccessor &accssor_;
@@ -157,7 +157,7 @@ public:
 
 template <class FieldMutator,
           class Result = decltype(
-              static_cast<FieldMutator *>(nullptr)->visit(int32_mref()))>
+              std::declval<FieldMutator *>()->visit(int32_mref()))>
 class field_mutator_adaptor : public field_instruction_visitor,
                               private result_holder<Result> {
   allocator *alloc_;
@@ -291,7 +291,7 @@ inline void field_mref::accept_mutator(FieldMutator &mutator) const {
 }
 
 template <typename T>
-inline decltype(static_cast<T *>(nullptr)->visit(int32_cref()))
+inline decltype(std::declval<T *>()->visit(int32_cref()))
 apply_accessor(T &accessor, field_cref v) {
   detail::field_accessor_adaptor<T> adaptor(accessor);
   v.instruction()->accept(adaptor, const_cast<mfast::value_storage *>(
@@ -300,7 +300,7 @@ apply_accessor(T &accessor, field_cref v) {
 }
 
 template <typename T>
-inline decltype(static_cast<T *>(nullptr)->visit(int32_mref()))
+inline decltype(std::declval<T *>()->visit(int32_mref()))
 apply_mutator(T &mutator, field_mref v) {
   detail::field_mutator_adaptor<T> adaptor(mutator, v.allocator());
   v.instruction()->accept(adaptor, field_mref_core_access::storage_of(v));

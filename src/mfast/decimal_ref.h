@@ -41,7 +41,7 @@ typedef boost::multiprecision::number<decimal_backend> decimal;
 
 inline decimal make_decimal(int64_t mantissa, int16_t exponent) {
   decimal r(mantissa);
-  r *= decimal_backend(1.0, exponent);
+  r *= decimal(decimal_backend(1.0, exponent));
   return r;
 }
 
@@ -119,7 +119,7 @@ public:
 
   decimal value() const {
     decimal r(mantissa());
-    r *= decimal_backend(1.0, exponent());
+    r *= decimal(decimal_backend(1.0, exponent()));
     return r;
   }
 
