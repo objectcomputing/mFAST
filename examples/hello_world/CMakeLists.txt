@@ -10,4 +10,4 @@
 # link_directories(${MFAST_LIBRARY_DIRS})
 
 add_executable (hello_world hello_world.cpp)
-target_link_libraries (hello_world ${MFAST_LIBRARIES})
+target_link_libraries (hello_world mfast_coder_static mfast_json_static mfast_xml_parser_static)
