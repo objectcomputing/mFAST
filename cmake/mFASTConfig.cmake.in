@@ -1,65 +1,53 @@
 # Config file for the mFAST package
-# It defines the following variables
-# MFAST_INCLUDE_DIR         - include directories for mFAST
-# MFAST_LIBRARY_DIRS        - library directories for mFAST
-# MFAST_LIBRARIES           - libraries to link against
-# MFAST_COMPONENTS          - installed components
-# MFAST_<component>_LIBRARY - particular component library
-# MFAST_EXECUTABLE          - the fast_type_gen executable
+# It defines the following targets
+# mfast_static            - base library, for static link
+# mfast_coder_static      - codecs library, for static link
+# mfast_xml_parser_static - xml parsing library, for static link
+# mfast_json_static       - json output library, for static link
+# mfast_sqlite3_static    - sqlite library, for static link
+# mfast                   - base library, for dynamic link
+# mfast_coder             - codecs library, for dynamic link
+# mfast_xml_parser        - xml parsing library, for dynamic link
+# mfast_json              - json output library, for dynamic link
+# mfast_sqlite3           - sqlite library, for dynamic link
+#
+# For convenience it also defines:
+# mFAST_INCLUDE_DIR         - include directories for mFAST
+# mFAST_LIBRARY_DIRS        - library directories for mFAST
+# mFAST_LIBRARIES           - libraries to link against
+# mFAST_EXECUTABLE          - the fast_type_gen executable
 
-# Compute paths
-get_filename_component(MFAST_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-include("${MFAST_CMAKE_DIR}/mFASTTargets.cmake")
+set(mFAST_VERSION @mFAST_VERSION@)
+include(CMakeFindDependencyMacro)
 
-find_package( Boost 1.55.0 )
-set(MFAST_INCLUDE_DIR "${Boost_INCLUDE_DIR}")
-foreach (directory @CONF_INCLUDE_DIRS@)
-  get_filename_component(directory "${directory}" ABSOLUTE)
-  list(APPEND MFAST_INCLUDE_DIR "${directory}")
-endforeach (directory)
-set(MFAST_LIBRARY_DIRS "@CONF_LIBRARY_DIRS@")
+@PACKAGE_INIT@
 
-list(REMOVE_DUPLICATES MFAST_INCLUDE_DIR)
+find_dependency(Boost 1.56.0)
 
-set(MFAST_EXECUTABLE @FAST_TYPE_GEN_INSTALL_LOCATION@)
-# These are IMPORTED targets created by mFASTTargets.cmake
-set(MFAST_FOUND "TRUE")
+include("${CMAKE_CURRENT_LIST_DIR}/mFASTTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/FastTypeGenTarget.cmake")
+set(mFAST_FOUND TRUE)
+set(mFAST_INCLUDE_DIR ${PACKAGE_PREFIX_DIR}/include)
+set(mFAST_LIBRARY_DIRS ${PACKAGE_PREFIX_DIR}/lib)
 
+macro(add_to_libraries_if_exists TARGET)
+  if (TARGET ${TARGET})
+    list(APPEND mFAST_LIBRARIES ${TARGET})
+    set(mFAST_${TARGET}_FOUND TRUE)
+  endif()
+endmacro()
 
-# Make dependent targets automatically pick up include directory and definitions for CMake 2.8.12 and later
-set_property(TARGET @MFAST_SHARED_LIBRARIES@ @MFAST_STATIC_LIBRARIES@
-             APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${MFAST_INCLUDE_DIR})
+add_to_libraries_if_exists(mfast)
+add_to_libraries_if_exists(mfast_xml_parser)
+add_to_libraries_if_exists(mfast_xml_parser_static)
+add_to_libraries_if_exists(mfast_static)
+add_to_libraries_if_exists(mfast_sqlite3)
+add_to_libraries_if_exists(mfast_sqlite3_static)
+add_to_libraries_if_exists(mfast_json)
+add_to_libraries_if_exists(mfast_json_static)
+add_to_libraries_if_exists(mfast_coder)
+add_to_libraries_if_exists(mfast_coder_static)
 
+set(mFAST_EXECUTABLE fast_type_gen)
 
-if (NOT DEFINED MFAST_USE_STATIC_LIBS OR MFAST_USE_STATIC_LIBS)
-  set(STATIC_SUFFIX "_static")
-  set(components @MFAST_STATIC_COMPONENTS@)
-else ()
-  set(components @MFAST_DYNAMIC_COMPONENTS@)
-endif ()
-
-foreach (entry IN LISTS mFAST_FIND_COMPONENTS)
-  foreach (component IN LISTS components)
-    if ("${entry}${STATIC_SUFFIX}" STREQUAL "${component}")
-      set("MFAST_${entry}_FOUND" Yes)
-    endif ()
-  endforeach (component)
-
-  if (MFAST_${entry}_FOUND)
-    list(REMOVE_ITEM mFAST_FIND_COMPONENTS "${entry}")
-    list(APPEND MFAST_LIBRARIES "mfast_${entry}${STATIC_SUFFIX}")
-
-    set(MFAST_USED_COMPONENTS "${MFAST_USED_COMPONENTS} ${entry}")
-    set("MFAST_${entry}_LIBRARY" "mfast_${entry}${STATIC_SUFFIX}")
-  else ()
-    message(SEND_ERROR "mFAST component ${entry} NOT FOUND! Available components: ${components}")
-  endif ()
-endforeach (entry)
-
-list(APPEND MFAST_LIBRARIES "mfast${STATIC_SUFFIX}")
-
-message(STATUS "mFAST Found! Used components:${MFAST_USED_COMPONENTS}")
-message(STATUS "Used libraries: ${MFAST_LIBRARIES}")
-
-include("${MFAST_CMAKE_DIR}/FastTypeGenTarget.cmake")
-include("${MFAST_CMAKE_DIR}/SetCXXStandard.cmake")
+check_required_components(mFAST)

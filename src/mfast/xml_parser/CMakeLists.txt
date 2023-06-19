@@ -1,63 +1,46 @@
+file (GLOB_RECURSE headers CONFIGURE_DEPENDS "*.h") ## retrieve all header files in current directory
+file (GLOB_RECURSE sources CONFIGURE_DEPENDS "*.cpp")     ## retrieve all source files in current directory
 
-file (GLOB_RECURSE headers "*.h") ## retrieve all header files in current directory
-file (GLOB_RECURSE sources "*.cpp")     ## retrieve all source files in current directory
+set(TINYXML2_ROOT ${PROJECT_SOURCE_DIR}/tinyxml2/)
 
+# create our own tinyxml2 target, easier to integrate in the build
+add_library(tinyxml2_static OBJECT)
+target_sources(tinyxml2_static PRIVATE ${TINYXML2_ROOT}/tinyxml2.cpp)
+target_sources(tinyxml2_static PUBLIC FILE_SET HEADERS BASE_DIRS ${TINYXML2_ROOT} FILES ${TINYXML2_ROOT}/tinyxml2.h)
 
+install(TARGETS tinyxml2_static
+        EXPORT  mFASTTargets
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mfast/xml_parser)
 
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-
-include_directories("${CMAKE_SOURCE_DIR}/tinyxml2")
-
-set(mfast_xml_parser_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/../../../tinyxml2/tinyxml2.cpp ${sources} ${headers})
-
-add_library(mfast_xml_parser_static STATIC ${mfast_xml_parser_SRCS})
-target_link_libraries(mfast_xml_parser_static mfast_static)
+add_library(mfast_xml_parser_static STATIC)
+target_sources(mfast_xml_parser_static PRIVATE ${sources})
+target_sources(mfast_xml_parser_static PUBLIC FILE_SET HEADERS BASE_DIRS ${PROJECT_SOURCE_DIR}/src FILES ${headers})
+target_link_libraries(mfast_xml_parser_static PUBLIC mfast_static tinyxml2_static)
+target_compile_definitions(mfast_xml_parser_static PUBLIC MFAST_CODER_STATIC_DEFINE)
 
 if (UNIX)
   set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
 endif()
-set_target_properties(mfast_xml_parser_static PROPERTIES COMPILE_FLAGS -DMFAST_CODER_STATIC_DEFINE)
-set_target_properties(mfast_xml_parser_static PROPERTIES LINKER_LANGUAGE CXX)
 
-install(TARGETS mfast_xml_parser_static
+install(TARGETS mfast_xml_parser_static 
         EXPORT  mFASTTargets
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
-
-set(MFAST_STATIC_LIBRARIES ${MFAST_STATIC_LIBRARIES} mfast_xml_parser_static CACHE INTERNAL "")
-set(MFAST_STATIC_COMPONENTS ${MFAST_STATIC_COMPONENTS} xml_parser_static CACHE INTERNAL "")
-
+        FILE_SET HEADERS)
 
 if (BUILD_SHARED_LIBS)
-  add_library(mfast_xml_parser SHARED ${mfast_xml_parser_SRCS})
+  add_library(tinyxml2_shared OBJECT)
+  target_sources(tinyxml2_shared PRIVATE ${TINYXML2_ROOT}/tinyxml2.cpp)
+  target_sources(tinyxml2_shared PUBLIC FILE_SET HEADERS BASE_DIRS ${TINYXML2_ROOT} FILES ${TINYXML2_ROOT}/tinyxml2.h)
+  set_property(TARGET tinyxml2_shared PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-  if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-    target_compile_definitions(mfast_xml_parser INTERFACE "-DMFAST_DYN_LINK")
-  endif (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-
-  if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-    set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
-  endif()
-
-  target_link_libraries(mfast_xml_parser mfast)
-  set_target_properties(mfast_xml_parser PROPERTIES
-                        LINKER_LANGUAGE CXX
-                        VERSION "${MFAST_VERSION}"
-                        SOVERSION "${MFAST_SOVERSION}")
-  if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-    set_target_properties(mfast_xml_parser PROPERTIES COMPILE_FLAGS -DMFAST_DYN_LINK)
-  endif ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
+  add_library(mfast_xml_parser SHARED)
+  target_sources(mfast_xml_parser PRIVATE ${sources})
+  target_sources(mfast_xml_parser PUBLIC FILE_SET HEADERS BASE_DIRS ${PROJECT_SOURCE_DIR}/src FILES ${headers})
+  target_compile_definitions(mfast_xml_parser INTERFACE MFAST_DYN_LINK)
+  target_link_libraries(mfast_xml_parser PUBLIC mfast PRIVATE tinyxml2_shared)
+  set_property(TARGET mfast_xml_parser PROPERTY VERSION ${MFAST_VERSION})
+  set_property(TARGET mfast_xml_parser PROPERTY SOVERSION ${MFAST_VERSION})
 
   install(TARGETS mfast_xml_parser
           EXPORT  mFASTTargets
-          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
-          LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
-
-  set(MFAST_SHARED_LIBRARIES ${MFAST_SHARED_LIBRARIES} mfast_xml_parser CACHE INTERNAL "")
-  set(MFAST_DYNAMIC_COMPONENTS ${MFAST_DYNAMIC_COMPONENTS} xml_parser CACHE INTERNAL "")
+          FILE_SET HEADERS)
 endif (BUILD_SHARED_LIBS)
-
-install(FILES mfast_xml_parser_export.h dynamic_templates_description.h
-        DESTINATION "${INSTALL_INCLUDE_DIR}/mfast/xml_parser")
-

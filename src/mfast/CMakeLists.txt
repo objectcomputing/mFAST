@@ -1,52 +1,41 @@
 
-file (GLOB headers "*.h") ## retrieve all header files in current directory
-file (GLOB sources "*.cpp")     ## retrieve all source files in current directory
+file (GLOB headers CONFIGURE_DEPENDS "*.h" ) ## retrieve all header files in current directory
+file (GLOB sources CONFIGURE_DEPENDS "*.cpp" )     ## retrieve all source files in current directory
 
-file (GLOB instruction_headers "instructions/*.h") ## retrieve all header files in instructions directory
-file (GLOB instruction_sources "instructions/*.cpp")     ## retrieve all source files in instructions directory
+file (GLOB instruction_headers CONFIGURE_DEPENDS "instructions/*.h") ## retrieve all header files in instructions directory
+file (GLOB instruction_sources CONFIGURE_DEPENDS "instructions/*.cpp")    ## retrieve all source files in instructions directory
 
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+list(APPEND headers ../mfast.h)
 
-set(mfast_SRCS  ${sources} ${instruction_sources} ${headers} ${instruction_headers})
-
-add_library(mfast_static STATIC ${mfast_SRCS})
-target_include_directories(mfast_static PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>)
+add_library(mfast_static STATIC)
+target_sources(mfast_static PRIVATE ${sources} ${instruction_sources})
+target_sources(mfast_static PUBLIC FILE_SET HEADERS BASE_DIRS ${PROJECT_SOURCE_DIR}/src FILES ${headers} ${instruction_headers})
+target_compile_definitions(mfast_static PUBLIC MFAST_STATIC_DEFINE)
+target_compile_features(mfast_static PUBLIC cxx_std_14)
+target_link_libraries(mfast_static PUBLIC Boost::headers)
 
 if (UNIX)
   set_target_properties(mfast_static PROPERTIES OUTPUT_NAME mfast)
 endif()
-set_target_properties(mfast_static PROPERTIES COMPILE_FLAGS -DMFAST_STATIC_DEFINE)
 
-install(TARGETS mfast_static
+install(TARGETS mfast_static 
         EXPORT  mFASTTargets
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
-
-set(MFAST_STATIC_LIBRARIES ${MFAST_STATIC_LIBRARIES} mfast_static CACHE INTERNAL "")
-
+        FILE_SET HEADERS)
 
 if (BUILD_SHARED_LIBS)
-  add_library(mfast SHARED ${mfast_SRCS})
-
-  if (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-    target_compile_definitions(mfast INTERFACE "-DMFAST_DYN_LINK")
-  endif (NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-
-  if (CMAKE_COMPILER_IS_GNUCXX OR ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"))
-    set_target_properties(mfast PROPERTIES COMPILE_FLAGS -fvisibility=hidden)
-  endif()
-  set_target_properties(mfast PROPERTIES
-                        VERSION "${MFAST_VERSION}"
-                        SOVERSION "${MFAST_SOVERSION}")
+  add_library(mfast SHARED)
+  target_sources(mfast PRIVATE ${sources} ${instruction_sources})
+  target_sources(mfast PUBLIC FILE_SET HEADERS BASE_DIRS ${PROJECT_SOURCE_DIR}/src FILES ${headers} ${instruction_headers})
+  target_compile_features(mfast PUBLIC cxx_std_14)
+  target_compile_definitions(mfast INTERFACE MFAST_DYN_LINK)
+  target_link_libraries(mfast PUBLIC Boost::headers)
+  set_property(TARGET mfast PROPERTY VERSION ${MFAST_VERSION})
+  set_property(TARGET mfast PROPERTY SOVERSION ${MFAST_VERSION})
 
   install(TARGETS mfast
           EXPORT  mFASTTargets
-          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
-          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib
-          LIBRARY DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib)
-
-  set(MFAST_SHARED_LIBRARIES ${MFAST_SHARED_LIBRARIES} mfast CACHE INTERNAL "")
-endif (BUILD_SHARED_LIBS)
+          FILE_SET HEADERS)
+endif ()
 
 add_subdirectory (coder)
 add_subdirectory (xml_parser)
@@ -55,7 +44,3 @@ add_subdirectory (json)
 if (BUILD_SQLITE3)
     add_subdirectory (sqlite3)
 endif(BUILD_SQLITE3)
-
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        DESTINATION "${INSTALL_INCLUDE_DIR}"
-        FILES_MATCHING PATTERN "*.h")
