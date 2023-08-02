@@ -404,3 +404,24 @@ TEST_CASE("test fast coder for a template with zero segment size", "[segment_pma
 }
 
 
+TEST_CASE("test fast coder without code generation for a simple template with constant and default","[manual_reset_test]")
+{
+  fast_coding_test_case test_case (
+    "<?xml version=\" 1.0 \"?>\n"
+    "<templates xmlns=\"http://www.fixprotocol.org/ns/template-definition\" "
+    "templateNs=\"http://www.fixprotocol.org/ns/templates/sample\" ns=\"http://www.fixprotocol.org/ns/fix\">\n"
+    "<template name=\"Test\" id=\"1\">\n"
+    "<uInt32 name=\"field1\" id=\"11\"><constant value=\"77\"/></uInt32>\n"
+    "<uInt32 name=\"field2\" id=\"12\" presence=\"optional\"><default value=\"50\"/></uInt32>\n"
+    "<uInt32 name=\"field3\" id=\"13\" presence=\"optional\"><constant value=\"89\"/></uInt32>\n"
+    "</template>\n"
+    "</templates>\n");
+
+  debug_allocator alloc;
+  message_type msg(&alloc, test_case.template_with_id(1));
+  message_mref msg_ref = msg.mref();
+
+  // Not setting fields...
+  REQUIRE(test_case.encoding(msg_ref, "\xa0\x80"));
+  REQUIRE(test_case.decoding("\xa0\x80", msg_ref));
+}
