@@ -101,7 +101,7 @@ public:
   explicit ext_cref(const field_cref &base) : base_(base) {}
   explicit ext_cref(const aggregate_cref &base) : base_(base) {}
   cref_type get() const { return base_; }
-  bool present() const { return !this->optional() || base_.present(); }
+  bool present() const { return !static_cast<cref_type*>(this)->optional() || base_.present(); }
 
 private:
   cref_type base_;
@@ -128,7 +128,7 @@ public:
   exponent_type get_exponent() const {
     return exponent_type(base_.get_exponent());
   }
-  bool present() const { return !this->optional() || base_.present(); }
+  bool present() const { return !static_cast<cref_type*>(this)->optional() || base_.present(); }
 
 private:
   decimal_cref base_;
@@ -193,7 +193,7 @@ public:
 
   explicit ext_cref(const field_cref &other) : base_(other) {}
   cref_type get() const { return cref_type(aggregate_cref(base_)[0]); }
-  bool present() const { return !this->optional() || base_.present(); }
+  bool present() const { return !static_cast<cref_type*>(this)->optional() || base_.present(); }
 
 private:
   field_cref base_;
@@ -211,7 +211,7 @@ public:
 
   ext_mref(field_mref other) : base_(std::move(other)) {}
   mref_type set() const {
-    if (this->optional()) {
+    if (static_cast<mref_type*>(this)->optional()) {
       value_storage *storage = field_mref_core_access::storage_of(this->base_);
       storage->present(true);
     }
@@ -224,9 +224,9 @@ public:
     ;
   }
 
-  bool present() const { return !this->optional() || base_.present(); }
+  bool present() const { return !static_cast<mref_type*>(this)->optional() || base_.present(); }
   void omit() const {
-    if (this->optional())
+    if (static_cast<mref_type*>(this)->optional())
       base_.omit();
   }
 
@@ -341,16 +341,16 @@ public:
   explicit ext_mref(field_mref other) : base_(std::move(other)) {}
   cref_type get() const { return cref_type(aggregate_cref(base_)[0]); }
   mref_type set() const {
-    if (this->optional()) {
+    if (static_cast<mref_type*>(this)->optional()) {
       value_storage *storage = field_mref_core_access::storage_of(this->base_);
       storage->present(true);
     }
     return mref_type(aggregate_mref(base_)[0]);
   }
 
-  bool present() const { return !this->optional() || base_.present(); }
+  bool present() const { return !static_cast<mref_type*>(this)->optional() || base_.present(); }
   void omit() const {
-    if (this->optional())
+    if (static_cast<mref_type*>(this)->optional())
       base_.omit();
   }
 
