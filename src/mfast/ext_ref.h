@@ -211,7 +211,7 @@ public:
 
   ext_mref(field_mref other) : base_(std::move(other)) {}
   mref_type set() const {
-    if (static_cast<mref_type*>(this)->optional()) {
+    if (this->optional()) {
       value_storage *storage = field_mref_core_access::storage_of(this->base_);
       storage->present(true);
     }
@@ -224,9 +224,9 @@ public:
     ;
   }
 
-  bool present() const { return !static_cast<mref_type*>(this)->optional() || base_.present(); }
+  bool present() const { return !this->optional() || base_.present(); }
   void omit() const {
-    if (static_cast<mref_type*>(this)->optional())
+    if (this->optional())
       base_.omit();
   }
 
@@ -341,16 +341,16 @@ public:
   explicit ext_mref(field_mref other) : base_(std::move(other)) {}
   cref_type get() const { return cref_type(aggregate_cref(base_)[0]); }
   mref_type set() const {
-    if (static_cast<mref_type*>(this)->optional()) {
+    if (this->optional()) {
       value_storage *storage = field_mref_core_access::storage_of(this->base_);
       storage->present(true);
     }
     return mref_type(aggregate_mref(base_)[0]);
   }
 
-  bool present() const { return !static_cast<mref_type*>(this)->optional() || base_.present(); }
+  bool present() const { return !this->optional() || base_.present(); }
   void omit() const {
-    if (static_cast<mref_type*>(this)->optional())
+    if (this->optional())
       base_.omit();
   }
 
