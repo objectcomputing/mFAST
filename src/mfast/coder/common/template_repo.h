@@ -37,6 +37,9 @@ private:
   void add_reset_entry(value_storage *entry) {
     reset_entries_.push_back(entry);
   }
+#ifdef TESTING_TEMPLATE_REPO_BASE
+public:
+#endif
   void add_vector_entry(value_storage *entry) {
     if (dictionary_alloc_)
       vector_entries_.push_back(entry);
