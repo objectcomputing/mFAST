@@ -189,7 +189,7 @@ void fast_encoder_impl::visit(message_cref cref, bool force_reset) {
 
   if (need_encode_template_id) {
     active_message_id_ = template_id;
-    strm_.encode(active_message_id_, false, false);
+    strm_.encode(template_id, false, false);
   }
 
   aggregate_cref message(cref.field_storage(0), instruction);
