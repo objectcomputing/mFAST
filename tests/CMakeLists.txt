@@ -61,6 +61,7 @@ add_executable (mfast_test
                 aggregate_view_test.cpp
                 simple_coder_test.cpp
                 scp_reset_test.cpp
+                message_pmap_test.cpp
             )
 
 target_link_libraries (mfast_test
