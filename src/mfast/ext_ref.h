@@ -128,7 +128,7 @@ public:
   exponent_type get_exponent() const {
     return exponent_type(base_.get_exponent());
   }
-  bool present() const { return !base_.optional() || base_.present(); }
+  bool present() const { return !this->optional() || base_.present(); }
 
 private:
   decimal_cref base_;
