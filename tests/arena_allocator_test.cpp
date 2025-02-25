@@ -16,7 +16,7 @@
 //     You should have received a copy of the GNU Lesser General Public License
 //     along with mFast.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <mfast/arena_allocator.h>
 #include <cstring>

@@ -4,7 +4,7 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 #include "debug_allocator.h"
 
 #include "test1.h"
