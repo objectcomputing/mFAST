@@ -6,7 +6,7 @@
 # endfunction(add_test_executable)
 # Includes Catch in the project:
 #add_subdirectory(${EXT_PROJECTS_DIR}/catch)
-include_directories(${PROJECT_SOURCE_DIR}/catch/include)
+# include_directories(${PROJECT_SOURCE_DIR}/Catch2/include)
 
 
 FASTTYPEGEN_TARGET(simple_types1 simple1.xml)
@@ -28,7 +28,6 @@ FASTTYPEGEN_TARGET(test_types5 test5.xml)
 FASTTYPEGEN_TARGET(test_scp scp.xml)
 
 add_executable (mfast_test
-                test_main.cpp
                 arena_allocator_test.cpp
                 field_ref_test.cpp
                 fast_istream_test.cpp
@@ -63,11 +62,12 @@ add_executable (mfast_test
                 scp_reset_test.cpp
             )
 
-target_link_libraries (mfast_test
+target_link_libraries (mfast_test PRIVATE 
                        mfast_static
                        mfast_coder_static
                        mfast_json_static
-                       mfast_xml_parser_static)
+                       mfast_xml_parser_static
+                       Catch2::Catch2WithMain)
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Emscripten")

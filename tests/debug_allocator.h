@@ -18,7 +18,7 @@
 //
 #pragma once
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 #include <mfast/malloc_allocator.h>
 #include <set>
 #include <cstring>
