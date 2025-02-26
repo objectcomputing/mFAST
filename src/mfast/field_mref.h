@@ -73,6 +73,7 @@ template <typename T> void field_mref::as(T value) {
     static_cast<uint64_mref>(*this).as(static_cast<uint64_t>(value));
     break;
   case field_type_decimal:
+  case field_type_exponent: 
     static_cast<decimal_mref>(*this).as(value);
     break;
   default:
