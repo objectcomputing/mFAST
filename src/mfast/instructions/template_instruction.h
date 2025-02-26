@@ -22,6 +22,7 @@ public:
                                 cpp_ns, tag),
         template_ns_(template_ns), reset_(reset) {
     field_type_ = field_type_template;
+    segment_pmap_size_++;   // Add one to the template id bit
   }
 
   const char *template_ns() const { return template_ns_; }
