@@ -165,7 +165,8 @@ protected:
   virtual void update_invariant() {
     nullable_flag_ = optional_flag_ && (operator_id_ != operator_constant);
     has_pmap_bit_ = operator_id_ > operator_delta ||
-                    ((operator_id_ == operator_constant) && optional_flag_);
+                    ((operator_id_ == operator_constant) && optional_flag_)||
+                    (field_type_ == field_type_group && optional_flag_);
   }
 
   // uint16_t field_index_;
@@ -208,7 +209,8 @@ inline field_instruction::field_instruction(operator_enum_t operator_id,
       optional_flag_(optional),
       nullable_flag_(optional && (operator_id != operator_constant)),
       has_pmap_bit_(operator_id > operator_delta ||
-                    ((operator_id == operator_constant) && optional)),
+                    ((operator_id == operator_constant) && optional) ||
+                    (field_type == field_type_group && optional)),
       has_initial_value_(false), field_type_(field_type),
       previous_value_shared_(false), id_(id), name_(name), ns_(ns),
       tag_(std::move(tag)) {}
