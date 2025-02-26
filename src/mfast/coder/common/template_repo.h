@@ -14,10 +14,14 @@ public:
   template_repo_base(mfast::allocator *dictionary_alloc)
       : dictionary_alloc_(dictionary_alloc) {}
   virtual ~template_repo_base() {
-    for (auto &elem : vector_enties_) {
+    for (auto &elem : vector_entries_) {
       if (elem->of_array.capacity_in_bytes_)
+      {
         dictionary_alloc_->deallocate(elem->of_array.content_,
                                       elem->of_array.capacity_in_bytes_);
+        elem->of_array.capacity_in_bytes_ = 0;
+        elem->of_array.content_ = nullptr;
+      }
     }
   }
 
@@ -33,9 +37,12 @@ private:
   void add_reset_entry(value_storage *entry) {
     reset_entries_.push_back(entry);
   }
+#ifdef TESTING_TEMPLATE_REPO_BASE
+public:
+#endif
   void add_vector_entry(value_storage *entry) {
     if (dictionary_alloc_)
-      vector_enties_.push_back(entry);
+      vector_entries_.push_back(entry);
   }
 
 protected:
@@ -43,7 +50,7 @@ protected:
 
   typedef std::vector<value_storage *> value_entries_t;
   value_entries_t reset_entries_;
-  value_entries_t vector_enties_; // for string and byteVector
+  value_entries_t vector_entries_; // for string and byteVector
   arena_allocator instruction_alloc_;
   mfast::allocator *dictionary_alloc_;
 };
