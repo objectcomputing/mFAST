@@ -183,6 +183,23 @@ protected:
   aggregate_cref base_;
 };
 
+template <typename BaseCRef, typename Properties>
+class ext_cref<BaseCRef, group_type_tag, Properties>
+    : public ext_ref_properties<group_type_tag, Properties> {
+public:
+  typedef BaseCRef cref_type;
+  typedef typename cref_type::type_category type_category;
+  typedef group_type_tag operator_category;
+
+  explicit ext_cref(const field_cref &base) : base_(base) {}
+  explicit ext_cref(const aggregate_cref &base) : base_(base) {}
+  cref_type get() const { return base_; }
+  bool present() const { return !this->optional() || base_.content(); }
+
+private:
+  cref_type base_;
+};
+
 template <typename Properties>
 class ext_cref<nested_message_cref, group_type_tag, Properties>
     : public ext_ref_properties<group_type_tag, Properties> {
