@@ -57,7 +57,6 @@ public:
     this->instruction_ = other.instruction_;
     this->storage_array_ = other.storage_array_;
   }
-  bool content() const { return storage_array_->of_group.content_ != nullptr; }
 
   class iterator
       : public boost::iterator_facade<iterator, field_cref,
