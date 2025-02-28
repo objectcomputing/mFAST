@@ -1,54 +1,16 @@
 #include "catch.hpp"
 #include <mfast.h>
-#include <mfast/coder/fast_encoder_v2.h>
-#include <mfast/coder/fast_decoder_v2.h>
 
+#include "fast_test_coding_case_v2.hpp"
 #include "byte_stream.h"
 
 #include "simple12.h"
 
-namespace
+using namespace test::coding;
+
+TEST_CASE("simple field and sequence optional encoder_v2/decoder_v2","[field_sequence_optional_sequence_encoder_v2_decoder2]")
 {
-class fast_test_coding_case_v2
-{
-    public:
-        fast_test_coding_case_v2():
-            encoder_v2_(simple12::description()),
-            decoder_v2_(simple12::description())
-        {}
-
-        bool
-        encoding(const mfast::message_cref& msg_ref, const byte_stream& result, bool reset=false)
-        {
-            const int buffer_size = 128;
-            char buffer[buffer_size];
-      
-            std::size_t encoded_size = encoder_v2_.encode(msg_ref, buffer, buffer_size, reset);
-            if (result == byte_stream(buffer, encoded_size))
-              return true;
-
-            INFO(  "Got \"" << byte_stream(buffer, encoded_size) << "\" instead." );
-            return false;
-        }
-
-        bool
-        decoding(const byte_stream& bytes, const mfast::message_cref& result, bool reset=false)
-        {
-          const char* first = bytes.data();
-          mfast::message_cref msg = decoder_v2_.decode(first, first+bytes.size(), reset);
-
-          return (msg == result);
-        }
-
-    private:
-        mfast::fast_encoder_v2 encoder_v2_;
-        mfast::fast_decoder_v2<0> decoder_v2_;
-};
-}
-
-TEST_CASE("simple field and sequence optional encoder_v2","[field_sequence_optional_sequence_encoder_v2]")
-{
-    fast_test_coding_case_v2 test_case;
+    fast_test_coding_case_v2<simple12::templates_description> test_case;
 
     SECTION("encode field")
     {
@@ -106,9 +68,9 @@ TEST_CASE("simple field and sequence optional encoder_v2","[field_sequence_optio
     }
 }
 
-TEST_CASE("simple field encoder_v2","[field_optional_encoder_v2]")
+TEST_CASE("simple field encoder_v2/decoder_v2","[field_optional_encoder_v2]")
 {
-    fast_test_coding_case_v2 test_case;
+    fast_test_coding_case_v2<simple12::templates_description> test_case;
 
     SECTION("encode fields")
     {
@@ -126,9 +88,9 @@ TEST_CASE("simple field encoder_v2","[field_optional_encoder_v2]")
     }
 }
 
-TEST_CASE("simple field and sequence encoder_v2","[field_sequence_encoder_v2]")
+TEST_CASE("simple field and sequence encoder_v2/decoder_v2","[field_sequence_encoder_v2_decoder_v2]")
 {
-    fast_test_coding_case_v2 test_case;
+    fast_test_coding_case_v2<simple12::templates_description> test_case;
 
     SECTION("encode fields")
     {
@@ -152,9 +114,9 @@ TEST_CASE("simple field and sequence encoder_v2","[field_sequence_encoder_v2]")
     }
 }
 
-TEST_CASE("simple field optional encoder_v2","[field__optional_encoder_v2]")
+TEST_CASE("simple field optional encoder_v2/decoder_v2","[field__optional_encoder_v2_decoder_v2]")
 {
-    fast_test_coding_case_v2 test_case;
+    fast_test_coding_case_v2<simple12::templates_description> test_case;
 
     SECTION("encode fields")
     {
@@ -200,25 +162,20 @@ TEST_CASE("simple field optional encoder_v2","[field__optional_encoder_v2]")
     }
 }
 
-TEST_CASE("simple field group optional encoder_v2","[field_group_optional_encoder_v2]")
+TEST_CASE("simple field group optional encoder_v2/decoder_v2","[field_group_optional_encoder_v2_decoder_v2]")
 {
-    fast_test_coding_case_v2 test_case;
+    fast_test_coding_case_v2<simple12::templates_description> test_case;
 
     SECTION("encode field")
     {
         simple12::Test_5 test_5;
         simple12::Test_5_mref test_5_mref = test_5.mref();
         test_5_mref.set_field_5_1().as(1);
-        // Error: Expecting value is \xE0 : 1110
+        // \xE0 : 1110 : OK
         // 1 : Stop Bit.
         // 1 : Set Template Id.
         // 1 : Set Field field_5_1
         // 0 : Not Set test_5_group
-        // Get value: F0, expecting E0
-        // 1 : Stop Bit.
-        // 1 : Set Template Id.
-        // 1 : Set Field field_5_1
-        // 1 : Set test_5_group -> False!
         REQUIRE(test_case.encoding(test_5.cref(),"\xE0\x85\x82",true));
         REQUIRE(test_case.decoding("\xE0\x85\x82",test_5.cref(),true));
     }
