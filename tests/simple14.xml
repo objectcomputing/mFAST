@@ -1,0 +1,31 @@
+<?xml version=\" 1.0 \"?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+    <template name="Test_1" id="1">
+        <sequence name="sequence_1" presence="optional">
+            <length name="field_1_1" id="12"><copy/></length>
+            <uInt32 name="field_1_2" id="13" presence="optional"><copy/></uInt32>
+        </sequence>
+        <uInt32 name="field_1_3" id="14" presence="optional"></uInt32>
+    </template>
+    <template name="Test_2" id="2">
+        <sequence name="sequence_2" presence="optional">
+            <length name="field_2_1" id="21"><constant value="1"/></length>
+            <uInt32 name="field_2_2" id="22" presence="optional"><copy/></uInt32>
+        </sequence>
+        <uInt32 name="field_2_3" id="23" presence="optional"></uInt32>
+    </template>
+    <template name="Test_3" id="3">
+        <sequence name="sequence_3" presence="optional">
+            <length name="field_3_1" id="31"><default value="1"/></length>
+            <uInt32 name="field_3_2" id="32" presence="optional"><copy/></uInt32>
+        </sequence>
+        <uInt32 name="field_3_3" id="33" presence="optional"></uInt32>
+    </template>
+    <template name="Test_4" id="4">
+        <sequence name="sequence_4" presence="optional">
+            <length name="field_4_1" id="41"></length>
+            <uInt32 name="field_4_2" id="42" presence="optional"><copy/></uInt32>
+        </sequence>
+        <uInt32 name="field_4_3" id="43" presence="optional"></uInt32>
+    </template>
+</templates>
