@@ -10,6 +10,8 @@
 #include "decimal_ref.h"
 #include "nested_message_ref.h"
 
+#include <type_traits>
+
 namespace mfast {
 template <int V> struct fast_operator_tag : std::integral_constant<int, V> {};
 
@@ -147,6 +149,13 @@ public:
   explicit ext_cref(const field_cref &other) : base_(other) {}
   cref_type get() const { return base_; }
   length_type get_length(value_storage &storage) const {
+    if (std::is_same<typename LengthExtRef::operator_category, constant_operator_tag>::value)
+      storage = base_.instruction()->length_instruction()->initial_value();
+    else if (std::is_same<typename LengthExtRef::operator_category, copy_operator_tag>::value)
+      storage = base_.instruction()->length_instruction()->prev_value();
+    else if (std::is_same<typename LengthExtRef::operator_category, default_operator_tag>::value)
+      storage = base_.instruction()->length_instruction()->initial_or_default_value();
+
     uint32_mref length_mref(nullptr, &storage,
                             base_.instruction()->length_instruction());
     length_mref.as(base_.size());
@@ -327,6 +336,13 @@ public:
   cref_type get() const { return base_; }
   is_optional_type optional() const { return is_optional_type(); }
   length_type set_length(value_storage &storage) const {
+    if (std::is_same<typename LengthExtRef::operator_category, constant_operator_tag>::value)
+      storage = base_.instruction()->length_instruction()->initial_value();
+    else if (std::is_same<typename LengthExtRef::operator_category, copy_operator_tag>::value)
+      storage = base_.instruction()->length_instruction()->prev_value();
+    else if (std::is_same<typename LengthExtRef::operator_category, default_operator_tag>::value)
+      storage = base_.instruction()->length_instruction()->initial_or_default_value();
+
     field_mref_base length_mref(nullptr, &storage,
                                 base_.instruction()->length_instruction());
     return length_type(length_mref);
