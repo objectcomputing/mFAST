@@ -21,6 +21,7 @@ FASTTYPEGEN_TARGET(simple_types9 simple9.xml)
 FASTTYPEGEN_TARGET(simple_types10 simple10.xml)
 FASTTYPEGEN_TARGET(simple_types11 simple11.xml)
 FASTTYPEGEN_TARGET(simple_types12 simple12.xml)
+FASTTYPEGEN_TARGET(simple_types14 simple14.xml)
 
 
 FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
@@ -60,6 +61,7 @@ add_executable (mfast_test
                 ${FASTTYPEGEN_simple_types10_OUTPUTS}
                 ${FASTTYPEGEN_simple_types11_OUTPUTS}
                 ${FASTTYPEGEN_simple_types12_OUTPUTS}
+                ${FASTTYPEGEN_simple_types14_OUTPUTS}
                 fast_type_gen_test.cpp
                 dictionary_builder_test.cpp
                 json_test.cpp
@@ -67,6 +69,8 @@ add_executable (mfast_test
                 composite_type_test.cpp
                 aggregate_view_test.cpp
                 simple_coder_test.cpp
+                sequence_encoder_decoder_v2.cpp
+                sequence_encoder_decoder_v2.cpp
                 scp_reset_test.cpp
                 template_repo_base.cpp
                 message_pmap_test.cpp
