@@ -1,58 +1,16 @@
 #include "catch.hpp"
 #include <mfast.h>
-#include <mfast/coder/fast_encoder.h>
-#include <mfast/coder/fast_decoder.h>
+
+#include "fast_test_coding_case.hpp"
 #include "byte_stream.h"
 
 #include "simple12.h"
 
-namespace
+using namespace test::coding;
+
+TEST_CASE("simple field and sequence optional encoder/decoder","[field_sequence_optional_encoder_decoder]")
 {
-class fast_test_coding_case
-{
-    public:
-        fast_test_coding_case()
-        {
-            encoder_.include({simple12::description()});
-            decoder_.include({simple12::description()});
-        }
-
-        bool encoding(const mfast::message_cref& msg_ref, const byte_stream& result, bool reset=false)
-        {
-            const int buffer_size = 128;
-            char buffer[buffer_size];
-        
-            std::size_t encoded_size = encoder_.encode(msg_ref,
-                                                        buffer,
-                                                        buffer_size,
-                                                        reset);
-        
-            if (result == byte_stream(buffer, encoded_size))
-                return true;
-
-            std::cout << byte_stream(buffer, encoded_size);
-
-            INFO(  "Got \"" << byte_stream(buffer, encoded_size) << "\" instead." );
-            return false;
-        }
-
-        bool decoding(const byte_stream& bytes, const mfast::message_cref& result, bool reset=false)
-        {
-            const char* first = bytes.data();
-            mfast::message_cref msg = decoder_.decode(first, first+bytes.size(), reset);
-
-            return (msg == result);
-        }
-
-    private:
-        mfast::fast_encoder encoder_;
-        mfast::fast_decoder decoder_;
-};
-}
-
-TEST_CASE("simple field and sequence optional encoder","[field_sequence_optional_sequence_encoder]")
-{
-    fast_test_coding_case test_case;
+    fast_test_coding_case<simple12::templates_description> test_case;
 
     SECTION("encode field")
     {
@@ -110,9 +68,9 @@ TEST_CASE("simple field and sequence optional encoder","[field_sequence_optional
     }
 }
 
-TEST_CASE("simple field encoder","[field_optional_encoder]")
+TEST_CASE("simple field encoder/decoder","[field_optional_encoder_decoder]")
 {
-    fast_test_coding_case test_case;
+    fast_test_coding_case<simple12::templates_description> test_case;
 
     SECTION("encode fields")
     {
@@ -130,9 +88,9 @@ TEST_CASE("simple field encoder","[field_optional_encoder]")
     }
 }
 
-TEST_CASE("simple field and sequence encoder","[field_sequence_encoder]")
+TEST_CASE("simple field and sequence encoder/decoder","[field_sequence_encoder_decoder]")
 {
-    fast_test_coding_case test_case;
+    fast_test_coding_case<simple12::templates_description> test_case;
 
     SECTION("encode fields")
     {
@@ -156,9 +114,9 @@ TEST_CASE("simple field and sequence encoder","[field_sequence_encoder]")
     }
 }
 
-TEST_CASE("simple field optional encoder","[field_optional_encoder]")
+TEST_CASE("simple field optional encoder/decoder","[field_optional_encoder_decoder]")
 {
-    fast_test_coding_case test_case;
+    fast_test_coding_case<simple12::templates_description> test_case;
 
     SECTION("encode fields")
     {
@@ -204,9 +162,9 @@ TEST_CASE("simple field optional encoder","[field_optional_encoder]")
     }
 }
 
-TEST_CASE("simple field group optional encoder","[field_group_optional_encoder]")
+TEST_CASE("simple field group optional encoder/decoder","[field_group_optional_encoder_decoder]")
 {
-    fast_test_coding_case test_case;
+    fast_test_coding_case<simple12::templates_description> test_case;
 
     SECTION("encode field")
     {

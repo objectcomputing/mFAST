@@ -21,6 +21,7 @@ FASTTYPEGEN_TARGET(simple_types9 simple9.xml)
 FASTTYPEGEN_TARGET(simple_types10 simple10.xml)
 FASTTYPEGEN_TARGET(simple_types11 simple11.xml)
 FASTTYPEGEN_TARGET(simple_types12 simple12.xml)
+FASTTYPEGEN_TARGET(simple_types13 simple13.xml)
 
 
 FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
@@ -41,6 +42,8 @@ add_executable (mfast_test
                 encoder_decoder_test.cpp
                 encoder_decoder_test_v2.cpp
                 field_comparator_test.cpp
+                group_encoder_decoder_v2.cpp
+                group_encoder_decoder.cpp
                 coder_test.cpp
                 value_storage_test.cpp
                 ${FASTTYPEGEN_test_types1_OUTPUTS}
@@ -60,6 +63,7 @@ add_executable (mfast_test
                 ${FASTTYPEGEN_simple_types10_OUTPUTS}
                 ${FASTTYPEGEN_simple_types11_OUTPUTS}
                 ${FASTTYPEGEN_simple_types12_OUTPUTS}
+                ${FASTTYPEGEN_simple_types13_OUTPUTS}
                 fast_type_gen_test.cpp
                 dictionary_builder_test.cpp
                 json_test.cpp

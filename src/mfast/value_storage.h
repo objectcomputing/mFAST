@@ -107,6 +107,7 @@ union MFAST_EXPORT value_storage {
   void defined(bool v) { of_array.defined_bit_ = v; }
   bool is_empty() const { return of_array.len_ == 0; }
   void present(bool p) { of_array.len_ = p; }
+  bool is_present() const { return of_group.present_ == 1; }
   uint32_t array_length() const {
     return of_array.len_ == 0 ? 0 : of_array.len_ - 1;
   };
