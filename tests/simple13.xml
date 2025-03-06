@@ -1,0 +1,32 @@
+<?xml version=\"1.0 \"?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+    <template name="Test_1" id="1">
+        <uInt32 name="field_1_1" id="11" presence="optional"></uInt32>
+        <uInt32 name="field_1_2" id="12"></uInt32>
+        <group name="group_1" presence="optional">
+            <string name="field_1_3" id="13">
+                <default value="test"/>
+            </string>
+            <uInt32 name="field_1_4" id="14" presence="optional"></uInt32>
+        </group>
+    </template>
+    <template name="Test_2" id="2">
+        <uInt32 name="field_2_1" id="21" presence="optional"></uInt32>
+    </template>
+    <template name="Test_3" id="3">
+        <uInt32 name="field_3_1" id="31" presence="optional"></uInt32>
+        <uInt32 name="field_2_2" id="32"></uInt32>
+        <group name="group_3_1" presence="optional">
+            <string name="field_3_3" id="33">
+                <default value="test"/>
+            </string>
+            <uInt32 name="field_3_4" id="34" presence="optional"></uInt32>
+            <group name="group_3_2" presence="optional">
+                <string name="field_3_5" id="35">
+                    <default value="test"/>
+                </string>
+                <uInt32 name="field_3_6" id="36" presence="optional"></uInt32>
+            </group>
+        </group>
+    </template>
+</templates>

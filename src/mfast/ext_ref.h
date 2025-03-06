@@ -203,10 +203,13 @@ public:
   explicit ext_cref(const field_cref &base) : base_(base) {}
   explicit ext_cref(const aggregate_cref &base) : base_(base) {}
   cref_type get() const { return base_; }
-  bool present() const { return !this->optional() || base_.content(); }
+  bool present() const { return !this->optional() || group_present_; }
+
+  void set_group_present(bool present) { group_present_ = present; }
 
 private:
   cref_type base_;
+  bool group_present_ = true;
 };
 
 template <typename Properties>
@@ -221,8 +224,11 @@ public:
   cref_type get() const { return cref_type(aggregate_cref(base_)[0]); }
   bool present() const { return !this->optional() || base_.present(); }
 
+  void set_group_present(bool present) { group_present_ = present; }
+
 private:
   field_cref base_;
+  bool group_present_ = true;
 };
 
 ///////////////////////////////////////////////////////////////
