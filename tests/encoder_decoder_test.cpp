@@ -225,3 +225,23 @@ TEST_CASE("simple field group optional encoder/decoder","[field_group_optional_e
         REQUIRE(test_case.decoding("\xF0\x85\x82\xC0\x81\x81\x82\x8B",test_5.cref(),true));
     }
 }
+
+TEST_CASE("simple optional field with default value encoder/decoder","[optional_field_with_default_value_encoder_decoder]")
+{
+    fast_test_coding_case<simple12::templates_description> test_case;
+
+    SECTION("encode fields")
+    {
+        simple12::Test_6 test_6;
+        simple12::Test_6_mref test_6_mref = test_6.mref();
+        test_6_mref.set_field_6_2().as(1);
+        // \xD0 : 1110 : OK
+        // 1 : Stop Bit.
+        // 1 : Set Template Id.
+        // 0 : Not Set Field field_6_1
+        // 1 : Set field_6_2
+        REQUIRE(test_case.encoding(test_6.cref(),"\xD0\x86\x82",true));
+        test_6_mref.set_field_6_1().as(1);
+        REQUIRE(test_case.decoding("\xD0\x86\x82",test_6.cref(),true));
+    }
+}

@@ -405,7 +405,7 @@ TEST_CASE("test the encoding of fast operator default","[operator_default_encode
 
     inst.prev_value().defined(false); // reset the previous value to undefined again
 
-    REQUIRE( encode_ext_cref("\xC0\x80",
+    REQUIRE( encode_ext_cref("\x80",
                                  ext_cref<uint64_cref, default_operator_tag, optional_with_initial_value_tag>(result),
                                  PRESERVE_PREVIOUS_VALUE, &allocator ) );
   }

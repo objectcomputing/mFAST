@@ -32,4 +32,15 @@
             <uInt32 name="field_5_5" id="54" presence="optional"><copy/></uInt32>
         </group>
     </template>
+    <template name="Test_6" id="6">
+        <uInt32 name="field_6_1" id="61" presence="optional">
+            <default value="1"/>
+        </uInt32>
+        <uInt32 name="field_6_2" id="62" presence="optional">
+            <copy/>
+        </uInt32>
+        <uInt32 name="field_6_3" id="63">
+            <default value="1"/>
+        </uInt32>
+    </template>
 </templates>
