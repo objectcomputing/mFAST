@@ -470,6 +470,11 @@ void fast_encoder_core::encode_field(const T &ext_ref, default_operator_tag,
     return;
   }
 
+  if (ext_ref.optional() && !ext_ref.present()) {
+    pmap.set_next_bit(false);
+    return;
+  }
+
   pmap.set_next_bit(true);
   if (!ext_ref.present()) {
     //  A NULL indicates that the value is absent and the state of the previous
