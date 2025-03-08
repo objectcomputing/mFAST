@@ -22,7 +22,7 @@ TEST_CASE("simple field and sequence optional encoder_v2/decoder_v2","[field_seq
         // 1 : Set Template Id.
         // 1 : Set Field field_1_1
         // 0 : XXX
-        REQUIRE(test_case.encoding(test_1.cref(),"\xE0\x81\x82\x81",true));
+        REQUIRE(test_case.encoding(test_1.cref(),"\xE0\x81\x82\x80",true));
         REQUIRE(test_case.decoding("\xE0\x81\x82\x80",test_1.cref(),true));
     }
 
@@ -244,5 +244,40 @@ TEST_CASE("simple optional field with default value encoder_v2/decoder_v2","[opt
         REQUIRE(test_case.encoding(test_6.cref(),"\xD0\x86\x82",true));
         test_6_mref.set_field_6_1().as(1);
         REQUIRE(test_case.decoding("\xD0\x86\x82",test_6.cref(),true));
+    }
+}
+
+TEST_CASE("sequence optional with constant length encoder_v2/decoder_v2","[optional_sequence_with_constant_length_encoder_v2/decoder_v2]")
+{
+    fast_test_coding_case_v2<simple12::templates_description> test_case;
+
+    SECTION("encode fields without sequence")
+    {
+        simple12::Test_7 test_7;
+        simple12::Test_7_mref test_7_mref = test_7.mref();
+        test_7_mref.set_field_7_1().as(1);
+        REQUIRE(test_case.encoding(test_7.cref(),"\xE0\x87\x82",true));
+        REQUIRE(test_case.decoding("\xE0\x87\x82",test_7.cref(),true));
+    }
+
+    SECTION("encode fields with sequence")
+    {
+        simple12::Test_7 test_7;
+        simple12::Test_7_mref test_7_mref = test_7.mref();
+        test_7_mref.set_field_7_1().as(1);
+
+        {
+            auto sequence_7_mref = test_7_mref.set_sequence_7();
+            sequence_7_mref.resize(1);
+
+            {
+                auto element_sequence = sequence_7_mref.front();
+                element_sequence.set_field_7_4().as(1);
+                element_sequence.set_field_7_5().as(1);
+            }
+        }
+
+        REQUIRE(test_case.encoding(test_7.cref(),"\xF0\x87\x82\xa0\x82\x82",true));
+        REQUIRE(test_case.decoding("\xF0\x87\x82\xa0\x82\x82",test_7.cref(),true));
     }
 }
