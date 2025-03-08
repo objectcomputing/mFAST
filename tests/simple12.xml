@@ -3,8 +3,9 @@
     <template name="Test_1" id="1">
         <uInt32 name="field_1_1" id="11" presence="optional"><copy/></uInt32>
         <sequence name="sequence_1" presence="optional">
-            <uInt32 name="field_1_2" id="12" presence="optional"></uInt32>
-            <uInt32 name="field_1_3" id="13" presence="optional"></uInt32>
+            <length name="num_elements" id="12"/>
+            <uInt32 name="field_1_2" id="13" presence="optional"></uInt32>
+            <uInt32 name="field_1_3" id="14" presence="optional"></uInt32>
         </sequence>
     </template>
     <template name="Test_2" id="2">
@@ -14,8 +15,9 @@
     <template name="Test_3" id="3">
         <uInt32 name="field_3_1" id="31"><copy/></uInt32>
         <sequence name="sequence_3">
-            <uInt32 name="field_3_2" id="32"></uInt32>
-            <uInt32 name="field_3_3" id="33"></uInt32>
+            <length name="num_elements" id="32"/>
+            <uInt32 name="field_3_2" id="33"></uInt32>
+            <uInt32 name="field_3_3" id="34"></uInt32>
         </sequence>
     </template>
     <template name="Test_4" id="4">
@@ -26,10 +28,11 @@
         <uInt32 name="field_5_1" id="51" presence="optional"><copy/></uInt32>
         <group name="test_5_group" presence="optional">
             <sequence name="sequence_5">
-                <uInt32 name="field_5_2" id="52"></uInt32>
-                <uInt32 name="field_5_3" id="53"></uInt32>
+                <length name="num_elements" id="52"/>
+                <uInt32 name="field_5_2" id="53"></uInt32>
+                <uInt32 name="field_5_3" id="54"></uInt32>
             </sequence>
-            <uInt32 name="field_5_5" id="54" presence="optional"><copy/></uInt32>
+            <uInt32 name="field_5_5" id="55" presence="optional"><copy/></uInt32>
         </group>
     </template>
     <template name="Test_6" id="6">
@@ -42,5 +45,24 @@
         <uInt32 name="field_6_3" id="63">
             <default value="1"/>
         </uInt32>
+    </template>
+    <template name="Test_7" id="7">
+        <uInt32 name="field_7_1" id="71" presence="optional">
+            <copy/>
+        </uInt32>
+        <sequence name="sequence_7" presence="optional">
+            <length name="num_elements" id="72">
+                <constant value="1"/>
+            </length>
+            <uInt32 name="field_7_3" id="73">
+                <default value="0"/>
+            </uInt32>
+            <uInt32 name="field_7_4" id="74" presence="optional">
+                <delta/>
+            </uInt32>
+            <uInt32 name="field_7_5" id="75" presence="optional">
+                <copy/>
+            </uInt32>
+        </sequence>
     </template>
 </templates>
