@@ -259,6 +259,17 @@ inline void fast_encoder_core::encode_field(const T &ext_ref, group_type_tag) {
 template <typename T>
 inline void fast_encoder_core::encode_field(const T &ext_ref,
                                             sequence_type_tag) {
+
+  if (ext_ref.get().instruction()->optional() && !ext_ref.present()) {
+    if (T::length_type::has_pmap_type::value)
+      this->current_->set_next_bit(false);
+    if(!std::is_same<typename T::length_type::operator_category, constant_operator_tag>::value &&
+       !std::is_same<typename T::length_type::operator_category, copy_operator_tag>::value &&
+       !std::is_same<typename T::length_type::operator_category, default_operator_tag>::value )
+      strm_.encode_null();
+    return;
+  }
+
   value_storage storage;
 
   typename T::length_type length = ext_ref.get_length(storage);

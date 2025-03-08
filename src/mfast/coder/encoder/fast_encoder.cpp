@@ -124,6 +124,16 @@ inline void fast_encoder_impl::visit(group_cref cref, int) {
 
 inline void fast_encoder_impl::visit(sequence_cref cref, int) {
 
+  if (cref.instruction()->optional() && !cref.present()) {
+    if (cref.instruction()->length_instruction()->pmap_size() > 0)
+      this->current_->set_next_bit(false);
+    if (cref.instruction()->length_instruction()->field_operator() != operator_constant &&
+        cref.instruction()->length_instruction()->field_operator() != operator_default &&
+        cref.instruction()->length_instruction()->field_operator() != operator_copy)
+      strm_.encode_null();
+    return;
+  }
+
   value_storage storage;
 
   uint32_mref length_mref(nullptr, &storage,
