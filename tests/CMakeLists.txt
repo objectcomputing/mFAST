@@ -74,7 +74,7 @@ add_executable (mfast_test
                 aggregate_view_test.cpp
                 simple_coder_test.cpp
                 sequence_encoder_decoder_v2.cpp
-                sequence_encoder_decoder_v2.cpp
+                sequence_encoder_decoder.cpp
                 scp_reset_test.cpp
                 template_repo_base.cpp
                 message_pmap_test.cpp
