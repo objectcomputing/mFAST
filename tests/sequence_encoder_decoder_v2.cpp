@@ -131,3 +131,111 @@ TEST_CASE("sequence optional none operator by length encoder_V2/decoder_v2","[se
     REQUIRE(test_case.encoding(test_4.cref(),"\xC0\x84\x82\xC0\xB3\x8B",true));
     REQUIRE(test_case.decoding("\xC0\x84\x82\xC0\xB3\x8B",test_4.cref(),true));
 }
+
+TEST_CASE("sequence inside sequence encoder_V2/decoder_v2","[sequence_inside_sequence_encoder_v2_decoder_v2]")
+{
+    fast_test_coding_case_v2<simple14::templates_description> test_case;
+
+    SECTION("outside sequence")
+    {
+        simple14::Test_5 test_5;
+        simple14::Test_5_mref test_5_mref = test_5.mref();
+
+        test_5_mref.set_field_5_2().as(1);
+
+        auto sequence_5_1_mref = test_5_mref.set_sequence_5_1();
+        sequence_5_1_mref.resize(1);
+
+        {
+            auto element_sequence = sequence_5_1_mref.front();
+            element_sequence.set_field_5_4().as(50);
+        }
+
+        REQUIRE(test_case.encoding(test_5.cref(),"\xD0\x85\x81\x81\xC0\xB3",true));
+        REQUIRE(test_case.decoding("\xD0\x85\x81\x81\xC0\xB3",test_5.cref(),true));
+    }
+
+    SECTION("inside sequence")
+    {
+        simple14::Test_5 test_5;
+        simple14::Test_5_mref test_5_mref = test_5.mref();
+
+        test_5_mref.set_field_5_2().as(1);
+
+        auto sequence_5_1_mref = test_5_mref.set_sequence_5_1();
+        sequence_5_1_mref.resize(1);
+
+        {
+            auto element_sequence = sequence_5_1_mref.front();
+            element_sequence.set_field_5_4().as(50);
+
+            auto sequence_5_2_mref = element_sequence.set_sequence_5_2();
+            sequence_5_2_mref.resize(1);
+
+            {
+                auto element_sequence_inside = sequence_5_2_mref.front();
+                element_sequence_inside.set_field_5_6().as(50);
+            }
+        }
+
+        REQUIRE(test_case.encoding(test_5.cref(),"\xD0\x85\x81\x81\xE0\xB3\x82\xB2",true));
+        REQUIRE(test_case.decoding("\xD0\x85\x81\x81\xE0\xB3\x82\xB2",test_5.cref(),true));
+    }
+}
+
+TEST_CASE("group sequence inside sequence encoder_V2/decoder_v2","[group_sequence_inside_sequence_encoder_v2_decoder_v2]")
+{
+    fast_test_coding_case_v2<simple14::templates_description> test_case;
+
+    SECTION("outside sequence")
+    {
+        simple14::Test_6 test_6;
+        simple14::Test_6_mref test_6_mref = test_6.mref();
+
+        // set group
+        {
+            auto group_6 = test_6_mref.set_group_6();
+            auto sequence_6_1_mref = group_6.set_sequence_6_1();
+            sequence_6_1_mref.resize(1);
+
+            //set sequence
+            {
+                auto element_sequence = sequence_6_1_mref.front();
+                element_sequence.set_field_6_3().as(50);
+            }
+        }
+
+        REQUIRE(test_case.encoding(test_6.cref(),"\xC0\x86\x81\xC0\xB2",true));
+        REQUIRE(test_case.decoding("\xC0\x86\x81\xC0\xB2",test_6.cref(),true));
+    }
+
+    SECTION("inside sequence")
+    {
+        simple14::Test_6 test_6;
+        simple14::Test_6_mref test_6_mref = test_6.mref();
+
+        // set group
+        {
+            auto group_6 = test_6_mref.set_group_6();
+            auto sequence_6_1_mref = group_6.set_sequence_6_1();
+            sequence_6_1_mref.resize(1);
+
+            //set sequence
+            {
+                auto element_sequence = sequence_6_1_mref.front();
+                element_sequence.set_field_6_3().as(50);
+
+                auto sequence_6_2_mref = element_sequence.set_sequence_6_2();
+                sequence_6_2_mref.resize(1);
+
+                {
+                    auto element_sequence_inside = sequence_6_2_mref.front();
+                    element_sequence_inside.set_field_6_6().as(50);
+                }
+            }
+        }
+
+        REQUIRE(test_case.encoding(test_6.cref(),"\xC0\x86\x81\xD0\xB2\x82\xB2",true));
+        REQUIRE(test_case.decoding("\xC0\x86\x81\xD0\xB2\x82\xB2",test_6.cref(),true));
+    }
+}
