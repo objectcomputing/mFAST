@@ -1,0 +1,12 @@
+<?xml version=\" 1.0 \"?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+    <template name="Test_1" id="1">
+        <uInt32 name="field_1_1" id="11" presence="optional"><copy/></uInt32>
+        <uInt32 name="field_1_2" id="12" presence="optional"><copy/></uInt32>
+        <uInt32 name="field_1_3" id="13" presence="optional"><copy/></uInt32>
+        <uInt32 name="field_1_4" id="14" presence="optional"><copy/></uInt32>
+        <uInt32 name="field_1_5" id="15" presence="optional"><copy/></uInt32>
+        <uInt32 name="field_1_6" id="16" presence="optional"><copy/></uInt32>
+        <uInt32 name="field_1_7" id="17" presence="optional"><copy/></uInt32>
+    </template>
+</templates>
