@@ -47,109 +47,109 @@ template <class FieldAccessor,
               std::declval<FieldAccessor *>()->visit(int32_cref()))>
 class field_accessor_adaptor : public field_instruction_visitor,
                                private result_holder<Result> {
-  FieldAccessor &accssor_;
+  FieldAccessor &accessor_;
 
 public:
-  field_accessor_adaptor(FieldAccessor &accssor) : accssor_(accssor) {}
+  field_accessor_adaptor(FieldAccessor &accessor) : accessor_(accessor) {}
   virtual void visit(const int32_field_instruction *inst,
                      void *storage) override {
     int32_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const uint32_field_instruction *inst,
                      void *storage) override {
     uint32_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const int64_field_instruction *inst,
                      void *storage) override {
     int64_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const uint64_field_instruction *inst,
                      void *storage) override {
     uint64_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const decimal_field_instruction *inst,
                      void *storage) override {
     decimal_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const ascii_field_instruction *inst,
                      void *storage) override {
     ascii_string_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const unicode_field_instruction *inst,
                      void *storage) override {
     unicode_string_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const byte_vector_field_instruction *inst,
                      void *storage) override {
     byte_vector_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const int32_vector_field_instruction *inst,
                      void *storage) override {
     int32_vector_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const uint32_vector_field_instruction *inst,
                      void *storage) override {
     uint32_vector_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const int64_vector_field_instruction *inst,
                      void *storage) override {
     int64_vector_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const uint64_vector_field_instruction *inst,
                      void *storage) override {
     uint64_vector_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   virtual void visit(const group_field_instruction *inst,
                      void *storage) override {
     group_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref, 0);
+    this->apply_visitor(accessor_, ref, 0);
   }
 
   virtual void visit(const sequence_field_instruction *inst,
                      void *storage) override {
     sequence_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref, 0);
+    this->apply_visitor(accessor_, ref, 0);
   }
 
   virtual void visit(const template_instruction *, void *) override {
     // message_cref ref(static_cast<value_storage*>(storage), inst);
-    // this->apply_visitor(accssor_, ref, 0);
+    // this->apply_visitor(accessor_, ref, 0);
   }
 
   virtual void visit(const templateref_instruction *inst,
                      void *storage) override {
     nested_message_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref, 0);
+    this->apply_visitor(accessor_, ref, 0);
   }
 
   virtual void visit(const enum_field_instruction *inst,
                      void *storage) override {
     enum_cref ref(static_cast<value_storage *>(storage), inst);
-    this->apply_visitor(accssor_, ref);
+    this->apply_visitor(accessor_, ref);
   }
 
   using result_holder<Result>::get_result;

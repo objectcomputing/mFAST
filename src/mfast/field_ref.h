@@ -59,7 +59,7 @@ public:
 
   const char *name() const { return instruction_->name(); }
   const field_instruction *instruction() const { return instruction_; }
-  template <typename FieldAccesor> void accept_accessor(FieldAccesor &) const;
+  template <typename FieldAccessor> void accept_accessor(FieldAccessor &) const;
 
   void refers_to(const field_cref &other) {
     this->instruction_ = other.instruction_;
