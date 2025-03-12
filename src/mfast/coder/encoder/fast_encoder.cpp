@@ -174,7 +174,8 @@ void fast_encoder_impl::visit(message_cref cref, bool force_reset) {
   template_instruction *instruction = *this->find(template_id);
 
   if (instruction != nullptr) {
-    current_pmap().init(&this->strm_, std::max<std::size_t>(instruction->segment_pmap_size(), 1));
+    constexpr std::size_t template_id_bit = 1;
+    current_pmap().init(&this->strm_, std::max<std::size_t>(instruction->segment_pmap_size() + template_id_bit, 1));
   } else {
     using namespace coder;
     BOOST_THROW_EXCEPTION(fast_dynamic_error("D9")
