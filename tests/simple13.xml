@@ -29,4 +29,20 @@
             </group>
         </group>
     </template>
+    <template name="Test_4" id="4">
+        <group name="group_4_1" presence="optional">
+            <sequence name="sequence_4">
+                <length name="field_4_1" id="41">
+                    <constant value="1"/>
+                </length>
+                <uInt32 name="field_4_2" id="42">
+                    <constant value="0"/>
+                </uInt32>
+                <uInt32 name="field_4_3" id="43">
+                    <copy/>
+                </uInt32>
+            </sequence>
+            <uInt32 name="field_4_4" id="44" presence="optional"><copy/></uInt32>
+        </group>
+    </template>
 </templates>

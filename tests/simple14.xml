@@ -28,4 +28,30 @@
         </sequence>
         <uInt32 name="field_4_3" id="43" presence="optional"></uInt32>
     </template>
+    <template name="Test_5" id="5">
+        <uInt32 name="field_5_1" id="51" presence="optional"><copy/></uInt32>
+        <uInt32 name="field_5_2" id="52"><copy/></uInt32>
+        <sequence name="sequence_5_1">
+            <length name="field_5_3" id="53"></length>
+            <uInt32 name="field_5_4" id="54" presence="optional"><copy/></uInt32>
+            <sequence name="sequence_5_2" presence="optional">
+                <length name="field_5_5" id="55"><copy/></length>
+                <uInt32 name="field_5_6" id="56"/>
+            </sequence>
+        </sequence>
+    </template>
+    <template name="Test_6" id="6">
+        <uInt32 name="field_6_1" id="61" presence="optional"><copy/></uInt32>
+        <group name="group_6">
+            <sequence name="sequence_6_1">
+                <length name="field_6_2" id="62"></length>
+                <uInt32 name="field_6_3" id="63"><copy/></uInt32>
+                <uInt32 name="field_6_4" id="64" presence="optional"><copy/></uInt32>
+                <sequence name="sequence_6_2" presence="optional">
+                    <length name="field_6_5" id="65"><copy/></length>
+                    <uInt32 name="field_6_6" id="66"/>
+                </sequence>
+            </sequence>
+        </group>
+    </template>
 </templates>
