@@ -167,6 +167,8 @@ public:
   }
   std::size_t size() const { return base_.size(); }
 
+  bool present() const { return base_.present(); }
+
 private:
   sequence_cref base_;
 };
