@@ -205,13 +205,13 @@ public:
   explicit ext_cref(const field_cref &base) : base_(base) {}
   explicit ext_cref(const aggregate_cref &base) : base_(base) {}
   cref_type get() const { return base_; }
-  bool present() const { return !this->optional() || group_present_; }
+  bool present() const { return group_present_; }
 
   void set_group_present(bool present) { group_present_ = present; }
 
 private:
   cref_type base_;
-  bool group_present_ = true;
+  bool group_present_ = this->optional()?false:true;
 };
 
 template <typename Properties>
