@@ -239,3 +239,41 @@ TEST_CASE("group sequence inside sequence encoder_V2/decoder_v2","[group_sequenc
         REQUIRE(test_case.decoding("\xC0\x86\x81\xD0\xB2\x82\xB2",test_6.cref(),true));
     }
 }
+
+TEST_CASE("sequence with optional group encoder_V2/decoder_v2","[sequence_optional_group_encoder_v2_decoder_v2]")
+{
+    fast_test_coding_case_v2<simple14::templates_description> test_case;
+
+    SECTION("group not present")
+    {
+        simple14::Test_7 test_7;
+        simple14::Test_7_mref test_7_mref = test_7.mref();
+
+        auto sequence_7_mref = test_7_mref.set_sequence_7();
+        sequence_7_mref.resize(1);
+
+        auto element_sequence = sequence_7_mref.front();
+        element_sequence.set_field_7_3().as(50);
+
+        REQUIRE(test_case.encoding(test_7.cref(),"\xC0\x87\x81\xC0\xB2",true));
+        REQUIRE(test_case.decoding("\xC0\x87\x81\xC0\xB2",test_7.cref(),true));
+    }
+
+    SECTION("group present")
+    {
+        simple14::Test_7 test_7;
+        simple14::Test_7_mref test_7_mref = test_7.mref();
+
+        auto sequence_7_mref = test_7_mref.set_sequence_7();
+        sequence_7_mref.resize(1);
+
+        auto element_sequence = sequence_7_mref.front();
+        element_sequence.set_field_7_3().as(50);
+
+        auto group_7 = element_sequence.set_group_7();
+        group_7.set_field_7_4().as(20);
+
+        REQUIRE(test_case.encoding(test_7.cref(),"\xC0\x87\x81\xE0\xB2\x94",true));
+        REQUIRE(test_case.decoding("\xC0\x87\x81\xE0\xB2\x94",test_7.cref(),true));
+    }
+}

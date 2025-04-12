@@ -18,8 +18,7 @@ class fast_test_coding_case_v2
             decoder_v2_(DESC::instance())
         {}
 
-        bool
-        encoding(const mfast::message_cref& msg_ref, const byte_stream& result, bool reset=false)
+        bool encoding(const mfast::message_cref& msg_ref, const byte_stream& result, bool reset=false)
         {
             const int buffer_size = 128;
             char buffer[buffer_size];
@@ -32,8 +31,7 @@ class fast_test_coding_case_v2
             return false;
         }
 
-        bool
-        decoding(const byte_stream& bytes, const mfast::message_cref& result, bool reset=false)
+        bool decoding(const byte_stream& bytes, const mfast::message_cref& result, bool reset=false)
         {
           const char* first = bytes.data();
           mfast::message_cref msg = decoder_v2_.decode(first, first+bytes.size(), reset);
