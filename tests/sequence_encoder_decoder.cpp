@@ -275,3 +275,24 @@ TEST_CASE("sequence with optional group encoder/decoder","[sequence_optional_gro
         REQUIRE(test_case.decoding("\xC0\x87\x81\xE0\xB2\x94",test_7.cref(),true));
     }
 }
+
+TEST_CASE("sequence with optional decimal encoder/decoder", "[sequence_with_optional_decimal_encoder_decoder]")
+{
+    fast_test_coding_case<simple14::templates_description> test_case;
+
+    SECTION("decimal present")
+    {
+        simple14::Test_8 test_8;
+        simple14::Test_8_mref test_8_mref = test_8.mref();
+
+        auto sequence_8_mref = test_8_mref.set_sequence_8();
+        sequence_8_mref.resize(1);
+
+        auto element_sequence = sequence_8_mref.front();
+        element_sequence.set_field_8_2().as(50);
+        element_sequence.set_field_8_3().as(10, 1);
+
+        REQUIRE(test_case.encoding(test_8.cref(),"\xC0\x88\x81\xC0\xB2\x82\x8A",true));
+        REQUIRE(test_case.decoding("\xC0\x88\x81\xC0\xB2\x82\x8A",test_8.cref(),true));
+    }
+}

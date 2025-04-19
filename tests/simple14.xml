@@ -63,4 +63,11 @@
             </group>
         </sequence>
     </template>
+    <template name="Test_8" id="8">
+        <sequence name="sequence_8">
+            <length name="field_8_1" id="81"></length>
+            <uInt32 name="field_8_2" id="82"><copy/></uInt32>
+            <decimal name="field_8_3" id="84" presence="optional"><delta/></decimal>
+        </sequence>
+    </template>
 </templates>

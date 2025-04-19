@@ -65,4 +65,8 @@
             </uInt32>
         </sequence>
     </template>
+    <template name="Test_8" id="8">
+        <decimal name="field_8_1" id="81"><delta/></decimal>
+        <uInt32 name="field_8_2" id="82"><copy/></uInt32>
+    </template>
 </templates>

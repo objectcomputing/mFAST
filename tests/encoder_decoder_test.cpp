@@ -280,3 +280,19 @@ TEST_CASE("sequence optional with constant length encoder/decoder","[optional_se
         REQUIRE(test_case.decoding("\xF0\x87\x82\xa0\x82\x82",test_7.cref(),true));
     }
 }
+
+TEST_CASE("decimal optional encoder/decoder","[decimal_optional_encoder_decoder]")
+{
+    fast_test_coding_case<simple12::templates_description> test_case;
+
+    SECTION("encode decimal value")
+    {
+        simple12::Test_8 test_8;
+        simple12::Test_8_mref test_8_mref = test_8.mref();
+        test_8_mref.set_field_8_1().as(15, 1);
+        test_8_mref.set_field_8_2().as(20);
+
+        REQUIRE(test_case.encoding(test_8.cref(),"\xE0\x88\x81\x8F\x94",true));
+        REQUIRE(test_case.decoding("\xE0\x88\x81\x8F\x94",test_8.cref(),true));
+    }
+}

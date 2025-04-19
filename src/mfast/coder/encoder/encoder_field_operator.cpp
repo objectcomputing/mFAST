@@ -548,6 +548,7 @@ public:
             cref.exponent() - bv.of_decimal.exponent_;
         delta_storage.of_decimal.mantissa_ =
             cref.mantissa() - bv.of_decimal.mantissa_;
+        delta_storage.of_decimal.present_ = cref.present();
 
         decimal_cref delta(&delta_storage, cref.instruction());
         stream << delta;
