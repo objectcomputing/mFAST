@@ -54,4 +54,13 @@
             </sequence>
         </group>
     </template>
+    <template name="Test_7" id="7">
+        <sequence name="sequence_7">
+            <length name="field_7_2" id="72"></length>
+            <uInt32 name="field_7_3" id="73"><copy/></uInt32>
+            <group name="group_7" presence="optional">
+                <uInt32 name="field_7_4" id="74"/>
+            </group>
+        </sequence>
+    </template>
 </templates>

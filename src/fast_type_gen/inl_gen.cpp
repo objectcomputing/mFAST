@@ -681,8 +681,16 @@ void inl_gen::visit(const mfast::sequence_field_instruction *inst,
     for (std::size_t i = 0; i < inst->subinstructions().size(); ++i) {
       const field_instruction *subinst = inst->subinstructions()[i];
 
-      out_ << "  visitor.visit(" << get_ext_cref_type(subinst) << " ((*this)["
-           << i << "]) );\n";
+      if (is_group_type(subinst) && subinst->optional())
+      {
+        out_ << "  {\n"
+            << "    " << get_ext_cref_type(subinst) << " ext_cref_group((*this)[" << i << "]);\n"
+            << "    ext_cref_group.set_group_present(this->field_storage(" << i << ")->is_present());\n"
+            << "    visitor.visit(ext_cref_group);\n"
+            << "  }\n";
+      }
+      else
+        out_ << "  visitor.visit(" << get_ext_cref_type(subinst) << " ((*this)[" << i << "]) );\n";
     }
 
     out_ << "}\n\n";
