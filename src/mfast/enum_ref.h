@@ -45,6 +45,15 @@ public:
   }
   bool is_boolean() const;
 
+protected:
+  friend class mfast::detail::codec_helper;
+
+  void save_to(value_storage &v) const {
+    v.of_uint64.content_ = this->storage()->of_uint64.content_;
+    v.defined(true);
+    v.present(this->present());
+  }
+
 private:
   enum_cref &operator=(const enum_cref &);
 };
@@ -70,6 +79,7 @@ public:
 
   enum_mref(const enum_mref &) = default;
 
+  explicit enum_mref(const field_mref_base &other) : base_type(other) {}
   void as(const enum_cref &cref) const {
     if (cref.absent()) {
       this->omit();
