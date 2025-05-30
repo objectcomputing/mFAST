@@ -24,7 +24,7 @@ FASTTYPEGEN_TARGET(simple_types12 simple12.xml)
 FASTTYPEGEN_TARGET(simple_types13 simple13.xml)
 FASTTYPEGEN_TARGET(simple_types14 simple14.xml)
 FASTTYPEGEN_TARGET(simple_types15 simple15.xml)
-
+FASTTYPEGEN_TARGET(simple_types16 simple16.xml)
 
 FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
 FASTTYPEGEN_TARGET(test_types3 test3.xml)
@@ -70,6 +70,7 @@ add_executable (mfast_test
                 ${FASTTYPEGEN_simple_types13_OUTPUTS}
                 ${FASTTYPEGEN_simple_types14_OUTPUTS}
                 ${FASTTYPEGEN_simple_types15_OUTPUTS}
+                ${FASTTYPEGEN_simple_types16_OUTPUTS}
                 fast_type_gen_test.cpp
                 dictionary_builder_test.cpp
                 json_test.cpp
@@ -82,6 +83,8 @@ add_executable (mfast_test
                 scp_reset_test.cpp
                 template_repo_base.cpp
                 message_pmap_test.cpp
+                enum_encoder_decoder_v2.cpp
+                enum_encoder_decoder.cpp
             )
 
 target_link_libraries (mfast_test

@@ -32,7 +32,7 @@ class fast_test_coding_case
             if (result == byte_stream(buffer, encoded_size))
                 return true;
 
-            INFO(  "Got \"" << byte_stream(buffer, encoded_size) << "\" instead." );
+            INFO( "Got \"" << byte_stream(buffer, encoded_size) << "\" instead." );
             return false;
         }
 
