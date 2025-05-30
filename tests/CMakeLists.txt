@@ -29,6 +29,7 @@ FASTTYPEGEN_TARGET(simple_types16 simple16.xml)
 if(XETRA_FAST_SPECIFICATION)
   FASTTYPEGEN_TARGET(simple_types17 simple17.xml)
   FASTTYPEGEN_TARGET(simple_types18 simple18.xml)
+  FASTTYPEGEN_TARGET(simple_types19 simple19.xml)
 endif(XETRA_FAST_SPECIFICATION)
 
 FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
@@ -96,10 +97,14 @@ if(XETRA_FAST_SPECIFICATION)
     set(test_sources ${test_sources}
         ${FASTTYPEGEN_simple_types17_OUTPUTS}
         ${FASTTYPEGEN_simple_types18_OUTPUTS}
+        ${FASTTYPEGEN_simple_types19_OUTPUTS}
         timestamp_encoder_decoder_v2.cpp
         timestamp_encoder_decoder.cpp
         xetra_enum_encoder_decoder_v2.cpp
         xetra_enum_encoder_decoder.cpp
+        set_basic_test.cpp
+        set_encoder_decoder_v2.cpp
+        set_encoder_decoder.cpp
     )
 endif(XETRA_FAST_SPECIFICATION)
 
