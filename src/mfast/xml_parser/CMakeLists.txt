@@ -22,6 +22,11 @@ if (UNIX)
   set_target_properties(mfast_xml_parser_static PROPERTIES OUTPUT_NAME mfast_xml_parser)
 endif()
 
+
+if(XETRA_FAST_SPECIFICATION)
+  target_compile_definitions(mfast_xml_parser_static PRIVATE XETRA_FAST_SPECIFICATION)
+endif(XETRA_FAST_SPECIFICATION)
+
 install(TARGETS mfast_xml_parser_static 
         EXPORT  mFASTTargets
         FILE_SET HEADERS)
@@ -39,6 +44,10 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries(mfast_xml_parser PUBLIC mfast PRIVATE tinyxml2_shared)
   set_property(TARGET mfast_xml_parser PROPERTY VERSION ${MFAST_VERSION})
   set_property(TARGET mfast_xml_parser PROPERTY SOVERSION ${MFAST_VERSION})
+
+  if(XETRA_FAST_SPECIFICATION)
+    target_compile_definitions(mfast_xml_parser PRIVATE XETRA_FAST_SPECIFICATION)
+  endif(XETRA_FAST_SPECIFICATION)
 
   install(TARGETS mfast_xml_parser
           EXPORT  mFASTTargets
