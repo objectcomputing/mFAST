@@ -290,6 +290,7 @@ message_type *fast_decoder_impl::decode_segment(fast_istreambuf &sb) {
   for (auto &&field : message->ref()) {
     apply_mutator(*this, field);
   }
+  this->current_ = nullptr;
   return message;
 }
 
