@@ -24,6 +24,7 @@ typedef int_field_instruction<uint64_t> uint64_field_instruction;
 class ascii_field_instruction;
 class enum_field_instruction;
 class byte_vector_field_instruction;
+class set_field_instruction;
 
 namespace xml_parser {
 using namespace tinyxml2;
@@ -113,6 +114,13 @@ private:
       // we use the defined_bit to differentiate whether the content is
       // converted to int value
       // or not
+      initial_value_.of_array.defined_bit_ = 0;
+    }
+  }
+  void set_init_value(const char *init_value_str,
+                      const set_field_instruction *) {
+    if (init_value_str) {
+      initial_value_ = string_value_storage(init_value_str).storage_;
       initial_value_.of_array.defined_bit_ = 0;
     }
   }

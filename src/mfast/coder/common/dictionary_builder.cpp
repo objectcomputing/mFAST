@@ -385,4 +385,13 @@ void dictionary_builder::visit(const enum_field_instruction *src_inst,
       get_dictionary_storage(dest->name(), dest->ns(), dest->op_context_,
                              field_type_uint64, &dest->prev_storage_, dest);
 }
+
+void dictionary_builder::visit(const set_field_instruction *src_inst,
+                               void *dest_inst) {
+  auto& dest = *static_cast<set_field_instruction**>(dest_inst);
+  dest = src_inst->clone(alloc_);
+  dest->prev_value_ =
+    get_dictionary_storage(dest->name(), dest->ns(), dest->op_context_,
+                           field_type_uint64, &dest->prev_storage_, dest);
+}
 }

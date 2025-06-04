@@ -30,6 +30,7 @@ public:
   virtual void visit(const uint64_vector_field_instruction *, void *) override;
 
   virtual void visit(const enum_field_instruction *inst, void *data) override;
+  virtual void visit(const set_field_instruction *inst, void *data) override;
 
   void print();
 

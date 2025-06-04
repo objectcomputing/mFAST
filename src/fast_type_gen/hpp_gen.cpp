@@ -672,6 +672,88 @@ void hpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
   }
 }
 
+void hpp_gen::visit(const mfast::set_field_instruction *inst, void *pIndex)
+{
+  std::string name(cpp_name(inst));
+  if (inst->ref_instruction() == nullptr)
+  {
+    header_cref_ << indent << "struct " << export_symbol_uppercase_ << name
+                 << "\n" << indent << "{\n" << indent << "  enum element {\n";
+    for (auto i = 0ul; i < inst->num_elements(); ++i)
+    {
+      header_cref_ << indent << "    " << cpp_name(inst->elements()[i]);
+      if (i == 0)
+        header_cref_ << " = 1";
+      else
+        header_cref_ << " = 1 << " << i;
+      if (i + 1 < inst->num_elements())
+        header_cref_ << ",\n";
+    }
+    header_cref_ << "\n" << indent << "  };\n" << indent
+                 << "  using instruction_type = "
+                 << "mfast::set_field_instruction_ex<"
+                 << name << ">;\n" << indent
+                 << "  static const instruction_type* instruction();\n"
+                 << indent << "};\n\n";
+    header_cref_ << indent << "class " << name << "_cref\n" << indent
+                 << "  : public mfast::set_cref_ex<" << name << "_cref, "
+                 << name << ">\n" << indent << "{\n" << indent << "  public:\n"
+                 << indent << "    using base_type = mfast::set_cref_ex<"
+                 << name << "_cref, " << name << ">;\n" << indent
+                 << "    using element_type = " << name << "::element;\n"
+                 << indent << "    using instruction_type = " << name
+                 << "::instruction_type;\n" << indent << "    "
+                 << name << "_cref(\n" << indent
+                 << "      const mfast::value_storage* storage=nullptr,\n" << indent
+                 << "      instruction_cptr            instruction=nullptr);\n\n"
+                 << indent << "    explicit " << name
+                 << "_cref(const field_cref& other);\n\n" << indent
+                 << "    element_type value() const;\n\n";
+    for (auto i = 0ul; i < inst->num_elements_; ++i)
+    {
+      std::string element_name = cpp_name(inst->elements_[i]);
+      header_cref_ << indent << "    bool has_" << element_name << "() const;\n";
+    }
+    header_cref_ << indent << "};\n\n";
+    header_mref_ << indent << "class " << name << "_mref\n" << indent
+                 << "  : public mfast::set_mref_ex<" << name << "_mref, "
+                 << name << "_cref>\n" << indent << "{\n" << indent
+                 << "  public:\n" << indent
+                 << "    using base_type = mfast::set_mref_ex<" << name
+                 << "_mref, " << name << "_cref>;\n" << indent
+                 << "    using element_type = " << name << "::element;\n"
+                 << indent << "    " << name << "_mref(\n" << indent
+                 << "      mfast::allocator*     alloc=nullptr,\n" << indent
+                 << "      mfast::value_storage* storage=nullptr,\n" << indent
+                 << "      instruction_cptr      instruction=nullptr);\n"
+                 << indent << "    explicit " << name
+                 << "_mref(const mfast::field_mref_base& other);\n\n";
+    for (auto i = 0ul; i < inst->num_elements_; ++i)
+    {
+      std::string element_name = cpp_name(inst->elements_[i]);
+      header_mref_ << indent << "    void set_" << element_name << "() const;\n";
+      header_mref_ << indent << "    void unset_" << element_name << "() const;\n";
+    }
+    header_mref_ << indent << "};\n\n";
+  }
+  if (pIndex) {
+    std::string ret_type = cpp_type_of(inst, &dependency_);
+    header_cref_ << indent << ret_type << "_cref get_" << name << "() const;\n";
+    header_cref_ << indent << ret_type << "_cref try_get_" << name << "() const;\n";
+    if (inst->field_operator() != mfast::operator_constant)
+      header_mref_ << indent << ret_type << "_mref set_" << name << "() const;\n";
+    if (inst->optional()) {
+      header_mref_ << indent << "void omit_" << name << "() const;\n";
+    }
+  } else {
+    content_ << header_cref_.str() << header_mref_.str();
+    header_cref_.clear();
+    header_cref_.str("");
+    header_mref_.clear();
+    header_mref_.str("");
+  }
+}
+
 void hpp_gen::generate(const mfast::aggregate_view_info &info) {
   std::string ns_prefix;
   std::string my_name = cpp_name(info.name_);

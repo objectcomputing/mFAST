@@ -120,6 +120,7 @@ private:
   virtual void visit(const templateref_instruction *, void *) override;
 
   virtual void visit(const enum_field_instruction *, void *) override;
+  virtual void visit(const set_field_instruction *, void *) override;
 
   template_instruction *clone_instruction(const template_instruction *);
 

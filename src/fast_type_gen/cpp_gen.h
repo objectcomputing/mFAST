@@ -38,6 +38,7 @@ public:
   virtual void visit(const mfast::uint64_vector_field_instruction *,
                      void *) override;
   virtual void visit(const mfast::enum_field_instruction *, void *) override;
+  virtual void visit(const mfast::set_field_instruction *, void *) override;
 
 private:
   virtual void generate(const mfast::aggregate_view_info &info);

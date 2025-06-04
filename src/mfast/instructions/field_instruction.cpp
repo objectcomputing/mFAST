@@ -37,7 +37,9 @@ const char *field_instruction::field_type_name() const {
       "field_type_templateref",    "field_type_ascii_string",
       "field_type_unicode_string", "field_type_byte_vector",
       "field_type_group",          "field_type_sequence",
-      "field_type_template",       "field_type_enum"};
+      "field_type_template",       "field_type_enum",
+      "field_type_set",
+  };
   return names[this->field_type()];
 }
 

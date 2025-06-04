@@ -51,6 +51,10 @@ struct fast_decoder_impl {
     this->visit(reinterpret_cast<uint64_mref &>(mref));
   }
 
+  void visit(set_mref &mref) {
+    this->visit(reinterpret_cast<uint64_mref &>(mref));
+  }
+
   template <typename SimpleMRef> void visit(const SimpleMRef &mref);
 
   template <typename IntType> void visit(const int_vector_mref<IntType> &mref);

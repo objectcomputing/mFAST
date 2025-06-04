@@ -216,6 +216,20 @@ public:
         dependency_->insert(inst->cpp_ns());
     }
   }
+
+  virtual void visit(const set_field_instruction *inst,
+                     void *pIndex) override {
+    if (inst->ref_instruction()) {
+      inst->ref_instruction()->accept(*this, pIndex);
+    } else if (inst->cpp_ns() == nullptr || inst->cpp_ns()[0] == 0 ||
+               strcmp(caller_cpp_ns_, inst->cpp_ns()) == 0) {
+      name_ = inst->name();
+    } else {
+      name_ = std::string(inst->cpp_ns()) + "::" + inst->name();
+      if (dependency_)
+        dependency_->insert(inst->cpp_ns());
+    }
+  }
 };
 
 std::string codegen_base::cpp_type_of(const mfast::field_instruction *inst,
