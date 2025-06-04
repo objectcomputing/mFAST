@@ -47,7 +47,8 @@ enum field_type_enum_t {
   field_type_sequence, // using of_array end, codegen needed start
   field_type_group,
   field_type_template,
-  field_type_enum
+  field_type_enum,
+  field_type_set,
 };
 
 enum property_enum_t {

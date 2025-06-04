@@ -51,4 +51,9 @@ void templateref_instruction::accept(field_instruction_visitor &visitor,
                                      void *context) const {
   visitor.visit(this, context);
 }
+
+void set_field_instruction::accept(field_instruction_visitor &visitor,
+                                   void *context) const {
+  return visitor.visit(this, context);
+}
 }

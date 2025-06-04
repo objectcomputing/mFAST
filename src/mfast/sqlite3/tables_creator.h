@@ -50,6 +50,8 @@ public:
   virtual void visit(const uint64_vector_field_instruction *, void *);
 
   virtual void visit(const enum_field_instruction *, void *);
+  virtual void visit(const set_field_instruction *, void *);
+
   const char *table_name() const;
   const char *primary_key_name() const;
   const char *primary_key_type() const;

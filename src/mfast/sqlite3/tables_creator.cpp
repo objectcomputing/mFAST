@@ -323,6 +323,12 @@ void tables_creator::visit(const enum_field_instruction *inst, void *) {
   num_columns_++;
 }
 
+void tables_creator::visit(const set_field_instruction *inst, void *) {
+  create_current_ << "  " << inst->name() << " INT,\n";
+  parameters_.push_back(inst->name());
+  num_columns_++;
+}
+
 std::string tables_creator::create_statements() {
   return create_prefix_.str() + create_current_.str() + create_postfix_.str();
 }

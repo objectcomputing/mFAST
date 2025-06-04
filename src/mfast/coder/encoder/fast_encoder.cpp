@@ -54,6 +54,11 @@ struct fast_encoder_impl : simple_template_repo_t {
     this->visit(tmp);
   }
 
+  void visit(set_cref cref) {
+    uint64_cref tmp{cref};
+    this->visit(tmp);
+  }
+
   template <typename SimpleCRef> void visit(SimpleCRef cref);
 
   template <typename IntType> void visit(int_vector_cref<IntType> cref);

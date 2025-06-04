@@ -94,6 +94,7 @@ protected:
   virtual void visit(const uint64_vector_field_instruction *, void *) override;
 
   virtual void visit(const enum_field_instruction *, void *) override;
+  virtual void visit(const set_field_instruction *, void *) override;
 
   instructions_view_t build_subfields();
   const group_field_instruction *get_sole_templateref();
