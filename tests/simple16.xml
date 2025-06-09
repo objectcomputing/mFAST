@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates
+    xmlns="http://www.fixprotocol.org/ns/fast/td/1.2"
+    xmlns:scp="http://www.fixprotocol.org/ns/fast/scp/1.2"
+    templateNs="https://www.deutsche-boerse.com/rta">
+  <define name="DiscreteEnum">
+    <enum>
+      <element name="One" value="1"/>
+      <element name="Three" value="3"/>
+      <element name="Five" value="5"/>
+    </enum>
+  </define>
+  <!-- Define templates-->
+  <template name="Test_1" id="1">
+    <string name="MsgType" id="35"><constant value="DP"/></string>
+    <field name="discrete" id="2477"><type name="DiscreteEnum"></type></field>
+  </template>
+  <template name="Test_2" id="2">
+      <string name="MsgType" id="36"><constant value="DQ"/></string>
+  </template>
+</templates>

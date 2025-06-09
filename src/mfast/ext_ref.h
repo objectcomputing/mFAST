@@ -250,12 +250,10 @@ public:
       storage->present(true);
     }
     return mref_type(base_);
-    ;
   }
 
   cref_type get() const {
     return cref_type(base_);
-    ;
   }
 
   bool present() const { return !this->optional() || base_.present(); }
