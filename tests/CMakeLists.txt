@@ -26,13 +26,17 @@ FASTTYPEGEN_TARGET(simple_types14 simple14.xml)
 FASTTYPEGEN_TARGET(simple_types15 simple15.xml)
 FASTTYPEGEN_TARGET(simple_types16 simple16.xml)
 
+if(XETRA_FAST_SPECIFICATION)
+  FASTTYPEGEN_TARGET(simple_types17 simple17.xml)
+endif(XETRA_FAST_SPECIFICATION)
+
 FASTTYPEGEN_TARGET(test_types1 test1.xml test2.xml)
 FASTTYPEGEN_TARGET(test_types3 test3.xml)
 FASTTYPEGEN_TARGET(test_types4 test4.xml)
 FASTTYPEGEN_TARGET(test_types5 test5.xml)
 FASTTYPEGEN_TARGET(test_scp scp.xml)
 
-add_executable (mfast_test
+set(test_sources
                 test_main.cpp
                 arena_allocator_test.cpp
                 field_ref_test.cpp
@@ -86,6 +90,16 @@ add_executable (mfast_test
                 enum_encoder_decoder_v2.cpp
                 enum_encoder_decoder.cpp
             )
+
+if(XETRA_FAST_SPECIFICATION)
+    set(test_sources ${test_sources}
+        ${FASTTYPEGEN_simple_types17_OUTPUTS}
+        timestamp_encoder_decoder_v2.cpp
+        timestamp_encoder_decoder.cpp
+    )
+endif(XETRA_FAST_SPECIFICATION)
+
+add_executable (mfast_test ${test_sources})
 
 target_link_libraries (mfast_test
                        mfast_static
