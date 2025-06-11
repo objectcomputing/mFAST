@@ -31,6 +31,11 @@ void field_instruction_visitor_ex::visit(const enum_field_instruction *inst,
   this->visit(static_cast<const integer_field_instruction_base *>(inst), data);
 }
 
+void field_instruction_visitor_ex::visit(const set_field_instruction *inst,
+                                         void *data) {
+  this->visit(static_cast<const integer_field_instruction_base *>(inst), data);
+}
+
 void field_instruction_visitor_ex::visit(const unicode_field_instruction *inst,
                                          void *data) {
   this->visit(static_cast<const ascii_field_instruction *>(inst), data);

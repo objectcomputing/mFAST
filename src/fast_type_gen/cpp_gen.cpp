@@ -658,6 +658,71 @@ void cpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
   }
 }
 
+void cpp_gen::visit(const mfast::set_field_instruction *inst, void *pIndex)
+{
+  std::string name(cpp_name(inst));
+  std::string qualified_name = name;
+  std::string instruction_variable_name;
+  std::stringstream elements_variable_name;
+  std::stringstream num_elements_name;
+  std::stringstream instruction_type;
+  if (inst->ref_instruction())
+    qualified_name = cpp_type_of(inst);
+  if (pIndex == nullptr)
+  {
+    out_ << "const " << qualified_name << "::instruction_type*\n" << name
+         << "::instruction()\n"
+         << "{\n";
+    instruction_variable_name = "  the_instruction";
+    instruction_type << qualified_name << "::instruction_type";
+  }
+  else
+  {
+    add_to_instruction_list(name);
+    instruction_variable_name = prefix_string() + name + "_instruction";
+    instruction_type << cref_scope() << name << "_cref::instruction_type";
+  }
+  if (inst->ref_instruction())
+  {
+    elements_variable_name << qualified_name << "::instruction()->elements()";
+    num_elements_name << qualified_name << "::instruction()->num_elements()";
+    instruction_type.str(qualified_name + "::instruction_type");
+  }
+  else
+  {
+    elements_variable_name << "elements";
+    num_elements_name << inst->num_elements();
+    out_ << "static const char* elements[] = {\n";
+    for (auto i = 0ul; i < inst->num_elements(); ++i)
+    {
+      if (i != 0)
+        out_ << ",\n";
+      out_ << "  \"" << inst->elements()[i] << "\"";
+    }
+    out_ << "};\n";
+  }
+  std::string context = gen_op_context(inst->name(), inst->op_context());
+  out_ << "const static " << instruction_type.str() << "\n"
+       << instruction_variable_name << "(\n"
+       << "  " << get_operator_name(inst) << ",\n"
+       << "  " << get_presence(inst) << ",\n"
+       << "  " << inst->id() << ", // id\n"
+       << "  \"" << inst->name() << "\", // name\n"
+       << "  \"" << inst->ns() << "\", // ns\n"
+       << "  " << context << ",  // opContext\n"
+       << "  int_value_storage<uint64_t>("
+       << inst->initial_value().get<uint64_t>() << "), // initial_value\n"
+       << "  " << elements_variable_name.str() << ", // element names\n"
+       << "  " << num_elements_name.str() << ",// num elements\n"
+       << "  nullptr, // ref_instruction\n"
+       << "  nullptr, // cpp_ns\n"
+       << "  " << inst->tag() << "); // tag\n\n";
+  if (pIndex == nullptr) {
+    out_ << "  return &the_instruction;\n"
+         << "}\n\n";
+  }
+}
+
 void cpp_gen::generate(const mfast::aggregate_view_info &info) {
   std::string my_name = cpp_name(info.name_);
 

@@ -13,6 +13,10 @@ if (UNIX)
   set_target_properties(mfast_sqlite3_static PROPERTIES OUTPUT_NAME mfast_sqlite3)
 endif()
 
+if(XETRA_FAST_SPECIFICATION)
+  target_compile_definitions(mfast_sqlite3_static PRIVATE XETRA_FAST_SPECIFICATION)
+endif(XETRA_FAST_SPECIFICATION)
+
 install(TARGETS mfast_sqlite3_static
         EXPORT  mFASTTargets
         FILE_SET HEADERS
@@ -26,6 +30,10 @@ if (BUILD_SHARED_LIBS)
   target_link_libraries(mfast_sqlite3 mfast SQLite::SQLite3)
   set_property(TARGET mfast_sqlite3 PROPERTY VERSION ${MFAST_VERSION})
   set_property(TARGET mfast_sqlite3 PROPERTY SOVERSION ${MFAST_VERSION})
+
+  if(XETRA_FAST_SPECIFICATION)
+    target_compile_definitions(mfast_sqlite3 PRIVATE XETRA_FAST_SPECIFICATION)
+  endif(XETRA_FAST_SPECIFICATION)
 
   install(TARGETS mfast_sqlite3
           EXPORT  mFASTTargets

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates
+    xmlns="http://www.fixprotocol.org/ns/fast/td/1.2"
+    xmlns:scp="http://www.fixprotocol.org/ns/fast/scp/1.2"
+    templateNs="https://www.deutsche-boerse.com/rta">
+  <define name="TradeConditionSet">
+    <set>
+      <element name="U" id="ExchangeLast"/>
+      <element name="R" id="OpeningPrice"/>
+      <element name="AX" id="HighPrice"/>
+      <element name="AY" id="LowPrice"/>
+      <element name="AJ" id="OfficialClosingPrice"/>
+      <element name="AW" id="LastAuctionPrice"/>
+      <element name="k" id="OutOfSequenceETH"/>
+      <element name="BD" id="PreviousClosingPrice"/>
+      <element name="a" id="VolumeOnly"/>
+      <element name="BC" id="TradingOnTermsOfIssue"/>
+      <element name="SA" id="SpecialAuction"/>
+      <element name="TC" id="TradeAtClose"/>
+      <element name="XR" id="Retail"/>
+      <element name="BB" id="MidpointPrice"/>
+    </set>
+  </define>
+  <template name="Test_1" id="1">
+    <uInt32 name="field1" id="11"><copy/></uInt32>
+    <field name="TradeCondition" id="277" presence="optional">
+      <type name="TradeConditionSet">
+        <default value="1"/>
+      </type>
+    </field>
+  </template>
+  <template name="Test_2" id="2">
+    <uInt32 name="field4" id="21"><copy/></uInt32>
+    <uInt32 name="field5" id="22"><copy/></uInt32>
+    <uInt32 name="field6" id="23"><copy/></uInt32>
+  </template>
+  <template name="Test_3" id="3">
+    <uInt32 name="field3" id="11"><copy/></uInt32>
+    <field name="TradeCondition" id="277" presence="optional">
+      <type name="TradeConditionSet">
+        <default/>
+      </type>
+    </field>
+  </template>
+</templates>
