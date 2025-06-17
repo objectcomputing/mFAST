@@ -16,8 +16,14 @@ jobs:
         run: curl -L https://archives.boost.io/release/1.72.0/source/boost_1_72_0.tar.gz | tar zx
         shell: bash
       - name: configure
-        run: cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DXETRA_FAST_SPECIFICATION=ON
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
+      - name: configure xetra
+        run: cmake -B ${{github.workspace}}/build-xetra -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DXETRA_FAST_SPECIFICATION=ON
       - name: build
-        run: cmake --build build --parallel 2
+        run: cmake --build ${{github.workspace}}/build --parallel 2
+      - name: build xetra
+        run: cmake --build ${{github.workspace}}/build-xetra --parallel 2
       - name: test
-        run: cd build && ctest -VV
+        run: cd ${{github.workspace}}/build && ctest -VV
+      - name: test xetra
+        run: cd ${{github.workspace}}/build-xetra && ctest -VV
