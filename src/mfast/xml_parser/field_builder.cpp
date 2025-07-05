@@ -7,11 +7,8 @@
 #include "field_op.h"
 #include "../exceptions.h"
 #include <boost/tokenizer.hpp>
+#include <boost/optional.hpp>
 #include "mfast/field_instructions.h"
-
-#ifdef XETRA_FAST_SPECIFICATION
-  #include <boost/optional.hpp>
-#endif
 
 using namespace tinyxml2;
 
@@ -789,6 +786,73 @@ void field_builder::visit(const enum_field_instruction *inst, void *) {
   parent_->add_instruction(instruction);
 }
 #endif
+
+void field_builder::visit(const set_field_instruction *inst, void *)
+{
+  const auto* element = &this->element_;
+  if (!field_op::find_field_op_element(*element))
+    element = content_element_;
+  field_op fop(inst, element, alloc());
+
+  const auto** set_element_names = inst->elements();
+  auto num_elements = inst->num_elements();
+
+  const char* init_value_str = nullptr;
+  if (!fop.initial_value_.is_defined())
+    init_value_str = fop.initial_value_.get<const char*>();
+
+  if (set_element_names == nullptr)
+  {
+    std::deque<const char*> names;
+    for (const auto* xml_elt = content_element_->FirstChildElement("element");
+         xml_elt != nullptr;
+         xml_elt = xml_elt->NextSiblingElement("element"))
+    {
+      const auto* name_attr = xml_elt->Attribute("id");
+      if (name_attr == nullptr)
+        name_attr = xml_elt->Attribute("name");
+      if (name_attr != nullptr)
+      {
+        if (init_value_str && std::strcmp(name_attr, init_value_str) == 0)
+          fop.initial_value_.set<uint64_t>(1 << names.size());
+        names.push_back(string_dup(name_attr, alloc()));
+      }
+    }
+    num_elements = names.size();
+    set_element_names = static_cast<const char**>
+      (alloc().allocate(names.size() * sizeof(const char*)));
+    std::copy(names.begin(), names.end(), set_element_names);
+  }
+  else
+    if (init_value_str)
+    {
+      boost::optional<std::uint64_t> value_int;
+      try
+      {
+        value_int = std::stoul(init_value_str);
+      } catch (...) {}
+      if (value_int)
+        fop.initial_value_.set<uint64_t>(*value_int);
+      else
+      {
+        for (auto i = 0ul; i < num_elements; ++i)
+          if (std::strcmp(set_element_names[i], init_value_str) == 0)
+          {
+            fop.initial_value_.set<uint64_t>(1 << i);
+            break;
+          }
+      }
+    }
+
+  auto instruction = new (alloc()) set_field_instruction(
+      fop.op_, get_presence(inst), get_id(inst), get_name(alloc()),
+      get_ns(inst, alloc()), fop.context_,
+      int_value_storage<uint64_t>(fop.initial_value_), set_element_names,
+      num_elements, inst->elements_ == nullptr ? nullptr : inst,
+      inst->cpp_ns(), parse_tag(inst));
+
+  parent_->add_instruction(instruction);
+}
 
 instruction_tag field_builder::parse_tag(const field_instruction *inst) {
   uint64_t value = inst->tag().to_uint64();

@@ -22,6 +22,7 @@
 #include "instructions/template_instruction.h"
 #include "instructions/templateref_instruction.h"
 #include "instructions/templates_description.h"
+#include "instructions/set_instruction.h"
 
 namespace mfast {
 class MFAST_EXPORT field_instruction_visitor {
@@ -45,6 +46,7 @@ public:
   virtual void visit(const uint64_vector_field_instruction *, void *) = 0;
 
   virtual void visit(const enum_field_instruction *inst, void *data) = 0;
+  virtual void visit(const set_field_instruction *inst, void *data) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////

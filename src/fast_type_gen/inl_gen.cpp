@@ -127,6 +127,11 @@ public:
     out_ << "ext_cref<enum_cref, " << get_operator_tag(inst) << ", "
          << get_properties_type(inst) << ">";
   }
+
+  virtual void visit(const set_field_instruction *inst, void *) override {
+    out_ << "ext_cref<set_cref, " << get_operator_tag(inst) << ", "
+         << get_properties_type(inst) << ">";
+  }
 };
 
 std::string get_ext_cref_type(const field_instruction *inst) {
@@ -258,6 +263,11 @@ public:
 
   virtual void visit(const enum_field_instruction *inst, void *) override {
     out_ << "ext_mref<enum_mref, " << get_operator_tag(inst) << ", "
+         << get_properties_type(inst) << ">";
+  }
+
+  virtual void visit(const set_field_instruction *inst, void *) override {
+    out_ << "ext_mref<set_mref, " << get_operator_tag(inst) << ", "
          << get_properties_type(inst) << ">";
   }
 };
@@ -1043,6 +1053,76 @@ void inl_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
   }
 
   gen_accessors(inst, name, cref_type_name, mref_type_name, pIndex);
+}
+
+void inl_gen::visit(const mfast::set_field_instruction *inst, void *pIndex)
+{
+  std::string name(cpp_name(inst));
+  std::string cref_type_name = cref_scope_.str() + name + "_cref";
+  std::string mref_type_name = mref_scope_.str() + name + "_mref";
+  if (inst->ref_instruction() == nullptr)
+  {
+    out_ << "inline\n" << cref_type_name << "::" << name << "_cref(\n"
+         << "  const mfast::value_storage*   storage,\n"
+         << "  " << cref_type_name << "::instruction_cptr instruction)\n"
+         << "  : base_type(storage, instruction)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n" << cref_type_name << "::" << name << "_cref(\n"
+         << "  const mfast::field_cref& other)\n"
+         << "  : base_type(other)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n" << mref_type_name << "::" << name << "_mref(\n"
+         << "  mfast::allocator*      alloc,\n"
+         << "  mfast::value_storage*  storage,\n"
+         << "  " << mref_type_name << "::instruction_cptr instruction)\n"
+         << "  : base_type(alloc, storage, instruction)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n" << mref_type_name << "::" << name << "_mref(\n"
+         << "  const mfast::field_mref_base& other)\n"
+         << "  : base_type(other)\n"
+         << "{\n"
+         << "}\n\n"
+         << "inline\n" << cref_type_name << "::element_type\n" << cref_type_name
+         << "::value() const\n"
+         << "{\n"
+         << "  return static_cast<" << name
+         << "::element>(base_type::value());\n"
+         << "}\n\n";
+    for (auto i = 0ul; i < inst->num_elements_; ++i)
+    {
+      std::string element_name = cpp_name(inst->elements_[i]);
+      out_ << "inline\n"
+           << "bool " << cref_type_name << "::has_" << element_name
+           << "() const\n"
+           << "{\n"
+           << "  return this->value() & " << name << "::" << element_name
+           << ";\n"
+           << "}\n\n"
+           << "inline\n"
+           << "void " << mref_type_name << "::set_" << element_name
+           << "() const\n"
+           << "{\n"
+           << "  auto tmp = this->value() | "
+           << name << "::" << element_name << ";\n"
+           << "  return this->as(static_cast<element_type>(tmp));\n"
+           << "}\n\n"
+           << "inline\n"
+           << "void " << mref_type_name << "::unset_" << element_name
+           << "() const\n"
+           << "{\n"
+           << "  auto tmp = this->value() & ~"
+           << name << "::" << element_name << ";\n"
+           << "  return this->as(static_cast<element_type>(tmp));\n"
+           << "}\n\n";
+    }
+  }
+  std::string ret_type = cpp_type_of(inst, nullptr);
+  auto ret_cref = ret_type + "_cref";
+  auto ret_mref = ret_type + "_mref";
+  gen_accessors(inst, name, ret_cref, ret_mref, pIndex);
 }
 
 void inl_gen::gen_accessors(const mfast::field_instruction *inst,

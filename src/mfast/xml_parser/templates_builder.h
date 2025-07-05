@@ -34,6 +34,7 @@ protected:
   const group_field_instruction group_field_instruction_prototype_;
   const sequence_field_instruction sequence_field_instruction_prototype_;
   const enum_field_instruction enum_field_instruction_prototype_;
+  const set_field_instruction set_field_instruction_prototype_;
 };
 
 } /* coder */

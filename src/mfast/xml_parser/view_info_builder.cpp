@@ -150,6 +150,11 @@ void view_info_builder::visit(const enum_field_instruction *inst,
   visit_basic(inst, pIndex);
 }
 
+void view_info_builder::visit(const set_field_instruction *inst,
+                              void *pIndex) {
+  visit_basic(inst, pIndex);
+}
+
 struct tag_reference_name;
 typedef boost::error_info<tag_reference_name, std::string> reference_name_info;
 

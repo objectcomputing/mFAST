@@ -15,6 +15,7 @@ public:
   virtual void visit(const uint64_field_instruction *, void *);
   virtual void visit(const decimal_field_instruction *, void *);
   virtual void visit(const enum_field_instruction *inst, void *data);
+  virtual void visit(const set_field_instruction *inst, void *data);
 
   virtual void visit(const ascii_field_instruction *, void *) = 0;
   virtual void visit(const unicode_field_instruction *, void *);

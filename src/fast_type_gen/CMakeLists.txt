@@ -10,6 +10,10 @@ else()
    add_executable (fast_type_gen)
    target_sources(fast_type_gen PRIVATE ${headers} ${sources})
 
+   if(XETRA_FAST_SPECIFICATION)
+      target_compile_definitions(fast_type_gen PRIVATE XETRA_FAST_SPECIFICATION)
+   endif(XETRA_FAST_SPECIFICATION)
+
    target_link_libraries (fast_type_gen PRIVATE
                    mfast_xml_parser_static
                    mfast_static

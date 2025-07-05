@@ -3,6 +3,7 @@
 #include <mfast.h>
 #include <iostream>
 #include <boost/io/ios_state.hpp>
+#include <bitset>
 
 using namespace mfast;
 
@@ -129,6 +130,11 @@ class message_printer
         os_ << "\n";
       }
       --indent_;
+    }
+
+    void visit(const set_cref& ref)
+    {
+      os_ << "0b" << std::bitset<16>{ref.value()};
     }
 };
 
