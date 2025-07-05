@@ -9,6 +9,10 @@
 #include <boost/tokenizer.hpp>
 #include "mfast/field_instructions.h"
 
+#ifdef XETRA_FAST_SPECIFICATION
+  #include <boost/optional.hpp>
+#endif
+
 using namespace tinyxml2;
 
 namespace mfast {
@@ -520,6 +524,31 @@ void field_builder::add_template(const char *, template_instruction *inst) {
                         << referenced_by_info(parent_->name()));
 }
 
+#if defined(XETRA_FAST_SPECIFICATION)
+bool parse_enum_value(const char **enum_element_names,
+                      const uint64_t *enum_element_values,
+                      uint64_t num_elements, const char *value_name,
+                      uint64_t &result) {
+  boost::optional<std::uint64_t> value_int;
+  try {
+    value_int = std::stoul(value_name);
+  } catch (...) {}
+  for (uint64_t i = 0; i < num_elements; ++i) {
+    // FAST 1.2 does not cleary specify what a default enum value refers to,
+    // search for a match in either name or value/deduce_value
+    if (std::strcmp(enum_element_names[i], value_name) == 0 ||
+       (value_int.has_value() && enum_element_values[i] == *value_int)) {
+          if (enum_element_values)
+            result = enum_element_values[i];
+          else
+            result = i;
+          return true;
+    }
+  }
+
+  return false;
+}
+#else
 bool parse_enum_value(const char **enum_element_names,
                       const uint64_t *enum_element_values,
                       uint64_t num_elements, const char *value_name,
@@ -537,6 +566,7 @@ bool parse_enum_value(const char **enum_element_names,
 
   return false;
 }
+#endif
 
 bool parse_enum_value(const enum_field_instruction *inst,
                       const char *value_name, uint64_t &result) {
@@ -547,6 +577,117 @@ bool parse_enum_value(const enum_field_instruction *inst,
 struct tag_value;
 typedef boost::error_info<tag_value, std::string> value_info;
 
+
+#if defined(XETRA_FAST_SPECIFICATION)
+void field_builder::visit(const enum_field_instruction *inst, void *) {
+
+  const XMLElement *element = &this->element_;
+  if (!field_op::find_field_op_element(*element))
+    element = content_element_;
+  field_op fop(inst, element, alloc());
+
+  const char **enum_element_names = inst->elements();
+  uint64_t num_elements = inst->num_elements();
+  const uint64_t *enum_element_values = inst->element_values();
+
+  const char *init_value_str = nullptr;
+  if (!fop.initial_value_.is_defined()) {
+    // if the  defined flag is false, the content value is parsed string from
+    // XML
+    init_value_str = fop.initial_value_.get<const char *>();
+  }
+
+  if (enum_element_names == nullptr) {
+
+    std::deque<const char *> names;
+    std::deque<uint64_t> values;
+
+    const XMLElement *xml_element =
+        content_element_->FirstChildElement("element");
+    for (; xml_element != nullptr;
+         xml_element = xml_element->NextSiblingElement("element")) {
+      // Use fancier identifier if available (Eurex style)
+      const char *name_attr = xml_element->Attribute("id");
+      // Otherwise revert to the specified name attribute
+      if (name_attr == nullptr)
+        name_attr = xml_element->Attribute("name");
+      if (name_attr != nullptr) {
+        if (init_value_str && std::strcmp(name_attr, init_value_str) == 0) {
+          fop.initial_value_.set<uint64_t>(names.size());
+        }
+        names.push_back(string_dup(name_attr, alloc()));
+
+        const char *value_str = xml_element->Attribute("value");
+        if (value_str) {
+          uint64_t v = boost::lexical_cast<uint64_t>(value_str);
+          if (values.empty() || v > values.back()) {
+            values.push_back(v);
+          }
+        } else {
+          // FAST 1.2 specification does not require a value attribute
+          if (values.empty())
+            values.push_back(0);
+          else
+            values.push_back(values.back() + 1);
+        }
+      }
+    }
+
+    if (values.size() != names.size()) {
+      throw std::runtime_error("Invalid value specification for enum elements");
+    }
+
+    num_elements = names.size();
+    enum_element_names = static_cast<const char **>(
+        alloc().allocate(names.size() * sizeof(const char *)));
+    std::copy(names.begin(), names.end(), enum_element_names);
+
+    if (values.size()) {
+      uint64_t *values_array = static_cast<uint64_t *>(
+          alloc().allocate(values.size() * sizeof(uint64_t)));
+      std::copy(values.begin(), values.end(), values_array);
+      enum_element_values = values_array;
+    }
+  } else if (init_value_str) {
+    // In this case, the element names are already defined, but we haven't
+    // decide what the specified
+    // initial value is.
+
+    uint64_t init_value;
+    if (parse_enum_value(enum_element_names, enum_element_values, num_elements,
+                         init_value_str, init_value)) {
+      fop.initial_value_ =
+          value_storage(0); // reset the storage to defined value
+      fop.initial_value_.set<uint64_t>(init_value);
+    } else {
+      BOOST_THROW_EXCEPTION(
+          fast_static_error("Unrecognized enum initial value : ")
+          << value_info(init_value_str));
+    }
+  }
+
+  if (!fop.initial_value_.is_defined()) {
+    if (fop.initial_value_.get<const char *>() != nullptr) {
+      std::string msg = "Invalid initial value for enum : ";
+      throw std::runtime_error(msg + init_value_str);
+    } else {
+      // at this point if initial_value_ is still undefined, we should reset it
+      // to zero
+      fop.initial_value_.set<uint64_t>(0);
+    }
+  }
+
+  auto instruction = new (alloc()) enum_field_instruction(
+      fop.op_, get_presence(inst), get_id(inst), get_name(alloc()),
+      get_ns(inst, alloc()), fop.context_,
+      int_value_storage<uint64_t>(fop.initial_value_), enum_element_names,
+      enum_element_values, num_elements,
+      inst->elements_ == nullptr ? nullptr : inst, inst->cpp_ns(),
+      parse_tag(inst));
+
+  parent_->add_instruction(instruction);
+}
+#else
 void field_builder::visit(const enum_field_instruction *inst, void *) {
 
   const XMLElement *element = &this->element_;
@@ -647,6 +788,7 @@ void field_builder::visit(const enum_field_instruction *inst, void *) {
 
   parent_->add_instruction(instruction);
 }
+#endif
 
 instruction_tag field_builder::parse_tag(const field_instruction *inst) {
   uint64_t value = inst->tag().to_uint64();
