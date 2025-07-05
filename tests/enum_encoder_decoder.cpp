@@ -17,3 +17,13 @@ TEST_CASE("enum test encoder/decoder","[enum_encoder_decoder]")
     REQUIRE(test_case.encoding(test_1.cref(),"\xC0\x81\x83",true));
     REQUIRE(test_case.decoding("\xC0\x81\x83",test_1.cref(),true));
 }
+
+TEST_CASE("enum test copy encoder/decoder","[enum_copy_encoder_decoder]")
+{
+    fast_test_coding_case<simple16::templates_description> test_case;
+    simple16::Test_3 test_3;
+    simple16::Test_3_mref test_3_mref = test_3.mref();
+    test_3_mref.set_discrete().as_Three();
+    REQUIRE(test_case.encoding(test_3.cref(),"\xE0\x83\x83",true));
+    REQUIRE(test_case.decoding("\xE0\x83\x83",test_3.cref(),true));
+}

@@ -2,6 +2,7 @@
 
 #include "../mfast_coder_export.h"
 #include "../../sequence_ref.h"
+#include "../../enum_ref.h"
 #include "../../nested_message_ref.h"
 #include "../../malloc_allocator.h"
 #include "../common/template_repo.h"
@@ -29,6 +30,11 @@ inline bool equivalent(const decimal_cref &v, const value_storage &prev) {
   return v.absent() == prev.is_empty() &&
          v.mantissa() == prev.of_decimal.mantissa_ &&
          v.exponent() == prev.of_decimal.exponent_;
+}
+
+inline bool equivalent(const enum_cref &v, const value_storage &prev) {
+  return v.absent() == prev.is_empty() &&
+         v.value() == prev.of_uint64.content_;
 }
 
 template <typename T>

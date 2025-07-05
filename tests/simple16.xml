@@ -18,4 +18,8 @@
   <template name="Test_2" id="2">
       <string name="MsgType" id="36"><constant value="DQ"/></string>
   </template>
+  <template name="Test_3" id="3">
+    <string name="MsgType" id="35"><constant value="HP"/></string>
+    <field name="discrete" id="2477"><type name="DiscreteEnum"><copy/></type></field>
+  </template>
 </templates>

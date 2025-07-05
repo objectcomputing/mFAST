@@ -97,6 +97,11 @@ public:
     *this->storage() = this->instruction()->initial_value();
   }
   value_type value() const { return this->storage()->get<value_type>(); }
+
+protected:
+  friend class mfast::detail::codec_helper;
+
+  void copy_from(value_storage v) const { *this->storage() = v; }
 };
 
 template <> struct mref_of<enum_cref> { typedef enum_mref type; };
