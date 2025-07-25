@@ -23,3 +23,29 @@ TEST_CASE("set encoder/decoder","[set_encoder_decoder]")
     REQUIRE(test_case.encoding(test_1.cref(),"\xF0\x81\x8A\x94",true));
     REQUIRE(test_case.decoding("\xF0\x81\x8A\x94",test_1.cref(),true));
 }
+
+TEST_CASE("set optional field encoder/decoder","[set_optional_encoder_decoder]")
+{
+    SECTION("optional field present")
+    {
+        fast_test_coding_case<simple19::templates_description> test_case;
+        simple19::Test_3 test_3;
+        simple19::Test_3_mref test_3_mref = test_3.mref();
+        test_3_mref.set_field3().as(10);
+        test_3_mref.set_TradeCondition().set_VolumeOnly();
+        REQUIRE(test_3.cref().get_TradeCondition().present());
+        REQUIRE(test_case.encoding(test_3.cref(), "\xF0\x83\x8A\x02\x81", true));
+        REQUIRE(test_case.decoding("\xF0\x83\x8A\x02\x81", test_3.cref(), true));
+    }
+
+    SECTION("optional field not present")
+    {
+        fast_test_coding_case<simple19::templates_description> test_case;
+        simple19::Test_3 test_3;
+        simple19::Test_3_mref test_3_mref = test_3.mref();
+        test_3_mref.set_field3().as(10);
+        REQUIRE(!test_3.cref().get_TradeCondition().present());
+        REQUIRE(test_case.encoding(test_3.cref(), "\xE0\x83\x8A", true));
+        REQUIRE(test_case.decoding("\xE0\x83\x8A", test_3.cref(), true));
+    }
+}

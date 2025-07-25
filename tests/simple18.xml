@@ -27,4 +27,8 @@
       <string name="MsgType" id="36"><constant value="DQ"/></string>
       <field name="MDStatisticIntervalUnit" id="2467"><type name="TypeUnit"><default value="3"/></type></field>
   </template>
+  <template name="Test_3" id="3">
+      <string name="MsgType" id="36"><constant value="EQ"/></string>
+      <field name="MDStatisticIntervalUnit" id="2467" presence="optional"><type name="TypeUnit"><default/></type></field>
+  </template>
 </templates>
