@@ -41,3 +41,26 @@ TEST_CASE("xetra enum test encoder/decoder","[xetra_enum_encoder_decoder]")
         REQUIRE(test_case.decoding("\xe0\x81\x81\x83",test_1.cref(),true));
     }
 }
+
+TEST_CASE("xetra enum optional test encoder/decoder","[xetra_enum_encoder_decoder]")
+{
+    SECTION("enum optional present")
+    {
+        fast_test_coding_case<simple18::templates_description> test_case;
+        simple18::Test_3 test_3;
+        simple18::Test_3_mref test_3_mref = test_3.mref();
+        test_3_mref.set_MDStatisticIntervalUnit().as_MilliSeconds();
+        REQUIRE(test_3.cref().get_MDStatisticIntervalUnit().present());
+        REQUIRE(test_case.encoding(test_3.cref(), "\xE0\x83\x82", true));
+        REQUIRE(test_case.decoding("\xE0\x83\x82", test_3.cref(), true));
+    }
+
+    SECTION("enum optional not present")
+    {
+        fast_test_coding_case<simple18::templates_description> test_case;
+        simple18::Test_3 test_3;
+        REQUIRE(!test_3.cref().get_MDStatisticIntervalUnit().present());
+        REQUIRE(test_case.encoding(test_3.cref(), "\xC0\x83", true));
+        REQUIRE(test_case.decoding("\xC0\x83", test_3.cref(), true));
+    }
+}

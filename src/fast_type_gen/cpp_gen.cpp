@@ -635,6 +635,8 @@ void cpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
 
   std::string context = gen_op_context(inst->name(), inst->op_context());
 
+  const mfast::value_storage &init_value = inst->initial_value();
+
   out_ << "const static " << instruction_type.str() << "\n"
        << instruction_variable_name << "(\n"
        << "  " << get_operator_name(inst) << ",\n"
@@ -643,8 +645,12 @@ void cpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
        << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
        << "  " << context << ",  // opContext\n"
-       << "  int_value_storage<uint64_t>("
-       << inst->initial_value().get<uint64_t>() << "), // initial_value\n"
+       << "  int_value_storage<uint64_t>(";
+
+  if (!init_value.is_empty())
+    out_ << init_value.get<uint64_t>();
+
+  out_ << "), // initial_value\n"
        << "  " << elements_variable_name.str() << ", // element names\n"
        << "  " << values_variable_name << ", // element values\n"
        << "  " << num_elements_name.str() << ",// num elements\n"
@@ -702,6 +708,9 @@ void cpp_gen::visit(const mfast::set_field_instruction *inst, void *pIndex)
     out_ << "};\n";
   }
   std::string context = gen_op_context(inst->name(), inst->op_context());
+
+  const mfast::value_storage &init_value = inst->initial_value();
+
   out_ << "const static " << instruction_type.str() << "\n"
        << instruction_variable_name << "(\n"
        << "  " << get_operator_name(inst) << ",\n"
@@ -710,8 +719,12 @@ void cpp_gen::visit(const mfast::set_field_instruction *inst, void *pIndex)
        << "  \"" << inst->name() << "\", // name\n"
        << "  \"" << inst->ns() << "\", // ns\n"
        << "  " << context << ",  // opContext\n"
-       << "  int_value_storage<uint64_t>("
-       << inst->initial_value().get<uint64_t>() << "), // initial_value\n"
+       << "  int_value_storage<uint64_t>(";
+
+  if (!init_value.is_empty())
+    out_ << init_value.get<uint64_t>();
+
+  out_ <<  "), // initial_value\n"
        << "  " << elements_variable_name.str() << ", // element names\n"
        << "  " << num_elements_name.str() << ",// num elements\n"
        << "  nullptr, // ref_instruction\n"

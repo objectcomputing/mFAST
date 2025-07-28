@@ -35,10 +35,10 @@ templates_builder::templates_builder(dynamic_templates_description *definition,
           instructions_view_t(nullptr, 0), nullptr, nullptr,
           &length_instruction_prototype, "", "", cpp_ns_),
       enum_field_instruction_prototype_(operator_none, presence_mandatory, 0,
-                                        nullptr, "", nullptr, 0, nullptr,
+                                        nullptr, "", nullptr, int_value_storage<uint64_t>(), nullptr,
                                         nullptr, 0, nullptr, cpp_ns_),
       set_field_instruction_prototype_(operator_none, presence_mandatory, 0,
-                                          nullptr, "", nullptr, 0, nullptr,
+                                          nullptr, "", nullptr, int_value_storage<uint64_t>(), nullptr,
                                           0, nullptr, cpp_ns_) {
   static const int32_field_instruction int32_field_instruction_prototype(
       operator_none, presence_mandatory, 0, nullptr, "", nullptr,

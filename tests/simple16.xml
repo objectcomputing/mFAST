@@ -22,4 +22,8 @@
     <string name="MsgType" id="35"><constant value="HP"/></string>
     <field name="discrete" id="2477"><type name="DiscreteEnum"><copy/></type></field>
   </template>
+  <template name="Test_4" id="4">
+    <string name="MsgType" id="35"><constant value="HP"/></string>
+    <field name="discrete" id="2477"><type name="DiscreteEnum" presence="optional"><default/></type></field>
+  </template>
 </templates>
