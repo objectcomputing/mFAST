@@ -582,9 +582,16 @@ void hpp_gen::visit(const mfast::enum_field_instruction *inst, void *pIndex) {
 
   if (inst->ref_instruction()) {
     std::string actual_type_name = cpp_type_of(inst, &dependency_);
-    header_cref_ << indent << "typedef " << actual_type_name << "_cref " << name
+    std::string enum_namespace;
+    if (actual_type_name.find("mfast") == std::string::npos)
+    {
+      for (auto &&ns : outer_ns_)
+        enum_namespace += ns + "::";
+      enum_namespace += filebase_ + "::";
+    }
+    header_cref_ << indent << "typedef " << enum_namespace << actual_type_name << "_cref " << name
                  << "_cref;\n";
-    header_mref_ << indent << "typedef " << actual_type_name << "_mref " << name
+    header_mref_ << indent << "typedef " << enum_namespace << actual_type_name << "_mref " << name
                  << "_mref;\n";
   } else {
     // this is the enum definition
