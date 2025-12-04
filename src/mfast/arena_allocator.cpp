@@ -4,16 +4,12 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include "arena_allocator.h"
+#include "allocator_utils.h"
 #include <cstring>
 #include <algorithm>
 #include <cstdlib>
 
 namespace mfast {
-
-inline std::size_t align(std::size_t n, std::size_t x) {
-  const std::size_t y = x - 1;
-  return (n + y) & ~y;
-}
 
 void arena_allocator::free_list(memory_chunk_base *head) {
   memory_chunk_base *tmp;

@@ -4,17 +4,14 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include "FastXMLVisitor.h"
+#include "xml_util.h"
 #include <cstring>
 #include <cstdlib>
 #include <iostream>
 const char *FastXMLVisitor::get_optional_attr(const XMLElement &element,
                                               const char *attr_name,
                                               const char *default_value) const {
-  const XMLAttribute *attr = element.FindAttribute(attr_name);
-  if (attr == nullptr) {
-    return default_value;
-  }
-  return attr->Value();
+  return mfast::xml_parser::get_optional_attr(element, attr_name, default_value);
 }
 
 bool FastXMLVisitor::is_mandatory_constant(const XMLElement &element) {
