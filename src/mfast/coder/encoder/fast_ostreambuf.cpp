@@ -3,8 +3,9 @@
 //
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
-#include <cstring>
 #include <algorithm>
+#include <cassert>
+#include <cstring>
 #include "fast_ostreambuf.h"
 
 namespace mfast {

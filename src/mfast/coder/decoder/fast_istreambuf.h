@@ -5,10 +5,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <stdexcept>
-
 #include "../../exceptions.h"
-#include <iostream>
 
 namespace mfast {
 class fast_istream;

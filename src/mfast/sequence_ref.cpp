@@ -5,7 +5,6 @@
 // See the file license.txt for licensing information.
 #include "mfast/sequence_ref.h"
 #include "mfast/allocator.h"
-#include <limits>
 
 namespace mfast {
 namespace detail {

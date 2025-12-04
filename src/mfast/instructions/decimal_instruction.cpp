@@ -4,7 +4,7 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 
-#include "../field_instructions.h"
+#include "decimal_instruction.h"
 
 namespace mfast {
 void decimal_field_instruction::construct_value(value_storage &storage,

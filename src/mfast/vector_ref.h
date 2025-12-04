@@ -8,7 +8,6 @@
 #include <iterator>
 #include <cstring>
 #include <vector>
-#include <limits>
 #include "field_ref.h"
 #include "allocator.h"
 #include "type_category.h"

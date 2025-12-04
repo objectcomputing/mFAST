@@ -6,7 +6,7 @@
 #pragma once
 
 #include "mfast_xml_parser_export.h"
-#include "../field_instructions.h"
+#include "../instructions/templates_description.h"
 #include "../arena_allocator.h"
 #include "../view_iterator.h"
 #include <deque>

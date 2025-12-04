@@ -6,7 +6,6 @@
 #pragma once
 #include "allocator.h"
 #include <cstdlib>
-#include <new>
 
 namespace mfast {
 class MFAST_EXPORT malloc_allocator : public allocator {

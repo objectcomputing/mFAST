@@ -7,7 +7,6 @@
 
 #include "../../string_ref.h"
 #include "../../exceptions.h"
-#include <stdexcept>
 
 namespace mfast {
 namespace detail {

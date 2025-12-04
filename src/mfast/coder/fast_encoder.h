@@ -6,6 +6,7 @@
 #pragma once
 
 #include "mfast_coder_export.h"
+#include "../instructions/templates_description.h"
 #include "../message_ref.h"
 #include "../malloc_allocator.h"
 

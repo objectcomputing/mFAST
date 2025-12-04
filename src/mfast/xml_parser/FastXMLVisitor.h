@@ -6,8 +6,6 @@
 #pragma once
 #include <stdint.h>
 #include <vector>
-#include <exception>
-#include <fstream>
 #include <string>
 #include <cstring>
 #include <deque>

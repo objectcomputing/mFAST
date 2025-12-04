@@ -7,20 +7,16 @@
 
 #include "../mfast_coder_export.h"
 
-#include "../../sequence_ref.h"
+#include "../../ext_ref.h"
 #include "../../nested_message_ref.h"
-#include "../../malloc_allocator.h"
-#include "../../output.h"
 #include "../../composite_type.h"
 #include "../common/exceptions.h"
-#include "../common/debug_stream.h"
 #include "../common/template_repo.h"
 #include "../common/codec_helper.h"
 #include "../decoder/decoder_presence_map.h"
 #include "../common/codec_helper.h"
 #include "../decoder/fast_istream.h"
 #include "fast_istream_extractor.h"
-#include <tuple>
 #include <vector>
 namespace mfast {
 namespace coder {

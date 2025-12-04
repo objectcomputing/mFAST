@@ -6,10 +6,9 @@
 #pragma once
 
 #include <cassert>
-#include "field_instructions.h"
 #include "allocator.h"
 #include "field_ref.h"
-#include "group_ref.h"
+#include "aggregate_ref.h"
 // #include "mfast/nested_message_ref.h"
 namespace mfast {
 struct fast_decoder_impl;

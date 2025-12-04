@@ -5,7 +5,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <new>
 #include <stdint.h>
 #include <cassert>
 #include <cstddef>

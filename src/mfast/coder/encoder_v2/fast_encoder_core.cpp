@@ -1,4 +1,5 @@
 #include "fast_encoder_core.h"
+#include "../common/exceptions.h"
 
 namespace mfast {
 namespace coder {

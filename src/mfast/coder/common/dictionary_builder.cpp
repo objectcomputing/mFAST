@@ -6,9 +6,6 @@
 #include "exceptions.h"
 #include "template_repo.h"
 #include <cstring>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
 
 namespace mfast {
 

@@ -8,7 +8,6 @@
 #include "../exceptions.h"
 #include <boost/tokenizer.hpp>
 #include <boost/optional.hpp>
-#include "mfast/field_instructions.h"
 
 using namespace tinyxml2;
 

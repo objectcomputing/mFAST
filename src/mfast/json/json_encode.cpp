@@ -4,6 +4,9 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include "json.h"
+#include "../enum_ref.h"
+#include "../field_visitor.h"
+#include "../nested_message_ref.h"
 #include <boost/io/ios_state.hpp>
 #include <cstdio>
 #ifdef _MSC_VER // someday someone at microsoft will read the C++11 standard.

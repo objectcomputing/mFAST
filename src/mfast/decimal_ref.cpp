@@ -3,11 +3,6 @@
 //
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
-#include <cmath>
-#include <cfloat>
-
-#include <iostream>
-
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
 

@@ -5,7 +5,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <deque>
 #include <map>
 #include "xml_util.h"
 #include "template_registry_impl.h"

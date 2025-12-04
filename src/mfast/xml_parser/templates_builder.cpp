@@ -4,6 +4,7 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include "templates_builder.h"
+#include "field_builder.h"
 #include "../boolean_ref.h"
 #include "view_info_builder.h"
 #include "../exceptions.h"

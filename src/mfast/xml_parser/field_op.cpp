@@ -7,6 +7,7 @@
 #include <set>
 #include <boost/assign.hpp>
 #include "field_op.h"
+#include "../exceptions.h"
 #include "../instructions/decimal_instruction.h"
 #include "../instructions/byte_vector_instruction.h"
 using namespace boost::assign;

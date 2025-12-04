@@ -1,5 +1,4 @@
 #include <cstring>
-#include <string.h>
 #include "view_info_builder.h"
 #include "xml_util.h"
 #include "../exceptions.h"

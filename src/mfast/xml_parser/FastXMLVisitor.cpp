@@ -7,7 +7,6 @@
 #include "xml_util.h"
 #include <cstring>
 #include <cstdlib>
-#include <iostream>
 const char *FastXMLVisitor::get_optional_attr(const XMLElement &element,
                                               const char *attr_name,
                                               const char *default_value) const {
