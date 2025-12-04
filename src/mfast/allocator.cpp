@@ -5,14 +5,10 @@
 // See the file license.txt for licensing information.
 #include "allocator.h"
 #include <new>
+#include "allocator_utils.h"
 #include <cstring>
 
 namespace mfast {
-
-inline std::size_t align(std::size_t n, std::size_t x) {
-  const std::size_t y = x - 1;
-  return (n + y) & ~y;
-}
 
 std::size_t allocator::reallocate(void *&pointer, std::size_t old_size,
                                   std::size_t new_size) {

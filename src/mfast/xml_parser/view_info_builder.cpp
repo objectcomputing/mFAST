@@ -1,6 +1,7 @@
 #include <cstring>
 #include <string.h>
 #include "view_info_builder.h"
+#include "xml_util.h"
 #include "../exceptions.h"
 #include <algorithm>
 namespace mfast {
@@ -157,16 +158,6 @@ void view_info_builder::visit(const set_field_instruction *inst,
 
 struct tag_reference_name;
 typedef boost::error_info<tag_reference_name, std::string> reference_name_info;
-
-inline const char *get_optional_attr(const tinyxml2::XMLElement &element,
-                                     const char *attr_name,
-                                     const char *default_value) {
-  const tinyxml2::XMLAttribute *attr = element.FindAttribute(attr_name);
-  if (attr == nullptr) {
-    return default_value;
-  }
-  return attr->Value();
-}
 
 void view_info_builder::build_field_view(const tinyxml2::XMLElement &element,
                                          unsigned &max_depth,
