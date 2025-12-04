@@ -15,10 +15,7 @@ inline const char *get_optional_attr(const XMLElement &element,
                                      const char *attr_name,
                                      const char *default_value) {
   const XMLAttribute *attr = element.FindAttribute(attr_name);
-  if (attr == nullptr) {
-    return default_value;
-  }
-  return attr->Value();
+  return attr ? attr->Value() : default_value;
 }
 
 inline const char *string_dup(const char *str, arena_allocator &alloc) {
