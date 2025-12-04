@@ -5,9 +5,9 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "../../field_instructions.h"
 #include "../common/codec_helper.h"
 #include "fast_ostreambuf.h"
+#include <limits>
 
 namespace mfast {
 class encoder_presence_map;

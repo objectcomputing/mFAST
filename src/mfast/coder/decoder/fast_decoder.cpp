@@ -4,17 +4,13 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include <boost/container/map.hpp>
-#include "../mfast_coder_export.h"
 #include "../fast_decoder.h"
 #include "../../field_visitor.h"
 #include "../../sequence_ref.h"
-#include "../../malloc_allocator.h"
-#include "../../output.h"
 #include "../../composite_type.h"
 #include "../common/exceptions.h"
 #include "../common/debug_stream.h"
 #include "../common/template_repo.h"
-#include "../common/codec_helper.h"
 #include "decoder_presence_map.h"
 #include "decoder_field_operator.h"
 #include "fast_istream.h"

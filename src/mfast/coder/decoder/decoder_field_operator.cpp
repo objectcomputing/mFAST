@@ -3,7 +3,6 @@
 //
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
-#include "../mfast_coder_export.h"
 #include "../common/codec_helper.h"
 #include "fast_istream.h"
 #include "decoder_presence_map.h"

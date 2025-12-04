@@ -5,9 +5,7 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "field_instructions.h"
 #include "field_ref.h"
-#include "group_ref.h"
 #include "aggregate_ref.h"
 
 #include <cassert>

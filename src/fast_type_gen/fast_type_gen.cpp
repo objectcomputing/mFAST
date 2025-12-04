@@ -9,7 +9,6 @@
 #include "hpp_gen.h"
 #include "inl_gen.h"
 #include "cpp_gen.h"
-#include "mfast/coder/common/dictionary_builder.h"
 #include "mfast/coder/common/template_repo.h"
 
 #include <stdlib.h>

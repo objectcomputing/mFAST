@@ -11,7 +11,6 @@
 #include "string_ref.h"
 #include "group_ref.h"
 #include "sequence_ref.h"
-#include "message_ref.h"
 #include "nested_message_ref.h"
 #include "set_ref.h"
 

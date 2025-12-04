@@ -9,10 +9,10 @@
 #include "../mfast_coder_export.h"
 #include "../../field_instructions.h"
 #include "../../arena_allocator.h"
+#include "../../instructions/templates_description.h"
 #include <vector>
 #include <map>
 #include <string>
-#include <stdexcept>
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4251) // non dll-interface class used as a member for

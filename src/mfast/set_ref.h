@@ -5,7 +5,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "mfast/field_instructions.h"
 #include "mfast/field_ref.h"
 #include "mfast/type_category.h"
 

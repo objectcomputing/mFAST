@@ -5,8 +5,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <cmath>
-#include <cfloat>
 #include <boost/utility/string_ref.hpp>
 #include "mfast_export.h"
 #include "field_ref.h"

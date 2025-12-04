@@ -12,7 +12,6 @@
 #include "mfast/mfast_export.h"
 #include "mfast/arena_allocator.h"
 #include "mfast/allocator.h"
-#include <algorithm>
 #include <iostream>
 
 namespace mfast {

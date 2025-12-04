@@ -5,7 +5,6 @@
 // See the file license.txt for licensing information.
 #include <iterator>
 #include <algorithm>
-#include "../mfast_coder_export.h"
 #include "../common/codec_helper.h"
 #include "fast_ostream.h"
 #include "encoder_presence_map.h"

@@ -5,7 +5,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <string>
 #include "field_ref.h"
 #include "vector_ref.h"
 #include <boost/utility/string_ref.hpp>

@@ -1,12 +1,9 @@
 #pragma once
 
 #include "../mfast_coder_export.h"
-#include "../../sequence_ref.h"
 #include "../../enum_ref.h"
 #include "../../nested_message_ref.h"
-#include "../../malloc_allocator.h"
 #include "../common/template_repo.h"
-#include "../common/exceptions.h"
 #include "../encoder/fast_ostream.h"
 #include "../encoder/resizable_fast_ostreambuf.h"
 #include "../encoder/encoder_presence_map.h"

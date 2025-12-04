@@ -4,6 +4,8 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include "malloc_allocator.h"
+#include <algorithm>
+#include <new>
 
 namespace mfast {
 

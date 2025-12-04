@@ -5,7 +5,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include "field_instructions.h"
 #include "field_ref.h"
 #include "type_category.h"
 

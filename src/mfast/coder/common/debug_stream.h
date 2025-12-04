@@ -6,7 +6,6 @@
 #pragma once
 
 #include <iostream>
-#include "../../output.h"
 #ifdef NDEBUG
 
 struct debug_stream {
@@ -25,6 +24,7 @@ struct debug_stream {
 };
 
 #else
+#include "../../output.h"
 
 class debug_stream {
 private:

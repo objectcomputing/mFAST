@@ -4,7 +4,6 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #pragma once
-#include <utility>
 #include "field_visitor.h"
 namespace mfast {
 namespace detail {

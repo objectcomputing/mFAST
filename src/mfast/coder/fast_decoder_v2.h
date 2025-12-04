@@ -7,7 +7,6 @@
 
 #include "decoder_v2/fast_decoder_core.h"
 #include <type_traits>
-#include <tuple>
 
 template <typename... CONDITIONS> struct all_true;
 

@@ -4,6 +4,10 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #include "json.h"
+#include "../enum_ref.h"
+#include "../group_ref.h"
+#include "../field_visitor.h"
+#include "../nested_message_ref.h"
 #include <boost/regex/pending/unicode_iterator.hpp>
 namespace mfast {
 

@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 #include "../mfast_coder_export.h"
-#include "../../exceptions.h"
+#include <boost/exception/all.hpp>
 
 namespace mfast {
 class buffer_overflow_error : public virtual boost::exception,

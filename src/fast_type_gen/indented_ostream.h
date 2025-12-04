@@ -5,7 +5,6 @@
 // See the file license.txt for licensing information.
 #pragma once
 
-#include <ostream>
 #include <iomanip>
 #include <sstream>
 struct indent_t {};

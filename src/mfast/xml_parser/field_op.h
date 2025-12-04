@@ -4,13 +4,10 @@
 // This file is part of mFAST.
 // See the file license.txt for licensing information.
 #pragma once
-#include <cstring>
-#include <map>
 #include <boost/lexical_cast.hpp>
 #include "../arena_allocator.h"
 #include "../instructions/field_instruction.h"
 #include "xml_util.h"
-#include "../exceptions.h"
 
 namespace mfast {
 class decimal_field_instruction;

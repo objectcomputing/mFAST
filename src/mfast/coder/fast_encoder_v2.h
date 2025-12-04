@@ -6,7 +6,6 @@
 #pragma once
 
 #include <vector>
-#include <tuple>
 #include "encoder_v2/fast_encoder_core.h"
 
 namespace mfast {
