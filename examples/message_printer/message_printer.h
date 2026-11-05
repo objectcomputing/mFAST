@@ -134,7 +134,19 @@ class message_printer
 
     void visit(const set_cref& ref)
     {
-      os_ << "0b" << std::bitset<16>{ref.value()};
+      bool initial = true;
+      for (uint64_t bit_index = 0; bit_index < ref.instruction()->num_elements_; ++bit_index)
+      {
+        const bool is_set = (ref.value() >> bit_index) & 0x01;
+        if (!is_set)
+          continue;
+
+        if (!initial)
+          os_ << "|";
+        initial = false;
+
+        os_ << ref.instruction()->elements_[bit_index];
+      }
     }
 };
 
